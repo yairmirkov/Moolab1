@@ -1585,14 +1585,43 @@ function App() {
                 </div>
               )}
             </div>
-          ) : (
+          ) : (() => {
+            const winTitles = [
+              { emoji: "🏆", title: "LEGENDARY", sub: "You just crushed it!" },
+              { emoji: "🔥", title: "ON FIRE", sub: "Unstoppable!" },
+              { emoji: "⚡", title: "GENIUS MOVE", sub: "Big brain energy!" },
+              { emoji: "💎", title: "DIAMOND HANDS", sub: "You held it down!" },
+              { emoji: "🚀", title: "MOON SHOT", sub: "To the moon!" },
+              { emoji: "👑", title: "BOSS STATUS", sub: "You own this!" },
+              { emoji: "🎯", title: "BULLSEYE", sub: "Nailed it perfectly!" },
+              { emoji: "💰", title: "MONEY MOVES", sub: "Smart play!" },
+              { emoji: "🌟", title: "ALL STAR", sub: "Nothing but net!" },
+              { emoji: "🧠", title: "BIG BRAIN", sub: "Galaxy brain moment!" },
+            ];
+            const loseTitles = [
+              { emoji: "💀", title: "REKT", sub: "Review the lessons and run it back." },
+              { emoji: "😤", title: "NOT YET", sub: "Almost had it — go again!" },
+              { emoji: "💪", title: "COMEBACK SZN", sub: "Legends bounce back." },
+              { emoji: "🔄", title: "RELOAD", sub: "One more try — you got this!" },
+              { emoji: "📚", title: "STUDY UP", sub: "Hit the lessons and come back stronger." },
+            ];
+            const pick = quizResult
+              ? winTitles[Math.floor(Math.random() * winTitles.length)]
+              : loseTitles[Math.floor(Math.random() * loseTitles.length)];
+            const shareText = quizResult
+              ? `${pick.emoji} I just conquered ${currentModule?.name} on Moolab! Level ${level} | ${xp} XP | ${bossWins} Boss Wins 🔥 Learn money skills the fun way!`
+              : `I'm leveling up my money skills on Moolab! 💰 ${currentModule?.name} is tough but I'm going again! 🚀`;
+            const shareUrl = "https://moolab.app";
+            const encodedText = encodeURIComponent(shareText);
+            const encodedUrl = encodeURIComponent(shareUrl);
+            return (
             <div style={{ animation: "popIn 0.5s ease-out" }}>
               <h1 style={{
                 fontSize: "5.5rem",
                 filter: quizResult
                   ? "drop-shadow(0 0 40px rgba(6,214,160,0.5))"
                   : "drop-shadow(0 0 40px rgba(255,107,107,0.5))",
-              }}>{quizResult ? "🏆" : "💀"}</h1>
+              }}>{pick.emoji}</h1>
               <h2 style={{
                 color: "#fff", fontSize: "2.6rem", fontWeight: 900,
                 letterSpacing: "-0.03em", margin: "0 0 6px 0",
@@ -1601,23 +1630,17 @@ function App() {
                   : "linear-gradient(135deg, #FF6B6B, #FF8E53)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               }}>
-                {quizResult ? "LEGENDARY" : "REKT"}
+                {pick.title}
               </h2>
-              <p
-                style={{
-                  color: quizResult ? "rgba(6,214,160,0.7)" : "rgba(255,107,107,0.7)",
-                  margin: "8px 0 28px 0",
-                  fontWeight: 700,
-                  fontSize: "0.85rem",
-                }}
-              >
-                {quizResult
-                  ? `+50 XP earned! Next quest in ${countdown}s...`
-                  : "Review the lessons and run it back."}
+              <p style={{
+                color: quizResult ? "rgba(6,214,160,0.7)" : "rgba(255,107,107,0.7)",
+                margin: "8px 0 20px 0", fontWeight: 700, fontSize: "0.85rem",
+              }}>
+                {quizResult ? `${pick.sub} +50 XP earned!` : pick.sub}
               </p>
 
               {quizResult && (
-                <div style={{ margin: "0 0 24px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div style={{ margin: "0 0 20px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <div style={{ position: "relative", width: 56, height: 56, marginBottom: 4 }}>
                     <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: "rotate(-90deg)" }}>
                       <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
@@ -1635,85 +1658,86 @@ function App() {
                 </div>
               )}
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  width: "100%",
-                  minWidth: 300,
-                }}
-              >
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", minWidth: 300 }}>
                 {quizResult ? (
-                  <>
-                    <button
-                      className="ws-btn"
-                      onClick={resetJourney}
-                      style={{
-                        padding: 20,
-                        borderRadius: 18,
-                        border: "none",
-                        background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
-                        fontWeight: 900,
-                        color: "#000",
-                        fontSize: "1rem",
-                        fontFamily: FONT,
-                        letterSpacing: "0.04em",
-                        cursor: "pointer",
-                        boxShadow: "0 0 30px rgba(6,214,160,0.25), 0 6px 20px rgba(0,0,0,0.4)",
-                      }}
-                    >
-                      GO NOW 🚀
-                    </button>
-                    <button
-                      className="ws-btn"
-                      onClick={() =>
-                        window.open(`whatsapp://send?text=Level Up!`)
-                      }
-                      style={{
-                        padding: 16,
-                        borderRadius: 16,
-                        background: "rgba(37,211,102,0.15)",
-                        color: "#25D366",
-                        border: "1px solid rgba(37,211,102,0.3)",
-                        fontWeight: 800,
-                        fontFamily: FONT,
-                        fontSize: "0.85rem",
-                        cursor: "pointer",
-                      }}
-                    >
-                      SHARE TO WHATSAPP
-                    </button>
-                  </>
+                  <button className="ws-btn" onClick={resetJourney} style={{
+                    padding: 20, borderRadius: 18, border: "none",
+                    background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
+                    fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
+                    letterSpacing: "0.04em", cursor: "pointer",
+                    boxShadow: "0 0 30px rgba(6,214,160,0.25), 0 6px 20px rgba(0,0,0,0.4)",
+                  }}>NEXT QUEST 🚀</button>
                 ) : (
-                  <button
-                    className="ws-btn"
-                    onClick={() => {
-                      setQuizResult(null);
-                      setQuizStarted(false);
-                      setQuizUnlocked(false);
-                      setCompletedSlides((p) => p.slice(0, -1));
-                    }}
-                    style={{
-                      padding: 20,
-                      borderRadius: 18,
-                      background: "linear-gradient(135deg, #FF6B6B, #FF8E53)",
-                      border: "none",
-                      color: "#000",
-                      fontWeight: 900,
-                      fontFamily: FONT,
-                      fontSize: "1rem",
-                      letterSpacing: "0.04em",
-                      cursor: "pointer",
-                      boxShadow: "0 0 30px rgba(255,107,107,0.25), 0 6px 20px rgba(0,0,0,0.4)",
-                    }}
-                  >
-                    TRY AGAIN
-                  </button>
+                  <button className="ws-btn" onClick={() => {
+                    setQuizResult(null); setQuizStarted(false);
+                    setQuizUnlocked(false); setCompletedSlides((p) => p.slice(0, -1));
+                  }} style={{
+                    padding: 20, borderRadius: 18, border: "none",
+                    background: "linear-gradient(135deg, #FF6B6B, #FF8E53)",
+                    fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
+                    letterSpacing: "0.04em", cursor: "pointer",
+                    boxShadow: "0 0 30px rgba(255,107,107,0.25), 0 6px 20px rgba(0,0,0,0.4)",
+                  }}>TRY AGAIN 💪</button>
                 )}
               </div>
+
+              <div style={{
+                marginTop: 28, padding: "20px 0", borderTop: "1px solid rgba(255,255,255,0.08)",
+                width: "100%",
+              }}>
+                <p style={{
+                  color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", fontWeight: 700,
+                  textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 14,
+                }}>Share your progress</p>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                  <button className="ws-btn" onClick={() => window.open(`https://wa.me/?text=${encodedText}%20${encodedUrl}`, "_blank")} style={{
+                    flex: 1, minWidth: 60, padding: "12px 10px", borderRadius: 14,
+                    background: "rgba(37,211,102,0.15)", color: "#25D366",
+                    border: "1px solid rgba(37,211,102,0.25)", fontWeight: 800,
+                    fontFamily: FONT, fontSize: "0.75rem", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zm-5.44 7.43h-.02c-1.84 0-3.65-.5-5.23-1.43l-.37-.22-3.9 1.02 1.04-3.8-.24-.39A10.39 10.39 0 012.04 12C2.04 6.48 6.5 2.02 12.04 2.02c2.67 0 5.18 1.04 7.07 2.93a9.93 9.93 0 012.93 7.07c0 5.52-4.5 10.02-10.01 10.02v-.23zm8.52-18.53A11.92 11.92 0 0012.04 0C5.46 0 .1 5.34.1 11.9c0 2.1.55 4.15 1.59 5.96L0 24l6.3-1.65a11.9 11.9 0 005.73 1.46h.01C18.58 23.81 24 18.47 24 11.9c0-3.18-1.24-6.17-3.45-8.42z"/></svg>
+                    WhatsApp
+                  </button>
+                  <button className="ws-btn" onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, "_blank")} style={{
+                    flex: 1, minWidth: 60, padding: "12px 10px", borderRadius: 14,
+                    background: "rgba(29,155,240,0.15)", color: "#1D9BF0",
+                    border: "1px solid rgba(29,155,240,0.25)", fontWeight: 800,
+                    fontFamily: FONT, fontSize: "0.75rem", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#1D9BF0"><path d="M18.24 2.25h3.55l-7.76 8.87L23.52 21.75h-7.15l-5.6-7.32-6.41 7.32H.81l8.3-9.49L.48 2.25h7.33l5.06 6.69 5.37-6.69zm-1.25 17.52h1.97L7.12 4.26H5.01l11.98 15.51z"/></svg>
+                    X
+                  </button>
+                  <button className="ws-btn" onClick={() => window.open(`https://www.instagram.com/`, "_blank")} style={{
+                    flex: 1, minWidth: 60, padding: "12px 10px", borderRadius: 14,
+                    background: "rgba(225,48,108,0.15)", color: "#E1306C",
+                    border: "1px solid rgba(225,48,108,0.25)", fontWeight: 800,
+                    fontFamily: FONT, fontSize: "0.75rem", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#E1306C"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85 0 3.2-.01 3.58-.07 4.85-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07-3.2 0-3.58-.01-4.85-.07-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85 0-3.2.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.63-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84A6.16 6.16 0 1018.16 12 6.16 6.16 0 0012 5.84zM12 16a4 4 0 110-8 4 4 0 010 8zm6.4-11.85a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg>
+                    Insta
+                  </button>
+                  <button className="ws-btn" onClick={() => {
+                    if (navigator.share) { navigator.share({ title: "Moolab", text: shareText, url: shareUrl }); }
+                    else { navigator.clipboard.writeText(`${shareText} ${shareUrl}`); }
+                  }} style={{
+                    flex: 1, minWidth: 60, padding: "12px 10px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)",
+                    border: "1px solid rgba(255,255,255,0.12)", fontWeight: 800,
+                    fontFamily: FONT, fontSize: "0.75rem", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 000-6 3 3 0 00-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 000 6c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65a2.92 2.92 0 002.92 2.92A2.92 2.92 0 0021 19.08a2.92 2.92 0 00-3-3z"/></svg>
+                    More
+                  </button>
+                </div>
+              </div>
             </div>
-          )}
+            );
+          })()}
         </div>
         </div>
       )}
