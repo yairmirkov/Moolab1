@@ -67,6 +67,7 @@ const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 const getAgeFromBirth = (birthStr: string): number => {
   if (!birthStr) return 0;
   const birth = new Date(birthStr);
+  if (isNaN(birth.getTime())) return 0;
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
   const m = today.getMonth() - birth.getMonth();
@@ -97,6 +98,15 @@ function App() {
   const [muted, setMuted] = useState(false);
   const [userName, setUserName] = useState(() => loadStr("name", ""));
   const [birthDate, setBirthDate] = useState(() => loadStr("birth", ""));
+  const [accountType, setAccountType] = useState(() => loadStr("acctType", ""));
+  const [parentName, setParentName] = useState(() => loadStr("parentName", ""));
+  const [onboardStep, setOnboardStep] = useState(() => {
+    const savedType = loadStr("acctType", "");
+    const savedName = loadStr("name", "");
+    if (savedType && savedName) return 2;
+    if (savedType) return 2;
+    return 0;
+  });
   const [showModuleMap, setShowModuleMap] = useState(false);
 
   const [xp, setXp] = useState(() => load("xp", 0));
@@ -218,6 +228,201 @@ function App() {
   };
 
   if (!appStarted) {
+    const canFinish = accountType === "parent"
+      ? (parentName.trim() && userName.trim() && birthDate)
+      : (userName.trim() && birthDate);
+
+    const stepContent = () => {
+      if (onboardStep === 0) {
+        return (
+          <>
+            <div style={{fontSize:"4rem",marginBottom:8,animation:"splashFloat 3s ease-in-out infinite",filter:"drop-shadow(0 0 25px rgba(6,214,160,0.3))"}}>💸</div>
+            <h1 style={{
+              fontSize: "3.2rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 6px 0", textAlign: "center",
+              background: "linear-gradient(135deg, #06D6A0, #00F5D4, #118AB2)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>WealthScroll</h1>
+            <p style={{
+              color: "rgba(255,255,255,0.3)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
+              marginBottom: 6, textTransform: "uppercase",
+              animation: "splashPulse 3s ease-in-out infinite",
+            }}>SWIPE &middot; LEARN &middot; EARN</p>
+            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.75rem", fontWeight: 600, maxWidth: 280, textAlign: "center", lineHeight: 1.5, marginBottom: 36 }}>
+              Financial literacy for kids &amp; teens. Learn money skills through bite-sized lessons and games.
+            </p>
+            <button
+              className="ws-btn"
+              onClick={() => setOnboardStep(1)}
+              style={{
+                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                border: "none", fontFamily: FONT,
+                background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
+                color: "#000", fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
+                cursor: "pointer",
+                boxShadow: "0 0 40px rgba(6,214,160,0.25), 0 8px 24px rgba(0,0,0,0.4)",
+              }}
+            >
+              GET STARTED
+            </button>
+            <p style={{ color: "rgba(255,255,255,0.15)", fontSize: "0.6rem", fontWeight: 600, marginTop: 14 }}>
+              Free &middot; No ads &middot; Safe for kids
+            </p>
+          </>
+        );
+      }
+
+      if (onboardStep === 1) {
+        return (
+          <>
+            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>👋</div>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em" }}>Who's signing up?</h2>
+            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 32 }}>
+              This helps us personalize the experience
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340 }}>
+              {[
+                { key: "learner", icon: "🎒", title: "I'm a Kid or Teen", desc: "I want to learn about money" },
+                { key: "parent", icon: "👨‍👩‍👧", title: "I'm a Parent", desc: "Setting this up for my child" },
+              ].map((opt) => (
+                <button
+                  className="ws-btn"
+                  key={opt.key}
+                  onClick={() => {
+                    setAccountType(opt.key);
+                    saveStr("acctType", opt.key);
+                    setOnboardStep(2);
+                  }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 14,
+                    width: "100%", padding: "18px 20px", borderRadius: 18,
+                    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+                    color: "#fff", fontFamily: FONT, cursor: "pointer", textAlign: "left",
+                  }}
+                >
+                  <span style={{ fontSize: "1.6rem" }}>{opt.icon}</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: "0.95rem" }}>{opt.title}</div>
+                    <div style={{ fontWeight: 500, fontSize: "0.65rem", color: "rgba(255,255,255,0.3)", marginTop: 2 }}>{opt.desc}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        );
+      }
+
+      if (onboardStep === 2) {
+        return (
+          <>
+            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>
+              {accountType === "parent" ? "👨‍👩‍👧" : "✏️"}
+            </div>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em" }}>
+              {accountType === "parent" ? "Parent Setup" : "Tell us about you"}
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
+              {accountType === "parent" ? "We'll personalize lessons for your child" : "We'll pick the right level for you"}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+              {accountType === "parent" && (
+                <div>
+                  <label style={{ display: "block", color: "rgba(255,255,255,0.35)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>YOUR NAME</label>
+                  <input
+                    type="text"
+                    placeholder="Parent's name"
+                    value={parentName}
+                    onChange={(e) => { setParentName(e.target.value); saveStr("parentName", e.target.value); }}
+                    style={{
+                      width: "100%", padding: "14px 18px", borderRadius: 14,
+                      background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+                      color: "#fff", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                      outline: "none", caretColor: "#06D6A0", boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+              )}
+              <div>
+                <label style={{ display: "block", color: "rgba(255,255,255,0.35)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {accountType === "parent" ? "CHILD'S NAME" : "YOUR NAME"}
+                </label>
+                <input
+                  type="text"
+                  placeholder={accountType === "parent" ? "Child's first name" : "What's your name?"}
+                  value={userName}
+                  onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+                    color: "#fff", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#06D6A0", boxSizing: "border-box",
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", color: "rgba(255,255,255,0.35)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {accountType === "parent" ? "CHILD'S BIRTHDAY" : "YOUR BIRTHDAY"}
+                </label>
+                <input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => { setBirthDate(e.target.value); saveStr("birth", e.target.value); }}
+                  max={new Date().toISOString().split("T")[0]}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+                    color: birthDate ? "#fff" : "rgba(255,255,255,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.9rem",
+                    outline: "none", boxSizing: "border-box", colorScheme: "dark",
+                  }}
+                />
+              </div>
+            </div>
+
+            {birthDate && (
+              <div style={{
+                marginBottom: 20, padding: "8px 16px", borderRadius: 12,
+                background: "rgba(6,214,160,0.06)", border: "1px solid rgba(6,214,160,0.12)",
+                animation: "ageBtn 0.3s ease-out both",
+              }}>
+                <span style={{ color: "#06D6A0", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
+                  {(() => {
+                    const age = getAgeFromBirth(birthDate);
+                    const group = getAgeGroup(age);
+                    if (group === "Kids") return "🌟 EXPLORER MODE — Ages 8-12";
+                    if (group === "Teens") return "🔥 HUSTLER MODE — Ages 13-16";
+                    return "💎 INVESTOR MODE — Ages 17+";
+                  })()}
+                </span>
+              </div>
+            )}
+
+            <button
+              className="ws-btn"
+              onClick={startSession}
+              disabled={!canFinish}
+              style={{
+                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                border: "none", fontFamily: FONT,
+                background: canFinish
+                  ? "linear-gradient(135deg, #06D6A0, #00F5D4)"
+                  : "rgba(255,255,255,0.06)",
+                color: canFinish ? "#000" : "rgba(255,255,255,0.2)",
+                fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
+                cursor: canFinish ? "pointer" : "default",
+                boxShadow: canFinish
+                  ? "0 0 40px rgba(6,214,160,0.25), 0 8px 24px rgba(0,0,0,0.4)"
+                  : "none",
+                transition: "all 0.3s ease",
+              }}
+            >
+              START LEARNING
+            </button>
+          </>
+        );
+      }
+      return null;
+    };
+
     return (
       <div
         style={{
@@ -241,105 +446,40 @@ function App() {
           @keyframes orbDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-40px) scale(1.15)} }
           @keyframes orbDrift2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-25px,30px) scale(0.9)} }
           @keyframes ageBtn { from{transform:translateY(18px);opacity:0} to{transform:translateY(0);opacity:1} }
+          @keyframes stepSlide { from{transform:translateX(30px);opacity:0} to{transform:translateX(0);opacity:1} }
           .ws-btn { transition: transform 0.12s cubic-bezier(0.25,0.46,0.45,0.94) !important; }
           .ws-btn:active { transform: scale(0.96) !important; }
         `}</style>
         <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,rgba(6,214,160,0.08) 0%,transparent 70%)",top:"15%",left:"-10%",filter:"blur(60px)",animation:"orbDrift1 10s ease-in-out infinite"}} />
         <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(255,107,107,0.06) 0%,transparent 70%)",bottom:"18%",right:"-8%",filter:"blur(60px)",animation:"orbDrift2 12s ease-in-out infinite"}} />
 
-        <div style={{fontSize:"4rem",marginBottom:8,animation:"splashFloat 3s ease-in-out infinite",filter:"drop-shadow(0 0 25px rgba(6,214,160,0.3))"}}>💸</div>
-        <h1 style={{
-          fontSize: "3.2rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 6px 0", textAlign: "center",
-          background: "linear-gradient(135deg, #06D6A0, #00F5D4, #118AB2)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>WealthScroll</h1>
-        <p style={{
-          color: "rgba(255,255,255,0.3)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
-          marginBottom: 14, textTransform: "uppercase",
-          animation: "splashPulse 3s ease-in-out infinite",
-        }}>SWIPE &middot; LEARN &middot; EARN</p>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 24 }}>
-          <input
-            type="text"
-            placeholder="What's your name?"
-            value={userName}
-            onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
+        {onboardStep > 0 && (
+          <button
+            className="ws-btn"
+            onClick={() => setOnboardStep(onboardStep - 1)}
             style={{
-              width: "100%", padding: "16px 20px", borderRadius: 16,
-              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-              color: "#fff", fontFamily: FONT, fontWeight: 700, fontSize: "1rem",
-              outline: "none", textAlign: "center", letterSpacing: "0.02em",
-              caretColor: "#06D6A0", boxSizing: "border-box",
+              position: "absolute", top: 20, left: 20, background: "none", border: "none",
+              color: "rgba(255,255,255,0.4)", fontSize: "1.4rem", cursor: "pointer", fontFamily: FONT,
+              zIndex: 10,
             }}
-          />
-          <input
-            type="date"
-            value={birthDate}
-            onChange={(e) => { setBirthDate(e.target.value); saveStr("birth", e.target.value); }}
-            max={new Date().toISOString().split("T")[0]}
-            style={{
-              width: "100%", padding: "16px 20px", borderRadius: 16,
-              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-              color: birthDate ? "#fff" : "rgba(255,255,255,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.9rem",
-              outline: "none", textAlign: "center", boxSizing: "border-box",
-              colorScheme: "dark",
-            }}
-          />
-        </div>
+          >←</button>
+        )}
 
-        {birthDate && (
-          <div style={{
-            marginBottom: 20, padding: "6px 14px", borderRadius: 10,
-            background: "rgba(6,214,160,0.08)", border: "1px solid rgba(6,214,160,0.15)",
-            animation: "ageBtn 0.3s ease-out both",
-          }}>
-            <span style={{ color: "#06D6A0", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.08em" }}>
-              {(() => {
-                const age = getAgeFromBirth(birthDate);
-                const group = getAgeGroup(age);
-                if (group === "Kids") return "🌟 EXPLORER MODE — Ages 8-12";
-                if (group === "Teens") return "🔥 HUSTLER MODE — Ages 13-16";
-                return "💎 INVESTOR MODE — Ages 17-21";
-              })()}
-            </span>
+        {onboardStep > 0 && (
+          <div style={{ position: "absolute", top: 28, display: "flex", gap: 6 }}>
+            {[1, 2].map((s) => (
+              <div key={s} style={{
+                width: s <= onboardStep ? 24 : 8, height: 4, borderRadius: 2,
+                background: s <= onboardStep ? "#06D6A0" : "rgba(255,255,255,0.1)",
+                transition: "all 0.3s ease",
+              }} />
+            ))}
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 20, marginBottom: 28 }}>
-          {[
-            { label: "XP", val: xp, color: "#06D6A0" },
-            { label: "LVL", val: level, color: "#FFD93D" },
-            { label: "STREAK", val: streak, color: "#FF6B6B" },
-          ].map((s) => (
-            <div key={s.label} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: 900, color: s.color, textShadow: `0 0 20px ${s.color}40` }}>{s.val}</div>
-              <div style={{ fontSize: "0.55rem", fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.12em" }}>{s.label}</div>
-            </div>
-          ))}
+        <div key={onboardStep} style={{ display: "flex", flexDirection: "column", alignItems: "center", animation: "stepSlide 0.35s ease-out both", width: "100%" }}>
+          {stepContent()}
         </div>
-
-        <button
-          className="ws-btn"
-          onClick={startSession}
-          disabled={!userName.trim() || !birthDate}
-          style={{
-            width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
-            border: "none", fontFamily: FONT,
-            background: userName.trim() && birthDate
-              ? "linear-gradient(135deg, #06D6A0, #00F5D4)"
-              : "rgba(255,255,255,0.06)",
-            color: userName.trim() && birthDate ? "#000" : "rgba(255,255,255,0.2)",
-            fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
-            cursor: userName.trim() && birthDate ? "pointer" : "default",
-            boxShadow: userName.trim() && birthDate
-              ? "0 0 40px rgba(6,214,160,0.25), 0 8px 24px rgba(0,0,0,0.4)"
-              : "none",
-            transition: "all 0.3s ease",
-          }}
-        >
-          START LEARNING
-        </button>
       </div>
     );
   }

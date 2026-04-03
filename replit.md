@@ -69,7 +69,15 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - `useEffect` on `quizResult === true` fires interval then calls `resetJourney()`
 - Countdown pulses when ≤ 3 seconds remaining
 
+### Sign-Up / Onboarding Flow
+- 3-step onboarding: (0) Welcome splash → (1) Who's signing up? (Kid/Teen vs Parent) → (2) Form
+- **Learner path**: name + birthday
+- **Parent path**: parent name + child name + child birthday
+- Account type persisted via `ws_acctType`, parent name via `ws_parentName`
+- `onboardStep` auto-resumes from saved state on reload (skips to step 2 if account type is saved)
+- Age auto-detected from birthday via `getAgeFromBirth()` + `getAgeGroup()`
+
 ### Age Groups
 - `8-12` Explorer — fun/emoji tone
 - `13-16` Hustler — Gen-Z slang
-- `17-21` Investor — Wall Street tone
+- `17+` Investor — Wall Street tone
