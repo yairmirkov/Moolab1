@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import LandingPage from "./LandingPage";
+import LandingPageES from "./LandingPageES";
 
 const MODULES = [
   { id: 0, name: "Saving Basics", icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 3 },
@@ -229,18 +230,19 @@ function App() {
   };
 
   if (showLanding) {
-    return (
-      <LandingPage
-        onParentLogin={() => {
-          setAccountType("parent");
-          saveStr("acctType", "parent");
-          setOnboardStep(2);
-          setShowLanding(false);
-          setFadeIn(true);
-          setTimeout(() => setFadeIn(false), 700);
-        }}
-      />
-    );
+    const parentLoginHandler = () => {
+      setAccountType("parent");
+      saveStr("acctType", "parent");
+      setOnboardStep(2);
+      setShowLanding(false);
+      setFadeIn(true);
+      setTimeout(() => setFadeIn(false), 700);
+    };
+    const landingLang = new URLSearchParams(window.location.search).get("lang");
+    if (landingLang === "es") {
+      return <LandingPageES onParentLogin={parentLoginHandler} />;
+    }
+    return <LandingPage onParentLogin={parentLoginHandler} />;
   }
 
   if (!appStarted) {

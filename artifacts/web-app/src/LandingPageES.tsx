@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-interface LandingPageProps {
+interface LandingPageESProps {
   onParentLogin: () => void;
 }
 
@@ -34,7 +34,6 @@ const PlayStoreBadge = () => (
   </a>
 );
 
-
 const DownloadBadges = () => (
   <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
     <AppStoreBadge />
@@ -42,14 +41,14 @@ const DownloadBadges = () => (
   </div>
 );
 
-export default function LandingPage({ onParentLogin }: LandingPageProps) {
+export default function LandingPageES({ onParentLogin }: LandingPageESProps) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
   }, []);
 
   const scrollToDownload = () =>
-    document.getElementById("download-section")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("download-section-es")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <div
@@ -66,22 +65,22 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
           </div>
           <div className="flex items-center gap-2.5">
             <a
-              href="?lang=es"
+              href="?"
               className="px-3 py-2 rounded-full text-[#1a3c2a]/40 font-bold text-xs tracking-wide hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200"
             >
-              ES
+              EN
             </a>
             <button
               onClick={onParentLogin}
               className="px-4 py-2 rounded-full border border-emerald-200 text-emerald-700 font-bold text-xs sm:text-sm tracking-wide hover:bg-emerald-50 active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              Parent Login
+              Acceso Padres
             </button>
             <button
               onClick={scrollToDownload}
               className="px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              Download App
+              Descargar App
             </button>
           </div>
         </div>
@@ -95,28 +94,28 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 mb-6 sm:mb-8">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[10px] sm:text-xs font-semibold text-emerald-700 tracking-wide uppercase">
-              Financial Literacy for the Next Generation
+              Educacion Financiera para la Nueva Generacion
             </span>
           </div>
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-5">
-            STOP SCROLLING.
+            DEJA DE SCROLLEAR.
             <br />
             <span className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 bg-clip-text text-transparent">
-              START EARNING.
+              EMPIEZA A GANAR.
             </span>
           </h1>
           <p className="text-base sm:text-lg text-[#1a3c2a]/45 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
-            The scroll experience your kids already love — reimagined to teach real financial skills through AI-powered lessons, games, and boss battles.
+            La experiencia de scroll que tus hijos ya aman — reinventada para ensenar habilidades financieras reales con lecciones de IA, juegos y batallas de jefe.
           </p>
-          <div id="download-section" className="mb-8">
+          <div id="download-section-es" className="mb-8">
             <DownloadBadges />
-            <p className="text-xs text-[#1a3c2a]/25 font-medium mt-4">Free · No ads · Safe for kids</p>
+            <p className="text-xs text-[#1a3c2a]/25 font-medium mt-4">Gratis · Sin anuncios · Seguro para ninos</p>
           </div>
           <div className="flex justify-center gap-10 sm:gap-14">
             {[
-              { value: "8–21", label: "Age Range" },
-              { value: "8", label: "Modules" },
-              { value: "AI", label: "Powered" },
+              { value: "8–21", label: "Edades" },
+              { value: "8", label: "Modulos" },
+              { value: "IA", label: "Potenciado" },
             ].map((s) => (
               <div key={s.label} className="text-center">
                 <div className="text-2xl sm:text-3xl font-black text-emerald-600">{s.value}</div>
@@ -131,19 +130,19 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
-              Learning That Feels Like
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Playing</span>
+              Aprender Se Siente Como
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Jugar</span>
             </h2>
             <p className="text-sm sm:text-base text-[#1a3c2a]/40 font-medium max-w-lg mx-auto">
-              Every swipe delivers bite-sized financial wisdom wrapped in games, challenges, and rewards.
+              Cada deslizamiento entrega sabiduria financiera en forma de juegos, desafios y recompensas.
             </p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
-              { icon: "🎮", title: "Kid-Friendly", desc: "No jargon — just fun, safe, age-appropriate money lessons." },
-              { icon: "🤖", title: "AI Content", desc: "Gemini AI generates fresh, personalized lessons every session." },
-              { icon: "⚔️", title: "Boss Battles", desc: "Beat the Boss Quiz to level up and unlock new modules." },
-              { icon: "🏆", title: "Gamification", desc: "Earn XP, build streaks, level up, and track boss wins." },
+              { icon: "🎮", title: "Para Ninos", desc: "Sin jerga — solo lecciones de dinero divertidas, seguras y apropiadas para su edad." },
+              { icon: "🤖", title: "Contenido IA", desc: "Gemini IA genera lecciones frescas y personalizadas en cada sesion." },
+              { icon: "⚔️", title: "Batallas de Jefe", desc: "Vence al Quiz del Jefe para subir de nivel y desbloquear nuevos modulos." },
+              { icon: "🏆", title: "Gamificacion", desc: "Gana XP, construye rachas, sube de nivel y registra victorias de jefe." },
             ].map((f) => (
               <div key={f.title} className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="text-2xl sm:text-3xl mb-3">{f.icon}</div>
@@ -159,31 +158,31 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
-              Three Paths.{" "}
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent">One Mission.</span>
+              Tres Caminos.{" "}
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent">Una Mision.</span>
             </h2>
             <p className="text-sm sm:text-base text-[#1a3c2a]/40 font-medium max-w-lg mx-auto">
-              Content adapts to their age so every lesson hits home.
+              El contenido se adapta a su edad para que cada leccion sea relevante.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
             {[
               {
-                emoji: "🌟", mode: "EXPLORER", ages: "Ages 7–12",
-                desc: "Piggy banks, allowance math, and saving goals through stories and games.",
-                topics: ["What is money?", "Saving vs spending", "Setting goals"],
+                emoji: "🌟", mode: "EXPLORADOR", ages: "Edades 7–12",
+                desc: "Alcancías, matematicas de mesada y metas de ahorro a traves de historias y juegos.",
+                topics: ["¿Que es el dinero?", "Ahorrar vs gastar", "Fijar metas"],
                 accent: "emerald",
               },
               {
-                emoji: "🔥", mode: "HUSTLER", ages: "Ages 13–17",
-                desc: "Side hustles, budgeting, and investing basics. Real talk for teens.",
-                topics: ["Earning income", "Budgeting 101", "Intro to investing"],
+                emoji: "🔥", mode: "EMPRENDEDOR", ages: "Edades 13–17",
+                desc: "Negocios, presupuestos y conceptos basicos de inversion. Conversacion real para adolescentes.",
+                topics: ["Generar ingresos", "Presupuesto 101", "Intro a inversiones"],
                 accent: "amber",
               },
               {
-                emoji: "💎", mode: "INVESTOR", ages: "Ages 18–21",
-                desc: "Credit scores, crypto, real estate, and tax strategy. Zero fluff.",
-                topics: ["Credit & debt", "Crypto basics", "Tax strategies"],
+                emoji: "💎", mode: "INVERSIONISTA", ages: "Edades 18–21",
+                desc: "Puntaje crediticio, cripto, bienes raíces y estrategia fiscal. Sin relleno.",
+                topics: ["Credito y deuda", "Conceptos de cripto", "Estrategias fiscales"],
                 accent: "violet",
               },
             ].map((card) => {
@@ -196,7 +195,7 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
                 <div key={card.mode} className={`relative rounded-2xl ${colors.bg} border ${colors.border} p-6 sm:p-7 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden`}>
                   <div className={`absolute top-0 left-0 right-0 h-1 ${colors.bar}`} />
                   <div className="text-3xl mb-3 mt-1">{card.emoji}</div>
-                  <div className={`text-[10px] font-black tracking-[0.2em] uppercase ${colors.text} mb-1`}>{card.mode} MODE</div>
+                  <div className={`text-[10px] font-black tracking-[0.2em] uppercase ${colors.text} mb-1`}>MODO {card.mode}</div>
                   <div className="text-xs font-bold text-[#1a3c2a]/40 mb-3">{card.ages}</div>
                   <p className="text-xs sm:text-sm text-[#1a3c2a]/50 font-medium leading-relaxed mb-4">{card.desc}</p>
                   <div className="space-y-1.5">
@@ -219,21 +218,21 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/60 border border-emerald-200/50 mb-5">
-                <span className="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wider">For Parents</span>
+                <span className="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wider">Para Padres</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
-                Parental
-                <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Command Center</span>
+                Centro de
+                <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Control Parental</span>
               </h2>
               <p className="text-sm text-[#1a3c2a]/45 font-medium leading-relaxed mb-6">
-                Complete visibility into your child's financial education. Real-time metrics, module progress, and learning insights.
+                Visibilidad completa de la educacion financiera de tu hijo. Metricas en tiempo real, progreso por modulo e informes de aprendizaje.
               </p>
               <div className="space-y-3 mb-6">
                 {[
-                  { icon: "📊", text: "Real-time XP, streak, and level tracking" },
-                  { icon: "🎯", text: "Module-by-module progress bars" },
-                  { icon: "🧠", text: "Learning insights and competency assessment" },
-                  { icon: "👀", text: "Full transparency — kids see what parents see" },
+                  { icon: "📊", text: "Seguimiento de XP, racha y nivel en tiempo real" },
+                  { icon: "🎯", text: "Barras de progreso por modulo" },
+                  { icon: "🧠", text: "Informes de aprendizaje y evaluacion de competencias" },
+                  { icon: "👀", text: "Transparencia total — los ninos ven lo que los padres ven" },
                 ].map((item) => (
                   <div key={item.text} className="flex items-start gap-2.5">
                     <span className="text-lg">{item.icon}</span>
@@ -246,17 +245,17 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-200/25 to-teal-200/15 blur-2xl scale-110" />
               <div className="relative bg-white rounded-2xl border border-emerald-200/50 shadow-xl p-5 space-y-3.5">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white font-bold text-xs">J</div>
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white font-bold text-xs">S</div>
                   <div>
-                    <div className="font-extrabold text-sm">Jordan's Progress</div>
-                    <div className="text-[10px] text-[#1a3c2a]/30 font-medium">Explorer Mode · Age 10</div>
+                    <div className="font-extrabold text-sm">Progreso de Sofia</div>
+                    <div className="text-[10px] text-[#1a3c2a]/30 font-medium">Modo Explorador · 10 anos</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2.5">
                   {[
                     { label: "XP", value: "2,450", icon: "⚡" },
-                    { label: "Streak", value: "7 days", icon: "🔥" },
-                    { label: "Boss Wins", value: "4", icon: "🏆" },
+                    { label: "Racha", value: "7 dias", icon: "🔥" },
+                    { label: "Victorias", value: "4", icon: "🏆" },
                   ].map((stat) => (
                     <div key={stat.label} className="bg-emerald-50 rounded-lg p-2.5 text-center">
                       <div className="text-base">{stat.icon}</div>
@@ -267,9 +266,9 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
                 </div>
                 <div className="space-y-2">
                   {[
-                    { name: "Saving Basics", pct: 100 },
-                    { name: "Smart Budgeting", pct: 67 },
-                    { name: "Earning Money", pct: 33 },
+                    { name: "Ahorro Basico", pct: 100 },
+                    { name: "Presupuesto Inteligente", pct: 67 },
+                    { name: "Ganar Dinero", pct: 33 },
                   ].map((m) => (
                     <div key={m.name}>
                       <div className="flex justify-between text-[10px] font-semibold mb-0.5">
@@ -291,20 +290,20 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
       <section className="py-16 sm:py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/50 mb-5">
-            <span className="text-[10px] sm:text-xs font-bold text-amber-700 uppercase tracking-wider">Coming Soon</span>
+            <span className="text-[10px] sm:text-xs font-bold text-amber-700 uppercase tracking-wider">Proximamente</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-3">
-            Mastermind
-            <span className="bg-gradient-to-r from-amber-500 to-orange-400 bg-clip-text text-transparent"> Subscription</span>
+            Suscripcion
+            <span className="bg-gradient-to-r from-amber-500 to-orange-400 bg-clip-text text-transparent"> Mastermind</span>
           </h2>
           <p className="text-sm text-[#1a3c2a]/40 font-medium max-w-md mx-auto mb-10">
-            Unlock the full WealthScroll experience for serious learners.
+            Desbloquea la experiencia completa de WealthScroll para aprendices serios.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 max-w-2xl mx-auto mb-10">
             {[
-              { icon: "♾️", title: "Unlimited Scrolls", desc: "No daily limits — learn whenever you want." },
-              { icon: "📈", title: "Advanced Analytics", desc: "Deep reports on learning patterns and growth." },
-              { icon: "🎓", title: "Premium Modules", desc: "Exclusive topics like entrepreneurship and crypto." },
+              { icon: "♾️", title: "Scrolls Ilimitados", desc: "Sin limites diarios — aprende cuando quieras." },
+              { icon: "📈", title: "Analisis Avanzado", desc: "Reportes profundos de patrones de aprendizaje y crecimiento." },
+              { icon: "🎓", title: "Modulos Premium", desc: "Temas exclusivos como emprendimiento y cripto." },
             ].map((perk) => (
               <div key={perk.title} className="p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 text-center">
                 <div className="text-2xl mb-2">{perk.icon}</div>
@@ -320,15 +319,15 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-4xl mb-4">💸</div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
-            Ready to Build Their
-            <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Financial Future?</span>
+            ¿Listos Para Construir Su
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Futuro Financiero?</span>
           </h2>
           <p className="text-sm text-[#1a3c2a]/35 font-medium mb-8 max-w-md mx-auto">
-            Free to start. No ads. No data selling. Just real financial education that sticks.
+            Gratis para empezar. Sin anuncios. Sin venta de datos. Solo educacion financiera real que perdura.
           </p>
           <DownloadBadges />
           <p className="text-[10px] text-[#1a3c2a]/20 font-medium mt-4">
-            Available on iOS and Android · Ages 7–21
+            Disponible en iOS y Android · Edades 7–21
           </p>
         </div>
       </section>
@@ -342,7 +341,7 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
             </span>
           </div>
           <p className="text-[10px] text-[#1a3c2a]/20 font-medium text-center sm:text-right">
-            Building the next generation of financially literate humans.
+            Construyendo la proxima generacion de humanos financieramente educados.
           </p>
         </div>
       </footer>
