@@ -101,7 +101,7 @@ export default function LandingPage({ onEnterApp, onParentLogin }: LandingPagePr
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-[#1a3c2a]/50 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
-            The addictive scroll experience your kids already love — rebuilt to teach real financial skills through AI-powered lessons, games, and boss battles.
+            The scroll experience your kids already love — reimagined to teach real financial skills through AI-powered lessons, games, and boss battles.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
             <button
