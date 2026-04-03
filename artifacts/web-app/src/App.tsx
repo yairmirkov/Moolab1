@@ -234,18 +234,18 @@ function App() {
       if (onboardStep === 0) {
         return (
           <>
-            <div style={{fontSize:"4rem",marginBottom:8,animation:"splashFloat 3s ease-in-out infinite",filter:"drop-shadow(0 0 25px rgba(6,214,160,0.3))"}}>💸</div>
+            <div style={{fontSize:"4rem",marginBottom:8,animation:"splashFloat 3s ease-in-out infinite",filter:"drop-shadow(0 0 25px rgba(16,185,129,0.3))"}}>💸</div>
             <h1 style={{
               fontSize: "3.2rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 6px 0", textAlign: "center",
-              background: "linear-gradient(135deg, #06D6A0, #00F5D4, #118AB2)",
+              background: "linear-gradient(135deg, #059669, #10b981, #047857)",
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             }}>WealthScroll</h1>
             <p style={{
-              color: "rgba(255,255,255,0.3)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
+              color: "rgba(26,60,42,0.35)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
               marginBottom: 6, textTransform: "uppercase",
               animation: "splashPulse 3s ease-in-out infinite",
             }}>SWIPE &middot; LEARN &middot; EARN</p>
-            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.75rem", fontWeight: 600, maxWidth: 280, textAlign: "center", lineHeight: 1.5, marginBottom: 36 }}>
+            <p style={{ color: "rgba(26,60,42,0.4)", fontSize: "0.75rem", fontWeight: 600, maxWidth: 280, textAlign: "center", lineHeight: 1.5, marginBottom: 36 }}>
               Financial literacy for kids &amp; teens. Learn money skills through bite-sized lessons and games.
             </p>
             <button
@@ -254,15 +254,15 @@ function App() {
               style={{
                 width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
-                background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
-                color: "#000", fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
+                background: "linear-gradient(135deg, #10b981, #34d399)",
+                color: "#fff", fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
                 cursor: "pointer",
-                boxShadow: "0 0 40px rgba(6,214,160,0.25), 0 8px 24px rgba(0,0,0,0.4)",
+                boxShadow: "0 0 40px rgba(16,185,129,0.2), 0 8px 24px rgba(0,0,0,0.08)",
               }}
             >
               GET STARTED
             </button>
-            <p style={{ color: "rgba(255,255,255,0.15)", fontSize: "0.6rem", fontWeight: 600, marginTop: 14 }}>
+            <p style={{ color: "rgba(26,60,42,0.2)", fontSize: "0.6rem", fontWeight: 600, marginTop: 14 }}>
               Free &middot; No ads &middot; Safe for kids
             </p>
           </>
@@ -273,8 +273,8 @@ function App() {
         return (
           <>
             <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>👋</div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em" }}>Who's signing up?</h2>
-            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 32 }}>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#1a3c2a" }}>Who's signing up?</h2>
+            <p style={{ color: "rgba(26,60,42,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 32 }}>
               This helps us personalize the experience
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340 }}>
@@ -293,14 +293,15 @@ function App() {
                   style={{
                     display: "flex", alignItems: "center", gap: 14,
                     width: "100%", padding: "18px 20px", borderRadius: 18,
-                    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
-                    color: "#fff", fontFamily: FONT, cursor: "pointer", textAlign: "left",
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(16,185,129,0.15)",
+                    color: "#1a3c2a", fontFamily: FONT, cursor: "pointer", textAlign: "left",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                   }}
                 >
                   <span style={{ fontSize: "1.6rem" }}>{opt.icon}</span>
                   <div>
                     <div style={{ fontWeight: 800, fontSize: "0.95rem" }}>{opt.title}</div>
-                    <div style={{ fontWeight: 500, fontSize: "0.65rem", color: "rgba(255,255,255,0.3)", marginTop: 2 }}>{opt.desc}</div>
+                    <div style={{ fontWeight: 500, fontSize: "0.65rem", color: "rgba(26,60,42,0.4)", marginTop: 2 }}>{opt.desc}</div>
                   </div>
                 </button>
               ))}
@@ -315,17 +316,17 @@ function App() {
             <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>
               {accountType === "parent" ? "👨‍👩‍👧" : "✏️"}
             </div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#1a3c2a" }}>
               {accountType === "parent" ? "Parent Setup" : "Tell us about you"}
             </h2>
-            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
+            <p style={{ color: "rgba(26,60,42,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
               {accountType === "parent" ? "We'll personalize lessons for your child" : "We'll pick the right level for you"}
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
               {accountType === "parent" && (
                 <div>
-                  <label style={{ display: "block", color: "rgba(255,255,255,0.35)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>YOUR NAME</label>
+                  <label style={{ display: "block", color: "rgba(26,60,42,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>YOUR NAME</label>
                   <input
                     type="text"
                     placeholder="Parent's name"
@@ -333,15 +334,16 @@ function App() {
                     onChange={(e) => { setParentName(e.target.value); saveStr("parentName", e.target.value); }}
                     style={{
                       width: "100%", padding: "14px 18px", borderRadius: 14,
-                      background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                      color: "#fff", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                      outline: "none", caretColor: "#06D6A0", boxSizing: "border-box",
+                      background: "rgba(255,255,255,0.7)", border: "1px solid rgba(16,185,129,0.2)",
+                      color: "#1a3c2a", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                      outline: "none", caretColor: "#059669", boxSizing: "border-box",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                     }}
                   />
                 </div>
               )}
               <div>
-                <label style={{ display: "block", color: "rgba(255,255,255,0.35)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                <label style={{ display: "block", color: "rgba(26,60,42,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
                   {accountType === "parent" ? "CHILD'S NAME" : "YOUR NAME"}
                 </label>
                 <input
@@ -351,14 +353,15 @@ function App() {
                   onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
                   style={{
                     width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                    color: "#fff", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", caretColor: "#06D6A0", boxSizing: "border-box",
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(16,185,129,0.2)",
+                    color: "#1a3c2a", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#059669", boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                   }}
                 />
               </div>
               <div>
-                <label style={{ display: "block", color: "rgba(255,255,255,0.35)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                <label style={{ display: "block", color: "rgba(26,60,42,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
                   {accountType === "parent" ? "CHILD'S BIRTH YEAR" : "YOUR BIRTH YEAR"}
                 </label>
                 <select
@@ -366,17 +369,18 @@ function App() {
                   onChange={(e) => { setBirthYear(e.target.value); saveStr("birth", e.target.value); }}
                   style={{
                     width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                    color: birthYear ? "#fff" : "rgba(255,255,255,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", boxSizing: "border-box", colorScheme: "dark",
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(16,185,129,0.2)",
+                    color: birthYear ? "#1a3c2a" : "rgba(26,60,42,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", boxSizing: "border-box", colorScheme: "light",
                     appearance: "none", WebkitAppearance: "none",
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(26,60,42,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
                     backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                   }}
                 >
                   <option value="" disabled>Select year</option>
                   {Array.from({ length: 22 }, (_, i) => new Date().getFullYear() - 4 - i).map((yr) => (
-                    <option key={yr} value={String(yr)} style={{ background: "#111", color: "#fff" }}>{yr}</option>
+                    <option key={yr} value={String(yr)} style={{ background: "#fff", color: "#1a3c2a" }}>{yr}</option>
                   ))}
                 </select>
               </div>
@@ -385,10 +389,10 @@ function App() {
             {birthYear && (
               <div style={{
                 marginBottom: 20, padding: "8px 16px", borderRadius: 12,
-                background: "rgba(6,214,160,0.06)", border: "1px solid rgba(6,214,160,0.12)",
+                background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)",
                 animation: "ageBtn 0.3s ease-out both",
               }}>
-                <span style={{ color: "#06D6A0", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
+                <span style={{ color: "#059669", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
                   {(() => {
                     const age = getAgeFromYear(birthYear);
                     const group = getAgeGroup(age);
@@ -408,13 +412,13 @@ function App() {
                 width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
                 background: canFinish
-                  ? "linear-gradient(135deg, #06D6A0, #00F5D4)"
-                  : "rgba(255,255,255,0.06)",
-                color: canFinish ? "#000" : "rgba(255,255,255,0.2)",
+                  ? "linear-gradient(135deg, #10b981, #34d399)"
+                  : "rgba(26,60,42,0.08)",
+                color: canFinish ? "#fff" : "rgba(26,60,42,0.25)",
                 fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
                 cursor: canFinish ? "pointer" : "default",
                 boxShadow: canFinish
-                  ? "0 0 40px rgba(6,214,160,0.25), 0 8px 24px rgba(0,0,0,0.4)"
+                  ? "0 0 40px rgba(16,185,129,0.2), 0 8px 24px rgba(0,0,0,0.08)"
                   : "none",
                 transition: "all 0.3s ease",
               }}
@@ -432,8 +436,8 @@ function App() {
         style={{
           width: "100vw",
           height: "100dvh",
-          background: "linear-gradient(160deg, #0a0a0f 0%, #111118 50%, #0a0a0f 100%)",
-          color: "#fff",
+          background: "linear-gradient(160deg, #f0faf4 0%, #e6f7ed 30%, #d4f1e0 60%, #f5faf7 100%)",
+          color: "#1a3c2a",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -446,7 +450,7 @@ function App() {
       >
         <style>{`
           @keyframes splashFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-          @keyframes splashPulse { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.04)} }
+          @keyframes splashPulse { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.04)} }
           @keyframes orbDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-40px) scale(1.15)} }
           @keyframes orbDrift2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-25px,30px) scale(0.9)} }
           @keyframes ageBtn { from{transform:translateY(18px);opacity:0} to{transform:translateY(0);opacity:1} }
@@ -454,8 +458,8 @@ function App() {
           .ws-btn { transition: transform 0.12s cubic-bezier(0.25,0.46,0.45,0.94) !important; }
           .ws-btn:active { transform: scale(0.96) !important; }
         `}</style>
-        <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,rgba(6,214,160,0.08) 0%,transparent 70%)",top:"15%",left:"-10%",filter:"blur(60px)",animation:"orbDrift1 10s ease-in-out infinite"}} />
-        <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(255,107,107,0.06) 0%,transparent 70%)",bottom:"18%",right:"-8%",filter:"blur(60px)",animation:"orbDrift2 12s ease-in-out infinite"}} />
+        <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%)",top:"15%",left:"-10%",filter:"blur(60px)",animation:"orbDrift1 10s ease-in-out infinite"}} />
+        <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(52,211,153,0.08) 0%,transparent 70%)",bottom:"18%",right:"-8%",filter:"blur(60px)",animation:"orbDrift2 12s ease-in-out infinite"}} />
 
         {onboardStep > 0 && (
           <button
@@ -463,7 +467,7 @@ function App() {
             onClick={() => setOnboardStep(onboardStep - 1)}
             style={{
               position: "absolute", top: 20, left: 20, background: "none", border: "none",
-              color: "rgba(255,255,255,0.4)", fontSize: "1.4rem", cursor: "pointer", fontFamily: FONT,
+              color: "rgba(26,60,42,0.4)", fontSize: "1.4rem", cursor: "pointer", fontFamily: FONT,
               zIndex: 10,
             }}
           >←</button>
@@ -474,7 +478,7 @@ function App() {
             {[1, 2].map((s) => (
               <div key={s} style={{
                 width: s <= onboardStep ? 24 : 8, height: 4, borderRadius: 2,
-                background: s <= onboardStep ? "#06D6A0" : "rgba(255,255,255,0.1)",
+                background: s <= onboardStep ? "#059669" : "rgba(26,60,42,0.12)",
                 transition: "all 0.3s ease",
               }} />
             ))}
@@ -672,8 +676,8 @@ function App() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(160deg, #0a0a0f 0%, #111118 50%, #0a0a0f 100%)",
-          color: "#fff",
+          background: "linear-gradient(160deg, #f0faf4 0%, #e6f7ed 30%, #d4f1e0 60%, #f5faf7 100%)",
+          color: "#1a3c2a",
           fontFamily: FONT,
         }}
       >
@@ -682,8 +686,8 @@ function App() {
           @keyframes ldBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         `}</style>
         <div style={{ fontSize: "3rem", marginBottom: 16, animation: "ldBounce 2s ease-in-out infinite" }}>🧠</div>
-        <div style={{ width:40,height:40,margin:"0 auto 16px",borderRadius:"50%",border:"3px solid rgba(255,255,255,0.06)",borderTopColor:"#06D6A0",animation:"ldSpin 0.7s linear infinite" }} />
-        <p style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: "-0.01em", background:"linear-gradient(90deg,#06D6A0,#00F5D4)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
+        <div style={{ width:40,height:40,margin:"0 auto 16px",borderRadius:"50%",border:"3px solid rgba(16,185,129,0.12)",borderTopColor:"#059669",animation:"ldSpin 0.7s linear infinite" }} />
+        <p style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: "-0.01em", background:"linear-gradient(90deg,#059669,#10b981)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
           Curating your feed...
         </p>
       </div>
