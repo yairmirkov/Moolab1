@@ -82,7 +82,7 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
           </div>
           <div className="flex items-center gap-2.5">
             <button
-              onClick={() => document.getElementById("parent-login")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={onParentLogin}
               className="px-4 py-2 rounded-full border border-emerald-200 text-emerald-700 font-bold text-xs sm:text-sm tracking-wide hover:bg-emerald-50 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               Parent Login
@@ -333,43 +333,7 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
         </div>
       </section>
 
-      <section id="parent-login" className="py-14 sm:py-16 px-6 bg-gradient-to-b from-white to-emerald-50/30">
-        <div className="max-w-sm mx-auto">
-          <div className="bg-white rounded-2xl border border-emerald-200/50 shadow-xl p-7 text-center">
-            <div className="text-3xl mb-3">👨‍👩‍👧</div>
-            <h2 className="text-xl font-black tracking-tight mb-1.5">Parent Login</h2>
-            <p className="text-xs text-[#1a3c2a]/35 font-medium mb-5">
-              View your child's progress, manage subscriptions, and more.
-            </p>
-            <form onSubmit={(e) => { e.preventDefault(); onParentLogin(); }} className="space-y-2.5 mb-5">
-              <input
-                type="email"
-                placeholder="Email address"
-                className="w-full px-4 py-3 rounded-xl bg-emerald-50/60 border border-emerald-200/40 text-[#1a3c2a] font-medium text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition-all placeholder:text-[#1a3c2a]/25"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full px-4 py-3 rounded-xl bg-emerald-50/60 border border-emerald-200/40 text-[#1a3c2a] font-medium text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition-all placeholder:text-[#1a3c2a]/25"
-              />
-              <button
-                type="submit"
-                className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-sm tracking-wide shadow-lg shadow-emerald-200/40 hover:shadow-emerald-300/50 hover:scale-[1.02] active:scale-95 transition-all duration-200 cursor-pointer"
-              >
-                Sign In
-              </button>
-            </form>
-            <p className="text-[11px] text-[#1a3c2a]/25 font-medium">
-              Don't have an account?{" "}
-              <button onClick={onParentLogin} className="text-emerald-600 font-bold hover:underline cursor-pointer">
-                Sign up as a Parent
-              </button>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-emerald-50/30 to-emerald-50/50">
+      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-emerald-50/50">
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-4xl mb-4">💸</div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
