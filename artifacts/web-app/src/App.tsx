@@ -43,6 +43,22 @@ const generateCards = async (ageGroup, topic?: string) => {
   }
 };
 
+const videoBank = [
+  "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2098989/2098989-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2519660/2519660-hd_1920_1080_24fps.mp4",
+  "https://videos.pexels.com/video-files/3571264/3571264-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/856030/856030-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/856356/856356-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/853789/853789-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/1093662/1093662-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1437396/1437396-hd_1920_1080_24fps.mp4",
+  "https://videos.pexels.com/video-files/3194277/3194277-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1851190/1851190-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3163534/3163534-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2278095/2278095-hd_1920_1080_30fps.mp4",
+];
+
 const bgGradients = [
   "radial-gradient(ellipse at 20% 50%, #064e3b 0%, #0f172a 60%, #020617 100%)",
   "radial-gradient(ellipse at 80% 30%, #1e3a5f 0%, #0c1524 50%, #020617 100%)",
@@ -1067,10 +1083,27 @@ function App() {
                   width: "100%",
                   height: "100%",
                   background: bgGradients[i % bgGradients.length],
-                  opacity: 0.9,
-                  animation: "vidFade 0.8s ease-out both",
                 }}
               />
+              <video
+                key={`v-${card.id}`}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  opacity: 0.5,
+                  animation: "vidFade 0.8s ease-out both",
+                }}
+              >
+                <source src={videoBank[i % videoBank.length]} type="video/mp4" />
+              </video>
 
               {/* Dark gradient overlay */}
               <div style={{
