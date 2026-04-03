@@ -264,7 +264,7 @@ function App() {
               fontSize: "3.2rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 6px 0", textAlign: "center",
               background: "linear-gradient(135deg, #059669, #10b981, #047857)",
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            }}>WealthScroll</h1>
+            }}>Moolab</h1>
             <p style={{
               color: "rgba(26,60,42,0.35)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
               marginBottom: 6, textTransform: "uppercase",
@@ -684,7 +684,7 @@ function App() {
 
       <div style={{ padding: "20px 20px 40px", textAlign: "center" }}>
         <div style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.55rem", fontWeight: 600 }}>
-          WealthScroll · {accountType === "parent" ? "Parent Dashboard" : "Transparency View"}
+          Moolab · {accountType === "parent" ? "Parent Dashboard" : "Transparency View"}
         </div>
       </div>
     </div>

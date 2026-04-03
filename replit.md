@@ -1,8 +1,8 @@
-# Workspace
+# Moolab
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+**Moolab** — a premium TikTok/Reels-style financial literacy app for kids and teens (ages 8–21). pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
 ## Stack
 

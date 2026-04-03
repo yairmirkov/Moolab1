@@ -64,7 +64,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
           <div className="flex items-center gap-2">
             <span className="text-2xl">💸</span>
             <span className="text-lg font-black tracking-tight bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
-              WealthScroll
+              Moolab
             </span>
           </div>
           <div className="flex items-center gap-2.5">
@@ -309,7 +309,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
             <span className="bg-gradient-to-r from-amber-500 to-orange-400 bg-clip-text text-transparent"> Mastermind</span>
           </h2>
           <p className="text-sm text-[#1a3c2a]/40 font-medium max-w-md mx-auto mb-10">
-            Desbloquea la experiencia completa de WealthScroll para aprendices serios.
+            Desbloquea la experiencia completa de Moolab para aprendices serios.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 max-w-2xl mx-auto mb-10">
             {[
@@ -349,7 +349,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
           <div className="flex items-center gap-2">
             <span className="text-lg">💸</span>
             <span className="text-sm font-black bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
-              WealthScroll
+              Moolab
             </span>
           </div>
           <p className="text-[10px] text-[#1a3c2a]/20 font-medium text-center sm:text-right">
