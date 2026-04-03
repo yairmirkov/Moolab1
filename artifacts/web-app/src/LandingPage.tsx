@@ -4,45 +4,58 @@ interface LandingPageProps {
   onParentLogin: () => void;
 }
 
-const AppleStoreSvg = () => (
-  <svg viewBox="0 0 120 40" className="h-10" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="120" height="40" rx="6" fill="#000" />
-    <text x="60" y="12" textAnchor="middle" fill="#fff" fontSize="7" fontFamily="system-ui" fontWeight="400">Download on the</text>
-    <text x="67" y="27" textAnchor="middle" fill="#fff" fontSize="13" fontFamily="system-ui" fontWeight="700">App Store</text>
-    <g transform="translate(18,10) scale(0.75)">
-      <path d="M18.72 12.61c-.02-2.14 1.75-3.17 1.83-3.22-1-1.46-2.55-1.66-3.1-1.68-1.32-.13-2.57.78-3.24.78-.67 0-1.7-.76-2.8-.74-1.44.02-2.77.84-3.51 2.13-1.49 2.59-.38 6.43 1.07 8.53.71 1.03 1.56 2.18 2.68 2.14 1.07-.04 1.48-.7 2.78-.7 1.3 0 1.67.7 2.78.67 1.16-.02 1.89-1.05 2.59-2.08.82-1.19 1.15-2.35 1.17-2.41-.03-.01-2.25-.86-2.27-3.42zM16.63 6.18c.59-.72 .99-1.71.88-2.7-.85.03-1.88.57-2.49 1.28-.55.63-1.03 1.65-.9 2.62.95.07 1.92-.48 2.51-1.2z" fill="#fff"/>
-    </g>
-  </svg>
+const AppStoreBadge = () => (
+  <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" className="inline-block hover:scale-105 active:scale-95 transition-transform duration-200">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" className="h-[44px]">
+      <rect width="120" height="40" rx="5" fill="#000"/>
+      <path d="M24.77 20.3a4.95 4.95 0 012.36-4.15 5.07 5.07 0 00-3.99-2.16c-1.68-.18-3.31 1.01-4.17 1.01-.87 0-2.18-.99-3.59-.96a5.31 5.31 0 00-4.47 2.72c-1.93 3.34-.49 8.27 1.36 10.97.93 1.33 2.01 2.82 3.44 2.76 1.39-.06 1.91-.88 3.59-.88 1.67 0 2.15.88 3.59.85 1.49-.03 2.43-1.33 3.33-2.67a11.02 11.02 0 001.51-3.09 4.77 4.77 0 01-2.96-4.4zM22.04 12.21a4.87 4.87 0 001.11-3.49 4.96 4.96 0 00-3.21 1.66 4.64 4.64 0 00-1.14 3.37 4.1 4.1 0 003.24-1.54z" fill="#fff"/>
+      <g fill="#fff">
+        <path d="M42.3 27.14h-4.73l-1.14 3.36H34.1l4.48-12.42h2.42l4.48 12.42h-2.36l-1.13-3.36zm-4.24-1.66h3.75l-1.85-5.45h-.05l-1.85 5.45zM55.16 25.97c0 2.81-1.51 4.62-3.78 4.62a3.07 3.07 0 01-2.85-1.58h-.04v4.48h-2.07V21.44h2v1.5h.04a3.21 3.21 0 012.89-1.6c2.3 0 3.81 1.82 3.81 4.63zm-2.13 0c0-1.83-.95-3.04-2.39-3.04-1.42 0-2.38 1.23-2.38 3.04 0 1.83.96 3.05 2.38 3.05 1.44 0 2.39-1.2 2.39-3.05zM65.12 25.97c0 2.81-1.5 4.62-3.77 4.62a3.07 3.07 0 01-2.85-1.58h-.04v4.48h-2.07V21.44h2v1.5h.03a3.21 3.21 0 012.9-1.6c2.3 0 3.8 1.82 3.8 4.63zm-2.13 0c0-1.83-.95-3.04-2.38-3.04-1.42 0-2.39 1.23-2.39 3.04 0 1.83.97 3.05 2.39 3.05 1.43 0 2.38-1.2 2.38-3.05zM71.71 27.04c.15 1.23 1.34 2.04 2.98 2.04 1.57 0 2.69-.81 2.69-1.92 0-.96-.68-1.54-2.3-1.93l-1.62-.39c-2.28-.55-3.34-1.62-3.34-3.34 0-2.14 1.87-3.61 4.52-3.61 2.62 0 4.42 1.47 4.48 3.61h-2.09c-.13-1.24-1.13-1.99-2.43-1.99s-2.3.76-2.3 1.86c0 .87.65 1.38 2.27 1.77l1.38.34c2.55.6 3.61 1.63 3.61 3.45 0 2.32-1.85 3.78-4.79 3.78-2.75 0-4.61-1.42-4.73-3.67h2.11z"/>
+        <path d="M83.35 19.3v2.14h1.92v1.58h-1.92v5.1c0 .79.35 1.16 1.12 1.16a5.93 5.93 0 00.79-.05v1.57a6.63 6.63 0 01-1.33.11c-1.87 0-2.6-.7-2.6-2.49v-5.4h-1.47v-1.58h1.47V19.3h2.02zM86.07 25.97c0-2.85 1.68-4.64 4.3-4.64 2.63 0 4.31 1.79 4.31 4.64 0 2.86-1.67 4.64-4.31 4.64-2.64 0-4.3-1.78-4.3-4.64zm6.5 0c0-1.95-.9-3.1-2.2-3.1s-2.2 1.16-2.2 3.1c0 1.96.9 3.1 2.2 3.1s2.2-1.15 2.2-3.1zM96.19 21.44h1.97v1.54h.04a2.38 2.38 0 012.37-1.64 3.08 3.08 0 01.73.08v1.93a2.83 2.83 0 00-.97-.14 2.07 2.07 0 00-2.14 2.3v5h-2V21.44zM110.42 27.84c-.28 1.82-2.06 3.07-4.33 3.07-2.93 0-4.74-1.76-4.74-4.59s1.82-4.69 4.66-4.69c2.79 0 4.54 1.72 4.54 4.47v.71h-7.14v.12a2.6 2.6 0 002.69 2.82 2.26 2.26 0 002.31-1.41l2.01.5zm-7.02-2.7h5.07a2.4 2.4 0 00-2.44-2.54 2.52 2.52 0 00-2.63 2.54z"/>
+      </g>
+      <g fill="#fff">
+        <text x="43" y="14" fontSize="8" fontFamily="system-ui" fontWeight="400" fill="#fff">Download on the</text>
+      </g>
+    </svg>
+  </a>
 );
 
-const GooglePlaySvg = () => (
-  <svg viewBox="0 0 135 40" className="h-10" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="135" height="40" rx="6" fill="#000" />
-    <text x="75" y="12" textAnchor="middle" fill="#fff" fontSize="6.5" fontFamily="system-ui" fontWeight="400">GET IT ON</text>
-    <text x="78" y="27" textAnchor="middle" fill="#fff" fontSize="12" fontFamily="system-ui" fontWeight="700">Google Play</text>
-    <g transform="translate(14,8) scale(0.6)">
-      <path d="M7.54 30.85 22.78 16.5 7.54 2.15c-.33.2-.54.57-.54.98v26.74c0 .41.21.78.54.98z" fill="#4285F4"/>
-      <path d="M27.84 12.67l-5.06-2.84L17.1 16.5l5.68 6.67 5.06-2.84c1.02-.57 1.02-2.09 0-2.66z" fill="#FBBC04"/>
-      <path d="M7.54 2.15 22.78 16.5l-5.68-6.67L7.54 2.15z" fill="#34A853"/>
-      <path d="M22.78 16.5 7.54 30.85l9.56-7.68L22.78 16.5z" fill="#EA4335"/>
-    </g>
-  </svg>
+const PlayStoreBadge = () => (
+  <a href="https://play.google.com" target="_blank" rel="noopener noreferrer" className="inline-block hover:scale-105 active:scale-95 transition-transform duration-200">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 135 40" className="h-[44px]">
+      <rect width="135" height="40" rx="5" fill="#000"/>
+      <path d="M68.14 21.75a4.34 4.34 0 100 8.68 4.34 4.34 0 000-8.68zm0 6.98a2.64 2.64 0 110-5.28 2.64 2.64 0 010 5.28zm-9.47-6.98a4.34 4.34 0 100 8.68 4.34 4.34 0 000-8.68zm0 6.98a2.64 2.64 0 110-5.28 2.64 2.64 0 010 5.28zm-11.27-5.65v1.94h4.64a4.05 4.05 0 01-1.06 2.44 4.77 4.77 0 01-3.58 1.42 5.19 5.19 0 010-10.38 4.97 4.97 0 013.52 1.38l1.37-1.37a6.8 6.8 0 00-4.89-1.97 7.13 7.13 0 100 14.26 6.52 6.52 0 004.97-2 6.44 6.44 0 001.68-4.56 6.35 6.35 0 00-.1-1.16H47.4zm46.06 1.5a4.03 4.03 0 00-3.72-2.83 4.11 4.11 0 00-4.08 4.34 4.24 4.24 0 004.28 4.34 4.29 4.29 0 003.6-1.9l-1.47-.98a2.47 2.47 0 01-2.13 1.19 2.2 2.2 0 01-2.1-1.31l5.8-2.4-.18-.45zm-5.92 1.45a2.33 2.33 0 012.22-2.48 1.65 1.65 0 011.58.9l-3.8 1.58zM88.28 30h2V17h-2v13zm-3.27-7.6h-.07a3.15 3.15 0 00-2.38-1.02 4.35 4.35 0 000 8.69 3.1 3.1 0 002.38-1.03h.07v.62c0 1.64-.88 2.52-2.29 2.52a2.37 2.37 0 01-2.16-1.52l-1.74.72A4.22 4.22 0 0082.72 34c2.3 0 4.24-1.36 4.24-4.66v-8.04h-1.95v.7zm-2.16 6a2.65 2.65 0 010-5.29 2.46 2.46 0 012.33 2.66 2.44 2.44 0 01-2.33 2.63zm24.54-11.4h-4.79V30h2v-4.94h2.79a4.17 4.17 0 100-8.33 4.17 4.17 0 000 .27zm.05 6.46h-2.84v-4.6h2.84a2.3 2.3 0 110 4.6zm12.36-1.93a3.76 3.76 0 00-3.57 2.06l1.78.74a1.9 1.9 0 011.83-1 1.94 1.94 0 012.13 1.73v.14a4.46 4.46 0 00-2.1-.52c-1.93 0-3.89 1.06-3.89 3.04a3.12 3.12 0 003.34 2.98 2.83 2.83 0 002.57-1.31h.07v1.03h1.93v-5.18c0-2.4-1.79-3.74-4.1-3.74l.01.03zm-.24 7.4c-.66 0-1.58-.33-1.58-1.15 0-1.04 1.15-1.44 2.14-1.44a3.6 3.6 0 011.83.45 2.44 2.44 0 01-2.39 2.14zm11.35-7.1l-2.3 5.82h-.06l-2.38-5.82h-2.15l3.56 8.1-2.03 4.5h2.08L130.97 22h-2.06zm-17.88 8h2V17h-2v13z" fill="#fff"/>
+      <path d="M10.44 7.54a2 2 0 00-.46 1.4v22.12a2 2 0 00.46 1.4l.07.07L22.7 20.37v-.27-.27L10.51 7.47l-.07.07z" fill="#4285F4"/>
+      <path d="M26.76 24.43l-4.06-4.06v-.27-.27l4.06-4.06.09.05 4.81 2.73c1.37.78 1.37 2.06 0 2.84l-4.81 2.73-.09.05v.26z" fill="#FBBC04"/>
+      <path d="M26.85 24.17L22.7 20.01 10.44 32.46a1.63 1.63 0 002.08.06l14.33-8.14v-.21z" fill="#EA4335"/>
+      <path d="M26.85 15.86L12.52 7.71a1.63 1.63 0 00-2.08.06L22.7 20.01l4.15-4.15z" fill="#34A853"/>
+      <text x="47" y="13" fontSize="7.5" fontFamily="system-ui" fontWeight="400" fill="#b3b3b3" letterSpacing="0.5">GET IT ON</text>
+    </svg>
+  </a>
 );
 
 const StripeLogo = () => (
-  <svg viewBox="0 0 60 25" className="h-6 sm:h-7" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 10.17c0-.59.49-.82 1.3-.82a8.54 8.54 0 013.49.89V7.2a10.15 10.15 0 00-3.49-.63C3.68 6.57 2 7.89 2 10.33c0 3.79 5.22 3.18 5.22 4.81 0 .7-.61.93-1.46.93-1.26 0-2.88-.52-4.16-1.22v3.1a10.58 10.58 0 004.16.87c2.74 0 4.62-1.26 4.62-3.75 0-4.08-5.24-3.36-5.24-4.9h-.14zM14.15 4l-2.89.62v13.25h2.89V4zM18.1 7.13l-.18-.9h-2.56v11.64h2.89v-7.9a2.08 2.08 0 012.2-.94v-2.8a1.98 1.98 0 00-2.35.9zM23.42 6.57l-2.86.61v10.5a2.83 2.83 0 002.91 2.88 4.74 4.74 0 001.51-.29V18a2.49 2.49 0 01-.8.13c-.63 0-1.06-.25-1.06-1.12V9.51h1.86V7.13h-1.56V6.57zM30.57 7.13l-.18-.9h-2.55v11.64h2.89v-7.9a2.08 2.08 0 012.2-.94v-2.8a1.98 1.98 0 00-2.36.9zM38.24 6.57a3.07 3.07 0 00-2.17.85l-.14-.72h-2.56v15.46l2.89-.61v-3.76a3.04 3.04 0 001.82.59c1.83 0 3.5-1.48 3.5-4.72 0-2.97-1.7-4.52-3.34-5.09zm-.59 8.87c-.6 0-.96-.22-1.21-.49V10.2c.26-.3.63-.5 1.21-.5 .93 0 1.57 1.04 1.57 2.88 0 1.87-.63 2.86-1.57 2.86zM47.68 6.57c-2.84 0-4.63 2.43-4.63 5.17s1.76 5.03 4.83 5.03a6.55 6.55 0 003.06-.71v-2.32a5.96 5.96 0 01-2.84.77c-1.13 0-2.12-.39-2.24-1.77h5.66c0-.15.02-.76.02-1.04 0-3.06-1.48-5.13-3.86-5.13zm-1.52 4.12c0-1.32.8-1.86 1.53-1.86.71 0 1.46.54 1.46 1.86h-2.99zM58.42 6.57c-2.84 0-4.14 2.43-4.14 5.17s1.76 5.03 4.34 5.03a6.55 6.55 0 002.56-.71v-2.32a5.96 5.96 0 01-2.34.77c-1.13 0-1.62-.39-1.75-1.77h5.16c0-.15.02-.76.02-1.04 0-3.06-.98-5.13-3.37-5.13h-.48z" fill="#635BFF"/>
+  <svg viewBox="0 0 120 50" className="h-8 opacity-50 hover:opacity-80 transition-opacity" xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M117.3 22.1c0-7.9-3.8-14.1-11.2-14.1-7.4 0-11.8 6.2-11.8 14 0 9.3 5.3 13.9 12.8 13.9 3.7 0 6.5-.8 8.6-2v-6.1c-2.1 1.1-4.5 1.7-7.6 1.7-3 0-5.7-1.1-6-4.7h15.1c0-.4.1-2 .1-2.7zm-15.3-2.9c0-3.5 2.1-5 4.1-5 1.9 0 3.9 1.5 3.9 5h-8zM82.8 8c-3 0-5 1.4-6 2.4l-.4-1.9h-7.1v36.2l8.1-1.7V36c1.1.8 2.6 1.9 5.2 1.9 5.3 0 10.1-4.2 10.1-13.6 0-8.6-4.9-13.3-9.9-16.3zm-1.7 22.8c-1.7 0-2.8-.6-3.5-1.4V18.6c.7-.9 1.9-1.5 3.5-1.5 2.7 0 4.6 3 4.6 7.8 0 4.5-1.9 5.9-4.6 5.9zM56.5 5l8.1-1.7v6.2h0V8.4l-8.1 1.7V5zM64.6 8.7h-8.1v26.6h8.1V8.7zM47.9 11.2l-.5-2.5h-7v26.6h8.1V17.1c1.9-2.5 5.2-2 6.2-1.7V8.7c-1-.4-4.8-1.1-6.8 2.5zM32.6 2.5L24.7 4v6.3l-.3.1v-.1L16 5l-8.1 1.7v5.5h-.1l.1.1v20.4h8.1V13.8l2.1-.5L18 11l.1.1v24.3h8.1V12.2l6.4-1.4v-8.3zM7.4 14.3c0-1.6 1.3-2.2 3.5-2.2 3.1 0 7.1 1 10.2 2.7V7.5c-3.4-1.4-6.8-1.9-10.2-1.9C4.3 5.6 0 9.1 0 14.6c0 8.5 11.7 7.2 11.7 10.8 0 1.9-1.6 2.5-3.9 2.5-3.4 0-7.7-1.4-11.1-3.3v7.4c3.8 1.6 7.6 2.3 11.1 2.3 6.7 0 11.3-3.3 11.3-10-.1-9.2-11.7-7.6-11.7-10z" fill="#635BFF"/>
   </svg>
 );
 
 const PayPalLogo = () => (
-  <svg viewBox="0 0 80 22" className="h-5 sm:h-6" xmlns="http://www.w3.org/2000/svg">
-    <path d="M27.47 4.74h-4.24a.58.58 0 00-.57.49l-1.72 10.9a.35.35 0 00.35.4h2.17a.41.41 0 00.4-.34l.49-3.08a.58.58 0 01.57-.49h1.31c2.73 0 4.31-1.32 4.72-3.94.19-1.15.01-2.05-.52-2.68-.59-.69-1.63-1.03-3.01-1.03l.05-.23zm.48 3.88c-.23 1.49-1.36 1.49-2.46 1.49h-.63l.44-2.78a.35.35 0 01.34-.29h.29c.75 0 1.45 0 1.81.43.22.25.28.63.21 1.15z" fill="#253B80"/>
-    <path d="M44.56 8.56h-2.17a.35.35 0 00-.34.29l-.1.6-.15-.22c-.47-.68-1.52-.91-2.56-.91-2.4 0-4.44 1.82-4.84 4.37-.21 1.27.09 2.48.82 3.32.67.78 1.62 1.1 2.76 1.1 1.95 0 3.03-1.25 3.03-1.25l-.1.61a.35.35 0 00.35.4h1.96a.58.58 0 00.57-.49l1.15-7.42a.35.35 0 00-.38-.4zm-3.05 4.23c-.21 1.25-1.2 2.09-2.47 2.09-.64 0-1.15-.2-1.47-.59-.32-.38-.44-.93-.34-1.53.2-1.24 1.21-2.11 2.46-2.11.62 0 1.13.21 1.46.6.33.39.47.94.36 1.54z" fill="#253B80"/>
-    <path d="M55.47 8.56h-2.18a.58.58 0 00-.48.25l-2.77 4.08-1.17-3.92a.58.58 0 00-.56-.41h-2.14a.35.35 0 00-.33.47l2.21 6.49-2.08 2.94a.35.35 0 00.29.55h2.17a.58.58 0 00.48-.25l6.69-9.65a.35.35 0 00-.29-.55h.16z" fill="#253B80"/>
-    <path d="M61.77 4.74h-4.24a.58.58 0 00-.57.49l-1.72 10.9a.35.35 0 00.35.4h2.28a.41.41 0 00.4-.34l.49-3.08a.58.58 0 01.57-.49h1.31c2.73 0 4.31-1.32 4.72-3.94.19-1.15.01-2.05-.52-2.68-.59-.69-1.63-1.03-3.01-1.03l-.06-.23zm.48 3.88c-.23 1.49-1.36 1.49-2.46 1.49h-.63l.44-2.78a.35.35 0 01.34-.29h.29c.75 0 1.45 0 1.81.43.22.25.28.63.21 1.15z" fill="#179BD7"/>
-    <path d="M78.86 8.56h-2.17a.35.35 0 00-.34.29l-.1.6-.15-.22c-.47-.68-1.52-.91-2.56-.91-2.4 0-4.44 1.82-4.84 4.37-.21 1.27.09 2.48.82 3.32.67.78 1.62 1.1 2.76 1.1 1.95 0 3.03-1.25 3.03-1.25l-.1.61a.35.35 0 00.35.4h1.96a.58.58 0 00.57-.49l1.15-7.42a.35.35 0 00-.38-.4zm-3.05 4.23c-.21 1.25-1.2 2.09-2.47 2.09-.64 0-1.15-.2-1.47-.59-.32-.38-.44-.93-.34-1.53.2-1.24 1.21-2.11 2.46-2.11.62 0 1.13.21 1.46.6.33.39.47.94.36 1.54z" fill="#179BD7"/>
+  <svg viewBox="0 0 100 26" className="h-8 opacity-50 hover:opacity-80 transition-opacity" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 12.237 2.8 L 4.437 2.8 C 3.937 2.8 3.437 3.2 3.337 3.7 L 0.237 23.7 C 0.137 24.1 0.437 24.4 0.837 24.4 L 4.537 24.4 C 5.037 24.4 5.537 24 5.637 23.5 L 6.437 18.1 C 6.537 17.6 6.937 17.2 7.537 17.2 L 10.037 17.2 C 15.137 17.2 18.137 14.7 18.937 9.8 C 19.237 7.7 18.937 6 17.937 4.8 C 16.837 3.5 14.837 2.8 12.237 2.8 Z M 13.137 10.1 C 12.737 12.9 10.537 12.9 8.537 12.9 L 7.337 12.9 L 8.137 7.7 C 8.137 7.4 8.437 7.2 8.737 7.2 L 9.237 7.2 C 10.637 7.2 11.937 7.2 12.637 8 C 13.137 8.4 13.337 9.1 13.137 10.1 Z" fill="#003087"/>
+    <path d="M 35.437 10 L 31.737 10 C 31.437 10 31.137 10.2 31.137 10.5 L 30.937 11.5 L 30.637 11.1 C 29.837 9.9 28.037 9.5 26.237 9.5 C 22.137 9.5 18.637 12.6 17.937 17 C 17.537 19.2 18.037 21.3 19.237 22.7 C 20.337 24 21.937 24.6 23.737 24.6 C 26.837 24.6 28.537 22.5 28.537 22.5 L 28.337 23.5 C 28.237 23.9 28.537 24.3 28.937 24.3 L 32.237 24.3 C 32.737 24.3 33.237 23.9 33.337 23.4 L 35.137 10.6 C 35.237 10.4 34.937 10 35.437 10 Z M 29.637 17.2 C 29.237 19.3 27.637 20.8 25.437 20.8 C 24.337 20.8 23.437 20.4 22.937 19.7 C 22.437 19 22.237 18 22.437 16.9 C 22.737 14.8 24.537 13.3 26.637 13.3 C 27.737 13.3 28.537 13.7 29.037 14.4 C 29.637 15 29.837 16 29.637 17.2 Z" fill="#003087"/>
+    <path d="M 55.337 10 L 51.637 10 C 51.237 10 50.937 10.2 50.737 10.5 L 45.537 18.1 L 43.337 10.8 C 43.237 10.3 42.737 10 42.337 10 L 38.637 10 C 38.237 10 37.837 10.4 38.037 10.9 L 42.137 23 L 38.237 28.4 C 37.937 28.8 38.237 29.4 38.737 29.4 L 42.437 29.4 C 42.837 29.4 43.137 29.2 43.337 28.9 L 55.837 10.9 C 56.137 10.6 55.837 10 55.337 10 Z" fill="#003087"/>
+    <path d="M 67.737 2.8 L 59.937 2.8 C 59.437 2.8 58.937 3.2 58.837 3.7 L 55.737 23.6 C 55.637 24 55.937 24.3 56.337 24.3 L 60.337 24.3 C 60.637 24.3 60.937 24.1 60.937 23.7 L 61.837 18.1 C 61.937 17.6 62.337 17.2 62.937 17.2 L 65.437 17.2 C 70.537 17.2 73.537 14.7 74.337 9.8 C 74.637 7.7 74.337 6 73.337 4.8 C 72.237 3.5 70.337 2.8 67.737 2.8 Z M 68.637 10.1 C 68.237 12.9 66.037 12.9 64.037 12.9 L 62.837 12.9 L 63.637 7.7 C 63.637 7.4 63.937 7.2 64.237 7.2 L 64.737 7.2 C 66.137 7.2 67.437 7.2 68.137 8 C 68.637 8.4 68.737 9.1 68.637 10.1 Z" fill="#0070E0"/>
+    <path d="M 90.937 10 L 87.237 10 C 86.937 10 86.637 10.2 86.637 10.5 L 86.437 11.5 L 86.137 11.1 C 85.337 9.9 83.537 9.5 81.737 9.5 C 77.637 9.5 74.137 12.6 73.437 17 C 73.037 19.2 73.537 21.3 74.737 22.7 C 75.837 24 77.437 24.6 79.237 24.6 C 82.337 24.6 84.037 22.5 84.037 22.5 L 83.837 23.5 C 83.737 23.9 84.037 24.3 84.437 24.3 L 87.737 24.3 C 88.237 24.3 88.737 23.9 88.837 23.4 L 90.637 10.6 C 90.637 10.4 90.437 10 90.937 10 Z M 85.137 17.2 C 84.737 19.3 83.137 20.8 80.937 20.8 C 79.837 20.8 78.937 20.4 78.437 19.7 C 77.937 19 77.737 18 77.937 16.9 C 78.237 14.8 80.037 13.3 82.137 13.3 C 83.237 13.3 84.037 13.7 84.537 14.4 C 85.137 15 85.337 16 85.137 17.2 Z" fill="#0070E0"/>
+    <path d="M 95.337 3.3 L 92.137 23.6 C 92.037 24 92.337 24.3 92.737 24.3 L 95.937 24.3 C 96.437 24.3 96.937 23.9 97.037 23.4 L 100.237 3.5 C 100.337 3.1 100.037 2.8 99.637 2.8 L 96.037 2.8 C 95.637 2.8 95.437 3 95.337 3.3 Z" fill="#0070E0"/>
   </svg>
+);
+
+const DownloadBadges = () => (
+  <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+    <AppStoreBadge />
+    <PlayStoreBadge />
+  </div>
 );
 
 export default function LandingPage({ onParentLogin }: LandingPageProps) {
@@ -51,29 +64,32 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
     requestAnimationFrame(() => setVisible(true));
   }, []);
 
+  const scrollToDownload = () =>
+    document.getElementById("download-section")?.scrollIntoView({ behavior: "smooth" });
+
   return (
     <div
       className={`min-h-screen bg-white font-['Inter',system-ui,sans-serif] text-[#1a3c2a] transition-opacity duration-700 ${visible ? "opacity-100" : "opacity-0"}`}
       style={{ overflowX: "hidden" }}
     >
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-emerald-100">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-2xl">💸</span>
-            <span className="text-xl font-black tracking-tight bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
+            <span className="text-lg font-black tracking-tight bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
               WealthScroll
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
-              onClick={onParentLogin}
-              className="px-5 py-2.5 rounded-full border border-emerald-200 text-emerald-700 font-bold text-sm tracking-wide hover:bg-emerald-50 active:scale-95 transition-all duration-200 cursor-pointer hidden sm:block"
+              onClick={() => document.getElementById("parent-login")?.scrollIntoView({ behavior: "smooth" })}
+              className="px-4 py-2 rounded-full border border-emerald-200 text-emerald-700 font-bold text-xs sm:text-sm tracking-wide hover:bg-emerald-50 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               Parent Login
             </button>
             <button
-              onClick={() => document.getElementById("download-section")?.scrollIntoView({ behavior: "smooth" })}
-              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-sm tracking-wide shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+              onClick={scrollToDownload}
+              className="px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               Download App
             </button>
@@ -81,254 +97,197 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
         </div>
       </nav>
 
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+      <section className="relative pt-28 sm:pt-32 pb-16 sm:pb-20 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/60 via-white to-white" />
-        <div className="absolute top-20 left-[10%] w-72 h-72 rounded-full bg-emerald-200/20 blur-3xl" />
-        <div className="absolute top-40 right-[5%] w-56 h-56 rounded-full bg-emerald-300/15 blur-3xl" />
-        <div className="relative max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 mb-8">
+        <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-emerald-200/20 blur-3xl" />
+        <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-emerald-300/15 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 mb-6 sm:mb-8">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs font-semibold text-emerald-700 tracking-wide uppercase">
+            <span className="text-[10px] sm:text-xs font-semibold text-emerald-700 tracking-wide uppercase">
               Financial Literacy for the Next Generation
             </span>
           </div>
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-5">
             STOP SCROLLING.
             <br />
             <span className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 bg-clip-text text-transparent">
               START EARNING.
             </span>
           </h1>
-          <p className="text-lg sm:text-xl text-[#1a3c2a]/50 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-base sm:text-lg text-[#1a3c2a]/45 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
             The scroll experience your kids already love — reimagined to teach real financial skills through AI-powered lessons, games, and boss battles.
           </p>
-          <p className="text-sm text-[#1a3c2a]/30 font-medium mb-6">Free · No ads · Safe for kids · No credit card</p>
-
-          <div id="download-section" className="flex items-center justify-center gap-4 mb-12">
-            <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" className="hover:scale-105 active:scale-95 transition-transform duration-200">
-              <AppleStoreSvg />
-            </a>
-            <a href="https://play.google.com" target="_blank" rel="noopener noreferrer" className="hover:scale-105 active:scale-95 transition-transform duration-200">
-              <GooglePlaySvg />
-            </a>
+          <div id="download-section" className="mb-8">
+            <DownloadBadges />
+            <p className="text-xs text-[#1a3c2a]/25 font-medium mt-4">Free · No ads · Safe for kids</p>
           </div>
-
-          <div className="flex justify-center gap-12 sm:gap-16">
+          <div className="flex justify-center gap-10 sm:gap-14">
             {[
-              { value: "8-21", label: "Age Range" },
+              { value: "8–21", label: "Age Range" },
               { value: "8", label: "Modules" },
               { value: "AI", label: "Powered" },
             ].map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-3xl sm:text-4xl font-black text-emerald-600">{s.value}</div>
-                <div className="text-xs font-semibold text-[#1a3c2a]/35 uppercase tracking-widest mt-1">{s.label}</div>
+                <div className="text-2xl sm:text-3xl font-black text-emerald-600">{s.value}</div>
+                <div className="text-[10px] sm:text-xs font-semibold text-[#1a3c2a]/30 uppercase tracking-widest mt-1">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20 px-6 bg-gradient-to-b from-white to-emerald-50/40">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">
+      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-emerald-50/40">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
               Learning That Feels Like
               <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Playing</span>
             </h2>
-            <p className="text-base text-[#1a3c2a]/40 font-medium max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-[#1a3c2a]/40 font-medium max-w-lg mx-auto">
               Every swipe delivers bite-sized financial wisdom wrapped in games, challenges, and rewards.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
-              {
-                icon: "🎮",
-                title: "Super Kid-Friendly",
-                desc: "Designed for ages 8+. No jargon, no confusion — just fun, safe, age-appropriate money lessons.",
-                color: "from-emerald-50 to-teal-50",
-                border: "border-emerald-100",
-              },
-              {
-                icon: "📚",
-                title: "Rich AI Content",
-                desc: "Gemini AI generates fresh, personalized lessons every session. No two scrolls are the same.",
-                color: "from-blue-50 to-cyan-50",
-                border: "border-blue-100",
-              },
-              {
-                icon: "⚔️",
-                title: "Boss Fight Arena",
-                desc: "Beat the Boss Quiz after every 4 lessons to level up and unlock new financial modules.",
-                color: "from-amber-50 to-orange-50",
-                border: "border-amber-100",
-              },
-              {
-                icon: "🏆",
-                title: "XP & Gamification",
-                desc: "Earn XP, build streaks, level up, and track boss wins. Real progress, real motivation.",
-                color: "from-purple-50 to-pink-50",
-                border: "border-purple-100",
-              },
+              { icon: "🎮", title: "Kid-Friendly", desc: "No jargon — just fun, safe, age-appropriate money lessons." },
+              { icon: "🤖", title: "AI Content", desc: "Gemini AI generates fresh, personalized lessons every session." },
+              { icon: "⚔️", title: "Boss Battles", desc: "Beat the Boss Quiz to level up and unlock new modules." },
+              { icon: "🏆", title: "Gamification", desc: "Earn XP, build streaks, level up, and track boss wins." },
             ].map((f) => (
-              <div
-                key={f.title}
-                className={`relative p-7 rounded-2xl bg-gradient-to-br ${f.color} border ${f.border} hover:shadow-lg hover:-translate-y-1 transition-all duration-300`}
-              >
-                <div className="text-3xl mb-4">{f.icon}</div>
-                <h3 className="text-lg font-extrabold mb-2 tracking-tight">{f.title}</h3>
-                <p className="text-sm text-[#1a3c2a]/45 font-medium leading-relaxed">{f.desc}</p>
+              <div key={f.title} className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div className="text-2xl sm:text-3xl mb-3">{f.icon}</div>
+                <h3 className="text-sm sm:text-base font-extrabold mb-1.5 tracking-tight">{f.title}</h3>
+                <p className="text-xs sm:text-sm text-[#1a3c2a]/40 font-medium leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">
+      <section className="py-16 sm:py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
               Three Paths.{" "}
               <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent">One Mission.</span>
             </h2>
-            <p className="text-base text-[#1a3c2a]/40 font-medium max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-[#1a3c2a]/40 font-medium max-w-lg mx-auto">
               Content adapts to their age so every lesson hits home.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
             {[
               {
-                emoji: "🌟",
-                mode: "EXPLORER",
-                ages: "Ages 7–12",
-                desc: "Piggy banks, allowance math, and saving goals. Learn money basics through stories and simple games.",
+                emoji: "🌟", mode: "EXPLORER", ages: "Ages 7–12",
+                desc: "Piggy banks, allowance math, and saving goals through stories and games.",
                 topics: ["What is money?", "Saving vs spending", "Setting goals"],
-                gradient: "from-emerald-400 to-teal-400",
-                bg: "bg-emerald-50",
-                border: "border-emerald-200/60",
+                accent: "emerald",
               },
               {
-                emoji: "🔥",
-                mode: "HUSTLER",
-                ages: "Ages 13–17",
-                desc: "Side hustles, budgeting apps, and investing basics. Real talk for teens ready to build wealth.",
+                emoji: "🔥", mode: "HUSTLER", ages: "Ages 13–17",
+                desc: "Side hustles, budgeting, and investing basics. Real talk for teens.",
                 topics: ["Earning income", "Budgeting 101", "Intro to investing"],
-                gradient: "from-amber-400 to-orange-400",
-                bg: "bg-amber-50",
-                border: "border-amber-200/60",
+                accent: "amber",
               },
               {
-                emoji: "💎",
-                mode: "INVESTOR",
-                ages: "Ages 18–21",
-                desc: "Credit scores, crypto, real estate, and tax strategy. Adulting-level finance, zero fluff.",
+                emoji: "💎", mode: "INVESTOR", ages: "Ages 18–21",
+                desc: "Credit scores, crypto, real estate, and tax strategy. Zero fluff.",
                 topics: ["Credit & debt", "Crypto basics", "Tax strategies"],
-                gradient: "from-violet-400 to-purple-400",
-                bg: "bg-violet-50",
-                border: "border-violet-200/60",
+                accent: "violet",
               },
-            ].map((card) => (
-              <div
-                key={card.mode}
-                className={`relative rounded-2xl ${card.bg} border ${card.border} p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden`}
-              >
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r opacity-80" style={{ backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))` }}>
-                  <div className={`h-full w-full bg-gradient-to-r ${card.gradient}`} />
+            ].map((card) => {
+              const colors = {
+                emerald: { bg: "bg-emerald-50", border: "border-emerald-200/60", bar: "bg-emerald-400", text: "text-emerald-600" },
+                amber: { bg: "bg-amber-50", border: "border-amber-200/60", bar: "bg-amber-400", text: "text-amber-600" },
+                violet: { bg: "bg-violet-50", border: "border-violet-200/60", bar: "bg-violet-400", text: "text-violet-600" },
+              }[card.accent];
+              return (
+                <div key={card.mode} className={`relative rounded-2xl ${colors.bg} border ${colors.border} p-6 sm:p-7 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden`}>
+                  <div className={`absolute top-0 left-0 right-0 h-1 ${colors.bar}`} />
+                  <div className="text-3xl mb-3 mt-1">{card.emoji}</div>
+                  <div className={`text-[10px] font-black tracking-[0.2em] uppercase ${colors.text} mb-1`}>{card.mode} MODE</div>
+                  <div className="text-xs font-bold text-[#1a3c2a]/40 mb-3">{card.ages}</div>
+                  <p className="text-xs sm:text-sm text-[#1a3c2a]/50 font-medium leading-relaxed mb-4">{card.desc}</p>
+                  <div className="space-y-1.5">
+                    {card.topics.map((t) => (
+                      <div key={t} className="flex items-center gap-2 text-[11px] font-semibold text-[#1a3c2a]/40">
+                        <span className={`w-1.5 h-1.5 rounded-full ${colors.bar}`} />
+                        {t}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="text-4xl mb-4 mt-2">{card.emoji}</div>
-                <div className={`text-xs font-black tracking-[0.2em] uppercase bg-gradient-to-r ${card.gradient} bg-clip-text text-transparent mb-1`}>
-                  {card.mode} MODE
-                </div>
-                <div className="text-sm font-bold text-[#1a3c2a]/50 mb-4">{card.ages}</div>
-                <p className="text-sm text-[#1a3c2a]/55 font-medium leading-relaxed mb-6">{card.desc}</p>
-                <div className="space-y-2">
-                  {card.topics.map((t) => (
-                    <div key={t} className="flex items-center gap-2 text-xs font-semibold text-[#1a3c2a]/45">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      {t}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section className="py-20 px-6 bg-gradient-to-b from-emerald-50/40 to-white">
+      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-emerald-50/40 to-white">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/60 border border-emerald-200/50 mb-6">
-                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">For Parents</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/60 border border-emerald-200/50 mb-5">
+                <span className="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wider">For Parents</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-5">
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
                 Parental
                 <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Command Center</span>
               </h2>
-              <p className="text-base text-[#1a3c2a]/45 font-medium leading-relaxed mb-8">
-                Complete visibility into your child's financial education journey. Real-time metrics, module progress, and learning insights — all in one dashboard.
+              <p className="text-sm text-[#1a3c2a]/45 font-medium leading-relaxed mb-6">
+                Complete visibility into your child's financial education. Real-time metrics, module progress, and learning insights.
               </p>
-              <div className="space-y-4 mb-8">
+              <div className="space-y-3 mb-6">
                 {[
                   { icon: "📊", text: "Real-time XP, streak, and level tracking" },
                   { icon: "🎯", text: "Module-by-module progress bars" },
                   { icon: "🧠", text: "Learning insights and competency assessment" },
-                  { icon: "👀", text: "Kids can see what parents see — full transparency" },
+                  { icon: "👀", text: "Full transparency — kids see what parents see" },
                 ].map((item) => (
-                  <div key={item.text} className="flex items-start gap-3">
-                    <span className="text-xl mt-0.5">{item.icon}</span>
-                    <span className="text-sm font-semibold text-[#1a3c2a]/60">{item.text}</span>
+                  <div key={item.text} className="flex items-start gap-2.5">
+                    <span className="text-lg">{item.icon}</span>
+                    <span className="text-xs sm:text-sm font-semibold text-[#1a3c2a]/55">{item.text}</span>
                   </div>
                 ))}
               </div>
-              <button
-                onClick={onParentLogin}
-                className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-sm tracking-wide shadow-lg shadow-emerald-200/40 hover:shadow-emerald-300/50 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-              >
-                Parent Login
-              </button>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-200/30 to-teal-200/20 blur-2xl scale-110" />
-              <div className="relative bg-white rounded-2xl border border-emerald-200/50 shadow-xl p-6 space-y-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white font-bold text-sm">
-                    J
-                  </div>
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-200/25 to-teal-200/15 blur-2xl scale-110" />
+              <div className="relative bg-white rounded-2xl border border-emerald-200/50 shadow-xl p-5 space-y-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white font-bold text-xs">J</div>
                   <div>
                     <div className="font-extrabold text-sm">Jordan's Progress</div>
-                    <div className="text-xs text-[#1a3c2a]/35 font-medium">Explorer Mode · Age 10</div>
+                    <div className="text-[10px] text-[#1a3c2a]/30 font-medium">Explorer Mode · Age 10</div>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                   {[
                     { label: "XP", value: "2,450", icon: "⚡" },
                     { label: "Streak", value: "7 days", icon: "🔥" },
                     { label: "Boss Wins", value: "4", icon: "🏆" },
                   ].map((stat) => (
-                    <div key={stat.label} className="bg-emerald-50 rounded-xl p-3 text-center">
-                      <div className="text-lg">{stat.icon}</div>
-                      <div className="text-sm font-black text-emerald-700">{stat.value}</div>
-                      <div className="text-[10px] font-semibold text-[#1a3c2a]/30 uppercase">{stat.label}</div>
+                    <div key={stat.label} className="bg-emerald-50 rounded-lg p-2.5 text-center">
+                      <div className="text-base">{stat.icon}</div>
+                      <div className="text-xs font-black text-emerald-700">{stat.value}</div>
+                      <div className="text-[9px] font-semibold text-[#1a3c2a]/25 uppercase">{stat.label}</div>
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {[
                     { name: "Saving Basics", pct: 100 },
                     { name: "Smart Budgeting", pct: 67 },
                     { name: "Earning Money", pct: 33 },
                   ].map((m) => (
                     <div key={m.name}>
-                      <div className="flex justify-between text-xs font-semibold mb-1">
-                        <span className="text-[#1a3c2a]/60">{m.name}</span>
+                      <div className="flex justify-between text-[10px] font-semibold mb-0.5">
+                        <span className="text-[#1a3c2a]/50">{m.name}</span>
                         <span className="text-emerald-600">{m.pct}%</span>
                       </div>
-                      <div className="h-2 rounded-full bg-emerald-100 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-                          style={{ width: `${m.pct}%` }}
-                        />
+                      <div className="h-1.5 rounded-full bg-emerald-100 overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style={{ width: `${m.pct}%` }} />
                       </div>
                     </div>
                   ))}
@@ -339,35 +298,34 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
         </div>
       </section>
 
-      <section className="py-20 px-6">
+      <section className="py-16 sm:py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/50 mb-6">
-            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">Coming Soon</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/50 mb-5">
+            <span className="text-[10px] sm:text-xs font-bold text-amber-700 uppercase tracking-wider">Coming Soon</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-3">
             Mastermind
             <span className="bg-gradient-to-r from-amber-500 to-orange-400 bg-clip-text text-transparent"> Subscription</span>
           </h2>
-          <p className="text-base text-[#1a3c2a]/40 font-medium max-w-xl mx-auto mb-12">
+          <p className="text-sm text-[#1a3c2a]/40 font-medium max-w-md mx-auto mb-10">
             Unlock the full WealthScroll experience for serious learners.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 max-w-2xl mx-auto mb-10">
             {[
-              { icon: "♾️", title: "Unlimited Scrolls", desc: "No daily limits — learn as much as you want, whenever you want." },
-              { icon: "📈", title: "Advanced Analytics", desc: "Deep-dive reports on learning patterns, strengths, and growth areas." },
-              { icon: "🎓", title: "Premium Modules", desc: "Exclusive advanced topics like entrepreneurship, real estate, and crypto strategy." },
+              { icon: "♾️", title: "Unlimited Scrolls", desc: "No daily limits — learn whenever you want." },
+              { icon: "📈", title: "Advanced Analytics", desc: "Deep reports on learning patterns and growth." },
+              { icon: "🎓", title: "Premium Modules", desc: "Exclusive topics like entrepreneurship and crypto." },
             ].map((perk) => (
-              <div key={perk.title} className="p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 text-center">
-                <div className="text-3xl mb-3">{perk.icon}</div>
-                <h3 className="text-sm font-extrabold tracking-tight mb-2">{perk.title}</h3>
-                <p className="text-xs text-[#1a3c2a]/40 font-medium leading-relaxed">{perk.desc}</p>
+              <div key={perk.title} className="p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 text-center">
+                <div className="text-2xl mb-2">{perk.icon}</div>
+                <h3 className="text-xs font-extrabold tracking-tight mb-1.5">{perk.title}</h3>
+                <p className="text-[11px] text-[#1a3c2a]/40 font-medium leading-relaxed">{perk.desc}</p>
               </div>
             ))}
           </div>
-
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-xs font-semibold text-[#1a3c2a]/30 uppercase tracking-wider">Secure payments powered by</p>
-            <div className="flex items-center justify-center gap-8">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-[10px] font-semibold text-[#1a3c2a]/25 uppercase tracking-wider">Secure payments powered by</p>
+            <div className="flex items-center justify-center gap-6">
               <StripeLogo />
               <PayPalLogo />
             </div>
@@ -375,33 +333,33 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
         </div>
       </section>
 
-      <section className="py-16 px-6 bg-gradient-to-b from-white to-emerald-50/30">
-        <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-2xl border border-emerald-200/50 shadow-xl p-8 text-center">
-            <div className="text-3xl mb-4">👨‍👩‍👧</div>
-            <h2 className="text-2xl font-black tracking-tight mb-2">Parent Login</h2>
-            <p className="text-sm text-[#1a3c2a]/40 font-medium mb-6">
-              Sign in to view your child's progress, manage subscriptions, and more.
+      <section id="parent-login" className="py-14 sm:py-16 px-6 bg-gradient-to-b from-white to-emerald-50/30">
+        <div className="max-w-sm mx-auto">
+          <div className="bg-white rounded-2xl border border-emerald-200/50 shadow-xl p-7 text-center">
+            <div className="text-3xl mb-3">👨‍👩‍👧</div>
+            <h2 className="text-xl font-black tracking-tight mb-1.5">Parent Login</h2>
+            <p className="text-xs text-[#1a3c2a]/35 font-medium mb-5">
+              View your child's progress, manage subscriptions, and more.
             </p>
-            <div className="space-y-3 mb-6">
+            <form onSubmit={(e) => { e.preventDefault(); onParentLogin(); }} className="space-y-2.5 mb-5">
               <input
                 type="email"
                 placeholder="Email address"
-                className="w-full px-4 py-3 rounded-xl bg-emerald-50/60 border border-emerald-200/40 text-[#1a3c2a] font-medium text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition-all placeholder:text-[#1a3c2a]/30"
+                className="w-full px-4 py-3 rounded-xl bg-emerald-50/60 border border-emerald-200/40 text-[#1a3c2a] font-medium text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition-all placeholder:text-[#1a3c2a]/25"
               />
               <input
                 type="password"
                 placeholder="Password"
-                className="w-full px-4 py-3 rounded-xl bg-emerald-50/60 border border-emerald-200/40 text-[#1a3c2a] font-medium text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition-all placeholder:text-[#1a3c2a]/30"
+                className="w-full px-4 py-3 rounded-xl bg-emerald-50/60 border border-emerald-200/40 text-[#1a3c2a] font-medium text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition-all placeholder:text-[#1a3c2a]/25"
               />
-            </div>
-            <button
-              onClick={onParentLogin}
-              className="w-full px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-sm tracking-wide shadow-lg shadow-emerald-200/40 hover:shadow-emerald-300/50 hover:scale-[1.02] active:scale-95 transition-all duration-200 cursor-pointer mb-4"
-            >
-              Sign In
-            </button>
-            <p className="text-xs text-[#1a3c2a]/25 font-medium">
+              <button
+                type="submit"
+                className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-sm tracking-wide shadow-lg shadow-emerald-200/40 hover:shadow-emerald-300/50 hover:scale-[1.02] active:scale-95 transition-all duration-200 cursor-pointer"
+              >
+                Sign In
+              </button>
+            </form>
+            <p className="text-[11px] text-[#1a3c2a]/25 font-medium">
               Don't have an account?{" "}
               <button onClick={onParentLogin} className="text-emerald-600 font-bold hover:underline cursor-pointer">
                 Sign up as a Parent
@@ -411,45 +369,36 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
         </div>
       </section>
 
-      <section className="py-20 px-6 bg-gradient-to-b from-emerald-50/30 to-emerald-50/60">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="text-5xl mb-6">💸</div>
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-5">
+      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-emerald-50/30 to-emerald-50/50">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="text-4xl mb-4">💸</div>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
             Ready to Build Their
             <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Financial Future?</span>
           </h2>
-          <p className="text-base text-[#1a3c2a]/40 font-medium mb-10 max-w-lg mx-auto">
+          <p className="text-sm text-[#1a3c2a]/35 font-medium mb-8 max-w-md mx-auto">
             Free to start. No ads. No data selling. Just real financial education that sticks.
           </p>
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" className="hover:scale-105 active:scale-95 transition-transform duration-200">
-              <AppleStoreSvg />
-            </a>
-            <a href="https://play.google.com" target="_blank" rel="noopener noreferrer" className="hover:scale-105 active:scale-95 transition-transform duration-200">
-              <GooglePlaySvg />
-            </a>
-          </div>
-          <p className="text-xs text-[#1a3c2a]/25 font-medium">
-            Free · No ads · Safe for kids · Ages 7–21
+          <DownloadBadges />
+          <p className="text-[10px] text-[#1a3c2a]/20 font-medium mt-4">
+            Available on iOS and Android · Ages 7–21
           </p>
         </div>
       </section>
 
-      <footer className="py-10 px-6 border-t border-emerald-100">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="py-8 px-6 border-t border-emerald-100">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="text-lg">💸</span>
             <span className="text-sm font-black bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
               WealthScroll
             </span>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4">
-              <StripeLogo />
-              <PayPalLogo />
-            </div>
+          <div className="flex items-center gap-5">
+            <StripeLogo />
+            <PayPalLogo />
           </div>
-          <p className="text-xs text-[#1a3c2a]/25 font-medium">
+          <p className="text-[10px] text-[#1a3c2a]/20 font-medium text-center sm:text-right">
             Building the next generation of financially literate humans.
           </p>
         </div>
