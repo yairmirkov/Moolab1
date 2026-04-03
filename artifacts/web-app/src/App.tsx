@@ -138,6 +138,7 @@ function App() {
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
   const feedRef = useRef<HTMLDivElement | null>(null);
 
   const progress = Math.min((completedSlides.length / 3) * 100, 100);
@@ -861,6 +862,31 @@ function App() {
             </button>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button
+              className="ws-btn"
+              onClick={() => {
+                if (audioRef.current) {
+                  if (isMuted) { audioRef.current.volume = 0.2; audioRef.current.play().catch(() => {}); }
+                  else { audioRef.current.volume = 0; audioRef.current.pause(); }
+                }
+                setIsMuted(!isMuted);
+              }}
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                padding: "8px 10px",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                fontSize: "1rem",
+                lineHeight: 1,
+              }}
+              title={isMuted ? "Unmute" : "Mute"}
+            >
+              {isMuted ? "🔇" : "🔊"}
+            </button>
             <div style={{
               padding: "5px 10px", borderRadius: 10,
               background: "rgba(255,217,61,0.08)", border: "1px solid rgba(255,217,61,0.15)",
