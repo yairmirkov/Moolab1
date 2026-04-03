@@ -1098,7 +1098,7 @@ function App() {
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
-                  opacity: 0.5,
+                  opacity: 0.35,
                   animation: "vidFade 0.8s ease-out both",
                 }}
               >
@@ -1108,7 +1108,7 @@ function App() {
               {/* Dark gradient overlay */}
               <div style={{
                 position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
-                background: "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 30%, transparent 50%, rgba(0,0,0,0.75) 75%, rgba(0,0,0,0.95) 100%)",
+                background: "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.8) 70%, rgba(0,0,0,0.95) 100%)",
                 zIndex: 1,
               }} />
 
@@ -1157,24 +1157,25 @@ function App() {
                 </div>
                 <p
                   style={{
-                    color: "rgba(255,255,255,0.7)",
+                    color: "rgba(255,255,255,0.85)",
                     marginBottom: 20,
                     fontSize: "1rem",
                     lineHeight: 1.5,
-                    fontWeight: 500,
+                    fontWeight: 600,
+                    textShadow: "0 1px 8px rgba(0,0,0,0.7)",
                   }}
                 >
                   {card.desc}
                 </p>
                 <div
                   style={{
-                    background: "rgba(255,255,255,0.04)",
+                    background: "rgba(0,0,0,0.45)",
                     padding: 22,
                     borderRadius: 24,
-                    backdropFilter: "blur(24px)",
-                    WebkitBackdropFilter: "blur(24px)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
+                    backdropFilter: "blur(30px)",
+                    WebkitBackdropFilter: "blur(30px)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
                   }}
                 >
                   <p
@@ -1184,7 +1185,7 @@ function App() {
                       fontWeight: 800,
                       marginBottom: 16,
                       lineHeight: 1.4,
-                      opacity: 0.9,
+                      textShadow: "0 1px 4px rgba(0,0,0,0.5)",
                     }}
                   >
                     {card.miniGame.question}
