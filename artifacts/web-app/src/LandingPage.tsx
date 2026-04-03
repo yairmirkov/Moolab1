@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 interface LandingPageProps {
   onParentLogin: () => void;
+  onTestApp?: () => void;
 }
 
 const AppStoreBadge = () => (
@@ -45,7 +46,7 @@ const DownloadBadges = () => (
   </div>
 );
 
-export default function LandingPage({ onParentLogin }: LandingPageProps) {
+export default function LandingPage({ onParentLogin, onTestApp }: LandingPageProps) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -114,6 +115,14 @@ export default function LandingPage({ onParentLogin }: LandingPageProps) {
           <div id="download-section" className="mb-8">
             <DownloadBadges />
             <p className="text-xs text-[#1a3c2a]/25 font-medium mt-4">Free · No ads · Safe for kids</p>
+            {onTestApp && (
+              <button
+                onClick={onTestApp}
+                className="mt-3 text-xs text-emerald-500/60 font-semibold hover:text-emerald-600 underline underline-offset-2 cursor-pointer transition-colors"
+              >
+                Try the web demo instead
+              </button>
+            )}
           </div>
           <div className="flex justify-center gap-10 sm:gap-14">
             {[

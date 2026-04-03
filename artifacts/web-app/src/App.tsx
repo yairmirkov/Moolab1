@@ -238,11 +238,16 @@ function App() {
       setFadeIn(true);
       setTimeout(() => setFadeIn(false), 700);
     };
+    const testAppHandler = () => {
+      setShowLanding(false);
+      setFadeIn(true);
+      setTimeout(() => setFadeIn(false), 700);
+    };
     const landingLang = new URLSearchParams(window.location.search).get("lang");
     if (landingLang === "es") {
-      return <LandingPageES onParentLogin={parentLoginHandler} />;
+      return <LandingPageES onParentLogin={parentLoginHandler} onTestApp={testAppHandler} />;
     }
-    return <LandingPage onParentLogin={parentLoginHandler} />;
+    return <LandingPage onParentLogin={parentLoginHandler} onTestApp={testAppHandler} />;
   }
 
   if (!appStarted) {
