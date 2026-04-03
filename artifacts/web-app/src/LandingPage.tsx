@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 interface LandingPageProps {
-  onEnterApp: () => void;
   onParentLogin: () => void;
 }
 
@@ -46,7 +45,7 @@ const PayPalLogo = () => (
   </svg>
 );
 
-export default function LandingPage({ onEnterApp, onParentLogin }: LandingPageProps) {
+export default function LandingPage({ onParentLogin }: LandingPageProps) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -73,10 +72,10 @@ export default function LandingPage({ onEnterApp, onParentLogin }: LandingPagePr
               Parent Login
             </button>
             <button
-              onClick={onEnterApp}
+              onClick={() => document.getElementById("download-section")?.scrollIntoView({ behavior: "smooth" })}
               className="px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-sm tracking-wide shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              Launch App
+              Download App
             </button>
           </div>
         </div>
@@ -103,17 +102,9 @@ export default function LandingPage({ onEnterApp, onParentLogin }: LandingPagePr
           <p className="text-lg sm:text-xl text-[#1a3c2a]/50 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
             The scroll experience your kids already love — reimagined to teach real financial skills through AI-powered lessons, games, and boss battles.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-            <button
-              onClick={onEnterApp}
-              className="px-10 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-black text-lg tracking-wide shadow-xl shadow-emerald-200/40 hover:shadow-emerald-300/50 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-            >
-              Launch App — It's Free
-            </button>
-            <span className="text-sm text-[#1a3c2a]/30 font-medium">No ads · Safe for kids · No credit card</span>
-          </div>
+          <p className="text-sm text-[#1a3c2a]/30 font-medium mb-6">Free · No ads · Safe for kids · No credit card</p>
 
-          <div className="flex items-center justify-center gap-4 mb-12">
+          <div id="download-section" className="flex items-center justify-center gap-4 mb-12">
             <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" className="hover:scale-105 active:scale-95 transition-transform duration-200">
               <AppleStoreSvg />
             </a>
@@ -427,15 +418,9 @@ export default function LandingPage({ onEnterApp, onParentLogin }: LandingPagePr
             Ready to Build Their
             <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Financial Future?</span>
           </h2>
-          <p className="text-base text-[#1a3c2a]/40 font-medium mb-8 max-w-lg mx-auto">
+          <p className="text-base text-[#1a3c2a]/40 font-medium mb-10 max-w-lg mx-auto">
             Free to start. No ads. No data selling. Just real financial education that sticks.
           </p>
-          <button
-            onClick={onEnterApp}
-            className="px-12 py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-black text-xl tracking-wide shadow-xl shadow-emerald-200/40 hover:shadow-emerald-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer mb-6"
-          >
-            Launch WealthScroll
-          </button>
           <div className="flex items-center justify-center gap-4 mb-4">
             <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" className="hover:scale-105 active:scale-95 transition-transform duration-200">
               <AppleStoreSvg />

@@ -231,11 +231,6 @@ function App() {
   if (showLanding) {
     return (
       <LandingPage
-        onEnterApp={() => {
-          setShowLanding(false);
-          setFadeIn(true);
-          setTimeout(() => setFadeIn(false), 700);
-        }}
         onParentLogin={() => {
           setAccountType("parent");
           saveStr("acctType", "parent");
