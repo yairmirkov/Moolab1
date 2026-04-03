@@ -1,6 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const generateCards = async (ageGroup) => {
+const MODULES = [
+  { id: 0, name: "Saving Basics", icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 3 },
+  { id: 1, name: "Smart Budgeting", icon: "📊", topic: "budgeting, tracking expenses, needs vs wants, spending plans", winsNeeded: 3 },
+  { id: 2, name: "Earning Money", icon: "💰", topic: "earning income, allowance, side hustles, entrepreneurship", winsNeeded: 3 },
+  { id: 3, name: "Investing 101", icon: "📈", topic: "investing basics, stocks, compound interest, index funds", winsNeeded: 3 },
+  { id: 4, name: "Credit & Debt", icon: "💳", topic: "credit scores, debt management, loans, interest rates", winsNeeded: 3 },
+  { id: 5, name: "Taxes & Gov", icon: "🏛️", topic: "taxes, government spending, tax filing, deductions", winsNeeded: 3 },
+  { id: 6, name: "Real Estate", icon: "🏠", topic: "real estate, renting vs buying, mortgages, property value", winsNeeded: 3 },
+  { id: 7, name: "Crypto & Digital", icon: "🪙", topic: "cryptocurrency, digital assets, blockchain, DeFi basics", winsNeeded: 3 },
+];
+
+const generateCards = async (ageGroup, topic?: string) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   let persona =
     ageGroup === "Kids"
@@ -8,7 +19,8 @@ const generateCards = async (ageGroup) => {
       : ageGroup === "Teens"
         ? "Gen-Z expert (13-17)."
         : "Real-world mentor (18-21).";
-  const prompt = `${persona} Generate 4 unique financial lessons. RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0}}`;
+  const topicLine = topic ? ` All lessons MUST focus on the topic of: ${topic}.` : "";
+  const prompt = `${persona} Generate 4 unique financial lessons.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0}}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -68,11 +80,16 @@ function App() {
   const [countdown, setCountdown] = useState(10);
   const [muted, setMuted] = useState(false);
   const [userName, setUserName] = useState(() => loadStr("name", ""));
+  const [showModuleMap, setShowModuleMap] = useState(false);
 
   const [xp, setXp] = useState(() => load("xp", 0));
   const [streak, setStreak] = useState(() => load("streak", 0));
   const [level, setLevel] = useState(() => load("level", 1));
   const [bossWins, setBossWins] = useState(() => load("bossWins", 0));
+  const [currentModuleIdx, setCurrentModuleIdx] = useState(() => load("modIdx", 0));
+  const [moduleProgress, setModuleProgress] = useState<Record<number, number>>(() => {
+    try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
+  });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
@@ -82,12 +99,18 @@ function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [flashGreen, setFlashGreen] = useState(false);
 
+  const currentModule = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
+  const currentModuleWins = moduleProgress[currentModuleIdx] || 0;
+  const allModulesComplete = currentModuleIdx >= MODULES.length;
+
   useEffect(() => {
     save("xp", xp);
     save("streak", streak);
     save("level", level);
     save("bossWins", bossWins);
-  }, [xp, streak, level, bossWins]);
+    save("modIdx", currentModuleIdx);
+    localStorage.setItem("ws_modProg", JSON.stringify(moduleProgress));
+  }, [xp, streak, level, bossWins, currentModuleIdx, moduleProgress]);
 
   const resetJourney = useCallback(() => {
     setLoading(true);
@@ -96,7 +119,8 @@ function App() {
     setQuizUnlocked(false);
     setQuizStarted(false);
     setQuizResult(null);
-    generateCards(ageGroup).then((data) => {
+    const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
+    generateCards(ageGroup, mod?.topic).then((data) => {
       if (data) {
         data.lessons = data.lessons.map((l) => ({
           ...l,
@@ -106,7 +130,7 @@ function App() {
       }
       setLoading(false);
     });
-  }, [ageGroup]);
+  }, [ageGroup, currentModuleIdx]);
 
   useEffect(() => {
     if (appStarted && ageGroup) resetJourney();
@@ -140,7 +164,7 @@ function App() {
     ) {
       isFetchingRef.current = true;
       setIsFetchingMore(true);
-      const newData = await generateCards(ageGroup);
+      const newData = await generateCards(ageGroup, currentModule?.topic);
       if (newData) {
         const nl = newData.lessons.map((l) => ({
           ...l,
@@ -450,8 +474,156 @@ function App() {
               boxShadow: progress > 0 ? "0 0 10px rgba(6,214,160,0.4)" : "none",
             }}
           />
+        {/* Module indicator */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setShowModuleMap(true); }}
+          style={{
+            marginTop: 10, display: "flex", alignItems: "center", gap: 8,
+            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 10, padding: "6px 12px", cursor: "pointer",
+            pointerEvents: "auto", width: "fit-content",
+          }}
+        >
+          <span style={{ fontSize: "0.9rem" }}>{currentModule?.icon}</span>
+          <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.08em" }}>
+            MODULE {currentModuleIdx + 1}: {currentModule?.name?.toUpperCase()}
+          </span>
+          <span style={{
+            color: "#06D6A0", fontWeight: 800, fontSize: "0.55rem",
+            marginLeft: 4, padding: "2px 6px", borderRadius: 6,
+            background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.2)",
+          }}>
+            {currentModuleWins}/{currentModule?.winsNeeded || 3}
+          </span>
+        </button>
         </div>
       </div>
+
+      {/* MODULE MAP */}
+      {showModuleMap && (
+        <div style={{
+          position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+          backgroundColor: "rgba(5,5,10,0.97)", zIndex: 200,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          padding: "50px 24px 30px", overflowY: "auto",
+          backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)",
+          animation: "popIn 0.35s ease-out both",
+        }}>
+          <button
+            className="ws-btn"
+            onClick={() => setShowModuleMap(false)}
+            style={{
+              position: "fixed", top: 20, right: 20,
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "50%", width: 40, height: 40,
+              color: "#fff", fontSize: "1.2rem", cursor: "pointer", fontFamily: FONT, zIndex: 201,
+            }}
+          >✕</button>
+
+          <h2 style={{
+            fontSize: "1.4rem", fontWeight: 900, marginBottom: 4,
+            background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+          }}>MODULE MAP</h2>
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 600, marginBottom: 24, letterSpacing: "0.1em" }}>
+            {Object.entries(moduleProgress).filter(([, v]) => v >= 3).length}/{MODULES.length} COMPLETED
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 360 }}>
+            {MODULES.map((mod, idx) => {
+              const wins = moduleProgress[idx] || 0;
+              const isComplete = wins >= mod.winsNeeded;
+              const isCurrent = idx === currentModuleIdx;
+              const isLocked = idx > currentModuleIdx && !isComplete;
+              const pct = Math.min((wins / mod.winsNeeded) * 100, 100);
+
+              return (
+                <div key={mod.id} style={{
+                  background: isCurrent
+                    ? "rgba(6,214,160,0.06)"
+                    : isComplete
+                      ? "rgba(255,217,61,0.04)"
+                      : "rgba(255,255,255,0.02)",
+                  border: isCurrent
+                    ? "1px solid rgba(6,214,160,0.25)"
+                    : isComplete
+                      ? "1px solid rgba(255,217,61,0.15)"
+                      : "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 18, padding: "16px 18px",
+                  opacity: isLocked ? 0.4 : 1,
+                  position: "relative", overflow: "hidden",
+                }}>
+                  {/* Progress fill background */}
+                  <div style={{
+                    position: "absolute", top: 0, left: 0, height: "100%",
+                    width: `${pct}%`,
+                    background: isComplete
+                      ? "rgba(255,217,61,0.05)"
+                      : "rgba(6,214,160,0.04)",
+                    transition: "width 0.5s ease",
+                  }} />
+
+                  <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+                      background: isComplete
+                        ? "rgba(255,217,61,0.12)"
+                        : isCurrent
+                          ? "rgba(6,214,160,0.12)"
+                          : "rgba(255,255,255,0.04)",
+                      border: isComplete
+                        ? "1px solid rgba(255,217,61,0.3)"
+                        : isCurrent
+                          ? "1px solid rgba(6,214,160,0.25)"
+                          : "1px solid rgba(255,255,255,0.08)",
+                      display: "flex", justifyContent: "center", alignItems: "center",
+                      fontSize: "1.2rem",
+                    }}>
+                      {isLocked ? "🔒" : isComplete ? "✅" : mod.icon}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        color: "#fff", fontWeight: 800, fontSize: "0.8rem",
+                        letterSpacing: "0.02em", marginBottom: 4,
+                      }}>
+                        {mod.name}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{
+                          flex: 1, height: 4, background: "rgba(255,255,255,0.06)",
+                          borderRadius: 2, overflow: "hidden",
+                        }}>
+                          <div style={{
+                            width: `${pct}%`, height: "100%",
+                            background: isComplete
+                              ? "linear-gradient(90deg, #FFD93D, #FF6B6B)"
+                              : "linear-gradient(90deg, #06D6A0, #00F5D4)",
+                            borderRadius: 2, transition: "width 0.5s ease",
+                          }} />
+                        </div>
+                        <span style={{
+                          color: isComplete ? "#FFD93D" : "rgba(255,255,255,0.35)",
+                          fontSize: "0.55rem", fontWeight: 700, flexShrink: 0,
+                        }}>
+                          {wins}/{mod.winsNeeded}
+                        </span>
+                      </div>
+                    </div>
+                    {isCurrent && !isComplete && (
+                      <div style={{
+                        padding: "3px 8px", borderRadius: 8,
+                        background: "rgba(6,214,160,0.15)", border: "1px solid rgba(6,214,160,0.3)",
+                        fontSize: "0.5rem", fontWeight: 800, color: "#06D6A0",
+                        letterSpacing: "0.08em", flexShrink: 0,
+                      }}>ACTIVE</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* FEED */}
       <div
@@ -814,8 +986,11 @@ function App() {
               >
                 BOSS FIGHT
               </h2>
-              <p style={{ color: "rgba(255,255,255,0.3)", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.12em", marginBottom: 40 }}>
+              <p style={{ color: "rgba(255,255,255,0.3)", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.12em", marginBottom: 6 }}>
                 PROVE YOUR KNOWLEDGE
+              </p>
+              <p style={{ color: "rgba(255,255,255,0.2)", fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.06em", marginBottom: 36 }}>
+                {currentModule?.icon} {currentModule?.name?.toUpperCase()} &middot; WIN {currentModuleWins + 1}/{currentModule?.winsNeeded || 3}
               </p>
               {!quizStarted ? (
                 <button
@@ -882,6 +1057,19 @@ function App() {
                               setXp((p) => p + 50);
                               setStreak((p) => p + 1);
                               setBossWins((p) => p + 1);
+                              setModuleProgress((prev) => {
+                                const newProg = { ...prev };
+                                const curWins = (newProg[currentModuleIdx] || 0) + 1;
+                                newProg[currentModuleIdx] = curWins;
+                                if (curWins >= (currentModule?.winsNeeded || 3)) {
+                                  setTimeout(() => {
+                                    if (currentModuleIdx < MODULES.length - 1) {
+                                      setCurrentModuleIdx((p) => p + 1);
+                                    }
+                                  }, 2000);
+                                }
+                                return newProg;
+                              });
                             } else {
                               setStreak(0);
                             }
