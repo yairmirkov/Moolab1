@@ -13,6 +13,16 @@ const MODULES = [
   { id: 7, name: "Crypto & Digital", icon: "🪙", topic: "cryptocurrency, digital assets, blockchain, DeFi basics", winsNeeded: 3 },
 ];
 
+const shuffleOptions = (options: string[], correctIndex: number) => {
+  const correctAnswer = options[correctIndex];
+  const shuffled = [...options];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return { options: shuffled, correctIndex: shuffled.indexOf(correctAnswer) };
+};
+
 const generateCards = async (ageGroup, topic?: string) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   let persona =
@@ -37,7 +47,23 @@ const generateCards = async (ageGroup, topic?: string) => {
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-    return JSON.parse(cleanText);
+    const parsed = JSON.parse(cleanText);
+    if (parsed?.lessons) {
+      parsed.lessons = parsed.lessons.map((lesson: any) => {
+        if (lesson.miniGame?.options) {
+          const shuffled = shuffleOptions(lesson.miniGame.options, lesson.miniGame.correctIndex);
+          lesson.miniGame.options = shuffled.options;
+          lesson.miniGame.correctIndex = shuffled.correctIndex;
+        }
+        return lesson;
+      });
+    }
+    if (parsed?.bossQuiz?.options) {
+      const shuffled = shuffleOptions(parsed.bossQuiz.options, parsed.bossQuiz.correctIndex);
+      parsed.bossQuiz.options = shuffled.options;
+      parsed.bossQuiz.correctIndex = shuffled.correctIndex;
+    }
+    return parsed;
   } catch (e) {
     return null;
   }
