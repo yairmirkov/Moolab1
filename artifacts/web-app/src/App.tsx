@@ -69,21 +69,82 @@ const generateCards = async (ageGroup, topic?: string) => {
   }
 };
 
-const videoBank = [
-  "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/2098989/2098989-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/2519660/2519660-hd_1920_1080_24fps.mp4",
-  "https://videos.pexels.com/video-files/3571264/3571264-hd_1920_1080_30fps.mp4",
+const allVideos = [
+  "https://videos.pexels.com/video-files/853789/853789-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/853970/853970-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/854029/854029-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/854097/854097-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/854245/854245-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/854648/854648-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/854669/854669-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/854716/854716-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/854905/854905-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/855023/855023-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/855286/855286-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/855404/855404-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/855640/855640-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/855758/855758-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/855994/855994-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/856030/856030-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/856356/856356-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/853789/853789-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/856462/856462-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/856934/856934-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/857288/857288-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1093658/1093658-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/1093662/1093662-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1093665/1093665-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1321208/1321208-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1409899/1409899-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/1437396/1437396-hd_1920_1080_24fps.mp4",
-  "https://videos.pexels.com/video-files/3194277/3194277-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1580507/1580507-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/1851190/1851190-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/3163534/3163534-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2098989/2098989-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2257010/2257010-hd_1920_1080_24fps.mp4",
   "https://videos.pexels.com/video-files/2278095/2278095-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2516159/2516159-hd_1920_1080_24fps.mp4",
+  "https://videos.pexels.com/video-files/2519660/2519660-hd_1920_1080_24fps.mp4",
+  "https://videos.pexels.com/video-files/2620041/2620041-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2759477/2759477-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2792370/2792370-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2795167/2795167-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2795173/2795173-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2795391/2795391-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2795407/2795407-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/3141207/3141207-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3163534/3163534-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/3194277/3194277-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/3195394/3195394-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3209829/3209829-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3214435/3214435-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3255275/3255275-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3571264/3571264-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/4328730/4328730-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/4469565/4469565-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/4763824/4763824-hd_1920_1080_24fps.mp4",
 ];
+
+const shuffleArray = <T,>(arr: T[]): T[] => {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+let videoQueue: string[] = [];
+const getNextVideo = (): string => {
+  if (videoQueue.length === 0) videoQueue = shuffleArray(allVideos);
+  return videoQueue.pop()!;
+};
+
+const cardVideoMap = new Map<string, string>();
+const getVideoForCard = (cardId: string): string => {
+  if (!cardVideoMap.has(cardId)) cardVideoMap.set(cardId, getNextVideo());
+  return cardVideoMap.get(cardId)!;
+};
 
 const bgGradients = [
   "radial-gradient(ellipse at 20% 50%, #064e3b 0%, #0f172a 60%, #020617 100%)",
@@ -1154,7 +1215,7 @@ function App() {
                   animation: "vidFade 0.8s ease-out both",
                 }}
               >
-                <source src={videoBank[i % videoBank.length]} type="video/mp4" />
+                <source src={getVideoForCard(card.id)} type="video/mp4" />
               </video>
 
               {/* Dark gradient overlay */}
