@@ -64,15 +64,11 @@ const saveStr = (k, v) => localStorage.setItem(`ws_${k}`, v);
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
-const getAgeFromBirth = (birthStr: string): number => {
-  if (!birthStr) return 0;
-  const birth = new Date(birthStr);
-  if (isNaN(birth.getTime())) return 0;
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-  return age;
+const getAgeFromYear = (yearStr: string): number => {
+  if (!yearStr) return 0;
+  const year = parseInt(yearStr, 10);
+  if (isNaN(year)) return 0;
+  return new Date().getFullYear() - year;
 };
 
 const getAgeGroup = (age: number): string => {
@@ -97,7 +93,7 @@ function App() {
   const [countdown, setCountdown] = useState(10);
   const [muted, setMuted] = useState(false);
   const [userName, setUserName] = useState(() => loadStr("name", ""));
-  const [birthDate, setBirthDate] = useState(() => loadStr("birth", ""));
+  const [birthYear, setBirthYear] = useState(() => loadStr("birth", ""));
   const [accountType, setAccountType] = useState(() => loadStr("acctType", ""));
   const [parentName, setParentName] = useState(() => loadStr("parentName", ""));
   const [onboardStep, setOnboardStep] = useState(() => {
@@ -164,7 +160,7 @@ function App() {
   }, [appStarted, ageGroup, resetJourney]);
 
   const startSession = () => {
-    const age = getAgeFromBirth(birthDate);
+    const age = getAgeFromYear(birthYear);
     setAgeGroup(getAgeGroup(age));
     setAppStarted(true);
     const randomTrack =
@@ -229,8 +225,8 @@ function App() {
 
   if (!appStarted) {
     const canFinish = accountType === "parent"
-      ? (parentName.trim() && userName.trim() && birthDate)
-      : (userName.trim() && birthDate);
+      ? (parentName.trim() && userName.trim() && birthYear)
+      : (userName.trim() && birthYear);
 
     const stepContent = () => {
       if (onboardStep === 0) {
@@ -361,24 +357,30 @@ function App() {
               </div>
               <div>
                 <label style={{ display: "block", color: "rgba(255,255,255,0.35)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {accountType === "parent" ? "CHILD'S BIRTHDAY" : "YOUR BIRTHDAY"}
+                  {accountType === "parent" ? "CHILD'S BIRTH YEAR" : "YOUR BIRTH YEAR"}
                 </label>
-                <input
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => { setBirthDate(e.target.value); saveStr("birth", e.target.value); }}
-                  max={new Date().toISOString().split("T")[0]}
+                <select
+                  value={birthYear}
+                  onChange={(e) => { setBirthYear(e.target.value); saveStr("birth", e.target.value); }}
                   style={{
                     width: "100%", padding: "14px 18px", borderRadius: 14,
                     background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                    color: birthDate ? "#fff" : "rgba(255,255,255,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.9rem",
+                    color: birthYear ? "#fff" : "rgba(255,255,255,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
                     outline: "none", boxSizing: "border-box", colorScheme: "dark",
+                    appearance: "none", WebkitAppearance: "none",
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
                   }}
-                />
+                >
+                  <option value="" disabled>Select year</option>
+                  {Array.from({ length: 22 }, (_, i) => new Date().getFullYear() - 4 - i).map((yr) => (
+                    <option key={yr} value={String(yr)} style={{ background: "#111", color: "#fff" }}>{yr}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
-            {birthDate && (
+            {birthYear && (
               <div style={{
                 marginBottom: 20, padding: "8px 16px", borderRadius: 12,
                 background: "rgba(6,214,160,0.06)", border: "1px solid rgba(6,214,160,0.12)",
@@ -386,7 +388,7 @@ function App() {
               }}>
                 <span style={{ color: "#06D6A0", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
                   {(() => {
-                    const age = getAgeFromBirth(birthDate);
+                    const age = getAgeFromYear(birthYear);
                     const group = getAgeGroup(age);
                     if (group === "Kids") return "🌟 EXPLORER MODE — Ages 8-12";
                     if (group === "Teens") return "🔥 HUSTLER MODE — Ages 13-16";
