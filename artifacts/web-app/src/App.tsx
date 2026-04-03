@@ -104,6 +104,7 @@ function App() {
     return 0;
   });
   const [showModuleMap, setShowModuleMap] = useState(false);
+  const [showParentDash, setShowParentDash] = useState(false);
 
   const [xp, setXp] = useState(() => load("xp", 0));
   const [streak, setStreak] = useState(() => load("streak", 0));
@@ -156,13 +157,14 @@ function App() {
   }, [ageGroup, currentModuleIdx]);
 
   useEffect(() => {
-    if (appStarted && ageGroup) resetJourney();
-  }, [appStarted, ageGroup, resetJourney]);
+    if (appStarted && ageGroup && accountType !== "parent") resetJourney();
+  }, [appStarted, ageGroup, accountType, resetJourney]);
 
   const startSession = () => {
     const age = getAgeFromYear(birthYear);
     setAgeGroup(getAgeGroup(age));
     setAppStarted(true);
+    if (accountType === "parent") return;
     const randomTrack =
       studyBeats[Math.floor(Math.random() * studyBeats.length)];
     if (!audioRef.current) {
@@ -486,6 +488,181 @@ function App() {
     );
   }
 
+  const totalModulesComplete = Object.values(moduleProgress).filter((w) => w >= 3).length;
+  const overallPct = Math.round((totalModulesComplete / MODULES.length) * 100);
+
+  const parentDashContent = (
+    <div style={{
+      width: "100vw", minHeight: "100dvh",
+      background: "linear-gradient(160deg, #0a0a0f 0%, #111118 50%, #0a0a0f 100%)",
+      color: "#fff", fontFamily: FONT, overflowY: "auto",
+    }}>
+      <style>{`
+        @keyframes pdFadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        .pd-card { animation: pdFadeIn 0.4s ease-out both; }
+      `}</style>
+
+      <div style={{ padding: "24px 20px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", marginBottom: 4 }}>
+            {accountType === "parent" ? "PARENT DASHBOARD" : "PARENT VIEW"}
+          </div>
+          <h1 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 900, letterSpacing: "-0.02em" }}>
+            {accountType === "parent" ? `Hi, ${parentName || "Parent"}` : "What Your Parent Sees"}
+          </h1>
+        </div>
+        {accountType === "parent" ? (
+          <button className="ws-btn" onClick={() => {
+            setAppStarted(false);
+            setOnboardStep(0);
+            setAccountType("");
+            saveStr("acctType", "");
+            setParentName("");
+            saveStr("parentName", "");
+            setUserName("");
+            saveStr("name", "");
+            setBirthYear("");
+            saveStr("birth", "");
+          }} style={{
+            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 12, padding: "8px 14px", color: "rgba(255,255,255,0.5)",
+            fontFamily: FONT, fontWeight: 700, fontSize: "0.65rem", cursor: "pointer",
+          }}>LOG OUT</button>
+        ) : (
+          <button className="ws-btn" onClick={() => setShowParentDash(false)} style={{
+            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "50%", width: 40, height: 40, color: "#fff", fontSize: "1.2rem",
+            cursor: "pointer", fontFamily: FONT,
+          }}>✕</button>
+        )}
+      </div>
+
+      <div style={{ padding: "20px 20px 8px" }}>
+        <div style={{
+          background: "rgba(6,214,160,0.04)", border: "1px solid rgba(6,214,160,0.1)",
+          borderRadius: 20, padding: "20px 22px", display: "flex", alignItems: "center", gap: 16,
+        }} className="pd-card">
+          <div style={{
+            width: 56, height: 56, borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(6,214,160,0.2), rgba(0,245,212,0.1))",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "1.6rem", border: "2px solid rgba(6,214,160,0.3)",
+          }}>
+            {userName ? userName.charAt(0).toUpperCase() : "?"}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 900, fontSize: "1.15rem", letterSpacing: "-0.01em" }}>{userName || "Learner"}</div>
+            <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.65rem", fontWeight: 600, marginTop: 2 }}>
+              {(() => {
+                const age = getAgeFromYear(birthYear);
+                const g = getAgeGroup(age);
+                return g === "Kids" ? `Age ~${age} · Explorer Mode` : g === "Teens" ? `Age ~${age} · Hustler Mode` : `Age ~${age} · Investor Mode`;
+              })()}
+            </div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#FFD93D" }}>{level}</div>
+            <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em" }}>LEVEL</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+        {[
+          { label: "TOTAL XP", val: xp, color: "#06D6A0", icon: "⚡" },
+          { label: "BOSS WINS", val: bossWins, color: "#FFD93D", icon: "🏆" },
+          { label: "STREAK", val: streak, color: "#FF6B6B", icon: "🔥" },
+        ].map((s, i) => (
+          <div key={s.label} className="pd-card" style={{
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 18, padding: "18px 12px", textAlign: "center",
+            animationDelay: `${i * 0.08}s`,
+          }}>
+            <div style={{ fontSize: "1.2rem", marginBottom: 4 }}>{s.icon}</div>
+            <div style={{ color: s.color, fontSize: "1.6rem", fontWeight: 900, textShadow: `0 0 15px ${s.color}30` }}>{s.val}</div>
+            <div style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.1em", marginTop: 4 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ padding: "16px 20px 8px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div style={{ fontSize: "0.85rem", fontWeight: 800 }}>Module Progress</div>
+          <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#06D6A0" }}>{totalModulesComplete}/{MODULES.length} Complete</div>
+        </div>
+        <div style={{
+          background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: 18, padding: "6px 0", overflow: "hidden",
+        }}>
+          {MODULES.map((mod, idx) => {
+            const wins = moduleProgress[idx] || 0;
+            const done = wins >= mod.winsNeeded;
+            const isActive = idx === currentModuleIdx && !done;
+            const pct = Math.round((wins / mod.winsNeeded) * 100);
+            return (
+              <div key={mod.id} className="pd-card" style={{
+                display: "flex", alignItems: "center", gap: 12, padding: "14px 18px",
+                borderBottom: idx < MODULES.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                animationDelay: `${idx * 0.05}s`,
+              }}>
+                <div style={{ fontSize: "1.2rem", width: 28, textAlign: "center" }}>{mod.icon}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                    <span style={{ fontWeight: 700, fontSize: "0.75rem", color: done ? "#06D6A0" : isActive ? "#fff" : "rgba(255,255,255,0.4)" }}>
+                      {mod.name}
+                    </span>
+                    <span style={{ fontSize: "0.5rem", fontWeight: 700, color: done ? "#06D6A0" : isActive ? "#FFD93D" : "rgba(255,255,255,0.2)", letterSpacing: "0.08em" }}>
+                      {done ? "COMPLETE ✓" : isActive ? "IN PROGRESS" : `${wins}/${mod.winsNeeded}`}
+                    </span>
+                  </div>
+                  <div style={{ width: "100%", height: 4, borderRadius: 2, background: "rgba(255,255,255,0.06)" }}>
+                    <div style={{
+                      width: `${pct}%`, height: "100%", borderRadius: 2,
+                      background: done ? "#06D6A0" : isActive ? "linear-gradient(90deg, #FFD93D, #FF6B6B)" : "rgba(255,255,255,0.1)",
+                      transition: "width 0.5s ease",
+                    }} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ padding: "16px 20px 8px" }}>
+        <div style={{ fontSize: "0.85rem", fontWeight: 800, marginBottom: 12 }}>Learning Insights</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {[
+            { label: "Current Module", val: allModulesComplete ? "All Done!" : currentModule.name, sub: allModulesComplete ? "🎉" : currentModule.icon, color: "#E040FB" },
+            { label: "Overall Progress", val: `${overallPct}%`, sub: `${totalModulesComplete} of ${MODULES.length}`, color: "#06D6A0" },
+            { label: "XP Per Level", val: `${xp % (level * 50)}/${level * 50}`, sub: "to next level", color: "#FFD93D" },
+            { label: "Sessions Played", val: bossWins + (streak > 0 ? streak : 0), sub: "total rounds", color: "#118AB2" },
+          ].map((s, i) => (
+            <div key={s.label} className="pd-card" style={{
+              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: 16, padding: "16px 14px",
+              animationDelay: `${i * 0.08}s`,
+            }}>
+              <div style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6 }}>{s.label.toUpperCase()}</div>
+              <div style={{ color: s.color, fontSize: "1.1rem", fontWeight: 900 }}>{s.val}</div>
+              <div style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.55rem", fontWeight: 600, marginTop: 2 }}>{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: "20px 20px 40px", textAlign: "center" }}>
+        <div style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.55rem", fontWeight: 600 }}>
+          WealthScroll · {accountType === "parent" ? "Parent Dashboard" : "Transparency View"}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (accountType === "parent" && appStarted) {
+    return parentDashContent;
+  }
+
   if (loading || !currentData)
     return (
       <div
@@ -593,26 +770,47 @@ function App() {
             pointerEvents: "auto",
           }}
         >
-          <button
-            className="ws-btn"
-            onClick={() => setShowProfile(true)}
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 14,
-              padding: "10px 16px",
-              color: "#fff",
-              fontWeight: 800,
-              fontSize: "0.75rem",
-              cursor: "pointer",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              fontFamily: FONT,
-              letterSpacing: "0.04em",
-            }}
-          >
-            💸 {userName || "PROFILE"}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <button
+              className="ws-btn"
+              onClick={() => setShowProfile(true)}
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 14,
+                padding: "10px 16px",
+                color: "#fff",
+                fontWeight: 800,
+                fontSize: "0.75rem",
+                cursor: "pointer",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                fontFamily: FONT,
+                letterSpacing: "0.04em",
+              }}
+            >
+              💸 {userName || "PROFILE"}
+            </button>
+            <button
+              className="ws-btn"
+              onClick={() => setShowParentDash(true)}
+              style={{
+                background: "rgba(224,64,251,0.06)",
+                border: "1px solid rgba(224,64,251,0.15)",
+                borderRadius: 14,
+                padding: "10px 12px",
+                color: "#E040FB",
+                fontWeight: 800,
+                fontSize: "0.75rem",
+                cursor: "pointer",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                fontFamily: FONT,
+              }}
+            >
+              👪
+            </button>
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{
               padding: "5px 10px", borderRadius: 10,
@@ -1149,6 +1347,12 @@ function App() {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {showParentDash && (
+        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 250 }}>
+          {parentDashContent}
         </div>
       )}
 

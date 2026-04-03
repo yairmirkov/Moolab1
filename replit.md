@@ -71,11 +71,19 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 
 ### Sign-Up / Onboarding Flow
 - 3-step onboarding: (0) Welcome splash → (1) Who's signing up? (Kid/Teen vs Parent) → (2) Form
-- **Learner path**: name + birthday
-- **Parent path**: parent name + child name + child birthday
+- **Learner path**: name + birth year
+- **Parent path**: parent name + child name + child birth year
+- Birth year is a `<select>` dropdown (not date input)
 - Account type persisted via `ws_acctType`, parent name via `ws_parentName`
 - `onboardStep` auto-resumes from saved state on reload (skips to step 2 if account type is saved)
-- Age auto-detected from birthday via `getAgeFromBirth()` + `getAgeGroup()`
+- Age auto-detected from birth year via `getAgeFromYear()` + `getAgeGroup()`
+
+### Parent Dashboard
+- **Parent login**: When `accountType === "parent"`, `startSession` skips audio/card generation. App renders `parentDashContent` full-screen instead of learning feed.
+- **Kid transparency**: Learner header has a 👪 button that toggles `showParentDash` overlay — same dashboard content, titled "What Your Parent Sees" / "PARENT VIEW"
+- Dashboard shows: child profile card (name, age, mode), XP/Boss Wins/Streak stat cards, full module progress list with progress bars, learning insights grid
+- Parent has LOG OUT button that clears all localStorage and returns to onboarding
+- Kid has ✕ close button to dismiss overlay and return to learning feed
 
 ### Age Groups
 - `8-12` Explorer — fun/emoji tone
