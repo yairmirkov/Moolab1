@@ -64,6 +64,22 @@ const saveStr = (k, v) => localStorage.setItem(`ws_${k}`, v);
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
+const getAgeFromBirth = (birthStr: string): number => {
+  if (!birthStr) return 0;
+  const birth = new Date(birthStr);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+};
+
+const getAgeGroup = (age: number): string => {
+  if (age <= 12) return "Kids";
+  if (age <= 16) return "Teens";
+  return "Young Adults";
+};
+
 function App() {
   const [appStarted, setAppStarted] = useState(false);
   const [ageGroup, setAgeGroup] = useState("");
@@ -80,6 +96,7 @@ function App() {
   const [countdown, setCountdown] = useState(10);
   const [muted, setMuted] = useState(false);
   const [userName, setUserName] = useState(() => loadStr("name", ""));
+  const [birthDate, setBirthDate] = useState(() => loadStr("birth", ""));
   const [showModuleMap, setShowModuleMap] = useState(false);
 
   const [xp, setXp] = useState(() => load("xp", 0));
@@ -136,8 +153,9 @@ function App() {
     if (appStarted && ageGroup) resetJourney();
   }, [appStarted, ageGroup, resetJourney]);
 
-  const startSession = (age: string) => {
-    setAgeGroup(age);
+  const startSession = () => {
+    const age = getAgeFromBirth(birthDate);
+    setAgeGroup(getAgeGroup(age));
     setAppStarted(true);
     const randomTrack =
       studyBeats[Math.floor(Math.random() * studyBeats.length)];
@@ -241,10 +259,10 @@ function App() {
           animation: "splashPulse 3s ease-in-out infinite",
         }}>SWIPE &middot; LEARN &middot; EARN</p>
 
-        <div style={{ width: "100%", maxWidth: 340, marginBottom: 24 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 24 }}>
           <input
             type="text"
-            placeholder="Enter your name..."
+            placeholder="What's your name?"
             value={userName}
             onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
             style={{
@@ -255,9 +273,40 @@ function App() {
               caretColor: "#06D6A0", boxSizing: "border-box",
             }}
           />
+          <input
+            type="date"
+            value={birthDate}
+            onChange={(e) => { setBirthDate(e.target.value); saveStr("birth", e.target.value); }}
+            max={new Date().toISOString().split("T")[0]}
+            style={{
+              width: "100%", padding: "16px 20px", borderRadius: 16,
+              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+              color: birthDate ? "#fff" : "rgba(255,255,255,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.9rem",
+              outline: "none", textAlign: "center", boxSizing: "border-box",
+              colorScheme: "dark",
+            }}
+          />
         </div>
 
-        <div style={{ display: "flex", gap: 20, marginBottom: 32 }}>
+        {birthDate && (
+          <div style={{
+            marginBottom: 20, padding: "6px 14px", borderRadius: 10,
+            background: "rgba(6,214,160,0.08)", border: "1px solid rgba(6,214,160,0.15)",
+            animation: "ageBtn 0.3s ease-out both",
+          }}>
+            <span style={{ color: "#06D6A0", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.08em" }}>
+              {(() => {
+                const age = getAgeFromBirth(birthDate);
+                const group = getAgeGroup(age);
+                if (group === "Kids") return "🌟 EXPLORER MODE — Ages 8-12";
+                if (group === "Teens") return "🔥 HUSTLER MODE — Ages 13-16";
+                return "💎 INVESTOR MODE — Ages 17-21";
+              })()}
+            </span>
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 20, marginBottom: 28 }}>
           {[
             { label: "XP", val: xp, color: "#06D6A0" },
             { label: "LVL", val: level, color: "#FFD93D" },
@@ -270,42 +319,27 @@ function App() {
           ))}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340 }}>
-          {[
-            { age: "Kids", label: "EXPLORER", sub: "Ages 8-12", color: "#FFD93D", icon: "🌟" },
-            { age: "Teens", label: "HUSTLER", sub: "Ages 13-16", color: "#FF6B6B", icon: "🔥" },
-            { age: "Young Adults", label: "INVESTOR", sub: "Ages 17-21", color: "#00F5D4", icon: "💎" },
-          ].map((lvl, i) => (
-            <button
-              key={lvl.age}
-              className="ws-btn"
-              onClick={() => startSession(lvl.age)}
-              style={{
-                padding: "20px 22px", borderRadius: 20,
-                background: "rgba(255,255,255,0.03)",
-                backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-                color: "#fff", border: `1px solid ${lvl.color}20`,
-                fontWeight: 800, fontSize: "0.95rem", fontFamily: FONT,
-                display: "flex", alignItems: "center", gap: 14, cursor: "pointer",
-                boxShadow: `0 0 30px ${lvl.color}08, inset 0 1px 0 rgba(255,255,255,0.04)`,
-                animation: `ageBtn 0.5s ease-out ${i * 0.1}s both`,
-                textAlign: "left",
-              }}
-            >
-              <div style={{
-                width: 46, height: 46, borderRadius: 14, flexShrink: 0,
-                background: `linear-gradient(135deg, ${lvl.color}20, ${lvl.color}08)`,
-                border: `1px solid ${lvl.color}25`,
-                display: "flex", justifyContent: "center", alignItems: "center", fontSize: "1.3rem",
-              }}>{lvl.icon}</div>
-              <div>
-                <div style={{ letterSpacing: "0.06em", fontSize: "0.85rem" }}>LVL {i + 1}: {lvl.label}</div>
-                <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.25)", fontWeight: 600, marginTop: 2 }}>{lvl.sub}</div>
-              </div>
-              <div style={{ marginLeft: "auto", color: `${lvl.color}60`, fontSize: "1.2rem" }}>&#8250;</div>
-            </button>
-          ))}
-        </div>
+        <button
+          className="ws-btn"
+          onClick={startSession}
+          disabled={!userName.trim() || !birthDate}
+          style={{
+            width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+            border: "none", fontFamily: FONT,
+            background: userName.trim() && birthDate
+              ? "linear-gradient(135deg, #06D6A0, #00F5D4)"
+              : "rgba(255,255,255,0.06)",
+            color: userName.trim() && birthDate ? "#000" : "rgba(255,255,255,0.2)",
+            fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
+            cursor: userName.trim() && birthDate ? "pointer" : "default",
+            boxShadow: userName.trim() && birthDate
+              ? "0 0 40px rgba(6,214,160,0.25), 0 8px 24px rgba(0,0,0,0.4)"
+              : "none",
+            transition: "all 0.3s ease",
+          }}
+        >
+          START LEARNING
+        </button>
       </div>
     );
   }
@@ -842,10 +876,11 @@ function App() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "60px 30px",
+            padding: "60px 30px 30px",
             backdropFilter: "blur(30px)",
             WebkitBackdropFilter: "blur(30px)",
             animation: "popIn 0.35s ease-out both",
+            overflowY: "auto",
           }}
         >
           <button
@@ -932,6 +967,45 @@ function App() {
                 <div style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.1em", marginTop: 4 }}>{s.label}</div>
               </div>
             ))}
+          </div>
+
+          {/* Module Switcher (Testing) */}
+          <div style={{
+            width: "100%", maxWidth: 300, marginTop: 24,
+            padding: "16px 18px", borderRadius: 18,
+            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+          }}>
+            <div style={{
+              color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", fontWeight: 700,
+              letterSpacing: "0.12em", marginBottom: 10, textAlign: "center",
+            }}>SWITCH MODULE (DEV)</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {MODULES.map((mod, idx) => (
+                <button
+                  className="ws-btn"
+                  key={mod.id}
+                  onClick={() => {
+                    setCurrentModuleIdx(idx);
+                    setShowProfile(false);
+                    resetJourney();
+                  }}
+                  style={{
+                    padding: "10px 14px", borderRadius: 12, fontFamily: FONT,
+                    background: idx === currentModuleIdx ? "rgba(6,214,160,0.1)" : "rgba(255,255,255,0.02)",
+                    border: idx === currentModuleIdx ? "1px solid rgba(6,214,160,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                    color: idx === currentModuleIdx ? "#06D6A0" : "rgba(255,255,255,0.5)",
+                    fontWeight: 700, fontSize: "0.7rem", cursor: "pointer",
+                    display: "flex", alignItems: "center", gap: 8,
+                  }}
+                >
+                  <span>{mod.icon}</span>
+                  <span>{mod.name}</span>
+                  {idx === currentModuleIdx && (
+                    <span style={{ marginLeft: "auto", fontSize: "0.5rem", fontWeight: 800, color: "#06D6A0" }}>ACTIVE</span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
