@@ -43,11 +43,13 @@ const generateCards = async (ageGroup, topic?: string) => {
   }
 };
 
-const videoBank = [
-  "https://cdn.pixabay.com/video/2023/10/19/185633-876189917_tiny.mp4",
-  "https://cdn.pixabay.com/video/2022/01/17/104523-666355831_tiny.mp4",
-  "https://cdn.pixabay.com/video/2021/04/12/70882-536925565_tiny.mp4",
-  "https://cdn.pixabay.com/video/2023/11/13/188892-883733008_tiny.mp4",
+const bgGradients = [
+  "radial-gradient(ellipse at 20% 50%, #064e3b 0%, #0f172a 60%, #020617 100%)",
+  "radial-gradient(ellipse at 80% 30%, #1e3a5f 0%, #0c1524 50%, #020617 100%)",
+  "radial-gradient(ellipse at 50% 80%, #312e81 0%, #0f172a 55%, #020617 100%)",
+  "radial-gradient(ellipse at 30% 20%, #7c2d12 0%, #1c1917 55%, #020617 100%)",
+  "radial-gradient(ellipse at 70% 60%, #065f46 0%, #0f172a 55%, #020617 100%)",
+  "radial-gradient(ellipse at 40% 40%, #1e40af 0%, #0f172a 55%, #020617 100%)",
 ];
 
 const studyBeats = [
@@ -1058,23 +1060,17 @@ function App() {
                 overflow: "hidden",
               }}
             >
-              <video
-                key={`v-${card.id}`}
-                autoPlay
-                muted
-                loop
-                playsInline
+              <div
+                key={`bg-${card.id}`}
                 style={{
                   position: "absolute",
                   width: "100%",
                   height: "100%",
-                  objectFit: "cover",
-                  opacity: 0.45,
+                  background: bgGradients[i % bgGradients.length],
+                  opacity: 0.9,
                   animation: "vidFade 0.8s ease-out both",
                 }}
-              >
-                <source src={videoBank[i % videoBank.length]} type="video/mp4" />
-              </video>
+              />
 
               {/* Dark gradient overlay */}
               <div style={{
