@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const generateCards = async (ageGroup) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -42,14 +42,56 @@ const generateCards = async (ageGroup) => {
   }
 };
 
-const slideVideos = [
-  "https://videos.pexels.com/video-files/3129671/3129671-sd_640_360_30fps.mp4",
-  "https://videos.pexels.com/video-files/857195/857195-sd_640_360_25fps.mp4",
-  "https://videos.pexels.com/video-files/3163534/3163534-sd_640_360_30fps.mp4",
-  "https://videos.pexels.com/video-files/852164/852164-sd_640_360_25fps.mp4",
-  "https://videos.pexels.com/video-files/856973/856973-sd_640_360_25fps.mp4",
-  "https://videos.pexels.com/video-files/4763824/4763824-sd_640_360_30fps.mp4",
+const pxImg = (id: number) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=800&h=1200&dpr=1`;
+
+const imageBank: { keywords: string[]; url: string }[] = [
+  { keywords: ["money", "dollar", "cash", "earn", "income", "wage", "pay", "paid", "salary", "wealth"], url: pxImg(3483098) },
+  { keywords: ["save", "saving", "piggy", "jar", "emergency", "rainy"], url: pxImg(68927) },
+  { keywords: ["invest", "stock", "market", "trade", "portfolio", "dividend", "growth", "compound"], url: pxImg(210607) },
+  { keywords: ["budget", "plan", "track", "expense", "spend", "spending"], url: pxImg(5466785) },
+  { keywords: ["shop", "buy", "purchase", "store", "retail", "consumer", "want"], url: pxImg(5632399) },
+  { keywords: ["coin", "change", "penny", "cent", "quarter"], url: pxImg(106152) },
+  { keywords: ["credit", "card", "debit", "swipe", "debt", "loan", "borrow", "owe"], url: pxImg(4386431) },
+  { keywords: ["business", "entrepreneur", "company", "startup", "hustle", "side"], url: pxImg(3184292) },
+  { keywords: ["toy", "game", "play", "fun", "kid", "child", "lego", "car"], url: pxImg(163696) },
+  { keywords: ["house", "home", "rent", "mortgage", "apartment", "real estate", "property"], url: pxImg(323780) },
+  { keywords: ["food", "eat", "grocery", "meal", "restaurant", "snack", "lunch"], url: pxImg(1640777) },
+  { keywords: ["school", "education", "learn", "college", "university", "student", "book", "tuition"], url: pxImg(301926) },
+  { keywords: ["gold", "treasure", "precious", "diamond", "luxury", "rich"], url: pxImg(610533) },
+  { keywords: ["crypto", "bitcoin", "digital", "blockchain", "nft", "token"], url: pxImg(843700) },
+  { keywords: ["bank", "account", "deposit", "withdraw", "atm", "check", "cheque"], url: pxImg(351264) },
+  { keywords: ["goal", "target", "dream", "future", "retire", "freedom", "success"], url: pxImg(1054218) },
+  { keywords: ["tax", "government", "irs", "refund", "deduction", "filing"], url: pxImg(6863183) },
+  { keywords: ["insurance", "protect", "coverage", "risk", "safety", "secure"], url: pxImg(7876667) },
+  { keywords: ["allowance", "chore", "parent", "family", "gift", "birthday"], url: pxImg(1166990) },
+  { keywords: ["donate", "charity", "give", "help", "volunteer", "share", "generous"], url: pxImg(6646918) },
 ];
+
+const defaultFinanceImages = [
+  pxImg(534216),
+  pxImg(4968391),
+  pxImg(4386476),
+  pxImg(3943716),
+  pxImg(4475523),
+];
+
+function getRelevantImage(title: string, desc: string, index: number): string {
+  const text = `${title} ${desc}`.toLowerCase();
+  let bestMatch: { url: string; score: number } | null = null;
+
+  for (const entry of imageBank) {
+    let score = 0;
+    for (const kw of entry.keywords) {
+      if (text.includes(kw)) score++;
+    }
+    if (score > 0 && (!bestMatch || score > bestMatch.score)) {
+      bestMatch = { url: entry.url, score };
+    }
+  }
+
+  return bestMatch ? bestMatch.url : defaultFinanceImages[index % defaultFinanceImages.length];
+}
 
 const audioByAge: Record<string, string> = {
   "8-12": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
@@ -58,12 +100,12 @@ const audioByAge: Record<string, string> = {
 };
 
 const slideAccents = [
-  { grad: "linear-gradient(160deg, #0f0c29 0%, #302b63 40%, #24243e 100%)", c1: "#FF6B6B", c2: "#FF8E53" },
-  { grad: "linear-gradient(160deg, #0a1628 0%, #1a0a3e 40%, #0d1117 100%)", c1: "#00F5D4", c2: "#7B61FF" },
-  { grad: "linear-gradient(160deg, #1a1a0a 0%, #2d1f0a 40%, #0a0a14 100%)", c1: "#FFD93D", c2: "#FF6B6B" },
-  { grad: "linear-gradient(160deg, #0a1a0a 0%, #0a2e1a 40%, #0a0f14 100%)", c1: "#06D6A0", c2: "#118AB2" },
-  { grad: "linear-gradient(160deg, #1a0a1a 0%, #2e0a2a 40%, #140a14 100%)", c1: "#E040FB", c2: "#536DFE" },
-  { grad: "linear-gradient(160deg, #0a141a 0%, #0a2a3e 40%, #0a0f17 100%)", c1: "#00B4D8", c2: "#48CAE4" },
+  { c1: "#FF6B6B", c2: "#FF8E53" },
+  { c1: "#00F5D4", c2: "#7B61FF" },
+  { c1: "#FFD93D", c2: "#FF6B6B" },
+  { c1: "#06D6A0", c2: "#118AB2" },
+  { c1: "#E040FB", c2: "#536DFE" },
+  { c1: "#00B4D8", c2: "#48CAE4" },
 ];
 
 function App() {
@@ -81,6 +123,7 @@ function App() {
 
   const [isMuted, setIsMuted] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioReady = useRef(false);
 
   const progress = Math.min((completedSlides.length / 3) * 100, 100);
 
@@ -92,35 +135,39 @@ function App() {
 
   useEffect(() => {
     if (!appStarted || !ageGroup) return;
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.25;
-    }
-    audioRef.current.src = audioByAge[ageGroup] || "";
-    if (!isMuted) {
-      audioRef.current.play().catch(() => {});
-    } else {
-      audioRef.current.pause();
-    }
-    return () => {
-      if (audioRef.current) audioRef.current.pause();
-    };
-  }, [appStarted, ageGroup, isMuted]);
+    const audio = new Audio();
+    audio.loop = true;
+    audio.volume = 0.25;
+    audio.crossOrigin = "anonymous";
+    audio.preload = "auto";
+    audio.src = audioByAge[ageGroup] || "";
+    audioRef.current = audio;
+    audioReady.current = false;
 
-  const toggleMute = () => {
+    const onCanPlay = () => { audioReady.current = true; };
+    audio.addEventListener("canplaythrough", onCanPlay);
+
+    return () => {
+      audio.removeEventListener("canplaythrough", onCanPlay);
+      audio.pause();
+      audio.src = "";
+      audioRef.current = null;
+    };
+  }, [appStarted, ageGroup]);
+
+  const toggleMute = useCallback(() => {
     setIsMuted((prev) => {
       const next = !prev;
-      if (audioRef.current) {
-        if (next) {
-          audioRef.current.pause();
-        } else {
-          audioRef.current.play().catch(() => {});
-        }
+      const audio = audioRef.current;
+      if (!audio) return next;
+      if (next) {
+        audio.pause();
+      } else {
+        audio.play().catch((err) => console.warn("Audio play blocked:", err));
       }
       return next;
     });
-  };
+  }, []);
 
   const resetJourney = () => {
     setLoading(true);
@@ -192,7 +239,6 @@ function App() {
     }
   };
 
-  /* ─── SPLASH / AGE SELECT ─── */
   if (!appStarted) {
     return (
       <div style={{
@@ -263,7 +309,6 @@ function App() {
     );
   }
 
-  /* ─── LOADING ─── */
   if (loading || !currentData) {
     return (
       <div style={{
@@ -291,7 +336,6 @@ function App() {
     );
   }
 
-  /* ─── MAIN FEED ─── */
   return (
     <div style={{
       position: "relative", width: "100vw", maxWidth: 430, margin: "0 auto",
@@ -302,14 +346,12 @@ function App() {
         @keyframes popIn { 0%{transform:scale(0.3) rotate(-5deg);opacity:0} 50%{transform:scale(1.08) rotate(1deg);opacity:1} 100%{transform:scale(1) rotate(0deg);opacity:1} }
         @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
         @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
-        @keyframes floatBtn { 0%,100%{box-shadow:0 0 18px var(--gc,rgba(6,214,160,.3)),0 0 50px var(--gc,rgba(6,214,160,.1));transform:scale(1)} 50%{box-shadow:0 0 28px var(--gc,rgba(6,214,160,.5)),0 0 70px var(--gc,rgba(6,214,160,.2));transform:scale(1.06)} }
         @keyframes confetti { 0%{transform:scale(0);opacity:1} 50%{transform:scale(1.5);opacity:.6} 100%{transform:scale(2.2);opacity:0} }
         @keyframes optSlide { from{transform:translateX(-16px);opacity:0} to{transform:translateX(0);opacity:1} }
         @keyframes blobA { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-40px) scale(1.15)} 66%{transform:translate(-25px,-15px) scale(.92)} }
         @keyframes blobB { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-40px,30px) scale(.9)} 66%{transform:translate(20px,15px) scale(1.1)} }
-        @keyframes vidFade { from{opacity:0} to{opacity:1} }
+        @keyframes imgFade { from{opacity:0;transform:scale(1.08)} to{opacity:1;transform:scale(1)} }
         .mg-opt:active{transform:scale(.95)!important}
-        .fab:active{transform:scale(.85)!important}
         ::-webkit-scrollbar{display:none}
       `}</style>
 
@@ -326,14 +368,16 @@ function App() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ color:"#06D6A0",fontWeight:800,fontSize:"0.7rem",letterSpacing:"0.08em" }}>
-              TASK {completedSlides.length}/3
+              XP {completedSlides.length}/3
             </span>
-            {/* Mute / Unmute */}
             <button onClick={toggleMute} style={{
-              width: 32, height: 32, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)",
-              background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
-              color: "#fff", fontSize: "14px", cursor: "pointer",
+              width: 34, height: 34, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.15)",
+              background: isMuted ? "rgba(255,255,255,0.06)" : "rgba(6,214,160,0.2)",
+              backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+              color: "#fff", fontSize: "15px", cursor: "pointer",
               display: "flex", justifyContent: "center", alignItems: "center",
+              transition: "background 0.2s ease, border-color 0.2s ease",
+              borderColor: isMuted ? "rgba(255,255,255,0.15)" : "rgba(6,214,160,0.4)",
             }}>
               {isMuted ? "🔇" : "🔊"}
             </button>
@@ -357,7 +401,7 @@ function App() {
         {currentData.lessons.map((card, index) => {
           const answeredIndex = slideAnswers[card.id];
           const t = slideAccents[index % slideAccents.length];
-          const vid = slideVideos[index % slideVideos.length];
+          const bgImage = getRelevantImage(card.title, card.desc, index);
           const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(card.title)}`;
           const isCorrect = answeredIndex !== undefined && answeredIndex === card.miniGame.correctIndex;
 
@@ -366,24 +410,25 @@ function App() {
               height: "100dvh", width: "100%", position: "relative",
               scrollSnapAlign: "start", scrollSnapStop: "always", overflow: "hidden", background: "#000",
             }}>
-              {/* Video Background */}
-              <video
-                autoPlay muted loop playsInline
+              {/* Relevant Background Image */}
+              <img
+                src={bgImage}
+                alt=""
+                loading="lazy"
                 style={{
                   position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
                   objectFit: "cover", zIndex: 0, opacity: 0.35,
-                  animation: "vidFade 1s ease-out both",
+                  animation: "imgFade 0.8s ease-out both",
                 }}
-                src={vid}
               />
 
-              {/* Gradient overlay on top of video */}
+              {/* Dark gradient overlay */}
               <div style={{
                 position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1,
-                background: `linear-gradient(180deg, rgba(0,0,0,0.5) 0%, ${t.c1}08 30%, rgba(0,0,0,0.7) 70%, rgba(0,0,0,0.95) 100%)`,
+                background: `linear-gradient(180deg, rgba(0,0,0,0.55) 0%, ${t.c1}06 35%, rgba(0,0,0,0.65) 65%, rgba(0,0,0,0.95) 100%)`,
               }} />
 
-              {/* Animated background blobs */}
+              {/* Animated color blobs */}
               <div style={{
                 position: "absolute", width: 200, height: 200, borderRadius: "50%",
                 background: `radial-gradient(circle, ${t.c1}15 0%, transparent 70%)`,
@@ -397,14 +442,14 @@ function App() {
                 animation: `blobB ${10 + (index % 3)}s ease-in-out infinite`,
               }} />
 
-              {/* Bottom content overlay */}
+              {/* Bottom content */}
               <div style={{
                 position: "absolute", bottom: 0, left: 0, width: "100%",
                 padding: "0 20px 28px", zIndex: 2,
-                background: "linear-gradient(transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.85) 100%)",
+                background: "linear-gradient(transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.88) 100%)",
                 animation: "slideUp 0.6s ease-out both",
               }}>
-                {/* Avatar + Title row */}
+                {/* Avatar + Title */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
                   <div style={{
                     width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
@@ -414,11 +459,7 @@ function App() {
                     display: "flex", justifyContent: "center", alignItems: "center",
                     overflow: "hidden",
                   }}>
-                    <img
-                      src={avatarUrl}
-                      alt="AI Tutor"
-                      style={{ width: "100%", height: "100%", borderRadius: "50%" }}
-                    />
+                    <img src={avatarUrl} alt="AI Tutor" style={{ width: "100%", height: "100%", borderRadius: "50%" }} />
                   </div>
                   <div>
                     <h1 style={{
@@ -428,9 +469,7 @@ function App() {
                     }}>
                       {card.title}
                     </h1>
-                    <div style={{
-                      display: "flex", alignItems: "center", gap: 6, marginTop: 4,
-                    }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
                       <div style={{ width: 6, height: 6, borderRadius: "50%", background: t.c1 }} />
                       <span style={{ fontSize: "0.6rem", fontWeight: 700, color: `${t.c1}90`, letterSpacing: "0.1em", textTransform: "uppercase" }}>
                         AI TUTOR
@@ -440,24 +479,21 @@ function App() {
                 </div>
 
                 <p style={{
-                  color: "rgba(255,255,255,0.75)", marginBottom: 18,
-                  fontSize: "0.95rem", lineHeight: 1.5, fontWeight: 500, margin: "0 0 18px 0",
+                  color: "rgba(255,255,255,0.75)", fontSize: "0.95rem", lineHeight: 1.5, fontWeight: 500,
+                  margin: "0 0 18px 0",
                 }}>
                   {card.desc}
                 </p>
 
-                {/* MINI-GAME (Premium Glass Card) */}
+                {/* MINI-GAME Glass Card */}
                 <div style={{
-                  padding: "20px",
-                  borderRadius: 20,
+                  padding: 20, borderRadius: 20,
                   background: "rgba(255,255,255,0.04)",
-                  backdropFilter: "blur(24px)",
-                  WebkitBackdropFilter: "blur(24px)",
+                  backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
                   border: "1px solid rgba(255,255,255,0.08)",
                   boxShadow: `0 0 40px ${t.c1}06, 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
                   position: "relative", overflow: "hidden",
                 }}>
-                  {/* Corner accent */}
                   <div style={{
                     position: "absolute", top: -1, right: -1, width: 60, height: 60,
                     borderRadius: "0 20px 0 30px",
@@ -467,8 +503,7 @@ function App() {
 
                   <p style={{
                     color: "#fff", fontSize: "0.85rem", fontWeight: 800,
-                    marginBottom: 14, opacity: 0.85, lineHeight: 1.4, margin: "0 0 14px 0",
-                    letterSpacing: "-0.01em",
+                    opacity: 0.85, lineHeight: 1.4, margin: "0 0 14px 0", letterSpacing: "-0.01em",
                   }}>
                     {card.miniGame.question}
                   </p>
@@ -495,8 +530,7 @@ function App() {
                           onClick={() => handleMiniGame(card.id, idx, card.miniGame.correctIndex)}
                           style={{
                             width: "100%", padding: "14px 16px", borderRadius: 14,
-                            border: `1px solid ${borderColor}`,
-                            background: bg,
+                            border: `1px solid ${borderColor}`, background: bg,
                             color: "#fff", fontWeight: 700, fontSize: "0.85rem",
                             textAlign: "center", fontFamily: "inherit",
                             cursor: answered ? "default" : "pointer",
@@ -517,53 +551,17 @@ function App() {
                     <div style={{
                       marginTop: 12, fontSize: "0.7rem", fontWeight: 700,
                       color: isCorrect ? "#06D6A0" : "#E76F51",
-                      letterSpacing: "0.08em", textTransform: "uppercase",
-                      textAlign: "center",
+                      letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center",
                     }}>
                       {isCorrect ? "+1 XP EARNED" : "WRONG — KEEP SWIPING"}
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* TikTok-style sidebar */}
-              <div style={{
-                position: "absolute", right: 12, top: "42%", zIndex: 3,
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
-              }}>
-                {/* Avatar on sidebar */}
-                <div style={{
-                  width: 44, height: 44, borderRadius: "50%", overflow: "hidden",
-                  border: `2px solid ${t.c1}50`, boxShadow: `0 0 14px ${t.c1}30`,
-                }}>
-                  <img src={avatarUrl} alt="" style={{ width:"100%",height:"100%" }} />
-                </div>
-                {/* XP */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                  <div style={{
-                    width: 42, height: 42, borderRadius: "50%", background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    display: "flex", justifyContent: "center", alignItems: "center", fontSize: "16px",
-                  }}>⭐</div>
-                  <span style={{ color: "rgba(255,255,255,0.45)", fontSize: "8px", fontWeight: 800 }}>
-                    {Math.min(progress, 100)}%
-                  </span>
-                </div>
-                {/* Share */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                  <div style={{
-                    width: 42, height: 42, borderRadius: "50%", background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    display: "flex", justifyContent: "center", alignItems: "center", fontSize: "16px",
-                  }}>🔗</div>
-                  <span style={{ color: "rgba(255,255,255,0.45)", fontSize: "8px", fontWeight: 800 }}>SHARE</span>
-                </div>
-              </div>
             </div>
           );
         })}
 
-        {/* Infinite scroll loading indicator */}
         {isFetchingMore && (
           <div style={{
             height: 80, display: "flex", justifyContent: "center", alignItems: "center",
@@ -574,7 +572,7 @@ function App() {
         )}
       </div>
 
-      {/* ─── BOSS QUIZ ─── */}
+      {/* BOSS QUIZ */}
       {quizUnlocked && (
         <div style={{
           position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
@@ -606,7 +604,6 @@ function App() {
                 fontWeight: 900, fontSize: "1rem", fontFamily: "inherit",
                 letterSpacing: "0.06em", textTransform: "uppercase", cursor: "pointer",
                 boxShadow: "0 0 40px rgba(255,217,61,0.3), 0 8px 24px rgba(0,0,0,0.4)",
-                transition: "transform 0.15s ease",
               }}>ENTER ARENA</button>
             </div>
           ) : quizResult === null ? (
