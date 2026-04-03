@@ -42,62 +42,43 @@ const generateCards = async (ageGroup) => {
   }
 };
 
-const pxImg = (id: number) =>
-  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=800&h=1200&dpr=1`;
+const pxVid = (id: number, fps = 25) =>
+  `https://videos.pexels.com/video-files/${id}/${id}-sd_640_360_${fps}fps.mp4`;
+const pxVidHD = (id: number, fps = 25) =>
+  `https://videos.pexels.com/video-files/${id}/${id}-hd_1920_1080_${fps}fps.mp4`;
 
-const imageBank: { keywords: string[]; url: string }[] = [
-  { keywords: ["money", "dollar", "cash", "earn", "income", "wage", "pay", "paid", "salary", "wealth"], url: pxImg(3483098) },
-  { keywords: ["save", "saving", "piggy", "jar", "emergency", "rainy"], url: pxImg(68927) },
-  { keywords: ["invest", "stock", "market", "trade", "portfolio", "dividend", "growth", "compound"], url: pxImg(210607) },
-  { keywords: ["budget", "plan", "track", "expense", "spend", "spending"], url: pxImg(5466785) },
-  { keywords: ["shop", "buy", "purchase", "store", "retail", "consumer", "want"], url: pxImg(5632399) },
-  { keywords: ["coin", "change", "penny", "cent", "quarter"], url: pxImg(106152) },
-  { keywords: ["credit", "card", "debit", "swipe", "debt", "loan", "borrow", "owe"], url: pxImg(4386431) },
-  { keywords: ["business", "entrepreneur", "company", "startup", "hustle", "side"], url: pxImg(3184292) },
-  { keywords: ["toy", "game", "play", "fun", "kid", "child", "lego", "car"], url: pxImg(163696) },
-  { keywords: ["house", "home", "rent", "mortgage", "apartment", "real estate", "property"], url: pxImg(323780) },
-  { keywords: ["food", "eat", "grocery", "meal", "restaurant", "snack", "lunch"], url: pxImg(1640777) },
-  { keywords: ["school", "education", "learn", "college", "university", "student", "book", "tuition"], url: pxImg(301926) },
-  { keywords: ["gold", "treasure", "precious", "diamond", "luxury", "rich"], url: pxImg(610533) },
-  { keywords: ["crypto", "bitcoin", "digital", "blockchain", "nft", "token"], url: pxImg(843700) },
-  { keywords: ["bank", "account", "deposit", "withdraw", "atm", "check", "cheque"], url: pxImg(351264) },
-  { keywords: ["goal", "target", "dream", "future", "retire", "freedom", "success"], url: pxImg(1054218) },
-  { keywords: ["tax", "government", "irs", "refund", "deduction", "filing"], url: pxImg(6863183) },
-  { keywords: ["insurance", "protect", "coverage", "risk", "safety", "secure"], url: pxImg(7876667) },
-  { keywords: ["allowance", "chore", "parent", "family", "gift", "birthday"], url: pxImg(1166990) },
-  { keywords: ["donate", "charity", "give", "help", "volunteer", "share", "generous"], url: pxImg(6646918) },
+const videoBank: { keywords: string[]; url: string; fallback: string }[] = [
+  { keywords: ["money", "dollar", "cash", "earn", "income", "wage", "pay", "salary"], url: pxVidHD(3943716, 25), fallback: pxVid(3943716, 25) },
+  { keywords: ["save", "saving", "piggy", "jar", "emergency", "rainy", "deposit"], url: pxVidHD(5537791, 30), fallback: pxVid(5537791, 30) },
+  { keywords: ["invest", "stock", "market", "trade", "portfolio", "growth", "compound"], url: pxVidHD(7579958, 30), fallback: pxVid(7579958, 30) },
+  { keywords: ["budget", "plan", "track", "expense", "spending", "cost"], url: pxVidHD(5377325, 30), fallback: pxVid(5377325, 30) },
+  { keywords: ["shop", "buy", "purchase", "store", "consumer", "want", "retail"], url: pxVidHD(5632399, 25), fallback: pxVid(5632399, 25) },
+  { keywords: ["coin", "change", "penny", "cent", "quarter", "gold"], url: pxVidHD(3945079, 25), fallback: pxVid(3945079, 25) },
+  { keywords: ["credit", "card", "debit", "swipe", "debt", "loan", "borrow"], url: pxVidHD(4386431, 30), fallback: pxVid(4386431, 30) },
+  { keywords: ["business", "entrepreneur", "company", "startup", "hustle", "side"], url: pxVidHD(3184292, 30), fallback: pxVid(3184292, 30) },
+  { keywords: ["toy", "game", "play", "fun", "kid", "child"], url: pxVidHD(3209037, 25), fallback: pxVid(3209037, 25) },
+  { keywords: ["house", "home", "rent", "mortgage", "apartment", "property"], url: pxVidHD(2510363, 25), fallback: pxVid(2510363, 25) },
+  { keywords: ["food", "eat", "grocery", "meal", "snack", "lunch"], url: pxVidHD(3298572, 25), fallback: pxVid(3298572, 25) },
+  { keywords: ["school", "education", "learn", "college", "book", "tuition"], url: pxVidHD(5198148, 25), fallback: pxVid(5198148, 25) },
+  { keywords: ["crypto", "bitcoin", "digital", "blockchain", "nft"], url: pxVidHD(4992549, 25), fallback: pxVid(4992549, 25) },
+  { keywords: ["bank", "account", "withdraw", "atm", "check"], url: pxVidHD(6266398, 30), fallback: pxVid(6266398, 30) },
+  { keywords: ["goal", "target", "dream", "future", "retire", "freedom", "success"], url: pxVidHD(3129671, 30), fallback: pxVid(3129671, 30) },
+  { keywords: ["tax", "government", "refund", "deduction"], url: pxVidHD(6774733, 30), fallback: pxVid(6774733, 30) },
+  { keywords: ["insurance", "protect", "risk", "safety", "secure"], url: pxVidHD(3195394, 25), fallback: pxVid(3195394, 25) },
+  { keywords: ["allowance", "chore", "parent", "family", "gift"], url: pxVidHD(4812201, 25), fallback: pxVid(4812201, 25) },
+  { keywords: ["donate", "charity", "give", "help", "generous", "share"], url: pxVidHD(4475523, 25), fallback: pxVid(4475523, 25) },
+  { keywords: ["work", "job", "career", "office", "profession"], url: pxVidHD(4063586, 25), fallback: pxVid(4063586, 25) },
+  { keywords: ["rich", "wealth", "luxury", "expensive", "premium", "diamond"], url: pxVidHD(3163534, 30), fallback: pxVid(3163534, 30) },
+  { keywords: ["interest", "rate", "percent", "apy", "yield", "return"], url: pxVidHD(2795167, 25), fallback: pxVid(2795167, 25) },
+  { keywords: ["need", "want", "smart", "wise", "decision", "choice"], url: pxVidHD(857195, 25), fallback: pxVid(857195, 25) },
+  { keywords: ["profit", "revenue", "gain", "win", "reward", "bonus"], url: pxVidHD(852164, 25), fallback: pxVid(852164, 25) },
+  { keywords: ["price", "value", "worth", "deal", "bargain", "discount"], url: pxVidHD(856973, 25), fallback: pxVid(856973, 25) },
+  { keywords: ["wallet", "pocket", "bill", "receipt", "tip"], url: pxVidHD(4763824, 30), fallback: pxVid(4763824, 30) },
+  { keywords: ["team", "group", "partner", "network", "connect"], url: pxVidHD(1851190, 25), fallback: pxVid(1851190, 25) },
+  { keywords: ["phone", "app", "tech", "computer", "online", "digital"], url: pxVidHD(5765826, 25), fallback: pxVid(5765826, 25) },
+  { keywords: ["math", "number", "calculate", "count", "add", "subtract"], url: pxVidHD(2611150, 30), fallback: pxVid(2611150, 30) },
+  { keywords: ["rule", "lesson", "strategy", "method", "system", "habit"], url: pxVidHD(3571264, 25), fallback: pxVid(3571264, 25) },
 ];
-
-const defaultFinanceImages = [
-  pxImg(534216),
-  pxImg(4968391),
-  pxImg(4386476),
-  pxImg(3943716),
-  pxImg(4475523),
-];
-
-function getRelevantImage(title: string, desc: string, index: number): string {
-  const text = `${title} ${desc}`.toLowerCase();
-  let bestMatch: { url: string; score: number } | null = null;
-
-  for (const entry of imageBank) {
-    let score = 0;
-    for (const kw of entry.keywords) {
-      if (text.includes(kw)) score++;
-    }
-    if (score > 0 && (!bestMatch || score > bestMatch.score)) {
-      bestMatch = { url: entry.url, score };
-    }
-  }
-
-  return bestMatch ? bestMatch.url : defaultFinanceImages[index % defaultFinanceImages.length];
-}
-
-const audioByAge: Record<string, string> = {
-  "8-12": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-  "13-16": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-  "17-21": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-};
 
 const slideAccents = [
   { c1: "#FF6B6B", c2: "#FF8E53" },
@@ -106,6 +87,8 @@ const slideAccents = [
   { c1: "#06D6A0", c2: "#118AB2" },
   { c1: "#E040FB", c2: "#536DFE" },
   { c1: "#00B4D8", c2: "#48CAE4" },
+  { c1: "#FF9F1C", c2: "#FF6B6B" },
+  { c1: "#7B61FF", c2: "#00F5D4" },
 ];
 
 function App() {
@@ -123,9 +106,52 @@ function App() {
 
   const [isMuted, setIsMuted] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioReady = useRef(false);
+  const currentSlideRef = useRef(0);
+  const feedRef = useRef<HTMLDivElement | null>(null);
+  const mediaMap = useRef(new Map<string, { videoUrl: string; fallbackUrl: string; songNum: number }>());
+  const usedVideoIndices = useRef(new Set<number>());
+  const songCounter = useRef(0);
 
   const progress = Math.min((completedSlides.length / 3) * 100, 100);
+
+  function assignMedia(lessonId: string, title: string, desc: string) {
+    if (mediaMap.current.has(lessonId)) return mediaMap.current.get(lessonId)!;
+
+    const text = `${title} ${desc}`.toLowerCase();
+    let bestIdx = -1;
+    let bestScore = 0;
+
+    for (let i = 0; i < videoBank.length; i++) {
+      if (usedVideoIndices.current.has(i)) continue;
+      let score = 0;
+      for (const kw of videoBank[i].keywords) {
+        if (text.includes(kw)) score++;
+      }
+      if (score > bestScore) { bestScore = score; bestIdx = i; }
+    }
+
+    if (bestIdx === -1) {
+      for (let i = 0; i < videoBank.length; i++) {
+        if (!usedVideoIndices.current.has(i)) { bestIdx = i; break; }
+      }
+    }
+
+    if (bestIdx === -1) {
+      usedVideoIndices.current.clear();
+      bestIdx = 0;
+    }
+
+    usedVideoIndices.current.add(bestIdx);
+    songCounter.current = (songCounter.current % 16) + 1;
+
+    const entry = {
+      videoUrl: videoBank[bestIdx].url,
+      fallbackUrl: videoBank[bestIdx].fallback,
+      songNum: songCounter.current,
+    };
+    mediaMap.current.set(lessonId, entry);
+    return entry;
+  }
 
   useEffect(() => {
     if (appStarted && ageGroup !== "") {
@@ -134,26 +160,51 @@ function App() {
   }, [appStarted, ageGroup]);
 
   useEffect(() => {
-    if (!appStarted || !ageGroup) return;
+    if (!appStarted) return;
     const audio = new Audio();
     audio.loop = true;
-    audio.volume = 0.25;
+    audio.volume = 0.3;
     audio.crossOrigin = "anonymous";
     audio.preload = "auto";
-    audio.src = audioByAge[ageGroup] || "";
     audioRef.current = audio;
-    audioReady.current = false;
-
-    const onCanPlay = () => { audioReady.current = true; };
-    audio.addEventListener("canplaythrough", onCanPlay);
 
     return () => {
-      audio.removeEventListener("canplaythrough", onCanPlay);
       audio.pause();
       audio.src = "";
       audioRef.current = null;
     };
-  }, [appStarted, ageGroup]);
+  }, [appStarted]);
+
+  useEffect(() => {
+    if (!currentData || !feedRef.current) return;
+
+    const feed = feedRef.current;
+    let lastIndex = -1;
+
+    const detectSlide = () => {
+      const h = window.innerHeight || feed.clientHeight;
+      const idx = Math.round(feed.scrollTop / h);
+      if (idx === lastIndex) return;
+      lastIndex = idx;
+      currentSlideRef.current = idx;
+
+      if (!isMuted && audioRef.current && currentData.lessons[idx]) {
+        const media = mediaMap.current.get(currentData.lessons[idx].id);
+        if (media) {
+          const newSrc = `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${media.songNum}.mp3`;
+          if (audioRef.current.src !== newSrc) {
+            audioRef.current.src = newSrc;
+            audioRef.current.play().catch(() => {});
+          }
+        }
+      }
+    };
+
+    feed.addEventListener("scroll", detectSlide, { passive: true });
+    detectSlide();
+
+    return () => feed.removeEventListener("scroll", detectSlide);
+  }, [currentData, isMuted]);
 
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => {
@@ -163,11 +214,17 @@ function App() {
       if (next) {
         audio.pause();
       } else {
+        if (currentData && currentData.lessons[currentSlideRef.current]) {
+          const media = mediaMap.current.get(currentData.lessons[currentSlideRef.current].id);
+          if (media) {
+            audio.src = `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${media.songNum}.mp3`;
+          }
+        }
         audio.play().catch((err) => console.warn("Audio play blocked:", err));
       }
       return next;
     });
-  }, []);
+  }, [currentData]);
 
   const resetJourney = () => {
     setLoading(true);
@@ -350,7 +407,7 @@ function App() {
         @keyframes optSlide { from{transform:translateX(-16px);opacity:0} to{transform:translateX(0);opacity:1} }
         @keyframes blobA { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-40px) scale(1.15)} 66%{transform:translate(-25px,-15px) scale(.92)} }
         @keyframes blobB { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-40px,30px) scale(.9)} 66%{transform:translate(20px,15px) scale(1.1)} }
-        @keyframes imgFade { from{opacity:0;transform:scale(1.08)} to{opacity:1;transform:scale(1)} }
+        @keyframes vidFade { from{opacity:0;transform:scale(1.06)} to{opacity:1;transform:scale(1)} }
         .mg-opt:active{transform:scale(.95)!important}
         ::-webkit-scrollbar{display:none}
       `}</style>
@@ -395,32 +452,39 @@ function App() {
 
       {/* The Feed */}
       <div
+        ref={feedRef}
         onScroll={handleScroll}
         style={{ height: "100dvh", overflowY: "scroll", scrollSnapType: "y mandatory", overflowX: "hidden", scrollbarWidth: "none" }}
       >
         {currentData.lessons.map((card, index) => {
           const answeredIndex = slideAnswers[card.id];
           const t = slideAccents[index % slideAccents.length];
-          const bgImage = getRelevantImage(card.title, card.desc, index);
-          const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(card.title)}`;
+          const media = assignMedia(card.id, card.title, card.desc);
+          const avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(card.title)}`;
           const isCorrect = answeredIndex !== undefined && answeredIndex === card.miniGame.correctIndex;
 
           return (
-            <div key={card.id} style={{
+            <div key={card.id} data-slide-index={index} style={{
               height: "100dvh", width: "100%", position: "relative",
               scrollSnapAlign: "start", scrollSnapStop: "always", overflow: "hidden", background: "#000",
             }}>
-              {/* Relevant Background Image */}
-              <img
-                src={bgImage}
-                alt=""
-                loading="lazy"
+              {/* Video Background */}
+              <video
+                autoPlay muted loop playsInline
                 style={{
                   position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
                   objectFit: "cover", zIndex: 0, opacity: 0.35,
-                  animation: "imgFade 0.8s ease-out both",
+                  animation: "vidFade 1s ease-out both",
                 }}
-              />
+                onError={(e) => {
+                  const vid = e.currentTarget;
+                  if (vid.src !== media.fallbackUrl) {
+                    vid.src = media.fallbackUrl;
+                  }
+                }}
+              >
+                <source src={media.videoUrl} type="video/mp4" />
+              </video>
 
               {/* Dark gradient overlay */}
               <div style={{
@@ -452,30 +516,22 @@ function App() {
                 {/* Avatar + Title */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
                   <div style={{
-                    width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
+                    width: 48, height: 48, borderRadius: "50%", flexShrink: 0,
                     background: `linear-gradient(135deg, ${t.c1}30, ${t.c2}15)`,
                     border: `2px solid ${t.c1}40`,
                     padding: 3, boxShadow: `0 0 20px ${t.c1}25`,
                     display: "flex", justifyContent: "center", alignItems: "center",
                     overflow: "hidden",
                   }}>
-                    <img src={avatarUrl} alt="AI Tutor" style={{ width: "100%", height: "100%", borderRadius: "50%" }} />
+                    <img src={avatarUrl} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%" }} />
                   </div>
-                  <div>
-                    <h1 style={{
-                      color: "#fff", fontSize: "1.6rem", fontWeight: 900, lineHeight: 1.1,
-                      letterSpacing: "-0.03em", margin: 0,
-                      textShadow: `0 0 30px ${t.c1}30, 0 2px 6px rgba(0,0,0,0.5)`,
-                    }}>
-                      {card.title}
-                    </h1>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: t.c1 }} />
-                      <span style={{ fontSize: "0.6rem", fontWeight: 700, color: `${t.c1}90`, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                        AI TUTOR
-                      </span>
-                    </div>
-                  </div>
+                  <h1 style={{
+                    color: "#fff", fontSize: "1.55rem", fontWeight: 900, lineHeight: 1.1,
+                    letterSpacing: "-0.03em", margin: 0,
+                    textShadow: `0 0 30px ${t.c1}30, 0 2px 6px rgba(0,0,0,0.5)`,
+                  }}>
+                    {card.title}
+                  </h1>
                 </div>
 
                 <p style={{
