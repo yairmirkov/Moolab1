@@ -1,24 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-const generateCards = async (ageGroup: string) => {
+const generateCards = async (ageGroup) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-  const prompt = `You are a fun, engaging financial literacy app. 
-  Generate a lesson plan for a user aged ${ageGroup}.
-  Return ONLY raw JSON. No markdown, no backticks.
-  The JSON must have this exact structure:
-  {
-    "lessons": [
-      { "id": 1, "title": "Catchy Title", "desc": "1-sentence explanation", "color": "#FF595E" },
-      { "id": 2, "title": "...", "desc": "...", "color": "#FFCA3A" },
-      { "id": 3, "title": "...", "desc": "...", "color": "#8AC926" }
-    ],
-    "quiz": {
-      "question": "A multiple choice question based EXACTLY on the lessons above.",
-      "options": ["Answer A", "Answer B", "Answer C", "Answer D"],
-      "correctIndex": 0
-    }
-  }`;
+  let tone = "";
+  if (ageGroup === "8-12") {
+    tone = "You are a fun older sibling. Simple words, many emojis.";
+  } else if (ageGroup === "13-16") {
+    tone = "You are a Gen-Z side-hustler. Fast-paced, slang, real talk.";
+  } else {
+    tone = "You are a Wall Street Shark. Investing, wealth, and leverage.";
+  }
+
+  const prompt = `${tone}
+  Generate 4 unique financial lessons. Return ONLY raw JSON. No markdown.
+  STRICT UI RULES: 
+  - Each question must have EITHER 2 or 3 options (AI choice).
+  - Each option must be MAX 3 words. Short & punchy.
+  - Never generate 4 options.
+  Structure: { "lessons": [{ "id": 1, "title": "Title", "desc": "1-sentence", "color": "#hex", "miniGame": { "question": "Q", "options": ["Option 1", "Option 2"], "correctIndex": 0 } }], "bossQuiz": { "question": "Final Q", "options": ["Option 1", "Option 2", "Option 3"], "correctIndex": 0 } }`;
 
   try {
     const response = await fetch(
@@ -29,28 +29,7 @@ const generateCards = async (ageGroup: string) => {
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
       },
     );
-
     const data = await response.json();
-
-    if (data.error) {
-      console.error("API DENIED US:", data.error.message);
-      return {
-        lessons: [
-          {
-            id: 1,
-            title: "API Error",
-            desc: data.error.message,
-            color: "#E76F51",
-          },
-        ],
-        quiz: {
-          question: "API Error?",
-          options: ["Yes", "No"],
-          correctIndex: 0,
-        },
-      };
-    }
-
     let aiText = data.candidates[0].content.parts[0].text;
     aiText = aiText
       .replace(/```json/g, "")
@@ -58,894 +37,695 @@ const generateCards = async (ageGroup: string) => {
       .trim();
     return JSON.parse(aiText);
   } catch (error) {
-    console.error("Code broke:", error);
-    return {
-      lessons: [
-        { id: 1, title: "Error", desc: "AI Nap time.", color: "#E76F51" },
-      ],
-      quiz: {
-        question: "Error loading?",
-        options: ["Yes", "No"],
-        correctIndex: 0,
-      },
-    };
+    console.error("API Error:", error);
+    return null;
   }
 };
 
-const slideThemes = [
-  {
-    bg: "linear-gradient(160deg, #0f0c29 0%, #302b63 40%, #24243e 100%)",
-    accent: "#FF6B6B",
-    accentAlt: "#FF8E53",
-    emoji: "🔥",
-    tagline: "SWIPE UP TO LEVEL UP",
-    shape: "blob1",
-    cardBg: "linear-gradient(135deg, rgba(255,107,107,0.12) 0%, rgba(255,142,83,0.06) 100%)",
-    borderGlow: "rgba(255,107,107,0.4)",
-  },
-  {
-    bg: "linear-gradient(160deg, #0a1628 0%, #1a0a3e 40%, #0d1117 100%)",
-    accent: "#00F5D4",
-    accentAlt: "#7B61FF",
-    emoji: "💎",
-    tagline: "KNOWLEDGE = POWER",
-    shape: "blob2",
-    cardBg: "linear-gradient(135deg, rgba(0,245,212,0.10) 0%, rgba(123,97,255,0.06) 100%)",
-    borderGlow: "rgba(0,245,212,0.4)",
-  },
-  {
-    bg: "linear-gradient(160deg, #1a1a0a 0%, #2d1f0a 40%, #0a0a14 100%)",
-    accent: "#FFD93D",
-    accentAlt: "#FF6B6B",
-    emoji: "🚀",
-    tagline: "BIG BRAIN MOVE",
-    shape: "blob3",
-    cardBg: "linear-gradient(135deg, rgba(255,217,61,0.10) 0%, rgba(255,107,107,0.06) 100%)",
-    borderGlow: "rgba(255,217,61,0.4)",
-  },
-  {
-    bg: "linear-gradient(160deg, #0a1a0a 0%, #0a2e1a 40%, #0a0f14 100%)",
-    accent: "#06D6A0",
-    accentAlt: "#118AB2",
-    emoji: "💰",
-    tagline: "MONEY MOVES ONLY",
-    shape: "blob1",
-    cardBg: "linear-gradient(135deg, rgba(6,214,160,0.10) 0%, rgba(17,138,178,0.06) 100%)",
-    borderGlow: "rgba(6,214,160,0.4)",
-  },
-  {
-    bg: "linear-gradient(160deg, #1a0a1a 0%, #2e0a2a 40%, #140a14 100%)",
-    accent: "#E040FB",
-    accentAlt: "#536DFE",
-    emoji: "⚡",
-    tagline: "SPEED RUN THIS",
-    shape: "blob2",
-    cardBg: "linear-gradient(135deg, rgba(224,64,251,0.10) 0%, rgba(83,109,254,0.06) 100%)",
-    borderGlow: "rgba(224,64,251,0.4)",
-  },
+const slideVideos = [
+  "https://videos.pexels.com/video-files/3129671/3129671-sd_640_360_30fps.mp4",
+  "https://videos.pexels.com/video-files/857195/857195-sd_640_360_25fps.mp4",
+  "https://videos.pexels.com/video-files/3163534/3163534-sd_640_360_30fps.mp4",
+  "https://videos.pexels.com/video-files/852164/852164-sd_640_360_25fps.mp4",
+  "https://videos.pexels.com/video-files/856973/856973-sd_640_360_25fps.mp4",
+  "https://videos.pexels.com/video-files/4763824/4763824-sd_640_360_30fps.mp4",
+];
+
+const audioByAge: Record<string, string> = {
+  "8-12": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+  "13-16": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+  "17-21": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+};
+
+const slideAccents = [
+  { grad: "linear-gradient(160deg, #0f0c29 0%, #302b63 40%, #24243e 100%)", c1: "#FF6B6B", c2: "#FF8E53" },
+  { grad: "linear-gradient(160deg, #0a1628 0%, #1a0a3e 40%, #0d1117 100%)", c1: "#00F5D4", c2: "#7B61FF" },
+  { grad: "linear-gradient(160deg, #1a1a0a 0%, #2d1f0a 40%, #0a0a14 100%)", c1: "#FFD93D", c2: "#FF6B6B" },
+  { grad: "linear-gradient(160deg, #0a1a0a 0%, #0a2e1a 40%, #0a0f14 100%)", c1: "#06D6A0", c2: "#118AB2" },
+  { grad: "linear-gradient(160deg, #1a0a1a 0%, #2e0a2a 40%, #140a14 100%)", c1: "#E040FB", c2: "#536DFE" },
+  { grad: "linear-gradient(160deg, #0a141a 0%, #0a2a3e 40%, #0a0f17 100%)", c1: "#00B4D8", c2: "#48CAE4" },
 ];
 
 function App() {
-  const [ageGroup, setAgeGroup] = useState("8-12");
-  const [currentData, setCurrentData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [appStarted, setAppStarted] = useState(false);
+  const [ageGroup, setAgeGroup] = useState("");
+  const [currentData, setCurrentData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const isFetchingRef = useRef(false);
+  const [completedSlides, setCompletedSlides] = useState([]);
+  const [slideAnswers, setSlideAnswers] = useState({});
   const [quizUnlocked, setQuizUnlocked] = useState(false);
-
   const [quizStarted, setQuizStarted] = useState(false);
-  const [quizResult, setQuizResult] = useState<boolean | null>(null);
+  const [quizResult, setQuizResult] = useState(null);
+
+  const [isMuted, setIsMuted] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const progress = Math.min((completedSlides.length / 3) * 100, 100);
 
   useEffect(() => {
+    if (appStarted && ageGroup !== "") {
+      resetJourney();
+    }
+  }, [appStarted, ageGroup]);
+
+  useEffect(() => {
+    if (!appStarted || !ageGroup) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.25;
+    }
+    audioRef.current.src = audioByAge[ageGroup] || "";
+    if (!isMuted) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
+    }
+    return () => {
+      if (audioRef.current) audioRef.current.pause();
+    };
+  }, [appStarted, ageGroup, isMuted]);
+
+  const toggleMute = () => {
+    setIsMuted((prev) => {
+      const next = !prev;
+      if (audioRef.current) {
+        if (next) {
+          audioRef.current.pause();
+        } else {
+          audioRef.current.play().catch(() => {});
+        }
+      }
+      return next;
+    });
+  };
+
+  const resetJourney = () => {
     setLoading(true);
-    setProgress(0);
+    setCompletedSlides([]);
+    setSlideAnswers({});
     setQuizUnlocked(false);
     setQuizStarted(false);
     setQuizResult(null);
-
     generateCards(ageGroup).then((newData) => {
-      setCurrentData(newData);
+      if (newData) {
+        newData.lessons = newData.lessons.map((l) => ({
+          ...l,
+          id: Math.random().toString(36).substr(2, 9),
+        }));
+        setCurrentData(newData);
+      }
       setLoading(false);
     });
-  }, [ageGroup]);
+  };
 
-  const handleInteract = () => {
-    if (progress < 100) {
-      const newProgress = progress + 35;
-      if (newProgress >= 100) {
-        setProgress(100);
-        setTimeout(() => setQuizUnlocked(true), 500);
-      } else {
-        setProgress(newProgress);
+  const handleScroll = async (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    if (
+      scrollHeight - scrollTop <= clientHeight * 2 &&
+      !isFetchingRef.current
+    ) {
+      isFetchingRef.current = true;
+      setIsFetchingMore(true);
+      const newData = await generateCards(ageGroup);
+      if (newData && newData.lessons) {
+        const newLessons = newData.lessons.map((l) => ({
+          ...l,
+          id: Math.random().toString(36).substr(2, 9),
+        }));
+        setCurrentData((prev) => ({
+          ...prev,
+          lessons: [...prev.lessons, ...newLessons],
+        }));
       }
+      setIsFetchingMore(false);
+      isFetchingRef.current = false;
     }
   };
 
-  const handleAnswer = (selectedIndex: number) => {
-    if (selectedIndex === currentData.quiz.correctIndex) {
-      setQuizResult(true);
-    } else {
-      setQuizResult(false);
+  const handleMiniGame = (lessonId, selectedIndex, correctIndex) => {
+    if (slideAnswers[lessonId] !== undefined) return;
+    setSlideAnswers((prev) => ({ ...prev, [lessonId]: selectedIndex }));
+    if (selectedIndex === correctIndex) {
+      const newCompleted = [...completedSlides, lessonId];
+      setCompletedSlides(newCompleted);
+      if (newCompleted.length >= 3)
+        setTimeout(() => setQuizUnlocked(true), 800);
     }
   };
 
-  const resetLoop = () => {
-    setProgress(0);
-    setQuizUnlocked(false);
-    setQuizStarted(false);
-    setQuizResult(null);
+  const handleShare = (platform) => {
+    const shareText = `Crushed the ${ageGroup} Boss Fight on WealthScroll! 👑 Check it out:`;
+    const url = window.location.href;
+    if (platform === "native" && navigator.share) {
+      navigator.share({ title: "WealthScroll", text: shareText, url });
+    } else if (platform === "wa") {
+      window.open(
+        `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + url)}`,
+      );
+    } else if (platform === "x") {
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`,
+      );
+    }
   };
 
+  /* ─── SPLASH / AGE SELECT ─── */
+  if (!appStarted) {
+    return (
+      <div style={{
+        width: "100vw", height: "100dvh", background: "linear-gradient(160deg, #0f0c29 0%, #302b63 40%, #24243e 100%)",
+        color: "#fff", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+        fontFamily: "'Inter', system-ui, sans-serif", padding: "20px", position: "relative", overflow: "hidden",
+      }}>
+        <style>{`
+          @keyframes splashFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+          @keyframes splashPulse { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
+          @keyframes orbDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,-50px) scale(1.2)} }
+          @keyframes orbDrift2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-30px,40px) scale(0.9)} }
+          @keyframes ageBtn { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+        `}</style>
+        <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,rgba(255,107,107,0.12) 0%,transparent 70%)",top:"12%",left:"-8%",filter:"blur(50px)",animation:"orbDrift1 8s ease-in-out infinite"}} />
+        <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(0,245,212,0.1) 0%,transparent 70%)",bottom:"15%",right:"-5%",filter:"blur(50px)",animation:"orbDrift2 9s ease-in-out infinite"}} />
+
+        <div style={{fontSize:"4.5rem",marginBottom:8,animation:"splashFloat 3s ease-in-out infinite",filter:"drop-shadow(0 0 30px rgba(255,217,61,0.4))"}}>💸</div>
+        <h1 style={{
+          fontSize: "3rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 4px 0", textAlign: "center",
+          background: "linear-gradient(135deg, #06D6A0, #00F5D4, #118AB2)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        }}>WealthScroll</h1>
+        <p style={{
+          color: "rgba(255,255,255,0.35)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.7rem",
+          marginBottom: 48, textTransform: "uppercase",
+          animation: "splashPulse 3s ease-in-out infinite",
+        }}>SWIPE &middot; LEARN &middot; EARN</p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 320 }}>
+          {[
+            { age: "8-12", label: "EXPLORER", sub: "Ages 8-12", color: "#FFD93D", icon: "🌟" },
+            { age: "13-16", label: "HUSTLER", sub: "Ages 13-16", color: "#FF6B6B", icon: "🔥" },
+            { age: "17-21", label: "INVESTOR", sub: "Ages 17-21", color: "#00F5D4", icon: "💎" },
+          ].map((lvl, i) => (
+            <button
+              key={lvl.age}
+              onClick={() => { setAgeGroup(lvl.age); setAppStarted(true); }}
+              style={{
+                padding: "18px 20px", borderRadius: 18,
+                background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+                color: "#fff", border: `1px solid ${lvl.color}25`,
+                fontWeight: 800, fontSize: "0.95rem", fontFamily: "inherit",
+                display: "flex", alignItems: "center", gap: 14, cursor: "pointer",
+                boxShadow: `0 0 30px ${lvl.color}10, inset 0 1px 0 rgba(255,255,255,0.05)`,
+                animation: `ageBtn 0.5s ease-out ${i * 0.1}s both`,
+                transition: "transform 0.15s ease, border-color 0.2s ease",
+                textAlign: "left",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.02)"; e.currentTarget.style.borderColor = `${lvl.color}60`; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.borderColor = `${lvl.color}25`; }}
+            >
+              <div style={{
+                width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+                background: `linear-gradient(135deg, ${lvl.color}25, ${lvl.color}10)`,
+                border: `1px solid ${lvl.color}30`,
+                display: "flex", justifyContent: "center", alignItems: "center", fontSize: "1.3rem",
+              }}>{lvl.icon}</div>
+              <div>
+                <div style={{ letterSpacing: "0.06em", fontSize: "0.85rem" }}>LVL {i + 1}: {lvl.label}</div>
+                <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.3)", fontWeight: 600, marginTop: 2 }}>{lvl.sub}</div>
+              </div>
+              <div style={{ marginLeft: "auto", color: `${lvl.color}80`, fontSize: "1.2rem" }}>&#8250;</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── LOADING ─── */
   if (loading || !currentData) {
     return (
-      <div
-        style={{
-          height: "100dvh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
-          color: "#fff",
-          fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
+      <div style={{
+        height: "100dvh", display: "flex", justifyContent: "center", alignItems: "center",
+        background: "linear-gradient(160deg, #0f0c29 0%, #302b63 40%, #24243e 100%)",
+        color: "#fff", fontFamily: "'Inter', system-ui, sans-serif", position: "relative", overflow: "hidden",
+      }}>
         <style>{`
-          @keyframes spin { to { transform: rotate(360deg); } }
-          @keyframes loadPulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-          }
-          @keyframes loadFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-          }
-          @keyframes loadDots {
-            0%, 20% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-          }
-          @keyframes orbFloat1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -40px) scale(1.1); }
-            66% { transform: translate(-20px, -20px) scale(0.9); }
-          }
-          @keyframes orbFloat2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(-40px, 30px) scale(0.9); }
-            66% { transform: translate(20px, 10px) scale(1.1); }
-          }
+          @keyframes ldSpin { to{transform:rotate(360deg)} }
+          @keyframes ldBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+          @keyframes ldDot { 0%,20%{opacity:0} 50%{opacity:1} 100%{opacity:0} }
         `}</style>
-        <div style={{
-          position: "absolute", width: 200, height: 200, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(255,107,107,0.15) 0%, transparent 70%)",
-          top: "20%", left: "10%", animation: "orbFloat1 6s ease-in-out infinite",
-        }} />
-        <div style={{
-          position: "absolute", width: 160, height: 160, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(0,245,212,0.12) 0%, transparent 70%)",
-          bottom: "20%", right: "10%", animation: "orbFloat2 7s ease-in-out infinite",
-        }} />
+        <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(6,214,160,0.1) 0%,transparent 70%)",top:"25%",right:"10%",filter:"blur(60px)"}} />
         <div style={{ textAlign: "center", zIndex: 1 }}>
-          <div style={{ fontSize: "4rem", marginBottom: 16, animation: "loadFloat 2s ease-in-out infinite" }}>
-            🧠
-          </div>
-          <div
-            style={{
-              width: 50, height: 50, margin: "0 auto 20px", borderRadius: "50%",
-              border: "3px solid rgba(255,255,255,0.1)",
-              borderTopColor: "#FF6B6B", borderRightColor: "#00F5D4",
-              animation: "spin 0.7s linear infinite",
-            }}
-          />
-          <p style={{
-            fontSize: "1.3rem", fontWeight: 800, letterSpacing: "-0.02em",
-            background: "linear-gradient(90deg, #FF6B6B, #FFD93D, #00F5D4)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            animation: "loadPulse 2s ease-in-out infinite",
-          }}>
-            Cooking up your lesson
+          <div style={{ fontSize: "3.5rem", marginBottom: 16, animation: "ldBounce 2s ease-in-out infinite" }}>🧠</div>
+          <div style={{ width:44,height:44,margin:"0 auto 18px",borderRadius:"50%",border:"3px solid rgba(255,255,255,0.08)",borderTopColor:"#06D6A0",borderRightColor:"#FF6B6B",animation:"ldSpin 0.7s linear infinite" }} />
+          <p style={{ fontSize:"1.15rem",fontWeight:800,letterSpacing:"-0.02em",background:"linear-gradient(90deg,#FF6B6B,#FFD93D,#00F5D4)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
+            Curating your feed...
           </p>
-          <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 8 }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{
-                width: 8, height: 8, borderRadius: "50%",
-                background: ["#FF6B6B", "#FFD93D", "#00F5D4"][i],
-                animation: `loadDots 1.4s ease-in-out ${i * 0.2}s infinite`,
-              }} />
-            ))}
+          <div style={{ display:"flex",gap:5,justifyContent:"center",marginTop:8 }}>
+            {[0,1,2].map(i => <div key={i} style={{width:6,height:6,borderRadius:"50%",background:["#FF6B6B","#FFD93D","#00F5D4"][i],animation:`ldDot 1.4s ease-in-out ${i*0.2}s infinite`}} />)}
           </div>
         </div>
       </div>
     );
   }
 
+  /* ─── MAIN FEED ─── */
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "100vw",
-        maxWidth: "430px",
-        margin: "0 auto",
-        background: "#000",
-        height: "100dvh",
-        overflow: "hidden",
-        fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
-      }}
-    >
+    <div style={{
+      position: "relative", width: "100vw", maxWidth: 430, margin: "0 auto",
+      background: "#000", height: "100dvh", overflow: "hidden",
+      fontFamily: "'Inter', system-ui, sans-serif",
+    }}>
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes popIn {
-          0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
-          50% { transform: scale(1.08) rotate(1deg); opacity: 1; }
-          100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        @keyframes floatGlow {
-          0%, 100% { box-shadow: 0 0 20px var(--glow-color, rgba(6,214,160,0.3)), 0 0 60px var(--glow-color, rgba(6,214,160,0.1)); transform: scale(1); }
-          50% { box-shadow: 0 0 35px var(--glow-color, rgba(6,214,160,0.5)), 0 0 90px var(--glow-color, rgba(6,214,160,0.2)); transform: scale(1.08); }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.15); }
-        }
-        @keyframes slideUpBounce {
-          0% { transform: translateY(60px); opacity: 0; }
-          60% { transform: translateY(-8px); opacity: 1; }
-          100% { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes borderRotate {
-          to { --border-angle: 360deg; }
-        }
-        @keyframes moveBlob1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(40px, -30px) scale(1.15); }
-          50% { transform: translate(-20px, -60px) scale(0.95); }
-          75% { transform: translate(-50px, 10px) scale(1.08); }
-        }
-        @keyframes moveBlob2 {
-          0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-          25% { transform: translate(-50px, 40px) scale(1.1) rotate(45deg); }
-          50% { transform: translate(30px, 50px) scale(0.9) rotate(90deg); }
-          75% { transform: translate(60px, -20px) scale(1.05) rotate(135deg); }
-        }
-        @keyframes moveBlob3 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(50px, 30px) scale(1.2); }
-          66% { transform: translate(-40px, -40px) scale(0.85); }
-        }
-        @keyframes taglineSlide {
-          0% { transform: translateX(-100%); opacity: 0; }
-          15% { transform: translateX(0); opacity: 1; }
-          85% { transform: translateX(0); opacity: 1; }
-          100% { transform: translateX(100%); opacity: 0; }
-        }
-        @keyframes videoPlaceholderPulse {
-          0%, 100% { border-color: rgba(255,255,255,0.08); }
-          50% { border-color: rgba(255,255,255,0.2); }
-        }
-        @keyframes emojiFloat {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          25% { transform: translateY(-12px) rotate(5deg); }
-          75% { transform: translateY(5px) rotate(-3deg); }
-        }
-        @keyframes glowPulse {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.7; transform: scale(1.05); }
-        }
-        @keyframes numberPop {
-          0% { transform: scale(0) rotate(-20deg); opacity: 0; }
-          60% { transform: scale(1.2) rotate(5deg); opacity: 1; }
-          100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        @keyframes confettiBurst {
-          0% { transform: scale(0); opacity: 1; }
-          50% { transform: scale(1.5); opacity: 0.8; }
-          100% { transform: scale(2); opacity: 0; }
-        }
-        @keyframes quizOptionSlide {
-          from { transform: translateX(-20px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        .got-it-btn:active { transform: scale(0.85) !important; }
-        .quiz-option:active { transform: scale(0.96) !important; background: rgba(255,255,255,0.15) !important; }
-        ::-webkit-scrollbar { display: none; }
+        @keyframes popIn { 0%{transform:scale(0.3) rotate(-5deg);opacity:0} 50%{transform:scale(1.08) rotate(1deg);opacity:1} 100%{transform:scale(1) rotate(0deg);opacity:1} }
+        @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+        @keyframes floatBtn { 0%,100%{box-shadow:0 0 18px var(--gc,rgba(6,214,160,.3)),0 0 50px var(--gc,rgba(6,214,160,.1));transform:scale(1)} 50%{box-shadow:0 0 28px var(--gc,rgba(6,214,160,.5)),0 0 70px var(--gc,rgba(6,214,160,.2));transform:scale(1.06)} }
+        @keyframes confetti { 0%{transform:scale(0);opacity:1} 50%{transform:scale(1.5);opacity:.6} 100%{transform:scale(2.2);opacity:0} }
+        @keyframes optSlide { from{transform:translateX(-16px);opacity:0} to{transform:translateX(0);opacity:1} }
+        @keyframes blobA { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-40px) scale(1.15)} 66%{transform:translate(-25px,-15px) scale(.92)} }
+        @keyframes blobB { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-40px,30px) scale(.9)} 66%{transform:translate(20px,15px) scale(1.1)} }
+        @keyframes vidFade { from{opacity:0} to{opacity:1} }
+        .mg-opt:active{transform:scale(.95)!important}
+        .fab:active{transform:scale(.85)!important}
+        ::-webkit-scrollbar{display:none}
       `}</style>
 
-      {/* Header */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          width: "100%",
-          padding: "14px 20px 18px",
-          zIndex: 10,
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          background: "linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 60%, transparent 100%)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: "10px",
-            background: "linear-gradient(135deg, #FF6B6B, #FFD93D)",
-            display: "flex", justifyContent: "center", alignItems: "center",
-            fontSize: "16px", flexShrink: 0,
-          }}>
-            💸
+      {/* HUD Header */}
+      <div style={{
+        position: "absolute", top: 0, width: "100%", padding: "14px 20px 20px", zIndex: 10,
+        background: "linear-gradient(180deg, rgba(0,0,0,.95) 0%, rgba(0,0,0,.65) 60%, transparent 100%)",
+        backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#06D6A0,#00F5D4)",display:"flex",justifyContent:"center",alignItems:"center",fontSize:"13px" }}>💸</div>
+            <span style={{ color:"#fff",fontWeight:900,fontSize:"0.7rem",letterSpacing:"0.12em" }}>WEALTHSCROLL</span>
           </div>
-          <select
-            value={ageGroup}
-            onChange={(e) => setAgeGroup(e.target.value)}
-            style={{
-              flex: 1, padding: "8px 14px", borderRadius: "10px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              fontSize: "12px", fontWeight: 800, fontFamily: "inherit",
-              cursor: "pointer", background: "rgba(255,255,255,0.06)",
-              color: "#fff", letterSpacing: "0.06em", textTransform: "uppercase",
-              outline: "none", appearance: "none", WebkitAppearance: "none",
-            }}
-          >
-            <option value="8-12" style={{ background: "#1a1a2e" }}>LVL 1: Explorer (8-12)</option>
-            <option value="13-16" style={{ background: "#1a1a2e" }}>LVL 2: Hustler (13-16)</option>
-            <option value="17-21" style={{ background: "#1a1a2e" }}>LVL 3: Investor (17-21)</option>
-          </select>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ color:"#06D6A0",fontWeight:800,fontSize:"0.7rem",letterSpacing:"0.08em" }}>
+              TASK {completedSlides.length}/3
+            </span>
+            {/* Mute / Unmute */}
+            <button onClick={toggleMute} style={{
+              width: 32, height: 32, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+              color: "#fff", fontSize: "14px", cursor: "pointer",
+              display: "flex", justifyContent: "center", alignItems: "center",
+            }}>
+              {isMuted ? "🔇" : "🔊"}
+            </button>
+          </div>
         </div>
-
-        {/* XP Progress Bar */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{
-            fontSize: "9px", fontWeight: 800, color: "rgba(255,255,255,0.5)",
-            letterSpacing: "0.1em", textTransform: "uppercase",
-          }}>XP</span>
-          <div
-            style={{
-              flex: 1, height: "5px",
-              backgroundColor: "rgba(255,255,255,0.06)",
-              borderRadius: "10px", overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                width: `${progress}%`,
-                height: "100%",
-                background: progress >= 100
-                  ? "linear-gradient(90deg, #FFD93D, #FF6B6B, #E040FB)"
-                  : "linear-gradient(90deg, #06D6A0, #00F5D4, #00E5FF)",
-                borderRadius: "10px",
-                transition: "width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease",
-                boxShadow: progress > 0 ? "0 0 14px rgba(6,214,160,0.5), 0 0 4px rgba(0,245,212,0.8)" : "none",
-              }}
-            />
-          </div>
-          <span style={{
-            fontSize: "11px", fontWeight: 800,
-            color: progress >= 100 ? "#FFD93D" : "#06D6A0",
-            minWidth: 32, textAlign: "right",
-            textShadow: progress >= 100 ? "0 0 10px rgba(255,217,61,0.5)" : "none",
-          }}>{Math.min(progress, 100)}%</span>
+        <div style={{ width:"100%",height:4,backgroundColor:"rgba(255,255,255,0.06)",borderRadius:4,marginTop:10 }}>
+          <div style={{
+            width: `${progress}%`, height: "100%", borderRadius: 4,
+            background: progress >= 100 ? "linear-gradient(90deg,#FFD93D,#FF6B6B,#E040FB)" : "linear-gradient(90deg,#06D6A0,#00F5D4,#00E5FF)",
+            transition: "width 0.6s cubic-bezier(0.22,1,0.36,1)",
+            boxShadow: progress > 0 ? "0 0 12px rgba(6,214,160,0.5)" : "none",
+          }} />
         </div>
       </div>
 
       {/* The Feed */}
       <div
-        style={{
-          height: "100dvh",
-          overflowY: "scroll",
-          scrollSnapType: "y mandatory",
-          scrollbarWidth: "none",
-        }}
+        onScroll={handleScroll}
+        style={{ height: "100dvh", overflowY: "scroll", scrollSnapType: "y mandatory", overflowX: "hidden", scrollbarWidth: "none" }}
       >
-        {currentData.lessons.map((card: any, index: number) => {
-          const theme = slideThemes[index % slideThemes.length];
-          const slideNum = index + 1;
-          const totalSlides = currentData.lessons.length;
+        {currentData.lessons.map((card, index) => {
+          const answeredIndex = slideAnswers[card.id];
+          const t = slideAccents[index % slideAccents.length];
+          const vid = slideVideos[index % slideVideos.length];
+          const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(card.title)}`;
+          const isCorrect = answeredIndex !== undefined && answeredIndex === card.miniGame.correctIndex;
 
           return (
-            <div
-              key={card.id}
-              style={{
-                height: "100dvh",
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                scrollSnapAlign: "start",
-                scrollSnapStop: "always",
-                padding: "80px 20px 20px",
-                textAlign: "left",
-                position: "relative",
-                background: theme.bg,
-                overflow: "hidden",
-              }}
-            >
+            <div key={card.id} style={{
+              height: "100dvh", width: "100%", position: "relative",
+              scrollSnapAlign: "start", scrollSnapStop: "always", overflow: "hidden", background: "#000",
+            }}>
+              {/* Video Background */}
+              <video
+                autoPlay muted loop playsInline
+                style={{
+                  position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+                  objectFit: "cover", zIndex: 0, opacity: 0.35,
+                  animation: "vidFade 1s ease-out both",
+                }}
+                src={vid}
+              />
+
+              {/* Gradient overlay on top of video */}
+              <div style={{
+                position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1,
+                background: `linear-gradient(180deg, rgba(0,0,0,0.5) 0%, ${t.c1}08 30%, rgba(0,0,0,0.7) 70%, rgba(0,0,0,0.95) 100%)`,
+              }} />
+
               {/* Animated background blobs */}
               <div style={{
-                position: "absolute", width: 220, height: 220, borderRadius: "50%",
-                background: `radial-gradient(circle, ${theme.accent}18 0%, transparent 70%)`,
-                top: "15%", left: "-10%", filter: "blur(40px)",
-                animation: `move${theme.shape.replace('blob','')==='1' ? 'Blob1' : theme.shape.replace('blob','')==='2' ? 'Blob2' : 'Blob3'} ${8 + index}s ease-in-out infinite`,
+                position: "absolute", width: 200, height: 200, borderRadius: "50%",
+                background: `radial-gradient(circle, ${t.c1}15 0%, transparent 70%)`,
+                top: "18%", left: "-8%", filter: "blur(50px)", zIndex: 1,
+                animation: `blobA ${8 + (index % 3)}s ease-in-out infinite`,
               }} />
               <div style={{
-                position: "absolute", width: 180, height: 180, borderRadius: "50%",
-                background: `radial-gradient(circle, ${theme.accentAlt}14 0%, transparent 70%)`,
-                bottom: "20%", right: "-5%", filter: "blur(50px)",
-                animation: `move${theme.shape.replace('blob','')==='1' ? 'Blob2' : theme.shape.replace('blob','')==='2' ? 'Blob3' : 'Blob1'} ${10 + index}s ease-in-out infinite`,
+                position: "absolute", width: 160, height: 160, borderRadius: "50%",
+                background: `radial-gradient(circle, ${t.c2}12 0%, transparent 70%)`,
+                bottom: "25%", right: "-5%", filter: "blur(60px)", zIndex: 1,
+                animation: `blobB ${10 + (index % 3)}s ease-in-out infinite`,
               }} />
 
-              {/* Slide number badge */}
+              {/* Bottom content overlay */}
               <div style={{
-                position: "absolute", top: 90, left: 20,
-                display: "flex", alignItems: "center", gap: 8,
-                animation: `numberPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.2}s both`,
+                position: "absolute", bottom: 0, left: 0, width: "100%",
+                padding: "0 20px 28px", zIndex: 2,
+                background: "linear-gradient(transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.85) 100%)",
+                animation: "slideUp 0.6s ease-out both",
               }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: "8px",
-                  background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentAlt})`,
-                  display: "flex", justifyContent: "center", alignItems: "center",
-                  fontSize: "13px", fontWeight: 900, color: "#000",
-                  boxShadow: `0 0 16px ${theme.accent}40`,
-                }}>
-                  {slideNum}
-                </div>
-                <span style={{
-                  fontSize: "10px", fontWeight: 700, color: "rgba(255,255,255,0.35)",
-                  letterSpacing: "0.1em", textTransform: "uppercase",
-                }}>
-                  / {totalSlides}
-                </span>
-              </div>
-
-              {/* Scrolling tagline */}
-              <div style={{
-                position: "absolute", top: 130, left: 0, width: "100%",
-                overflow: "hidden", height: 20,
-              }}>
-                <div style={{
-                  fontSize: "10px", fontWeight: 800, letterSpacing: "0.2em",
-                  color: `${theme.accent}50`, textTransform: "uppercase",
-                  whiteSpace: "nowrap", paddingLeft: 20,
-                  animation: "taglineSlide 6s ease-in-out infinite",
-                }}>
-                  {theme.tagline} &nbsp;&middot;&nbsp; {theme.tagline} &nbsp;&middot;&nbsp; {theme.tagline}
-                </div>
-              </div>
-
-              {/* Main card content */}
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  maxWidth: "380px",
-                  animation: "slideUpBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both",
-                }}
-              >
-                {/* Video Placeholder - full width, immersive */}
-                <div
-                  style={{
-                    width: "100%",
-                    height: "200px",
-                    borderRadius: "20px",
-                    background: theme.cardBg,
-                    border: "2px solid rgba(255,255,255,0.06)",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: "20px",
-                    position: "relative",
+                {/* Avatar + Title row */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                  <div style={{
+                    width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
+                    background: `linear-gradient(135deg, ${t.c1}30, ${t.c2}15)`,
+                    border: `2px solid ${t.c1}40`,
+                    padding: 3, boxShadow: `0 0 20px ${t.c1}25`,
+                    display: "flex", justifyContent: "center", alignItems: "center",
                     overflow: "hidden",
-                    animation: "videoPlaceholderPulse 3s ease-in-out infinite",
-                  }}
-                >
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: `linear-gradient(120deg, transparent 30%, ${theme.accent}08 50%, transparent 70%)`,
-                    backgroundSize: "200% 100%",
-                    animation: "shimmer 2.5s ease-in-out infinite",
-                  }} />
-                  <div style={{
-                    position: "absolute", bottom: 0, left: 0, right: 0, height: "60%",
-                    background: "linear-gradient(transparent, rgba(0,0,0,0.4))",
-                  }} />
-                  <div style={{ textAlign: "center", zIndex: 1 }}>
-                    <div style={{
-                      fontSize: "3rem",
-                      animation: "emojiFloat 3s ease-in-out infinite",
-                      filter: `drop-shadow(0 0 20px ${theme.accent}60)`,
+                  }}>
+                    <img
+                      src={avatarUrl}
+                      alt="AI Tutor"
+                      style={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                    />
+                  </div>
+                  <div>
+                    <h1 style={{
+                      color: "#fff", fontSize: "1.6rem", fontWeight: 900, lineHeight: 1.1,
+                      letterSpacing: "-0.03em", margin: 0,
+                      textShadow: `0 0 30px ${t.c1}30, 0 2px 6px rgba(0,0,0,0.5)`,
                     }}>
-                      {theme.emoji}
-                    </div>
+                      {card.title}
+                    </h1>
                     <div style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      marginTop: 8, justifyContent: "center",
+                      display: "flex", alignItems: "center", gap: 6, marginTop: 4,
                     }}>
-                      <div style={{
-                        width: 24, height: 24, borderRadius: "50%",
-                        background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentAlt})`,
-                        display: "flex", justifyContent: "center", alignItems: "center",
-                        boxShadow: `0 0 12px ${theme.accent}50`,
-                      }}>
-                        <div style={{
-                          width: 0, height: 0,
-                          borderLeft: "8px solid #fff",
-                          borderTop: "5px solid transparent",
-                          borderBottom: "5px solid transparent",
-                          marginLeft: 2,
-                        }} />
-                      </div>
-                      <span style={{
-                        color: "rgba(255,255,255,0.4)", fontSize: "10px",
-                        fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                      }}>
-                        Video Soon
+                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: t.c1 }} />
+                      <span style={{ fontSize: "0.6rem", fontWeight: 700, color: `${t.c1}90`, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                        AI TUTOR
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Glass Card Content */}
-                <div
-                  style={{
-                    padding: "24px",
-                    borderRadius: "20px",
-                    background: "rgba(255,255,255,0.03)",
-                    backdropFilter: "blur(40px)",
-                    WebkitBackdropFilter: "blur(40px)",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    boxShadow: `0 0 50px ${theme.accent}08, 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
-                    position: "relative",
-                  }}
-                >
-                  {/* Corner glow accent */}
+                <p style={{
+                  color: "rgba(255,255,255,0.75)", marginBottom: 18,
+                  fontSize: "0.95rem", lineHeight: 1.5, fontWeight: 500, margin: "0 0 18px 0",
+                }}>
+                  {card.desc}
+                </p>
+
+                {/* MINI-GAME (Premium Glass Card) */}
+                <div style={{
+                  padding: "20px",
+                  borderRadius: 20,
+                  background: "rgba(255,255,255,0.04)",
+                  backdropFilter: "blur(24px)",
+                  WebkitBackdropFilter: "blur(24px)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  boxShadow: `0 0 40px ${t.c1}06, 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
+                  position: "relative", overflow: "hidden",
+                }}>
+                  {/* Corner accent */}
                   <div style={{
-                    position: "absolute", top: -1, right: -1, width: 80, height: 80,
-                    borderRadius: "0 20px 0 40px",
-                    background: `linear-gradient(225deg, ${theme.accent}20, transparent)`,
+                    position: "absolute", top: -1, right: -1, width: 60, height: 60,
+                    borderRadius: "0 20px 0 30px",
+                    background: `linear-gradient(225deg, ${t.c1}15, transparent)`,
                     pointerEvents: "none",
                   }} />
 
-                  <h1
-                    style={{
-                      color: "#fff",
-                      fontSize: "1.7rem",
-                      fontWeight: 900,
-                      lineHeight: 1.15,
-                      letterSpacing: "-0.03em",
-                      margin: "0 0 10px 0",
-                      background: `linear-gradient(135deg, #fff 60%, ${theme.accent})`,
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    {card.title}
-                  </h1>
-
-                  <p
-                    style={{
-                      color: "rgba(255,255,255,0.65)",
-                      fontSize: "0.95rem",
-                      fontWeight: 500,
-                      lineHeight: 1.6,
-                      margin: 0,
-                    }}
-                  >
-                    {card.desc}
+                  <p style={{
+                    color: "#fff", fontSize: "0.85rem", fontWeight: 800,
+                    marginBottom: 14, opacity: 0.85, lineHeight: 1.4, margin: "0 0 14px 0",
+                    letterSpacing: "-0.01em",
+                  }}>
+                    {card.miniGame.question}
                   </p>
 
-                  {/* Swipe hint */}
-                  <div style={{
-                    marginTop: 16, display: "flex", alignItems: "center", gap: 6,
-                  }}>
-                    <div style={{
-                      width: 16, height: 2, borderRadius: 1,
-                      background: `${theme.accent}40`,
-                    }} />
-                    <span style={{
-                      fontSize: "9px", fontWeight: 700, letterSpacing: "0.12em",
-                      color: `${theme.accent}60`, textTransform: "uppercase",
-                    }}>
-                      Swipe up for more
-                    </span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {card.miniGame.options.map((opt, idx) => {
+                      const answered = answeredIndex !== undefined;
+                      const isSelected = answeredIndex === idx;
+                      const isRight = idx === card.miniGame.correctIndex;
+
+                      let bg = "rgba(255,255,255,0.06)";
+                      let borderColor = "rgba(255,255,255,0.08)";
+                      if (answered && isSelected) {
+                        if (isRight) { bg = "rgba(6,214,160,0.2)"; borderColor = "rgba(6,214,160,0.5)"; }
+                        else { bg = "rgba(231,111,81,0.2)"; borderColor = "rgba(231,111,81,0.5)"; }
+                      } else if (answered && isRight) {
+                        bg = "rgba(6,214,160,0.08)"; borderColor = "rgba(6,214,160,0.25)";
+                      }
+
+                      return (
+                        <button
+                          className="mg-opt"
+                          key={idx}
+                          onClick={() => handleMiniGame(card.id, idx, card.miniGame.correctIndex)}
+                          style={{
+                            width: "100%", padding: "14px 16px", borderRadius: 14,
+                            border: `1px solid ${borderColor}`,
+                            background: bg,
+                            color: "#fff", fontWeight: 700, fontSize: "0.85rem",
+                            textAlign: "center", fontFamily: "inherit",
+                            cursor: answered ? "default" : "pointer",
+                            transition: "transform 0.1s ease, background 0.2s ease, border-color 0.2s ease",
+                            backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+                          }}
+                        >
+                          {opt}
+                          {answered && isSelected && (
+                            <span style={{ marginLeft: 8 }}>{isRight ? "✅" : "❌"}</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
+
+                  {answeredIndex !== undefined && (
+                    <div style={{
+                      marginTop: 12, fontSize: "0.7rem", fontWeight: 700,
+                      color: isCorrect ? "#06D6A0" : "#E76F51",
+                      letterSpacing: "0.08em", textTransform: "uppercase",
+                      textAlign: "center",
+                    }}>
+                      {isCorrect ? "+1 XP EARNED" : "WRONG — KEEP SWIPING"}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Floating TikTok sidebar */}
-              <div
-                style={{
-                  position: "absolute",
-                  right: 12,
-                  bottom: "22%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 20,
-                }}
-              >
-                {/* Got it button */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                  <button
-                    className="got-it-btn"
-                    onClick={handleInteract}
-                    style={{
-                      width: 48, height: 48, borderRadius: "50%",
-                      border: "none",
-                      background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentAlt})`,
-                      color: "#fff", fontSize: "20px", cursor: "pointer",
-                      display: "flex", justifyContent: "center", alignItems: "center",
-                      transition: "transform 0.15s ease",
-                      animation: "floatGlow 2.5s ease-in-out infinite",
-                      ["--glow-color" as any]: `${theme.accent}50`,
-                    }}
-                  >
-                    👍
-                  </button>
-                  <span style={{
-                    color: "rgba(255,255,255,0.5)", fontSize: "9px",
-                    fontWeight: 800, letterSpacing: "0.05em",
-                  }}>
-                    GOT IT
+              {/* TikTok-style sidebar */}
+              <div style={{
+                position: "absolute", right: 12, top: "42%", zIndex: 3,
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
+              }}>
+                {/* Avatar on sidebar */}
+                <div style={{
+                  width: 44, height: 44, borderRadius: "50%", overflow: "hidden",
+                  border: `2px solid ${t.c1}50`, boxShadow: `0 0 14px ${t.c1}30`,
+                }}>
+                  <img src={avatarUrl} alt="" style={{ width:"100%",height:"100%" }} />
+                </div>
+                {/* XP */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                  <div style={{
+                    width: 42, height: 42, borderRadius: "50%", background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    display: "flex", justifyContent: "center", alignItems: "center", fontSize: "16px",
+                  }}>⭐</div>
+                  <span style={{ color: "rgba(255,255,255,0.45)", fontSize: "8px", fontWeight: 800 }}>
+                    {Math.min(progress, 100)}%
                   </span>
                 </div>
-
-                {/* XP indicator */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                {/* Share */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                   <div style={{
-                    width: 48, height: 48, borderRadius: "50%",
-                    background: "rgba(255,255,255,0.06)",
+                    width: 42, height: 42, borderRadius: "50%", background: "rgba(255,255,255,0.06)",
                     border: "1px solid rgba(255,255,255,0.1)",
-                    display: "flex", justifyContent: "center", alignItems: "center",
-                    fontSize: "18px",
-                  }}>
-                    ⭐
-                  </div>
-                  <span style={{
-                    color: "rgba(255,255,255,0.5)", fontSize: "9px",
-                    fontWeight: 800,
-                  }}>
-                    {Math.min(progress, 100)} XP
-                  </span>
-                </div>
-
-                {/* Share-style button */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                  <div style={{
-                    width: 48, height: 48, borderRadius: "50%",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    display: "flex", justifyContent: "center", alignItems: "center",
-                    fontSize: "18px",
-                  }}>
-                    🔗
-                  </div>
-                  <span style={{
-                    color: "rgba(255,255,255,0.5)", fontSize: "9px",
-                    fontWeight: 800,
-                  }}>
-                    SHARE
-                  </span>
+                    display: "flex", justifyContent: "center", alignItems: "center", fontSize: "16px",
+                  }}>🔗</div>
+                  <span style={{ color: "rgba(255,255,255,0.45)", fontSize: "8px", fontWeight: 800 }}>SHARE</span>
                 </div>
               </div>
             </div>
           );
         })}
+
+        {/* Infinite scroll loading indicator */}
+        {isFetchingMore && (
+          <div style={{
+            height: 80, display: "flex", justifyContent: "center", alignItems: "center",
+            color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.1em",
+          }}>
+            LOADING MORE...
+          </div>
+        )}
       </div>
 
-      {/* THE QUIZ ENGINE */}
+      {/* ─── BOSS QUIZ ─── */}
       {quizUnlocked && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0, left: 0, width: "100%", height: "100%",
-            background: "linear-gradient(160deg, #0f0c29 0%, #1a0a3e 40%, #0d1117 100%)",
-            zIndex: 20,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "24px",
-            textAlign: "center",
-            animation: "popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both",
-            overflow: "hidden",
-          }}
-        >
-          {/* Background decoration */}
-          <div style={{
-            position: "absolute", width: 300, height: 300, borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(0,245,212,0.08) 0%, transparent 70%)",
-            top: "10%", left: "-20%", filter: "blur(60px)",
-          }} />
-          <div style={{
-            position: "absolute", width: 250, height: 250, borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(224,64,251,0.06) 0%, transparent 70%)",
-            bottom: "10%", right: "-15%", filter: "blur(60px)",
-          }} />
+        <div style={{
+          position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+          background: "linear-gradient(160deg, #0f0c29 0%, #1a0a3e 40%, #0d1117 100%)",
+          zIndex: 20, display: "flex", flexDirection: "column",
+          justifyContent: "center", alignItems: "center",
+          padding: 28, textAlign: "center",
+          animation: "popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both",
+          overflow: "hidden",
+        }}>
+          <div style={{position:"absolute",width:280,height:280,borderRadius:"50%",background:"radial-gradient(circle,rgba(255,217,61,0.07) 0%,transparent 70%)",top:"8%",left:"-15%",filter:"blur(60px)"}} />
+          <div style={{position:"absolute",width:220,height:220,borderRadius:"50%",background:"radial-gradient(circle,rgba(0,245,212,0.06) 0%,transparent 70%)",bottom:"12%",right:"-10%",filter:"blur(60px)"}} />
 
           {!quizStarted ? (
-            <>
-              {/* Confetti burst ring */}
-              <div style={{
-                position: "absolute", width: 200, height: 200,
-                borderRadius: "50%",
-                border: "2px solid rgba(255,217,61,0.15)",
-                animation: "confettiBurst 2s ease-out infinite",
-              }} />
-              <div style={{
-                fontSize: "5rem", marginBottom: "12px",
-                filter: "drop-shadow(0 0 40px rgba(255,217,61,0.5))",
-                animation: "pulse 1.5s ease-in-out infinite",
-              }}>
-                🎯
-              </div>
+            <div style={{ zIndex: 1 }}>
+              <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)",width:180,height:180,borderRadius:"50%",border:"2px solid rgba(255,217,61,0.12)",animation:"confetti 2.5s ease-out infinite",pointerEvents:"none"}} />
+              <div style={{ fontSize: "5rem", marginBottom: 14, filter: "drop-shadow(0 0 40px rgba(255,217,61,0.5))", animation: "pulse 1.5s ease-in-out infinite" }}>👑</div>
               <h2 style={{
-                color: "#fff", fontSize: "2.4rem", fontWeight: 900,
-                letterSpacing: "-0.04em", margin: "0 0 4px 0",
+                fontSize: "2.6rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 4px 0",
                 background: "linear-gradient(135deg, #FFD93D, #FF6B6B)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-              }}>
-                Challenge Unlocked!
-              </h2>
-              <p style={{
-                color: "rgba(255,255,255,0.45)", fontSize: "0.9rem",
-                fontWeight: 600, margin: "0 0 32px 0",
-                letterSpacing: "0.02em",
-              }}>
-                Time to flex what you just learned
+              }}>BOSS FIGHT</h2>
+              <p style={{ color: "rgba(255,255,255,0.35)", fontWeight: 700, fontSize: "0.75rem", letterSpacing: "0.15em", margin: "0 0 36px 0", textTransform: "uppercase" }}>
+                UNLOCK YOUR NEXT LEVEL
               </p>
-              <button
-                onClick={() => setQuizStarted(true)}
-                style={{
-                  padding: "16px 52px", fontSize: "16px", fontWeight: 900,
-                  fontFamily: "inherit", borderRadius: "14px",
-                  border: "none",
-                  background: "linear-gradient(135deg, #FFD93D, #FF6B6B)",
-                  color: "#000", cursor: "pointer",
-                  letterSpacing: "0.04em", textTransform: "uppercase",
-                  boxShadow: "0 0 40px rgba(255,217,61,0.3), 0 8px 24px rgba(0,0,0,0.4)",
-                  transition: "transform 0.15s ease",
-                }}
-              >
-                Let's Go
-              </button>
-            </>
+              <button onClick={() => setQuizStarted(true)} style={{
+                padding: "18px 56px", borderRadius: 16, border: "none",
+                background: "linear-gradient(135deg, #FFD93D, #FF6B6B)", color: "#000",
+                fontWeight: 900, fontSize: "1rem", fontFamily: "inherit",
+                letterSpacing: "0.06em", textTransform: "uppercase", cursor: "pointer",
+                boxShadow: "0 0 40px rgba(255,217,61,0.3), 0 8px 24px rgba(0,0,0,0.4)",
+                transition: "transform 0.15s ease",
+              }}>ENTER ARENA</button>
+            </div>
           ) : quizResult === null ? (
-            <div style={{ width: "100%", maxWidth: 380, zIndex: 1 }}>
-              <div style={{
-                display: "flex", alignItems: "center", gap: 8,
-                marginBottom: 20,
-              }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: "8px",
-                  background: "linear-gradient(135deg, #7B61FF, #536DFE)",
-                  display: "flex", justifyContent: "center", alignItems: "center",
-                  fontSize: "14px",
-                }}>
-                  🧠
-                </div>
-                <span style={{
-                  fontSize: "10px", fontWeight: 800, color: "rgba(255,255,255,0.4)",
-                  letterSpacing: "0.12em", textTransform: "uppercase",
-                }}>
-                  Pop Quiz
-                </span>
+            <div style={{ width: "100%", maxWidth: 360, zIndex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+                <div style={{ width: 26, height: 26, borderRadius: 8, background: "linear-gradient(135deg, #E040FB, #536DFE)", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "12px" }}>⚡</div>
+                <span style={{ fontSize: "0.65rem", fontWeight: 800, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase" }}>ULTIMATE TEST</span>
               </div>
-
-              <div
-                style={{
-                  padding: "24px 20px",
-                  borderRadius: "20px",
-                  background: "rgba(255,255,255,0.04)",
-                  backdropFilter: "blur(40px)",
-                  WebkitBackdropFilter: "blur(40px)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
-                }}
-              >
+              <div style={{
+                padding: "24px 20px", borderRadius: 20,
+                background: "rgba(255,255,255,0.04)", backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
+              }}>
                 <h3 style={{
-                  color: "#fff", fontSize: "1.15rem", fontWeight: 700,
-                  lineHeight: 1.45, letterSpacing: "-0.01em",
-                  margin: "0 0 20px 0",
+                  color: "#fff", fontSize: "1.2rem", fontWeight: 800, lineHeight: 1.35,
+                  letterSpacing: "-0.02em", margin: "0 0 22px 0",
                 }}>
-                  {currentData.quiz.question}
+                  {currentData.bossQuiz.question}
                 </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {currentData.quiz.options.map(
-                    (option: string, index: number) => {
-                      const optionColors = ["#FF6B6B", "#FFD93D", "#00F5D4", "#7B61FF"];
-                      return (
-                        <button
-                          className="quiz-option"
-                          key={index}
-                          onClick={() => handleAnswer(index)}
-                          style={{
-                            padding: "14px 16px",
-                            fontSize: "14px", fontWeight: 600,
-                            fontFamily: "inherit", borderRadius: "12px",
-                            border: "1px solid rgba(255,255,255,0.06)",
-                            background: "rgba(255,255,255,0.04)",
-                            color: "rgba(255,255,255,0.85)",
-                            cursor: "pointer", textAlign: "left",
-                            transition: "transform 0.1s ease, background 0.15s ease",
-                            display: "flex", alignItems: "center", gap: 12,
-                            animation: `quizOptionSlide 0.4s ease-out ${index * 0.08}s both`,
-                          }}
-                        >
-                          <span style={{
-                            width: 26, height: 26, borderRadius: "8px",
-                            background: `${optionColors[index]}18`,
-                            border: `1px solid ${optionColors[index]}30`,
-                            display: "flex", justifyContent: "center", alignItems: "center",
-                            fontSize: "11px", fontWeight: 900,
-                            color: optionColors[index],
-                            flexShrink: 0,
-                          }}>
-                            {String.fromCharCode(65 + index)}
-                          </span>
-                          {option}
-                        </button>
-                      );
-                    },
-                  )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {currentData.bossQuiz.options.map((opt, i) => {
+                    const colors = ["#FF6B6B", "#FFD93D", "#00F5D4"];
+                    return (
+                      <button
+                        className="mg-opt"
+                        key={i}
+                        onClick={() => setQuizResult(i === currentData.bossQuiz.correctIndex)}
+                        style={{
+                          width: "100%", padding: "15px 16px", borderRadius: 14,
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          background: "rgba(255,255,255,0.05)",
+                          color: "rgba(255,255,255,0.9)", fontWeight: 700,
+                          fontSize: "0.9rem", fontFamily: "inherit",
+                          cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+                          transition: "transform 0.1s ease, background 0.15s ease",
+                          animation: `optSlide 0.4s ease-out ${i * 0.08}s both`,
+                        }}
+                      >
+                        <span style={{
+                          width: 24, height: 24, borderRadius: 7,
+                          background: `${colors[i % 3]}15`, border: `1px solid ${colors[i % 3]}30`,
+                          display: "flex", justifyContent: "center", alignItems: "center",
+                          fontSize: "10px", fontWeight: 900, color: colors[i % 3], flexShrink: 0,
+                        }}>{String.fromCharCode(65 + i)}</span>
+                        {opt}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           ) : (
-            <>
-              <div
-                style={{
-                  fontSize: "5rem", marginBottom: "12px",
-                  filter: quizResult
-                    ? "drop-shadow(0 0 50px rgba(0,245,212,0.6))"
-                    : "drop-shadow(0 0 50px rgba(255,107,107,0.6))",
-                  animation: "popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both",
-                }}
-              >
+            <div style={{ zIndex: 1 }}>
+              <div style={{
+                fontSize: "5rem", marginBottom: 14,
+                filter: quizResult ? "drop-shadow(0 0 50px rgba(0,245,212,0.5))" : "drop-shadow(0 0 50px rgba(255,107,107,0.5))",
+                animation: "popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both",
+              }}>
                 {quizResult ? "🏆" : "💀"}
               </div>
               <h2 style={{
-                fontSize: "2.2rem", fontWeight: 900,
-                letterSpacing: "-0.04em", margin: "0 0 6px 0",
-                background: quizResult
-                  ? "linear-gradient(135deg, #00F5D4, #06D6A0)"
-                  : "linear-gradient(135deg, #FF6B6B, #FF8E53)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                fontSize: "2.4rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 6px 0",
+                background: quizResult ? "linear-gradient(135deg, #00F5D4, #06D6A0)" : "linear-gradient(135deg, #FF6B6B, #FF8E53)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               }}>
-                {quizResult ? "Wall Street Shark!" : "Broke. Try Again."}
+                {quizResult ? "LEGENDARY" : "REKT"}
               </h2>
-              <p style={{
-                color: "rgba(255,255,255,0.4)", fontSize: "0.9rem",
-                fontWeight: 600, margin: "0 0 32px 0",
-              }}>
-                {quizResult ? "Big flex. Your money IQ just leveled up." : "No cap, review the slides and run it back."}
+              <p style={{ color: "rgba(255,255,255,0.35)", fontWeight: 600, fontSize: "0.8rem", margin: "0 0 36px 0" }}>
+                {quizResult ? "Your money IQ just hit a new high." : "Review the lessons and run it back."}
               </p>
-              <button
-                onClick={resetLoop}
-                style={{
-                  padding: "16px 48px", fontSize: "16px", fontWeight: 900,
-                  fontFamily: "inherit", borderRadius: "14px",
-                  border: "none",
-                  background: quizResult
-                    ? "linear-gradient(135deg, #00F5D4, #06D6A0)"
-                    : "linear-gradient(135deg, #FF6B6B, #FF8E53)",
-                  color: "#000", cursor: "pointer",
-                  letterSpacing: "0.04em", textTransform: "uppercase",
-                  boxShadow: quizResult
-                    ? "0 0 40px rgba(0,245,212,0.3), 0 8px 24px rgba(0,0,0,0.4)"
-                    : "0 0 40px rgba(255,107,107,0.3), 0 8px 24px rgba(0,0,0,0.4)",
-                  transition: "transform 0.15s ease",
-                }}
-              >
-                {quizResult ? "Keep Grinding" : "Run It Back"}
-              </button>
-            </>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 300 }}>
+                {quizResult ? (
+                  <>
+                    <button onClick={resetJourney} style={{
+                      padding: 18, borderRadius: 16, border: "none",
+                      background: "linear-gradient(135deg, #06D6A0, #00F5D4)", color: "#000",
+                      fontWeight: 900, fontSize: "0.95rem", fontFamily: "inherit",
+                      letterSpacing: "0.04em", textTransform: "uppercase", cursor: "pointer",
+                      boxShadow: "0 0 30px rgba(6,214,160,0.3), 0 6px 20px rgba(0,0,0,0.4)",
+                    }}>NEW JOURNEY</button>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                      <button onClick={() => handleShare("native")} style={{
+                        padding: 14, borderRadius: 14, background: "rgba(255,255,255,0.06)",
+                        backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+                        border: "1px solid rgba(255,255,255,0.1)", color: "#fff",
+                        fontSize: "0.7rem", fontWeight: 800, fontFamily: "inherit", cursor: "pointer",
+                      }}>SHARE</button>
+                      <button onClick={() => handleShare("wa")} style={{
+                        padding: 14, borderRadius: 14, background: "rgba(37,211,102,0.15)",
+                        backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+                        border: "1px solid rgba(37,211,102,0.3)", color: "#25D366",
+                        fontSize: "0.7rem", fontWeight: 800, fontFamily: "inherit", cursor: "pointer",
+                      }}>WA</button>
+                      <button onClick={() => handleShare("x")} style={{
+                        padding: 14, borderRadius: 14, background: "rgba(255,255,255,0.08)",
+                        backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+                        border: "1px solid rgba(255,255,255,0.15)", color: "#fff",
+                        fontSize: "0.7rem", fontWeight: 800, fontFamily: "inherit", cursor: "pointer",
+                      }}>X</button>
+                    </div>
+                  </>
+                ) : (
+                  <button onClick={() => {
+                    setCompletedSlides((prev) => prev.slice(0, -1));
+                    setQuizUnlocked(false);
+                    setQuizStarted(false);
+                    setQuizResult(null);
+                  }} style={{
+                    padding: 18, borderRadius: 16, border: "none",
+                    background: "linear-gradient(135deg, #FF6B6B, #FF8E53)", color: "#000",
+                    fontWeight: 900, fontSize: "0.95rem", fontFamily: "inherit",
+                    letterSpacing: "0.04em", textTransform: "uppercase", cursor: "pointer",
+                    boxShadow: "0 0 30px rgba(255,107,107,0.3), 0 6px 20px rgba(0,0,0,0.4)",
+                  }}>RETRY</button>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}
