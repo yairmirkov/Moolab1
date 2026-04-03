@@ -47,6 +47,8 @@ const load = (k, d) => {
   return v ? parseInt(v, 10) : d;
 };
 const save = (k, v) => localStorage.setItem(`ws_${k}`, String(v));
+const loadStr = (k, d) => localStorage.getItem(`ws_${k}`) || d;
+const saveStr = (k, v) => localStorage.setItem(`ws_${k}`, v);
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
@@ -65,6 +67,7 @@ function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [muted, setMuted] = useState(false);
+  const [userName, setUserName] = useState(() => loadStr("name", ""));
 
   const [xp, setXp] = useState(() => load("xp", 0));
   const [streak, setStreak] = useState(() => load("streak", 0));
@@ -214,7 +217,23 @@ function App() {
           animation: "splashPulse 3s ease-in-out infinite",
         }}>SWIPE &middot; LEARN &middot; EARN</p>
 
-        <div style={{ display: "flex", gap: 20, marginBottom: 40 }}>
+        <div style={{ width: "100%", maxWidth: 340, marginBottom: 24 }}>
+          <input
+            type="text"
+            placeholder="Enter your name..."
+            value={userName}
+            onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
+            style={{
+              width: "100%", padding: "16px 20px", borderRadius: 16,
+              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+              color: "#fff", fontFamily: FONT, fontWeight: 700, fontSize: "1rem",
+              outline: "none", textAlign: "center", letterSpacing: "0.02em",
+              caretColor: "#06D6A0", boxSizing: "border-box",
+            }}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: 20, marginBottom: 32 }}>
           {[
             { label: "XP", val: xp, color: "#06D6A0" },
             { label: "LVL", val: level, color: "#FFD93D" },
@@ -222,7 +241,7 @@ function App() {
           ].map((s) => (
             <div key={s.label} style={{ textAlign: "center" }}>
               <div style={{ fontSize: "1.5rem", fontWeight: 900, color: s.color, textShadow: `0 0 20px ${s.color}40` }}>{s.val}</div>
-              <div style={{ fontSize: "0.5rem", fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.12em" }}>{s.label}</div>
+              <div style={{ fontSize: "0.55rem", fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.12em" }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -392,7 +411,7 @@ function App() {
               letterSpacing: "0.04em",
             }}
           >
-            💸 PROFILE
+            💸 {userName || "PROFILE"}
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{
@@ -511,7 +530,7 @@ function App() {
                       width: 48,
                       height: 48,
                       borderRadius: "50%",
-                      background: "rgba(255,255,255,0.08)",
+                      background: "transparent",
                       border: "2px solid rgba(6,214,160,0.4)",
                       boxShadow: "0 0 15px rgba(6,214,160,0.15)",
                     }}
@@ -709,7 +728,7 @@ function App() {
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             margin: "0 0 6px 0",
           }}>
-            YOUR PROFILE
+            {userName ? userName.toUpperCase() : "YOUR PROFILE"}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontWeight: 600, margin: "0 0 30px 0" }}>
             {xp} / {level * 50} XP to next level
@@ -754,6 +773,14 @@ function App() {
             left: 0,
             width: "100%",
             height: "100%",
+            backgroundColor: "#050505",
+            zIndex: 100,
+          }}
+        >
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
             animation: quizResult === null
               ? "arenaPulse 2s ease-in-out infinite"
               : quizResult === false
@@ -761,8 +788,7 @@ function App() {
                 : undefined,
             background: quizResult === true
               ? "radial-gradient(ellipse at center, rgba(6,214,160,0.08) 0%, #050505 60%, #020202 100%)"
-              : "#050505",
-            zIndex: 100,
+              : "transparent",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -1020,6 +1046,7 @@ function App() {
               </div>
             </div>
           )}
+        </div>
         </div>
       )}
     </div>
