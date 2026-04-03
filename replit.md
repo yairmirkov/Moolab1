@@ -71,9 +71,13 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 
 ### Landing Page
 - `src/LandingPage.tsx` — informational marketing page shown first on app load
-- Sections: Hero ("STOP SCROLLING. START EARNING."), Features (4 cards), Three Identities (Explorer/Hustler/Investor), Parental Command Center, Mastermind Subscription (coming soon), Final CTA
+- Sections: Hero ("STOP SCROLLING. START EARNING."), Features (4 cards), Three Identities (Explorer/Hustler/Investor), Parental Command Center, Mastermind Subscription (coming soon), Parent Login form, Final CTA
+- App Store & Google Play download badges in hero and final CTA sections
+- Stripe & PayPal trust logos in subscription section and footer
+- Parent Login section with email/password form; clicking Sign In triggers `onParentLogin` (routes to parent onboarding step 2)
+- Nav bar has "Parent Login" button (desktop) and "Launch App" button
 - Uses Tailwind CSS with Mint Fresh emerald palette
-- Accepts `onEnterApp` prop; clicking "Launch App" transitions to onboarding with fade-in animation
+- Accepts `onEnterApp` and `onParentLogin` props
 - `showLanding` state in App.tsx controls visibility; persists per session only (shows on every fresh load)
 
 ### Sign-Up / Onboarding Flow

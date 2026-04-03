@@ -230,11 +230,21 @@ function App() {
 
   if (showLanding) {
     return (
-      <LandingPage onEnterApp={() => {
-        setShowLanding(false);
-        setFadeIn(true);
-        setTimeout(() => setFadeIn(false), 700);
-      }} />
+      <LandingPage
+        onEnterApp={() => {
+          setShowLanding(false);
+          setFadeIn(true);
+          setTimeout(() => setFadeIn(false), 700);
+        }}
+        onParentLogin={() => {
+          setAccountType("parent");
+          saveStr("acctType", "parent");
+          setOnboardStep(2);
+          setShowLanding(false);
+          setFadeIn(true);
+          setTimeout(() => setFadeIn(false), 700);
+        }}
+      />
     );
   }
 
