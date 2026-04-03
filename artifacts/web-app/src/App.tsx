@@ -3,14 +3,14 @@ import LandingPage from "./LandingPage";
 import LandingPageES from "./LandingPageES";
 
 const MODULES = [
-  { id: 0, name: "Saving Basics", icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 3 },
-  { id: 1, name: "Smart Budgeting", icon: "📊", topic: "budgeting, tracking expenses, needs vs wants, spending plans", winsNeeded: 3 },
-  { id: 2, name: "Earning Money", icon: "💰", topic: "earning income, allowance, side hustles, entrepreneurship", winsNeeded: 3 },
-  { id: 3, name: "Investing 101", icon: "📈", topic: "investing basics, stocks, compound interest, index funds", winsNeeded: 3 },
-  { id: 4, name: "Credit & Debt", icon: "💳", topic: "credit scores, debt management, loans, interest rates", winsNeeded: 3 },
-  { id: 5, name: "Taxes & Gov", icon: "🏛️", topic: "taxes, government spending, tax filing, deductions", winsNeeded: 3 },
-  { id: 6, name: "Real Estate", icon: "🏠", topic: "real estate, renting vs buying, mortgages, property value", winsNeeded: 3 },
-  { id: 7, name: "Crypto & Digital", icon: "🪙", topic: "cryptocurrency, digital assets, blockchain, DeFi basics", winsNeeded: 3 },
+  { id: 0, name: "Saving Basics", icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
+  { id: 1, name: "Smart Budgeting", icon: "📊", topic: "budgeting, tracking expenses, needs vs wants, spending plans", winsNeeded: 10 },
+  { id: 2, name: "Earning Money", icon: "💰", topic: "earning income, allowance, side hustles, entrepreneurship", winsNeeded: 10 },
+  { id: 3, name: "Investing 101", icon: "📈", topic: "investing basics, stocks, compound interest, index funds", winsNeeded: 10 },
+  { id: 4, name: "Credit & Debt", icon: "💳", topic: "credit scores, debt management, loans, interest rates", winsNeeded: 10 },
+  { id: 5, name: "Taxes & Gov", icon: "🏛️", topic: "taxes, government spending, tax filing, deductions", winsNeeded: 10 },
+  { id: 6, name: "Real Estate", icon: "🏠", topic: "real estate, renting vs buying, mortgages, property value", winsNeeded: 10 },
+  { id: 7, name: "Crypto & Digital", icon: "🪙", topic: "cryptocurrency, digital assets, blockchain, DeFi basics", winsNeeded: 10 },
 ];
 
 const shuffleOptions = (options: string[], correctIndex: number) => {
@@ -32,7 +32,7 @@ const generateCards = async (ageGroup, topic?: string) => {
         ? "Gen-Z expert (13-17)."
         : "Real-world mentor (18-21).";
   const topicLine = topic ? ` All lessons MUST focus on the topic of: ${topic}.` : "";
-  const prompt = `${persona} Generate 4 unique financial lessons.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0}}`;
+  const prompt = `${persona} Generate 10 unique financial lessons with diverse topics. Each lesson MUST have a completely different question - never repeat similar questions.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0}}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -228,7 +228,7 @@ function App() {
   const [isMuted, setIsMuted] = useState(false);
   const feedRef = useRef<HTMLDivElement | null>(null);
 
-  const progress = Math.min((completedSlides.length / 3) * 100, 100);
+  const progress = Math.min((completedSlides.length / 5) * 100, 100);
 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [flashGreen, setFlashGreen] = useState(false);
@@ -294,15 +294,16 @@ function App() {
       setScrollProgress(Math.min((scrollTop / maxScroll) * 100, 100));
     }
 
-    if (
-      scrollHeight - scrollTop <= clientHeight * 1.5 &&
-      !isFetchingRef.current
-    ) {
+    const currentSlideIdx = Math.round(scrollTop / clientHeight);
+    const totalSlides = currentData.lessons?.length || 0;
+    const slidesFromEnd = totalSlides - currentSlideIdx;
+
+    if (slidesFromEnd <= 3 && !isFetchingRef.current) {
       isFetchingRef.current = true;
       setIsFetchingMore(true);
       const newData = await generateCards(ageGroup, currentModule?.topic);
       if (newData) {
-        const nl = newData.lessons.map((l) => ({
+        const nl = newData.lessons.slice(0, 5).map((l) => ({
           ...l,
           id: Math.random().toString(36).substr(2, 9),
         }));
@@ -1029,7 +1030,7 @@ function App() {
             marginLeft: 4, padding: "2px 6px", borderRadius: 6,
             background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.2)",
           }}>
-            {currentModuleWins}/{currentModule?.winsNeeded || 3}
+            {currentModuleWins}/{currentModule?.winsNeeded || 10}
           </span>
         </button>
         </div>
@@ -1331,7 +1332,7 @@ function App() {
                                 setCompletedSlides((p) => [...p, card.id]);
                                 setXp((p) => p + 10);
                                 triggerGreenFlash();
-                                if (completedSlides.length + 1 >= 3)
+                                if (completedSlides.length + 1 >= 5)
                                   setTimeout(() => setQuizUnlocked(true), 800);
                               }
                             }
@@ -1553,7 +1554,7 @@ function App() {
                 ? "arenaPulseLose 1.5s ease-in-out infinite"
                 : undefined,
             background: quizResult === true
-              ? "radial-gradient(ellipse at center, rgba(6,214,160,0.08) 0%, #050505 60%, #020202 100%)"
+              ? "radial-gradient(ellipse at center, rgba(6,214,160,0.04) 0%, #050505 50%, #020202 100%)"
               : "transparent",
             display: "flex",
             flexDirection: "column",
@@ -1584,7 +1585,7 @@ function App() {
                 PROVE YOUR KNOWLEDGE
               </p>
               <p style={{ color: "rgba(255,255,255,0.2)", fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.06em", marginBottom: 36 }}>
-                {currentModule?.icon} {currentModule?.name?.toUpperCase()} &middot; WIN {currentModuleWins + 1}/{currentModule?.winsNeeded || 3}
+                {currentModule?.icon} {currentModule?.name?.toUpperCase()} &middot; WIN {currentModuleWins + 1}/{currentModule?.winsNeeded || 10}
               </p>
               {!quizStarted ? (
                 <button
@@ -1655,7 +1656,7 @@ function App() {
                                 const newProg = { ...prev };
                                 const curWins = (newProg[currentModuleIdx] || 0) + 1;
                                 newProg[currentModuleIdx] = curWins;
-                                if (curWins >= (currentModule?.winsNeeded || 3)) {
+                                if (curWins >= (currentModule?.winsNeeded || 10)) {
                                   setTimeout(() => {
                                     if (currentModuleIdx < MODULES.length - 1) {
                                       setCurrentModuleIdx((p) => p + 1);
@@ -1733,22 +1734,23 @@ function App() {
               <h1 style={{
                 fontSize: "5.5rem",
                 filter: quizResult
-                  ? "drop-shadow(0 0 40px rgba(6,214,160,0.5))"
+                  ? "drop-shadow(0 0 40px rgba(255,217,61,0.5))"
                   : "drop-shadow(0 0 40px rgba(255,107,107,0.5))",
               }}>{pick.emoji}</h1>
               <h2 style={{
                 color: "#fff", fontSize: "2.6rem", fontWeight: 900,
                 letterSpacing: "-0.03em", margin: "0 0 6px 0",
                 background: quizResult
-                  ? "linear-gradient(135deg, #00F5D4, #06D6A0)"
+                  ? "linear-gradient(135deg, #FFD93D, #FFFFFF, #FFD93D)"
                   : "linear-gradient(135deg, #FF6B6B, #FF8E53)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               }}>
                 {pick.title}
               </h2>
               <p style={{
-                color: quizResult ? "rgba(6,214,160,0.7)" : "rgba(255,107,107,0.7)",
+                color: quizResult ? "rgba(255,255,255,0.75)" : "rgba(255,107,107,0.7)",
                 margin: "8px 0 20px 0", fontWeight: 700, fontSize: "0.85rem",
+                textShadow: "0 1px 6px rgba(0,0,0,0.5)",
               }}>
                 {quizResult ? `${pick.sub} +50 XP earned!` : pick.sub}
               </p>
