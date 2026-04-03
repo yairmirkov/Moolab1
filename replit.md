@@ -69,6 +69,13 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - `useEffect` on `quizResult === true` fires interval then calls `resetJourney()`
 - Countdown pulses when ≤ 3 seconds remaining
 
+### Landing Page
+- `src/LandingPage.tsx` — informational marketing page shown first on app load
+- Sections: Hero ("STOP SCROLLING. START EARNING."), Features (4 cards), Three Identities (Explorer/Hustler/Investor), Parental Command Center, Mastermind Subscription (coming soon), Final CTA
+- Uses Tailwind CSS with Mint Fresh emerald palette
+- Accepts `onEnterApp` prop; clicking "Launch App" transitions to onboarding with fade-in animation
+- `showLanding` state in App.tsx controls visibility; persists per session only (shows on every fresh load)
+
 ### Sign-Up / Onboarding Flow
 - 3-step onboarding: (0) Welcome splash → (1) Who's signing up? (Kid/Teen vs Parent) → (2) Form
 - **Learner path**: name + birth year

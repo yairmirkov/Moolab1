@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import LandingPage from "./LandingPage";
 
 const MODULES = [
   { id: 0, name: "Saving Basics", icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 3 },
@@ -105,6 +106,8 @@ function App() {
   });
   const [showModuleMap, setShowModuleMap] = useState(false);
   const [showParentDash, setShowParentDash] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
 
   const [xp, setXp] = useState(() => load("xp", 0));
   const [streak, setStreak] = useState(() => load("streak", 0));
@@ -224,6 +227,16 @@ function App() {
     setFlashGreen(true);
     setTimeout(() => setFlashGreen(false), 300);
   };
+
+  if (showLanding) {
+    return (
+      <LandingPage onEnterApp={() => {
+        setShowLanding(false);
+        setFadeIn(true);
+        setTimeout(() => setFadeIn(false), 700);
+      }} />
+    );
+  }
 
   if (!appStarted) {
     const canFinish = accountType === "parent"
@@ -446,9 +459,11 @@ function App() {
           padding: 20,
           position: "relative",
           overflow: "hidden",
+          animation: fadeIn ? "appFadeIn 0.7s ease-out both" : undefined,
         }}
       >
         <style>{`
+          @keyframes appFadeIn { from{opacity:0;transform:scale(0.98)} to{opacity:1;transform:scale(1)} }
           @keyframes splashFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
           @keyframes splashPulse { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.04)} }
           @keyframes orbDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-40px) scale(1.15)} }
