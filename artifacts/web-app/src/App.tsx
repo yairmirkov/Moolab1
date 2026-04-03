@@ -1,22 +1,28 @@
 import { useState, useEffect } from "react";
 
-// 1. The API call function (The Brain)
 const generateCards = async (ageGroup: string) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-  // The specific prompt we send to the AI
   const prompt = `You are a fun, engaging financial literacy app. 
-  Generate 3 short financial lessons for a user aged ${ageGroup}. 
-  Return ONLY a raw JSON array of objects. Do not include markdown formatting or the word 'json'. 
-  Each object must have exactly these keys:
-  "id" (number 1, 2, or 3),
-  "title" (a short, catchy title with an emoji),
-  "desc" (a 1-sentence explanation),
-  "color" (a bright, modern hex color code like "#FF595E").`;
+  Generate a lesson plan for a user aged ${ageGroup}.
+  Return ONLY raw JSON. No markdown, no backticks.
+  The JSON must have this exact structure:
+  {
+    "lessons": [
+      { "id": 1, "title": "Catchy Title 🚀", "desc": "1-sentence explanation", "color": "#FF595E" },
+      { "id": 2, "title": "...", "desc": "...", "color": "#FFCA3A" },
+      { "id": 3, "title": "...", "desc": "...", "color": "#8AC926" }
+    ],
+    "quiz": {
+      "question": "A multiple choice question based EXACTLY on the lessons above.",
+      "options": ["Answer A", "Answer B", "Answer C", "Answer D"],
+      "correctIndex": 0
+    }
+  }`;
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -26,42 +32,66 @@ const generateCards = async (ageGroup: string) => {
 
     const data = await response.json();
 
-    // Cleaning up the AI's response to turn it into usable data
+    if (data.error) {
+      console.error("API DENIED US:", data.error.message);
+      return {
+        lessons: [
+          {
+            id: 1,
+            title: "⚠️ API Error",
+            desc: data.error.message,
+            color: "#E76F51",
+          },
+        ],
+        quiz: {
+          question: "API Error?",
+          options: ["Yes", "No"],
+          correctIndex: 0,
+        },
+      };
+    }
+
     let aiText = data.candidates[0].content.parts[0].text;
     aiText = aiText
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-
     return JSON.parse(aiText);
   } catch (error) {
-    console.error("AI Error:", error);
-    return [
-      {
-        id: 1,
-        title: "⚠️ Error",
-        desc: "The AI is taking a nap. Try again!",
-        color: "#E76F51",
+    console.error("Code broke:", error);
+    return {
+      lessons: [
+        { id: 1, title: "⚠️ Error", desc: "AI Nap time.", color: "#E76F51" },
+      ],
+      quiz: {
+        question: "Error loading?",
+        options: ["Yes", "No"],
+        correctIndex: 0,
       },
-    ];
+    };
   }
 };
 
 function App() {
   const [ageGroup, setAgeGroup] = useState("8-12");
-  const [currentCards, setCurrentCards] = useState<any[]>([]); // Data is empty until AI loads
-  const [loading, setLoading] = useState(true); // Loading screen state
+  const [currentData, setCurrentData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [quizUnlocked, setQuizUnlocked] = useState(false);
 
-  // 2. The Trigger: Every time the age dropdown changes, call the AI
+  // NEW: Quiz State
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [quizResult, setQuizResult] = useState<boolean | null>(null);
+
   useEffect(() => {
     setLoading(true);
     setProgress(0);
     setQuizUnlocked(false);
+    setQuizStarted(false);
+    setQuizResult(null);
 
-    generateCards(ageGroup).then((newCards) => {
-      setCurrentCards(newCards);
+    generateCards(ageGroup).then((newData) => {
+      setCurrentData(newData);
       setLoading(false);
     });
   }, [ageGroup]);
@@ -78,6 +108,39 @@ function App() {
     }
   };
 
+  const handleAnswer = (selectedIndex: number) => {
+    if (selectedIndex === currentData.quiz.correctIndex) {
+      setQuizResult(true);
+    } else {
+      setQuizResult(false);
+    }
+  };
+
+  const resetLoop = () => {
+    setProgress(0);
+    setQuizUnlocked(false);
+    setQuizStarted(false);
+    setQuizResult(null);
+  };
+
+  if (loading || !currentData) {
+    return (
+      <div
+        style={{
+          height: "100dvh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#111",
+          color: "#fff",
+          fontSize: "1.5rem",
+        }}
+      >
+        <p>🤖 AI is building your lesson...</p>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -86,7 +149,7 @@ function App() {
         maxWidth: "400px",
         margin: "0 auto",
         backgroundColor: "#000",
-        height: "100vh",
+        height: "100dvh",
         overflow: "hidden",
         fontFamily: "sans-serif",
       }}
@@ -122,8 +185,6 @@ function App() {
           <option value="13-16">Level 2: Hustler (Age 13-16)</option>
           <option value="17-21">Level 3: Investor (Age 17-21)</option>
         </select>
-
-        {/* Progress Bar */}
         <div
           style={{
             width: "100%",
@@ -144,91 +205,74 @@ function App() {
         </div>
       </div>
 
-      {/* 3. The Loading Screen */}
-      {loading ? (
-        <div
-          style={{
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#111",
-            color: "#fff",
-            fontSize: "1.5rem",
-          }}
-        >
-          <p>🤖 AI is thinking...</p>
-        </div>
-      ) : (
-        /* The Feed */
-        <div
-          style={{
-            height: "100vh",
-            overflowY: "scroll",
-            scrollSnapType: "y mandatory",
-          }}
-        >
-          {currentCards.map((card) => (
-            <div
-              key={card.id}
+      {/* The Feed */}
+      <div
+        style={{
+          height: "100dvh",
+          overflowY: "scroll",
+          scrollSnapType: "y mandatory",
+        }}
+      >
+        {currentData.lessons.map((card: any) => (
+          <div
+            key={card.id}
+            style={{
+              height: "100dvh",
+              width: "100%",
+              backgroundColor: card.color,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              scrollSnapAlign: "start",
+              scrollSnapStop: "always",
+              padding: "20px",
+              textAlign: "center",
+            }}
+          >
+            <h1
               style={{
-                height: "100vh",
-                width: "100%",
-                backgroundColor: card.color,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                scrollSnapAlign: "start",
-                padding: "20px",
-                textAlign: "center",
+                color: "#fff",
+                fontSize: "2.5rem",
+                marginBottom: "10px",
+                textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
               }}
             >
-              <h1
-                style={{
-                  color: "#fff",
-                  fontSize: "2.5rem",
-                  marginBottom: "10px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                {card.title}
-              </h1>
-              <p
-                style={{
-                  color: "#fff",
-                  fontSize: "1.2rem",
-                  maxWidth: "80%",
-                  opacity: 0.9,
-                  fontWeight: "500",
-                  marginBottom: "30px",
-                }}
-              >
-                {card.desc}
-              </p>
+              {card.title}
+            </h1>
+            <p
+              style={{
+                color: "#fff",
+                fontSize: "1.2rem",
+                maxWidth: "80%",
+                opacity: 0.9,
+                fontWeight: "500",
+                marginBottom: "30px",
+              }}
+            >
+              {card.desc}
+            </p>
+            <button
+              onClick={handleInteract}
+              style={{
+                padding: "15px 30px",
+                fontSize: "18px",
+                fontWeight: "bold",
+                borderRadius: "30px",
+                border: "none",
+                backgroundColor: "#fff",
+                color: "#000",
+                cursor: "pointer",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+              }}
+            >
+              Got it! 👍
+            </button>
+          </div>
+        ))}
+      </div>
 
-              <button
-                onClick={handleInteract}
-                style={{
-                  padding: "15px 30px",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  borderRadius: "30px",
-                  border: "none",
-                  backgroundColor: "#fff",
-                  color: "#000",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                }}
-              >
-                Got it! 👍
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* The Quiz Modal */}
+      {/* THE QUIZ ENGINE */}
       {quizUnlocked && (
         <div
           style={{
@@ -237,7 +281,7 @@ function App() {
             left: 0,
             width: "100%",
             height: "100%",
-            backgroundColor: "rgba(0,0,0,0.95)",
+            backgroundColor: "#111",
             zIndex: 20,
             display: "flex",
             flexDirection: "column",
@@ -247,32 +291,117 @@ function App() {
             textAlign: "center",
           }}
         >
-          <h1
-            style={{ color: "#06D6A0", fontSize: "3rem", marginBottom: "10px" }}
-          >
-            🎯
-          </h1>
-          <h2 style={{ color: "#fff", fontSize: "2rem", marginBottom: "20px" }}>
-            Daily Challenge Unlocked!
-          </h2>
-          <button
-            onClick={() => {
-              setProgress(0);
-              setQuizUnlocked(false);
-            }}
-            style={{
-              padding: "15px 40px",
-              fontSize: "20px",
-              fontWeight: "bold",
-              borderRadius: "30px",
-              border: "none",
-              backgroundColor: "#06D6A0",
-              color: "#fff",
-              cursor: "pointer",
-            }}
-          >
-            Start Quiz 🚀
-          </button>
+          {!quizStarted ? (
+            // Pre-Quiz Screen
+            <>
+              <h1
+                style={{
+                  color: "#06D6A0",
+                  fontSize: "4rem",
+                  marginBottom: "10px",
+                }}
+              >
+                🎯
+              </h1>
+              <h2
+                style={{
+                  color: "#fff",
+                  fontSize: "2rem",
+                  marginBottom: "20px",
+                }}
+              >
+                Challenge Unlocked!
+              </h2>
+              <button
+                onClick={() => setQuizStarted(true)}
+                style={{
+                  padding: "15px 40px",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  borderRadius: "30px",
+                  border: "none",
+                  backgroundColor: "#06D6A0",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                Start Quiz 🚀
+              </button>
+            </>
+          ) : quizResult === null ? (
+            // The Actual Quiz
+            <div style={{ width: "100%" }}>
+              <h3
+                style={{
+                  color: "#fff",
+                  fontSize: "1.5rem",
+                  marginBottom: "30px",
+                }}
+              >
+                {currentData.quiz.question}
+              </h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                {currentData.quiz.options.map(
+                  (option: string, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => handleAnswer(index)}
+                      style={{
+                        padding: "15px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        borderRadius: "15px",
+                        border: "none",
+                        backgroundColor: "#333",
+                        color: "#fff",
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                    >
+                      {option}
+                    </button>
+                  ),
+                )}
+              </div>
+            </div>
+          ) : (
+            // The Result Screen
+            <>
+              <h1 style={{ fontSize: "4rem", marginBottom: "10px" }}>
+                {quizResult ? "🏆" : "💀"}
+              </h1>
+              <h2
+                style={{
+                  color: "#fff",
+                  fontSize: "2rem",
+                  marginBottom: "20px",
+                }}
+              >
+                {quizResult ? "Wall Street Shark!" : "Broke. Try Again."}
+              </h2>
+              <button
+                onClick={resetLoop}
+                style={{
+                  padding: "15px 40px",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  borderRadius: "30px",
+                  border: "none",
+                  backgroundColor: quizResult ? "#06D6A0" : "#E76F51",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                Keep Learning
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
