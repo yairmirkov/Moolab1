@@ -56,9 +56,10 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - Subject bar in HUD shows "MODULE X: SUBJECT" with 3-pip progress indicators
 
 ### Multimedia Features
-- **Video backgrounds**: 30-entry `videoBank` with keyword-matched Pexels SD videos (ALL SD via `pxVid()` for instant mobile loading). `usedVideoIndices` ref prevents repeats; clears when all used.
-- **Per-slide audio**: SoundHelix songs 1–16, each slide gets unique `songNum`. IntersectionObserver-style scroll detection switches audio on slide change.
-- **Audio start**: `startAudio()` called directly on age button click (user gesture) to bypass browser autoplay policy.
+- **Video backgrounds**: 53 verified Pexels HD videos with Fisher-Yates shuffle queue (`videoQueue`), per-card stable mapping (`cardVideoMap`), gradient fallbacks
+- **Dual-track audio**: `musicRef` (study beats, vol 0.15) + speech synthesis commentary (vol 0.8). Music "ducks" to 0.05 when radio host speaks.
+- **Moolab Radio Show**: `triggerRadioHost()` fires every 5 cards scrolled OR after mini-game win. Uses `speechSynthesis` API with preferred natural voices. 10 tips per age group (Kids/Teens/Adults). Non-repeat tip selection via `usedTipsRef`. Shows pulsing "🎙️ LIVE" indicator in HUD during playback.
+- **Audio start**: Music starts on session begin (user gesture) to bypass autoplay policy.
 - **Avatars**: DiceBear `adventurer` human-style SVG seeded by card title
 - **Glassmorphism**: `backdrop-filter: blur(24px)` on mini-game cards + quiz panels
 - **Animated blobs**: Per-slide floating color orbs with `blobA`/`blobB` CSS keyframes

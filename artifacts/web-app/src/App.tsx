@@ -161,6 +161,45 @@ const studyBeats = [
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
 ];
 
+const radioTips: Record<string, string[]> = {
+  Kids: [
+    "Yo! Did you know a piggy bank is like a tiny fortress for your candy money?",
+    "Here's a secret — if you save one dollar every day, you'll have 365 dollars by next year! That's a LOT of toys!",
+    "Fun fact: The word 'bank' comes from the Italian word for bench! Old-timey money people sat on benches!",
+    "Quick tip: Before you buy something, wait one whole day. If you still want it tomorrow, maybe it's worth it!",
+    "Did you know? Even kids can start a lemonade stand or sell drawings. That's called being an entrepreneur!",
+    "Money hack: When you get money for your birthday, try saving half and spending half. Future you will say thanks!",
+    "Cool fact: The first coins were made over 2,600 years ago! People used to trade goats before that!",
+    "Pro move: Keep your savings somewhere you can't easily grab it. Out of sight, out of mind!",
+    "Here's the deal — needs are things like food and shoes. Wants are things like video games. Know the difference!",
+    "Secret tip: The richest people in the world started saving when they were YOUR age!",
+  ],
+  Teens: [
+    "Real talk — compound interest is basically free money. Start saving now and watch it multiply!",
+    "Quick flex: If you invest 50 bucks a month starting at 15, you could have over a million by retirement!",
+    "Money move: Always pay yourself first. Before spending on anything, put at least 10 percent in savings!",
+    "Hot tip: A credit score is like your financial GPA. Start building it early with a secured card!",
+    "Did you know? Index funds beat 90 percent of professional stock pickers. Keep it simple, keep it smart!",
+    "Side hustle alert: Freelancing, tutoring, reselling — there are so many ways to earn online right now!",
+    "Budget hack: Try the 50-30-20 rule. 50 for needs, 30 for wants, 20 for savings. Simple and effective!",
+    "Real talk — student loans can follow you for decades. Scholarships are literally free money. Apply to all of them!",
+    "Smart move: Before buying anything over 50 bucks, sleep on it for 48 hours. Impulse buys kill budgets!",
+    "Here's a secret: Most millionaires don't drive fancy cars. They invest the difference. That's the real flex!",
+  ],
+  Adults: [
+    "Pro tip: Your credit score is your financial passport. Keep it high, travel cheap!",
+    "Real estate insight: Your first property doesn't have to be your dream home. Think investment first!",
+    "Tax hack: Max out your retirement contributions before the deadline. That's money the taxman can't touch!",
+    "Investing 101: Diversification isn't just a buzzword. It's the only free lunch in finance!",
+    "Quick tip: An emergency fund should cover 3 to 6 months of expenses. Start building yours today!",
+    "Money wisdom: The best time to start investing was yesterday. The second best time is right now!",
+    "Credit tip: Keep your utilization below 30 percent. Your credit score will thank you!",
+    "Budget reality: Track every dollar for one month. You'll be shocked where your money actually goes!",
+    "Wealth building: Pay off high-interest debt before investing. Guaranteed return on your money!",
+    "Smart move: Automate your savings and investments. What you don't see, you won't spend!",
+  ],
+};
+
 const load = (k, d) => {
   const v = localStorage.getItem(`ws_${k}`);
   return v ? parseInt(v, 10) : d;
@@ -181,7 +220,7 @@ const getAgeFromYear = (yearStr: string): number => {
 const getAgeGroup = (age: number): string => {
   if (age <= 12) return "Kids";
   if (age <= 16) return "Teens";
-  return "Young Adults";
+  return "Adults";
 };
 
 function App() {
@@ -224,8 +263,14 @@ function App() {
     try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
   });
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
+  const isMutedRef = useRef(false);
+  const [radioLive, setRadioLive] = useState(false);
+  const radioSpeakingRef = useRef(false);
+  const slidesScrolledRef = useRef(0);
+  const lastRadioSlideRef = useRef(-1);
+  const usedTipsRef = useRef<Set<number>>(new Set());
   const feedRef = useRef<HTMLDivElement | null>(null);
 
   const progress = Math.min((completedSlides.length / 5) * 100, 100);
@@ -253,6 +298,12 @@ function App() {
     setQuizUnlocked(false);
     setQuizStarted(false);
     setQuizResult(null);
+    slidesScrolledRef.current = 0;
+    lastRadioSlideRef.current = -1;
+    usedTipsRef.current.clear();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    radioSpeakingRef.current = false;
+    setRadioLive(false);
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
     generateCards(ageGroup, mod?.topic).then((data) => {
       if (data) {
@@ -270,6 +321,44 @@ function App() {
     if (appStarted && ageGroup && accountType !== "parent") resetJourney();
   }, [appStarted, ageGroup, accountType, resetJourney]);
 
+  const triggerRadioHost = useCallback((forceAgeGroup?: string) => {
+    const ag = forceAgeGroup || ageGroup;
+    if (radioSpeakingRef.current || isMutedRef.current || !ag) return;
+    const tips = radioTips[ag] || radioTips.Teens;
+    if (usedTipsRef.current.size >= tips.length) usedTipsRef.current.clear();
+    let tipIdx: number;
+    do { tipIdx = Math.floor(Math.random() * tips.length); } while (usedTipsRef.current.has(tipIdx));
+    usedTipsRef.current.add(tipIdx);
+    const tip = tips[tipIdx];
+
+    radioSpeakingRef.current = true;
+    setRadioLive(true);
+
+    if (musicRef.current) musicRef.current.volume = 0.05;
+
+    const restoreAudio = () => {
+      radioSpeakingRef.current = false;
+      setRadioLive(false);
+      if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
+    };
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(tip);
+      utter.rate = 1.05;
+      utter.pitch = 1.1;
+      utter.volume = 0.8;
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => /samantha|karen|daniel|google.*us|natural/i.test(v.name));
+      if (preferred) utter.voice = preferred;
+      utter.onend = restoreAudio;
+      utter.onerror = restoreAudio;
+      window.speechSynthesis.speak(utter);
+    } else {
+      setTimeout(restoreAudio, 5000);
+    }
+  }, [ageGroup]);
+
   const startSession = () => {
     const age = getAgeFromYear(birthYear);
     setAgeGroup(getAgeGroup(age));
@@ -277,12 +366,13 @@ function App() {
     if (accountType === "parent") return;
     const randomTrack =
       studyBeats[Math.floor(Math.random() * studyBeats.length)];
-    if (!audioRef.current) {
-      audioRef.current = new Audio(randomTrack);
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.2;
+    if (!musicRef.current) {
+      musicRef.current = new Audio(randomTrack);
+      musicRef.current.loop = true;
+      musicRef.current.volume = 0.15;
     }
-    audioRef.current.play().catch(() => {});
+    musicRef.current.play().catch(() => {});
+    if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
   };
 
   const handleScroll = async (e: any) => {
@@ -295,6 +385,15 @@ function App() {
     }
 
     const currentSlideIdx = Math.round(scrollTop / clientHeight);
+
+    if (currentSlideIdx !== lastRadioSlideRef.current) {
+      lastRadioSlideRef.current = currentSlideIdx;
+      slidesScrolledRef.current += 1;
+      if (slidesScrolledRef.current > 0 && slidesScrolledRef.current % 5 === 0) {
+        triggerRadioHost();
+      }
+    }
+
     const totalSlides = currentData.lessons?.length || 0;
     const slidesFromEnd = totalSlides - currentSlideIdx;
 
@@ -853,6 +952,10 @@ function App() {
           50% { background: radial-gradient(ellipse at center, rgba(255,107,107,0.12) 0%, #080808 55%, #020202 100%); }
         }
         @keyframes glowPulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+        @keyframes radioGlow {
+          0%,100% { box-shadow: 0 0 6px rgba(255,68,68,0.3); opacity: 0.85; }
+          50% { box-shadow: 0 0 14px rgba(255,68,68,0.6); opacity: 1; }
+        }
         @keyframes greenFlash {
           0% { box-shadow: inset 0 0 0 3px rgba(6,214,160,0.9), 0 0 30px rgba(6,214,160,0.4); }
           100% { box-shadow: inset 0 0 0 0px rgba(6,214,160,0), 0 0 0px rgba(6,214,160,0); }
@@ -950,14 +1053,43 @@ function App() {
             </button>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {radioLive && (
+              <div style={{
+                background: "rgba(255,40,40,0.15)",
+                border: "1px solid rgba(255,60,60,0.4)",
+                borderRadius: 12,
+                padding: "6px 12px",
+                display: "flex", alignItems: "center", gap: 6,
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                animation: "radioGlow 1.5s ease-in-out infinite",
+              }}>
+                <span style={{ fontSize: "0.8rem" }}>🎙️</span>
+                <span style={{
+                  color: "#ff4444",
+                  fontWeight: 800,
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.08em",
+                  fontFamily: FONT,
+                  textShadow: "0 0 8px rgba(255,68,68,0.5)",
+                }}>LIVE</span>
+              </div>
+            )}
             <button
               className="ws-btn"
               onClick={() => {
-                if (audioRef.current) {
-                  if (isMuted) { audioRef.current.volume = 0.2; audioRef.current.play().catch(() => {}); }
-                  else { audioRef.current.volume = 0; audioRef.current.pause(); }
+                const newMuted = !isMuted;
+                isMutedRef.current = newMuted;
+                if (musicRef.current) {
+                  if (newMuted) { musicRef.current.volume = 0; musicRef.current.pause(); }
+                  else { musicRef.current.volume = 0.15; musicRef.current.play().catch(() => {}); }
                 }
-                setIsMuted(!isMuted);
+                if (newMuted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+                if (newMuted) {
+                  radioSpeakingRef.current = false;
+                  setRadioLive(false);
+                }
+                setIsMuted(newMuted);
               }}
               style={{
                 background: "rgba(255,255,255,0.06)",
@@ -1332,6 +1464,7 @@ function App() {
                                 setCompletedSlides((p) => [...p, card.id]);
                                 setXp((p) => p + 10);
                                 triggerGreenFlash();
+                                setTimeout(() => triggerRadioHost(), 1200);
                                 if (completedSlides.length + 1 >= 5)
                                   setTimeout(() => setQuizUnlocked(true), 800);
                               }
