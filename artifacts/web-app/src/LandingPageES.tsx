@@ -8,16 +8,16 @@ const MoolabLogo = ({ size = 32, glow = false }: { size?: number; glow?: boolean
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     style={glow ? {
-      filter: "drop-shadow(0 0 6px #00FF9D) drop-shadow(0 0 14px rgba(0,255,157,0.4))",
+      filter: "drop-shadow(0 0 6px #2e8bc0) drop-shadow(0 0 14px rgba(46,139,192,0.4))",
       animation: "logoGlow 2s ease-in-out infinite",
     } : undefined}
   >
-    <rect x="6" y="46" width="7" height="12" fill="#00FF9D" opacity="0.3" rx="1" />
-    <rect x="17" y="38" width="7" height="20" fill="#00FF9D" opacity="0.5" rx="1" />
-    <rect x="28" y="28" width="7" height="30" fill="#00FF9D" opacity="0.7" rx="1" />
-    <path d="M39 58 L39 20 L46 20 L46 58 Z" fill="#00FF9D" opacity="0.85" />
-    <path d="M46 20 L46 4 L58 4 L46 20Z" fill="#00FF9D" />
-    <path d="M46 4 L58 4 L52 12 Z" fill="#00FF9D" opacity="0.5" />
+    <rect x="6" y="46" width="7" height="12" fill="#2e8bc0" opacity="0.3" rx="1" />
+    <rect x="17" y="38" width="7" height="20" fill="#2e8bc0" opacity="0.5" rx="1" />
+    <rect x="28" y="28" width="7" height="30" fill="#2e8bc0" opacity="0.7" rx="1" />
+    <path d="M39 58 L39 20 L46 20 L46 58 Z" fill="#2e8bc0" opacity="0.85" />
+    <path d="M46 20 L46 4 L58 4 L46 20Z" fill="#145374" />
+    <path d="M46 4 L58 4 L52 12 Z" fill="#145374" opacity="0.5" />
   </svg>
 );
 
@@ -77,33 +77,33 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
 
   return (
     <div
-      className={`min-h-screen bg-white font-['Inter',system-ui,sans-serif] text-[#1a3c2a] transition-opacity duration-700 ${visible ? "opacity-100" : "opacity-0"}`}
+      className={`min-h-screen bg-white font-['Inter',system-ui,sans-serif] text-[#0c2d48] transition-opacity duration-700 ${visible ? "opacity-100" : "opacity-0"}`}
       style={{ overflowX: "hidden" }}
     >
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-emerald-100">
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-sky-100">
         <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MoolabLogo size={30} glow />
-            <span style={{ fontFamily: "'Orbitron', sans-serif" }} className="text-lg font-black tracking-tight bg-gradient-to-r from-[#00FF9D] to-emerald-400 bg-clip-text text-transparent">
+            <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-lg font-black tracking-tight bg-gradient-to-r from-[#2e8bc0] to-[#145374] bg-clip-text text-transparent">
               MOOLAB
             </span>
           </div>
           <div className="flex items-center gap-2.5">
             <a
               href="?"
-              className="px-3 py-2 rounded-full text-[#1a3c2a]/40 font-bold text-xs tracking-wide hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200"
+              className="px-3 py-2 rounded-full text-[#0c2d48]/40 font-bold text-xs tracking-wide hover:text-[#145374] hover:bg-sky-50 transition-all duration-200"
             >
               EN
             </a>
             <button
               onClick={onParentLogin}
-              className="px-4 py-2 rounded-full border border-emerald-200 text-emerald-700 font-bold text-xs sm:text-sm tracking-wide hover:bg-emerald-50 active:scale-95 transition-all duration-200 cursor-pointer"
+              className="px-4 py-2 rounded-full border border-sky-200 text-[#145374] font-bold text-xs sm:text-sm tracking-wide hover:bg-sky-50 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               Acceso Padres
             </button>
             <button
               onClick={scrollToDownload}
-              className="px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+              className="px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-200/50 hover:shadow-sky-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               Descargar App
             </button>
@@ -112,33 +112,33 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
       </nav>
 
       <section className="relative pt-28 sm:pt-32 pb-16 sm:pb-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/60 via-white to-white" />
-        <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-emerald-200/20 blur-3xl" />
-        <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-emerald-300/15 blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-50/60 via-white to-white" />
+        <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-sky-200/20 blur-3xl" />
+        <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-sky-300/15 blur-3xl" />
         <div className="relative max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 mb-6 sm:mb-8">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-semibold text-emerald-700 tracking-wide uppercase">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200/60 mb-6 sm:mb-8">
+            <span className="w-2 h-2 rounded-full bg-[#2e8bc0] animate-pulse" />
+            <span className="text-[10px] sm:text-xs font-semibold text-[#145374] tracking-wide uppercase">
               Educacion Financiera para la Nueva Generacion
             </span>
           </div>
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-5">
             DEJA DE SCROLLEAR.
             <br />
-            <span className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#0c2d48] via-[#145374] to-[#2e8bc0] bg-clip-text text-transparent">
               EMPIEZA A GANAR.
             </span>
           </h1>
-          <p className="text-base sm:text-lg text-[#1a3c2a]/45 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
+          <p className="text-base sm:text-lg text-[#0c2d48]/45 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
             La experiencia de scroll que tus hijos ya aman — reinventada para ensenar habilidades financieras reales con lecciones de IA, juegos y batallas de jefe.
           </p>
           <div id="download-section-es" className="mb-8">
             <DownloadBadges />
-            <p className="text-xs text-[#1a3c2a]/25 font-medium mt-4">Gratis · Sin anuncios · Seguro para ninos</p>
+            <p className="text-xs text-[#0c2d48]/25 font-medium mt-4">Gratis · Sin anuncios · Seguro para ninos</p>
             {onTestApp && (
               <button
                 onClick={onTestApp}
-                className="mt-3 text-xs text-emerald-500/60 font-semibold hover:text-emerald-600 underline underline-offset-2 cursor-pointer transition-colors"
+                className="mt-3 text-xs text-[#2e8bc0]/60 font-semibold hover:text-[#145374] underline underline-offset-2 cursor-pointer transition-colors"
               >
                 Probar el demo web
               </button>
@@ -151,22 +151,22 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
               { value: "IA", label: "Potenciado" },
             ].map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-2xl sm:text-3xl font-black text-emerald-600">{s.value}</div>
-                <div className="text-[10px] sm:text-xs font-semibold text-[#1a3c2a]/30 uppercase tracking-widest mt-1">{s.label}</div>
+                <div className="text-2xl sm:text-3xl font-black text-[#145374]">{s.value}</div>
+                <div className="text-[10px] sm:text-xs font-semibold text-[#0c2d48]/30 uppercase tracking-widest mt-1">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-emerald-50/40">
+      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-sky-50/40">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
               Aprender Se Siente Como
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Jugar</span>
+              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> Jugar</span>
             </h2>
-            <p className="text-sm sm:text-base text-[#1a3c2a]/40 font-medium max-w-lg mx-auto">
+            <p className="text-sm sm:text-base text-[#0c2d48]/40 font-medium max-w-lg mx-auto">
               Cada deslizamiento entrega sabiduria financiera en forma de juegos, desafios y recompensas.
             </p>
           </div>
@@ -177,10 +177,10 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
               { icon: "⚔️", title: "Batallas de Jefe", desc: "Vence al Quiz del Jefe para subir de nivel y desbloquear nuevos modulos." },
               { icon: "🏆", title: "Gamificacion", desc: "Gana XP, construye rachas, sube de nivel y registra victorias de jefe." },
             ].map((f) => (
-              <div key={f.title} className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div key={f.title} className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-sky-50/80 to-cyan-50/60 border border-sky-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="text-2xl sm:text-3xl mb-3">{f.icon}</div>
                 <h3 className="text-sm sm:text-base font-extrabold mb-1.5 tracking-tight">{f.title}</h3>
-                <p className="text-xs sm:text-sm text-[#1a3c2a]/40 font-medium leading-relaxed">{f.desc}</p>
+                <p className="text-xs sm:text-sm text-[#0c2d48]/40 font-medium leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -192,9 +192,9 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
               Tres Caminos.{" "}
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent">Una Mision.</span>
+              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">Una Mision.</span>
             </h2>
-            <p className="text-sm sm:text-base text-[#1a3c2a]/40 font-medium max-w-lg mx-auto">
+            <p className="text-sm sm:text-base text-[#0c2d48]/40 font-medium max-w-lg mx-auto">
               El contenido se adapta a su edad para que cada leccion sea relevante.
             </p>
           </div>
@@ -220,7 +220,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
               },
             ].map((card) => {
               const colors = {
-                emerald: { bg: "bg-emerald-50", border: "border-emerald-200/60", bar: "bg-emerald-400", text: "text-emerald-600" },
+                emerald: { bg: "bg-sky-50", border: "border-sky-200/60", bar: "bg-[#2e8bc0]", text: "text-[#145374]" },
                 amber: { bg: "bg-amber-50", border: "border-amber-200/60", bar: "bg-amber-400", text: "text-amber-600" },
                 violet: { bg: "bg-violet-50", border: "border-violet-200/60", bar: "bg-violet-400", text: "text-violet-600" },
               }[card.accent];
@@ -229,11 +229,11 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
                   <div className={`absolute top-0 left-0 right-0 h-1 ${colors.bar}`} />
                   <div className="text-3xl mb-3 mt-1">{card.emoji}</div>
                   <div className={`text-[10px] font-black tracking-[0.2em] uppercase ${colors.text} mb-1`}>MODO {card.mode}</div>
-                  <div className="text-xs font-bold text-[#1a3c2a]/40 mb-3">{card.ages}</div>
-                  <p className="text-xs sm:text-sm text-[#1a3c2a]/50 font-medium leading-relaxed mb-4">{card.desc}</p>
+                  <div className="text-xs font-bold text-[#0c2d48]/40 mb-3">{card.ages}</div>
+                  <p className="text-xs sm:text-sm text-[#0c2d48]/50 font-medium leading-relaxed mb-4">{card.desc}</p>
                   <div className="space-y-1.5">
                     {card.topics.map((t) => (
-                      <div key={t} className="flex items-center gap-2 text-[11px] font-semibold text-[#1a3c2a]/40">
+                      <div key={t} className="flex items-center gap-2 text-[11px] font-semibold text-[#0c2d48]/40">
                         <span className={`w-1.5 h-1.5 rounded-full ${colors.bar}`} />
                         {t}
                       </div>
@@ -246,18 +246,18 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-emerald-50/40 to-white">
+      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-sky-50/40 to-white">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/60 border border-emerald-200/50 mb-5">
-                <span className="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wider">Para Padres</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100/60 border border-sky-200/50 mb-5">
+                <span className="text-[10px] sm:text-xs font-bold text-[#145374] uppercase tracking-wider">Para Padres</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
                 Centro de
-                <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Control Parental</span>
+                <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> Control Parental</span>
               </h2>
-              <p className="text-sm text-[#1a3c2a]/45 font-medium leading-relaxed mb-6">
+              <p className="text-sm text-[#0c2d48]/45 font-medium leading-relaxed mb-6">
                 Visibilidad completa de la educacion financiera de tu hijo. Metricas en tiempo real, progreso por modulo e informes de aprendizaje.
               </p>
               <div className="space-y-3 mb-6">
@@ -269,19 +269,19 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
                 ].map((item) => (
                   <div key={item.text} className="flex items-start gap-2.5">
                     <span className="text-lg">{item.icon}</span>
-                    <span className="text-xs sm:text-sm font-semibold text-[#1a3c2a]/55">{item.text}</span>
+                    <span className="text-xs sm:text-sm font-semibold text-[#0c2d48]/55">{item.text}</span>
                   </div>
                 ))}
               </div>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-200/25 to-teal-200/15 blur-2xl scale-110" />
-              <div className="relative bg-white rounded-2xl border border-emerald-200/50 shadow-xl p-5 space-y-3.5">
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-sky-200/25 to-cyan-200/15 blur-2xl scale-110" />
+              <div className="relative bg-white rounded-2xl border border-sky-200/50 shadow-xl p-5 space-y-3.5">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white font-bold text-xs">S</div>
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#2e8bc0] to-[#145374] flex items-center justify-center text-white font-bold text-xs">S</div>
                   <div>
                     <div className="font-extrabold text-sm">Progreso de Sofia</div>
-                    <div className="text-[10px] text-[#1a3c2a]/30 font-medium">Modo Explorador · 10 anos</div>
+                    <div className="text-[10px] text-[#0c2d48]/30 font-medium">Modo Explorador · 10 anos</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2.5">
@@ -290,10 +290,10 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
                     { label: "Racha", value: "7 dias", icon: "🔥" },
                     { label: "Victorias", value: "4", icon: "🏆" },
                   ].map((stat) => (
-                    <div key={stat.label} className="bg-emerald-50 rounded-lg p-2.5 text-center">
+                    <div key={stat.label} className="bg-sky-50 rounded-lg p-2.5 text-center">
                       <div className="text-base">{stat.icon}</div>
-                      <div className="text-xs font-black text-emerald-700">{stat.value}</div>
-                      <div className="text-[9px] font-semibold text-[#1a3c2a]/25 uppercase">{stat.label}</div>
+                      <div className="text-xs font-black text-[#145374]">{stat.value}</div>
+                      <div className="text-[9px] font-semibold text-[#0c2d48]/25 uppercase">{stat.label}</div>
                     </div>
                   ))}
                 </div>
@@ -305,11 +305,11 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
                   ].map((m) => (
                     <div key={m.name}>
                       <div className="flex justify-between text-[10px] font-semibold mb-0.5">
-                        <span className="text-[#1a3c2a]/50">{m.name}</span>
-                        <span className="text-emerald-600">{m.pct}%</span>
+                        <span className="text-[#0c2d48]/50">{m.name}</span>
+                        <span className="text-[#145374]">{m.pct}%</span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-emerald-100 overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style={{ width: `${m.pct}%` }} />
+                      <div className="h-1.5 rounded-full bg-sky-100 overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0]" style={{ width: `${m.pct}%` }} />
                       </div>
                     </div>
                   ))}
@@ -329,7 +329,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
             Suscripcion
             <span className="bg-gradient-to-r from-amber-500 to-orange-400 bg-clip-text text-transparent"> Mastermind</span>
           </h2>
-          <p className="text-sm text-[#1a3c2a]/40 font-medium max-w-md mx-auto mb-10">
+          <p className="text-sm text-[#0c2d48]/40 font-medium max-w-md mx-auto mb-10">
             Desbloquea la experiencia completa de Moolab para aprendices serios.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 max-w-2xl mx-auto mb-10">
@@ -341,39 +341,39 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
               <div key={perk.title} className="p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 text-center">
                 <div className="text-2xl mb-2">{perk.icon}</div>
                 <h3 className="text-xs font-extrabold tracking-tight mb-1.5">{perk.title}</h3>
-                <p className="text-[11px] text-[#1a3c2a]/40 font-medium leading-relaxed">{perk.desc}</p>
+                <p className="text-[11px] text-[#0c2d48]/40 font-medium leading-relaxed">{perk.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-emerald-50/50">
+      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-sky-50/50">
         <div className="max-w-2xl mx-auto text-center">
           <div className="mb-4"><MoolabLogo size={48} glow /></div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
             ¿Listos Para Construir Su
-            <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Futuro Financiero?</span>
+            <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> Futuro Financiero?</span>
           </h2>
-          <p className="text-sm text-[#1a3c2a]/35 font-medium mb-8 max-w-md mx-auto">
+          <p className="text-sm text-[#0c2d48]/35 font-medium mb-8 max-w-md mx-auto">
             Gratis para empezar. Sin anuncios. Sin venta de datos. Solo educacion financiera real que perdura.
           </p>
           <DownloadBadges />
-          <p className="text-[10px] text-[#1a3c2a]/20 font-medium mt-4">
+          <p className="text-[10px] text-[#0c2d48]/20 font-medium mt-4">
             Disponible en iOS y Android · Edades 7–21
           </p>
         </div>
       </section>
 
-      <footer className="py-8 px-6 border-t border-emerald-100">
+      <footer className="py-8 px-6 border-t border-sky-100">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <MoolabLogo size={22} />
-            <span style={{ fontFamily: "'Orbitron', sans-serif" }} className="text-sm font-black bg-gradient-to-r from-[#00FF9D] to-emerald-400 bg-clip-text text-transparent">
+            <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm font-black bg-gradient-to-r from-[#2e8bc0] to-[#145374] bg-clip-text text-transparent">
               MOOLAB
             </span>
           </div>
-          <p className="text-[10px] text-[#1a3c2a]/20 font-medium text-center sm:text-right">
+          <p className="text-[10px] text-[#0c2d48]/20 font-medium text-center sm:text-right">
             Construyendo la proxima generacion de tiburones financieros.
           </p>
         </div>

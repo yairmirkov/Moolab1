@@ -53,11 +53,11 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 
 ### Apex Logo System
 - Custom inline SVG: ascending bar chart where the tallest bar morphs into an angular shark fin
-- Color: Neon Emerald `#00FF9D` with opacity gradient (0.3 → 0.5 → 0.7 → 0.85 → 1.0)
-- Pulsing `logoGlow` CSS animation (drop-shadow pulses between 6px and 10px spread)
-- Brand font: **Orbitron** (Google Fonts) — geometric, futuristic sans-serif
+- Color: Ocean Breeze palette `#2e8bc0` (bright blue) with opacity gradient (0.3 → 0.5 → 0.7 → 0.85), `#145374` (mid-dark blue) for fin
+- Pulsing `logoGlow` CSS animation (drop-shadow pulses between 6px and 10px spread, blue glow)
+- Brand font: **Inter** (font-black) — clean, modern sans-serif
 - Rendered in: LandingPage nav (30px, glow), LandingPage CTA (48px, glow), LandingPage footer (22px), LandingPageES (same), App.tsx HUD (22px, static glow)
-- Text "MOOLAB" uses Orbitron font-black with `#00FF9D` → emerald-400 gradient
+- Text "MOOLAB" uses Inter font-black with `#2e8bc0` → `#145374` gradient
 
 ### Landing Page Copy (Shark Doctrine)
 - Hero badge: "Building Financial Sharks Since Day One"
@@ -119,7 +119,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - Stripe & PayPal trust logos in subscription section and footer
 - Parent Login section with email/password form; clicking Sign In triggers `onParentLogin` (routes to parent onboarding step 2)
 - Nav bar has "Parent Login" button (desktop) and "Launch App" button
-- Uses Tailwind CSS with Mint Fresh emerald palette
+- Uses Tailwind CSS with Ocean Breeze blue palette (`#0c2d48` deep navy, `#145374` mid blue, `#2e8bc0` bright blue, `#b1d4e0` light blue, white)
 - Accepts `onEnterApp` and `onParentLogin` props
 - `showLanding` state in App.tsx controls visibility; persists per session only (shows on every fresh load)
 

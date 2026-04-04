@@ -495,18 +495,18 @@ function App() {
       if (onboardStep === 0) {
         return (
           <>
-            <div style={{fontSize:"4rem",marginBottom:8,animation:"splashFloat 3s ease-in-out infinite",filter:"drop-shadow(0 0 25px rgba(16,185,129,0.3))"}}>💸</div>
+            <div style={{fontSize:"4rem",marginBottom:8,animation:"splashFloat 3s ease-in-out infinite",filter:"drop-shadow(0 0 25px rgba(46,139,192,0.3))"}}>💸</div>
             <h1 style={{
               fontSize: "3.2rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 6px 0", textAlign: "center",
-              background: "linear-gradient(135deg, #059669, #10b981, #047857)",
+              background: "linear-gradient(135deg, #0c2d48, #145374, #2e8bc0)",
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             }}>Moolab</h1>
             <p style={{
-              color: "rgba(26,60,42,0.35)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
+              color: "rgba(12,45,72,0.35)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
               marginBottom: 6, textTransform: "uppercase",
               animation: "splashPulse 3s ease-in-out infinite",
             }}>SWIPE &middot; LEARN &middot; EARN</p>
-            <p style={{ color: "rgba(26,60,42,0.4)", fontSize: "0.75rem", fontWeight: 600, maxWidth: 280, textAlign: "center", lineHeight: 1.5, marginBottom: 36 }}>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.75rem", fontWeight: 600, maxWidth: 280, textAlign: "center", lineHeight: 1.5, marginBottom: 36 }}>
               Financial literacy for kids &amp; teens. Learn money skills through bite-sized lessons and games.
             </p>
             <button
@@ -515,15 +515,15 @@ function App() {
               style={{
                 width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
-                background: "linear-gradient(135deg, #10b981, #34d399)",
+                background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
                 color: "#fff", fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
                 cursor: "pointer",
-                boxShadow: "0 0 40px rgba(16,185,129,0.2), 0 8px 24px rgba(0,0,0,0.08)",
+                boxShadow: "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)",
               }}
             >
               GET STARTED
             </button>
-            <p style={{ color: "rgba(26,60,42,0.2)", fontSize: "0.6rem", fontWeight: 600, marginTop: 14 }}>
+            <p style={{ color: "rgba(12,45,72,0.2)", fontSize: "0.6rem", fontWeight: 600, marginTop: 14 }}>
               Free &middot; No ads &middot; Safe for kids
             </p>
           </>
@@ -534,8 +534,8 @@ function App() {
         return (
           <>
             <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>👋</div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#1a3c2a" }}>Who's signing up?</h2>
-            <p style={{ color: "rgba(26,60,42,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 32 }}>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>Who's signing up?</h2>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 32 }}>
               This helps us personalize the experience
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340 }}>
@@ -554,15 +554,15 @@ function App() {
                   style={{
                     display: "flex", alignItems: "center", gap: 14,
                     width: "100%", padding: "18px 20px", borderRadius: 18,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(16,185,129,0.15)",
-                    color: "#1a3c2a", fontFamily: FONT, cursor: "pointer", textAlign: "left",
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.15)",
+                    color: "#0c2d48", fontFamily: FONT, cursor: "pointer", textAlign: "left",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                   }}
                 >
                   <span style={{ fontSize: "1.6rem" }}>{opt.icon}</span>
                   <div>
                     <div style={{ fontWeight: 800, fontSize: "0.95rem" }}>{opt.title}</div>
-                    <div style={{ fontWeight: 500, fontSize: "0.65rem", color: "rgba(26,60,42,0.4)", marginTop: 2 }}>{opt.desc}</div>
+                    <div style={{ fontWeight: 500, fontSize: "0.65rem", color: "rgba(12,45,72,0.4)", marginTop: 2 }}>{opt.desc}</div>
                   </div>
                 </button>
               ))}
@@ -577,17 +577,17 @@ function App() {
             <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>
               {accountType === "parent" ? "👨‍👩‍👧" : "✏️"}
             </div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#1a3c2a" }}>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
               {accountType === "parent" ? "Parent Setup" : "Tell us about you"}
             </h2>
-            <p style={{ color: "rgba(26,60,42,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
               {accountType === "parent" ? "We'll personalize lessons for your child" : "We'll pick the right level for you"}
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
               {accountType === "parent" && (
                 <div>
-                  <label style={{ display: "block", color: "rgba(26,60,42,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>YOUR NAME</label>
+                  <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>YOUR NAME</label>
                   <input
                     type="text"
                     placeholder="Parent's name"
@@ -595,16 +595,16 @@ function App() {
                     onChange={(e) => { setParentName(e.target.value); saveStr("parentName", e.target.value); }}
                     style={{
                       width: "100%", padding: "14px 18px", borderRadius: 14,
-                      background: "rgba(255,255,255,0.7)", border: "1px solid rgba(16,185,129,0.2)",
-                      color: "#1a3c2a", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                      outline: "none", caretColor: "#059669", boxSizing: "border-box",
+                      background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                      color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                      outline: "none", caretColor: "#145374", boxSizing: "border-box",
                       boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                     }}
                   />
                 </div>
               )}
               <div>
-                <label style={{ display: "block", color: "rgba(26,60,42,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
                   {accountType === "parent" ? "CHILD'S NAME" : "YOUR NAME"}
                 </label>
                 <input
@@ -614,15 +614,15 @@ function App() {
                   onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
                   style={{
                     width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(16,185,129,0.2)",
-                    color: "#1a3c2a", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", caretColor: "#059669", boxSizing: "border-box",
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                   }}
                 />
               </div>
               <div>
-                <label style={{ display: "block", color: "rgba(26,60,42,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
                   {accountType === "parent" ? "CHILD'S BIRTH YEAR" : "YOUR BIRTH YEAR"}
                 </label>
                 <select
@@ -630,18 +630,18 @@ function App() {
                   onChange={(e) => { setBirthYear(e.target.value); saveStr("birth", e.target.value); }}
                   style={{
                     width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(16,185,129,0.2)",
-                    color: birthYear ? "#1a3c2a" : "rgba(26,60,42,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: birthYear ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
                     outline: "none", boxSizing: "border-box", colorScheme: "light",
                     appearance: "none", WebkitAppearance: "none",
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(26,60,42,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
                     backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                   }}
                 >
                   <option value="" disabled>Select year</option>
                   {Array.from({ length: 22 }, (_, i) => new Date().getFullYear() - 4 - i).map((yr) => (
-                    <option key={yr} value={String(yr)} style={{ background: "#fff", color: "#1a3c2a" }}>{yr}</option>
+                    <option key={yr} value={String(yr)} style={{ background: "#fff", color: "#0c2d48" }}>{yr}</option>
                   ))}
                 </select>
               </div>
@@ -650,10 +650,10 @@ function App() {
             {birthYear && (
               <div style={{
                 marginBottom: 20, padding: "8px 16px", borderRadius: 12,
-                background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)",
+                background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.2)",
                 animation: "ageBtn 0.3s ease-out both",
               }}>
-                <span style={{ color: "#059669", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
+                <span style={{ color: "#145374", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
                   {(() => {
                     const age = getAgeFromYear(birthYear);
                     const group = getAgeGroup(age);
@@ -673,13 +673,13 @@ function App() {
                 width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
                 background: canFinish
-                  ? "linear-gradient(135deg, #10b981, #34d399)"
-                  : "rgba(26,60,42,0.08)",
-                color: canFinish ? "#fff" : "rgba(26,60,42,0.25)",
+                  ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
+                  : "rgba(12,45,72,0.08)",
+                color: canFinish ? "#fff" : "rgba(12,45,72,0.25)",
                 fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
                 cursor: canFinish ? "pointer" : "default",
                 boxShadow: canFinish
-                  ? "0 0 40px rgba(16,185,129,0.2), 0 8px 24px rgba(0,0,0,0.08)"
+                  ? "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)"
                   : "none",
                 transition: "all 0.3s ease",
               }}
@@ -698,7 +698,7 @@ function App() {
           width: "100vw",
           height: "100dvh",
           background: "linear-gradient(160deg, #f0faf4 0%, #e6f7ed 30%, #d4f1e0 60%, #f5faf7 100%)",
-          color: "#1a3c2a",
+          color: "#0c2d48",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -721,7 +721,7 @@ function App() {
           .ws-btn { transition: transform 0.12s cubic-bezier(0.25,0.46,0.45,0.94) !important; }
           .ws-btn:active { transform: scale(0.96) !important; }
         `}</style>
-        <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%)",top:"15%",left:"-10%",filter:"blur(60px)",animation:"orbDrift1 10s ease-in-out infinite"}} />
+        <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,rgba(46,139,192,0.1) 0%,transparent 70%)",top:"15%",left:"-10%",filter:"blur(60px)",animation:"orbDrift1 10s ease-in-out infinite"}} />
         <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(52,211,153,0.08) 0%,transparent 70%)",bottom:"18%",right:"-8%",filter:"blur(60px)",animation:"orbDrift2 12s ease-in-out infinite"}} />
 
         {onboardStep > 0 && (
@@ -730,7 +730,7 @@ function App() {
             onClick={() => setOnboardStep(onboardStep - 1)}
             style={{
               position: "absolute", top: 20, left: 20, background: "none", border: "none",
-              color: "rgba(26,60,42,0.4)", fontSize: "1.4rem", cursor: "pointer", fontFamily: FONT,
+              color: "rgba(12,45,72,0.4)", fontSize: "1.4rem", cursor: "pointer", fontFamily: FONT,
               zIndex: 10,
             }}
           >←</button>
@@ -741,7 +741,7 @@ function App() {
             {[1, 2].map((s) => (
               <div key={s} style={{
                 width: s <= onboardStep ? 24 : 8, height: 4, borderRadius: 2,
-                background: s <= onboardStep ? "#059669" : "rgba(26,60,42,0.12)",
+                background: s <= onboardStep ? "#145374" : "rgba(12,45,72,0.12)",
                 transition: "all 0.3s ease",
               }} />
             ))}
@@ -836,7 +836,7 @@ function App() {
 
       <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
         {[
-          { label: "TOTAL XP", val: xp, color: "#06D6A0", icon: "⚡" },
+          { label: "TOTAL XP", val: xp, color: "#2e8bc0", icon: "⚡" },
           { label: "BOSS WINS", val: bossWins, color: "#FFD93D", icon: "🏆" },
           { label: "STREAK", val: streak, color: "#FF6B6B", icon: "🔥" },
         ].map((s, i) => (
@@ -855,7 +855,7 @@ function App() {
       <div style={{ padding: "16px 20px 8px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div style={{ fontSize: "0.85rem", fontWeight: 800 }}>Module Progress</div>
-          <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#06D6A0" }}>{totalModulesComplete}/{MODULES.length} Complete</div>
+          <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#2e8bc0" }}>{totalModulesComplete}/{MODULES.length} Complete</div>
         </div>
         <div style={{
           background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
@@ -875,17 +875,17 @@ function App() {
                 <div style={{ fontSize: "1.2rem", width: 28, textAlign: "center" }}>{mod.icon}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                    <span style={{ fontWeight: 700, fontSize: "0.75rem", color: done ? "#06D6A0" : isActive ? "#fff" : "rgba(255,255,255,0.4)" }}>
+                    <span style={{ fontWeight: 700, fontSize: "0.75rem", color: done ? "#2e8bc0" : isActive ? "#fff" : "rgba(255,255,255,0.4)" }}>
                       {mod.name}
                     </span>
-                    <span style={{ fontSize: "0.5rem", fontWeight: 700, color: done ? "#06D6A0" : isActive ? "#FFD93D" : "rgba(255,255,255,0.2)", letterSpacing: "0.08em" }}>
+                    <span style={{ fontSize: "0.5rem", fontWeight: 700, color: done ? "#2e8bc0" : isActive ? "#FFD93D" : "rgba(255,255,255,0.2)", letterSpacing: "0.08em" }}>
                       {done ? "COMPLETE ✓" : isActive ? "IN PROGRESS" : `${wins}/${mod.winsNeeded}`}
                     </span>
                   </div>
                   <div style={{ width: "100%", height: 4, borderRadius: 2, background: "rgba(255,255,255,0.06)" }}>
                     <div style={{
                       width: `${pct}%`, height: "100%", borderRadius: 2,
-                      background: done ? "#06D6A0" : isActive ? "linear-gradient(90deg, #FFD93D, #FF6B6B)" : "rgba(255,255,255,0.1)",
+                      background: done ? "#2e8bc0" : isActive ? "linear-gradient(90deg, #FFD93D, #FF6B6B)" : "rgba(255,255,255,0.1)",
                       transition: "width 0.5s ease",
                     }} />
                   </div>
@@ -901,9 +901,9 @@ function App() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           {[
             { label: "Current Module", val: allModulesComplete ? "All Done!" : currentModule.name, sub: allModulesComplete ? "🎉" : currentModule.icon, color: "#E040FB" },
-            { label: "Overall Progress", val: `${overallPct}%`, sub: `${totalModulesComplete} of ${MODULES.length}`, color: "#06D6A0" },
+            { label: "Overall Progress", val: `${overallPct}%`, sub: `${totalModulesComplete} of ${MODULES.length}`, color: "#2e8bc0" },
             { label: "XP Per Level", val: `${xp % (level * 50)}/${level * 50}`, sub: "to next level", color: "#FFD93D" },
-            { label: "Sessions Played", val: bossWins + (streak > 0 ? streak : 0), sub: "total rounds", color: "#118AB2" },
+            { label: "Sessions Played", val: bossWins + (streak > 0 ? streak : 0), sub: "total rounds", color: "#0c2d48" },
           ].map((s, i) => (
             <div key={s.label} className="pd-card" style={{
               background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
@@ -940,7 +940,7 @@ function App() {
           justifyContent: "center",
           alignItems: "center",
           background: "linear-gradient(160deg, #f0faf4 0%, #e6f7ed 30%, #d4f1e0 60%, #f5faf7 100%)",
-          color: "#1a3c2a",
+          color: "#0c2d48",
           fontFamily: FONT,
         }}
       >
@@ -949,8 +949,8 @@ function App() {
           @keyframes ldBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         `}</style>
         <div style={{ fontSize: "3rem", marginBottom: 16, animation: "ldBounce 2s ease-in-out infinite" }}>🧠</div>
-        <div style={{ width:40,height:40,margin:"0 auto 16px",borderRadius:"50%",border:"3px solid rgba(16,185,129,0.12)",borderTopColor:"#059669",animation:"ldSpin 0.7s linear infinite" }} />
-        <p style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: "-0.01em", background:"linear-gradient(90deg,#059669,#10b981)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
+        <div style={{ width:40,height:40,margin:"0 auto 16px",borderRadius:"50%",border:"3px solid rgba(46,139,192,0.12)",borderTopColor:"#145374",animation:"ldSpin 0.7s linear infinite" }} />
+        <p style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: "-0.01em", background:"linear-gradient(90deg,#145374,#2e8bc0)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
           Curating your feed...
         </p>
       </div>
@@ -987,8 +987,8 @@ function App() {
           50% { box-shadow: 0 0 14px rgba(255,68,68,0.6); opacity: 1; }
         }
         @keyframes greenFlash {
-          0% { box-shadow: inset 0 0 0 3px rgba(6,214,160,0.9), 0 0 30px rgba(6,214,160,0.4); }
-          100% { box-shadow: inset 0 0 0 0px rgba(6,214,160,0), 0 0 0px rgba(6,214,160,0); }
+          0% { box-shadow: inset 0 0 0 3px rgba(46,139,192,0.9), 0 0 30px rgba(46,139,192,0.4); }
+          100% { box-shadow: inset 0 0 0 0px rgba(46,139,192,0), 0 0 0px rgba(46,139,192,0); }
         }
         .ws-btn { transition: transform 0.12s cubic-bezier(0.25,0.46,0.45,0.94) !important; }
         .ws-btn:active { transform: scale(0.96) !important; }
@@ -1013,10 +1013,10 @@ function App() {
         <div style={{
           width: "100%",
           height: `${scrollProgress}%`,
-          background: "linear-gradient(180deg, #06D6A0, #00F5D4, #118AB2)",
+          background: "linear-gradient(180deg, #2e8bc0, #b1d4e0, #145374)",
           borderRadius: "0 0 2px 0",
           transition: "height 0.3s ease-out",
-          boxShadow: scrollProgress > 0 ? "0 0 8px rgba(6,214,160,0.5), 0 0 20px rgba(6,214,160,0.2)" : "none",
+          boxShadow: scrollProgress > 0 ? "0 0 8px rgba(46,139,192,0.5), 0 0 20px rgba(46,139,192,0.2)" : "none",
           animation: scrollProgress > 0 ? "glowPulse 2s ease-in-out infinite" : "none",
         }} />
       </div>
@@ -1043,13 +1043,13 @@ function App() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
 
-            <svg width="22" height="22" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 0 4px #00FF9D)", flexShrink: 0 }}>
-              <rect x="6" y="46" width="7" height="12" fill="#00FF9D" opacity="0.3" rx="1" />
-              <rect x="17" y="38" width="7" height="20" fill="#00FF9D" opacity="0.5" rx="1" />
-              <rect x="28" y="28" width="7" height="30" fill="#00FF9D" opacity="0.7" rx="1" />
-              <path d="M39 58 L39 20 L46 20 L46 58 Z" fill="#00FF9D" opacity="0.85" />
-              <path d="M46 20 L46 4 L58 4 L46 20Z" fill="#00FF9D" />
-              <path d="M46 4 L58 4 L52 12 Z" fill="#00FF9D" opacity="0.5" />
+            <svg width="22" height="22" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 0 4px #2e8bc0)", flexShrink: 0 }}>
+              <rect x="6" y="46" width="7" height="12" fill="#2e8bc0" opacity="0.3" rx="1" />
+              <rect x="17" y="38" width="7" height="20" fill="#2e8bc0" opacity="0.5" rx="1" />
+              <rect x="28" y="28" width="7" height="30" fill="#2e8bc0" opacity="0.7" rx="1" />
+              <path d="M39 58 L39 20 L46 20 L46 58 Z" fill="#2e8bc0" opacity="0.85" />
+              <path d="M46 20 L46 4 L58 4 L46 20Z" fill="#145374" />
+              <path d="M46 4 L58 4 L52 12 Z" fill="#145374" opacity="0.5" />
             </svg>
             <button
               className="ws-btn"
@@ -1153,7 +1153,7 @@ function App() {
               <span style={{ color: "#FFD93D", fontWeight: 800, fontSize: "0.65rem" }}>LVL {level}</span>
             </div>
             <span style={{
-              color: "#06D6A0", fontWeight: 900, fontSize: "0.75rem",
+              color: "#2e8bc0", fontWeight: 900, fontSize: "0.75rem",
               textShadow: "0 0 12px rgba(6,214,160,0.4)",
               letterSpacing: "0.02em",
             }}>
@@ -1176,10 +1176,10 @@ function App() {
               height: "100%",
               background: progress >= 100
                 ? "linear-gradient(90deg, #FFD93D, #FF6B6B, #E040FB)"
-                : "linear-gradient(90deg, #06D6A0, #00F5D4)",
+                : "linear-gradient(90deg, #2e8bc0, #b1d4e0)",
               borderRadius: 2,
               transition: "width 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
-              boxShadow: progress > 0 ? "0 0 10px rgba(6,214,160,0.4)" : "none",
+              boxShadow: progress > 0 ? "0 0 10px rgba(46,139,192,0.4)" : "none",
             }}
           />
         {/* Module indicator */}
@@ -1197,7 +1197,7 @@ function App() {
             MODULE {currentModuleIdx + 1}: {currentModule?.name?.toUpperCase()}
           </span>
           <span style={{
-            color: "#06D6A0", fontWeight: 800, fontSize: "0.55rem",
+            color: "#2e8bc0", fontWeight: 800, fontSize: "0.55rem",
             marginLeft: 4, padding: "2px 6px", borderRadius: 6,
             background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.2)",
           }}>
@@ -1230,7 +1230,7 @@ function App() {
 
           <h2 style={{
             fontSize: "1.4rem", fontWeight: 900, marginBottom: 4,
-            background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
+            background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
           }}>MODULE MAP</h2>
           <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 600, marginBottom: 24, letterSpacing: "0.1em" }}>
@@ -1305,7 +1305,7 @@ function App() {
                             width: `${pct}%`, height: "100%",
                             background: isComplete
                               ? "linear-gradient(90deg, #FFD93D, #FF6B6B)"
-                              : "linear-gradient(90deg, #06D6A0, #00F5D4)",
+                              : "linear-gradient(90deg, #2e8bc0, #b1d4e0)",
                             borderRadius: 2, transition: "width 0.5s ease",
                           }} />
                         </div>
@@ -1321,7 +1321,7 @@ function App() {
                       <div style={{
                         padding: "3px 8px", borderRadius: 8,
                         background: "rgba(6,214,160,0.15)", border: "1px solid rgba(6,214,160,0.3)",
-                        fontSize: "0.5rem", fontWeight: 800, color: "#06D6A0",
+                        fontSize: "0.5rem", fontWeight: 800, color: "#2e8bc0",
                         letterSpacing: "0.08em", flexShrink: 0,
                       }}>ACTIVE</div>
                     )}
@@ -1536,7 +1536,7 @@ function App() {
                   {answered !== undefined && isCorrect && (
                     <div style={{
                       marginTop: 12, fontSize: "0.68rem", fontWeight: 700,
-                      color: "#06D6A0",
+                      color: "#2e8bc0",
                       letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center",
                     }}>
                       +10 XP — WELL PLAYED
@@ -1558,7 +1558,7 @@ function App() {
                       }}>
                         <span style={{ fontSize: "1.1rem" }}>🧠</span>
                         <span style={{
-                          color: "#06D6A0", fontWeight: 800, fontSize: "0.65rem",
+                          color: "#2e8bc0", fontWeight: 800, fontSize: "0.65rem",
                           letterSpacing: "0.1em", textTransform: "uppercase",
                         }}>INSIGHT UNLOCKED</span>
                       </div>
@@ -1569,7 +1569,7 @@ function App() {
                           style={{
                             width: "100%", padding: "10px 16px", borderRadius: 12,
                             background: "rgba(6,214,160,0.12)", border: "1px solid rgba(6,214,160,0.25)",
-                            color: "#06D6A0", fontWeight: 700, fontSize: "0.78rem",
+                            color: "#2e8bc0", fontWeight: 700, fontSize: "0.78rem",
                             cursor: "pointer", fontFamily: FONT,
                           }}
                         >
@@ -1589,7 +1589,7 @@ function App() {
                             style={{
                               padding: "6px 14px", borderRadius: 10,
                               background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.2)",
-                              color: "#06D6A0", fontWeight: 700, fontSize: "0.68rem",
+                              color: "#2e8bc0", fontWeight: 700, fontSize: "0.68rem",
                               cursor: "pointer", fontFamily: FONT,
                               display: "flex", alignItems: "center", gap: 6,
                             }}
@@ -1660,8 +1660,8 @@ function App() {
               />
               <defs>
                 <linearGradient id="profGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#06D6A0" />
-                  <stop offset="100%" stopColor="#00F5D4" />
+                  <stop offset="0%" stopColor="#2e8bc0" />
+                  <stop offset="100%" stopColor="#b1d4e0" />
                 </linearGradient>
               </defs>
             </svg>
@@ -1676,7 +1676,7 @@ function App() {
 
           <h2 style={{
             color: "#fff", fontSize: "1.6rem", fontWeight: 900,
-            background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
+            background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             margin: "0 0 6px 0",
           }}>
@@ -1696,7 +1696,7 @@ function App() {
             }}
           >
             {[
-              { label: "TOTAL XP", val: xp, color: "#06D6A0" },
+              { label: "TOTAL XP", val: xp, color: "#2e8bc0" },
               { label: "BOSS WINS", val: bossWins, color: "#FFD93D" },
               { label: "STREAK", val: `${streak}🔥`, color: "#FF6B6B" },
               { label: "MODULE", val: Math.floor(bossWins / 3) + 1, color: "#E040FB" },
@@ -1738,7 +1738,7 @@ function App() {
                     padding: "10px 14px", borderRadius: 12, fontFamily: FONT,
                     background: idx === currentModuleIdx ? "rgba(6,214,160,0.1)" : "rgba(255,255,255,0.02)",
                     border: idx === currentModuleIdx ? "1px solid rgba(6,214,160,0.3)" : "1px solid rgba(255,255,255,0.05)",
-                    color: idx === currentModuleIdx ? "#06D6A0" : "rgba(255,255,255,0.5)",
+                    color: idx === currentModuleIdx ? "#2e8bc0" : "rgba(255,255,255,0.5)",
                     fontWeight: 700, fontSize: "0.7rem", cursor: "pointer",
                     display: "flex", alignItems: "center", gap: 8,
                   }}
@@ -1746,7 +1746,7 @@ function App() {
                   <span>{mod.icon}</span>
                   <span>{mod.name}</span>
                   {idx === currentModuleIdx && (
-                    <span style={{ marginLeft: "auto", fontSize: "0.5rem", fontWeight: 800, color: "#06D6A0" }}>ACTIVE</span>
+                    <span style={{ marginLeft: "auto", fontSize: "0.5rem", fontWeight: 800, color: "#2e8bc0" }}>ACTIVE</span>
                   )}
                 </button>
               ))}
@@ -1854,7 +1854,7 @@ function App() {
                 >
                   <div style={{ fontSize: "3rem", marginBottom: 12, filter: "drop-shadow(0 0 20px rgba(6,214,160,0.4))" }}>🧠</div>
                   <h3 style={{
-                    color: "#06D6A0", fontSize: "1.3rem", fontWeight: 900,
+                    color: "#2e8bc0", fontSize: "1.3rem", fontWeight: 900,
                     letterSpacing: "0.04em", marginBottom: 6,
                   }}>HOLD UP</h3>
                   <p style={{
@@ -1874,7 +1874,7 @@ function App() {
                     style={{
                       padding: "8px 18px", borderRadius: 12, marginBottom: 20,
                       background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.25)",
-                      color: "#06D6A0", fontWeight: 700, fontSize: "0.75rem",
+                      color: "#2e8bc0", fontWeight: 700, fontSize: "0.75rem",
                       cursor: "pointer", fontFamily: FONT,
                       display: "inline-flex", alignItems: "center", gap: 6,
                     }}
@@ -1895,7 +1895,7 @@ function App() {
                     }}
                     style={{
                       width: "100%", padding: 18, borderRadius: 18, border: "none",
-                      background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
+                      background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
                       fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
                       letterSpacing: "0.04em", cursor: "pointer",
                       boxShadow: "0 0 30px rgba(6,214,160,0.25), 0 6px 20px rgba(0,0,0,0.4)",
@@ -1938,7 +1938,7 @@ function App() {
                     }}
                   >
                     {currentData.bossQuiz.options.map((opt, i) => {
-                      const colors = ["#FF6B6B", "#FFD93D", "#00F5D4"];
+                      const colors = ["#FF6B6B", "#FFD93D", "#b1d4e0"];
                       return (
                         <button
                           className="ws-btn"
@@ -2059,7 +2059,7 @@ function App() {
                   <div style={{ position: "relative", width: 56, height: 56, marginBottom: 4 }}>
                     <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: "rotate(-90deg)" }}>
                       <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
-                      <circle cx="28" cy="28" r="24" fill="none" stroke="#06D6A0" strokeWidth="3"
+                      <circle cx="28" cy="28" r="24" fill="none" stroke="#2e8bc0" strokeWidth="3"
                         strokeLinecap="round" strokeDasharray="151"
                         strokeDashoffset={151 - (151 * countdown / 10)}
                         style={{ transition: "stroke-dashoffset 1s linear" }}
@@ -2077,7 +2077,7 @@ function App() {
                 {quizResult ? (
                   <button className="ws-btn" onClick={resetJourney} style={{
                     padding: 20, borderRadius: 18, border: "none",
-                    background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
+                    background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
                     fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
                     letterSpacing: "0.04em", cursor: "pointer",
                     boxShadow: "0 0 30px rgba(6,214,160,0.25), 0 6px 20px rgba(0,0,0,0.4)",
