@@ -51,6 +51,14 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - **Adults**: Capital leverage, high-volatility assets, aggressive portfolio expansion, real estate leverage, equity building
 - Prompt assembly: `${persona} ${coreDoctrine} ${ageShark} ${instructions}`
 
+### Apex Logo System
+- Custom inline SVG: ascending bar chart where the tallest bar morphs into an angular shark fin
+- Color: Neon Emerald `#00FF9D` with opacity gradient (0.3 → 0.5 → 0.7 → 0.85 → 1.0)
+- Pulsing `logoGlow` CSS animation (drop-shadow pulses between 6px and 10px spread)
+- Brand font: **Orbitron** (Google Fonts) — geometric, futuristic sans-serif
+- Rendered in: LandingPage nav (30px, glow), LandingPage CTA (48px, glow), LandingPage footer (22px), LandingPageES (same), App.tsx HUD (22px, static glow)
+- Text "MOOLAB" uses Orbitron font-black with `#00FF9D` → emerald-400 gradient
+
 ### Landing Page Copy (Shark Doctrine)
 - Hero badge: "Building Financial Sharks Since Day One"
 - Subheadline: "The financial system is designed to keep your kids in the rat race..."

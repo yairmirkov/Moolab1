@@ -1042,6 +1042,15 @@ function App() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+
+            <svg width="22" height="22" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 0 4px #00FF9D)", flexShrink: 0 }}>
+              <rect x="6" y="46" width="7" height="12" fill="#00FF9D" opacity="0.3" rx="1" />
+              <rect x="17" y="38" width="7" height="20" fill="#00FF9D" opacity="0.5" rx="1" />
+              <rect x="28" y="28" width="7" height="30" fill="#00FF9D" opacity="0.7" rx="1" />
+              <path d="M39 58 L39 20 L46 20 L46 58 Z" fill="#00FF9D" opacity="0.85" />
+              <path d="M46 20 L46 4 L58 4 L46 20Z" fill="#00FF9D" />
+              <path d="M46 4 L58 4 L52 12 Z" fill="#00FF9D" opacity="0.5" />
+            </svg>
             <button
               className="ws-btn"
               onClick={() => setShowProfile(true)}
@@ -1060,7 +1069,7 @@ function App() {
                 letterSpacing: "0.04em",
               }}
             >
-              💸 {userName || "PROFILE"}
+              {userName || "PROFILE"}
             </button>
             <button
               className="ws-btn"

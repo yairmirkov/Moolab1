@@ -1,5 +1,26 @@
 import { useEffect, useState } from "react";
 
+const MoolabLogo = ({ size = 32, glow = false }: { size?: number; glow?: boolean }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 64 64"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={glow ? {
+      filter: "drop-shadow(0 0 6px #00FF9D) drop-shadow(0 0 14px rgba(0,255,157,0.4))",
+      animation: "logoGlow 2s ease-in-out infinite",
+    } : undefined}
+  >
+    <rect x="6" y="46" width="7" height="12" fill="#00FF9D" opacity="0.3" rx="1" />
+    <rect x="17" y="38" width="7" height="20" fill="#00FF9D" opacity="0.5" rx="1" />
+    <rect x="28" y="28" width="7" height="30" fill="#00FF9D" opacity="0.7" rx="1" />
+    <path d="M39 58 L39 20 L46 20 L46 58 Z" fill="#00FF9D" opacity="0.85" />
+    <path d="M46 20 L46 4 L58 4 L46 20Z" fill="#00FF9D" />
+    <path d="M46 4 L58 4 L52 12 Z" fill="#00FF9D" opacity="0.5" />
+  </svg>
+);
+
 interface LandingPageProps {
   onParentLogin: () => void;
   onTestApp?: () => void;
@@ -63,9 +84,9 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-emerald-100">
         <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">💸</span>
-            <span className="text-lg font-black tracking-tight bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
-              Moolab
+            <MoolabLogo size={30} glow />
+            <span style={{ fontFamily: "'Orbitron', sans-serif" }} className="text-lg font-black tracking-tight bg-gradient-to-r from-[#00FF9D] to-emerald-400 bg-clip-text text-transparent">
+              MOOLAB
             </span>
           </div>
           <div className="flex items-center gap-2.5">
@@ -330,7 +351,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
 
       <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-emerald-50/50">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="text-4xl mb-4">💸</div>
+          <div className="mb-4"><MoolabLogo size={48} glow /></div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
             Raise a Shark
             <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Today.</span>
@@ -348,9 +369,9 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
       <footer className="py-8 px-6 border-t border-emerald-100">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-lg">💸</span>
-            <span className="text-sm font-black bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
-              Moolab
+            <MoolabLogo size={22} />
+            <span style={{ fontFamily: "'Orbitron', sans-serif" }} className="text-sm font-black bg-gradient-to-r from-[#00FF9D] to-emerald-400 bg-clip-text text-transparent">
+              MOOLAB
             </span>
           </div>
           <p className="text-[10px] text-[#1a3c2a]/20 font-medium text-center sm:text-right">
