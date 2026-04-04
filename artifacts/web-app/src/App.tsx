@@ -32,7 +32,7 @@ const generateCards = async (ageGroup, topic?: string) => {
         ? "You are The High-Performance Coach for ages 13-17. Focus on the transition from consumer to owner. Talk about the mechanics of the creator economy, digital leverage, and building real competitive edges. Tone: sharp, authentic, direct. No forced slang — just real talk about building an edge and thinking like a strategist."
         : "You are The Wealth Strategist for ages 18-21. Zero fluff. Focus on aggressive mastery of the global financial system — credit engineering, tax optimization, investment vehicles, asset allocation. Tone: elite, sophisticated, and focused on high-level execution. Think MasterClass instructor meets Wall Street analyst.";
   const topicLine = topic ? ` All lessons MUST focus on the topic of: ${topic}.` : "";
-  const prompt = `${persona} Generate 10 unique financial lessons with diverse topics. Each lesson MUST have a completely different question - never repeat similar questions. Titles should be concise and professional (2-4 words). Descriptions should be insightful one-liners that reveal a non-obvious truth.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0}}`;
+  const prompt = `${persona} Generate 10 unique financial lessons with diverse topics. Each lesson MUST have a completely different question - never repeat similar questions. Titles should be concise and professional (2-4 words). Descriptions should be insightful one-liners that reveal a non-obvious truth. For every question, provide an explanation field: a 2-3 sentence charismatic, highly encouraging explanation of why the correct answer is right. Speak like a beloved, brilliant professor. Start with phrases like 'Great guess, but think about it this way...' or 'Almost! Here is the secret...' or 'Good thinking — and here is why...'.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0, "explanation": "Why correct answer is right"}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0, "explanation": "Why correct answer is right"}}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -263,6 +263,9 @@ function App() {
     try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
   });
 
+  const [revealedExplanations, setRevealedExplanations] = useState<Record<string, boolean>>({});
+  const [bossExplanation, setBossExplanation] = useState<string | null>(null);
+
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const isMutedRef = useRef(false);
@@ -298,6 +301,8 @@ function App() {
     setQuizUnlocked(false);
     setQuizStarted(false);
     setQuizResult(null);
+    setRevealedExplanations({});
+    setBossExplanation(null);
     slidesScrolledRef.current = 0;
     lastRadioSlideRef.current = -1;
     usedTipsRef.current.clear();
@@ -433,6 +438,22 @@ function App() {
   const triggerGreenFlash = () => {
     setFlashGreen(true);
     setTimeout(() => setFlashGreen(false), 300);
+  };
+
+  const speakExplanation = (text: string) => {
+    if (isMutedRef.current || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.95;
+    utter.pitch = 1.0;
+    utter.volume = 0.85;
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => /samantha|karen|daniel|google.*us|natural/i.test(v.name));
+    if (preferred) utter.voice = preferred;
+    if (musicRef.current) musicRef.current.volume = 0.05;
+    utter.onend = () => { if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15; };
+    utter.onerror = () => { if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15; };
+    window.speechSynthesis.speak(utter);
   };
 
   if (showLanding) {
@@ -1458,7 +1479,7 @@ function App() {
                           className="ws-btn"
                           key={idx}
                           onClick={() => {
-                            if (!slideAnswers[card.id]) {
+                            if (slideAnswers[card.id] === undefined) {
                               setSlideAnswers((p) => ({ ...p, [card.id]: idx }));
                               if (idx === card.miniGame.correctIndex) {
                                 setCompletedSlides((p) => [...p, card.id]);
@@ -1494,13 +1515,71 @@ function App() {
                       );
                     })}
                   </div>
-                  {answered !== undefined && (
+                  {answered !== undefined && isCorrect && (
                     <div style={{
                       marginTop: 12, fontSize: "0.68rem", fontWeight: 700,
-                      color: isCorrect ? "#06D6A0" : "#E76F51",
+                      color: "#06D6A0",
                       letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center",
                     }}>
-                      {isCorrect ? "+10 XP — WELL PLAYED" : "NOT QUITE — KEEP GOING"}
+                      +10 XP — WELL PLAYED
+                    </div>
+                  )}
+                  {answered !== undefined && !isCorrect && (
+                    <div style={{
+                      marginTop: 14,
+                      background: "linear-gradient(135deg, rgba(6,214,160,0.08), rgba(0,245,212,0.06))",
+                      border: "1px solid rgba(6,214,160,0.2)",
+                      borderRadius: 16,
+                      padding: "14px 16px",
+                      backdropFilter: "blur(16px)",
+                      WebkitBackdropFilter: "blur(16px)",
+                      animation: "fadeIn 0.4s ease-out",
+                    }}>
+                      <div style={{
+                        display: "flex", alignItems: "center", gap: 8, marginBottom: 8,
+                      }}>
+                        <span style={{ fontSize: "1.1rem" }}>🧠</span>
+                        <span style={{
+                          color: "#06D6A0", fontWeight: 800, fontSize: "0.65rem",
+                          letterSpacing: "0.1em", textTransform: "uppercase",
+                        }}>INSIGHT UNLOCKED</span>
+                      </div>
+                      {!revealedExplanations[card.id] ? (
+                        <button
+                          className="ws-btn"
+                          onClick={() => setRevealedExplanations(p => ({ ...p, [card.id]: true }))}
+                          style={{
+                            width: "100%", padding: "10px 16px", borderRadius: 12,
+                            background: "rgba(6,214,160,0.12)", border: "1px solid rgba(6,214,160,0.25)",
+                            color: "#06D6A0", fontWeight: 700, fontSize: "0.78rem",
+                            cursor: "pointer", fontFamily: FONT,
+                          }}
+                        >
+                          🧠 Tap to understand why
+                        </button>
+                      ) : (
+                        <div>
+                          <p style={{
+                            color: "rgba(255,255,255,0.85)", fontSize: "0.82rem",
+                            lineHeight: 1.55, fontWeight: 500, margin: "0 0 10px 0",
+                          }}>
+                            {card.miniGame.explanation || "The correct answer builds on a key principle. Review the lesson to see the full picture."}
+                          </p>
+                          <button
+                            className="ws-btn"
+                            onClick={() => speakExplanation(card.miniGame.explanation || "Review the lesson to understand this concept better.")}
+                            style={{
+                              padding: "6px 14px", borderRadius: 10,
+                              background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.2)",
+                              color: "#06D6A0", fontWeight: 700, fontSize: "0.68rem",
+                              cursor: "pointer", fontFamily: FONT,
+                              display: "flex", alignItems: "center", gap: 6,
+                            }}
+                          >
+                            <span style={{ fontSize: "0.8rem" }}>▶</span> Listen
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1739,6 +1818,74 @@ function App() {
                 >
                   BEGIN CHALLENGE
                 </button>
+              ) : bossExplanation ? (
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, rgba(6,214,160,0.06), rgba(0,245,212,0.04))",
+                    padding: 30,
+                    borderRadius: 28,
+                    border: "1px solid rgba(6,214,160,0.2)",
+                    width: "100%",
+                    maxWidth: 380,
+                    backdropFilter: "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 60px rgba(6,214,160,0.08)",
+                    animation: "popIn 0.5s ease-out",
+                    textAlign: "center",
+                  }}
+                >
+                  <div style={{ fontSize: "3rem", marginBottom: 12, filter: "drop-shadow(0 0 20px rgba(6,214,160,0.4))" }}>🧠</div>
+                  <h3 style={{
+                    color: "#06D6A0", fontSize: "1.3rem", fontWeight: 900,
+                    letterSpacing: "0.04em", marginBottom: 6,
+                  }}>HOLD UP</h3>
+                  <p style={{
+                    color: "rgba(6,214,160,0.6)", fontSize: "0.68rem", fontWeight: 700,
+                    letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20,
+                  }}>LET'S BREAK THIS DOWN</p>
+                  <p style={{
+                    color: "rgba(255,255,255,0.85)", fontSize: "0.92rem",
+                    lineHeight: 1.65, fontWeight: 500, margin: "0 0 20px 0",
+                    textAlign: "left",
+                  }}>
+                    {bossExplanation}
+                  </p>
+                  <button
+                    className="ws-btn"
+                    onClick={() => speakExplanation(bossExplanation)}
+                    style={{
+                      padding: "8px 18px", borderRadius: 12, marginBottom: 20,
+                      background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.25)",
+                      color: "#06D6A0", fontWeight: 700, fontSize: "0.75rem",
+                      cursor: "pointer", fontFamily: FONT,
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                    }}
+                  >
+                    <span>▶</span> Listen to explanation
+                  </button>
+                  <button
+                    className="ws-btn"
+                    onClick={() => {
+                      setBossExplanation(null);
+                      setQuizStarted(false);
+                      setQuizUnlocked(false);
+                      setCompletedSlides((prev) => {
+                        const removed = prev[prev.length - 1];
+                        if (removed) setSlideAnswers((sa) => { const n = { ...sa }; delete n[removed]; return n; });
+                        return prev.slice(0, -1);
+                      });
+                    }}
+                    style={{
+                      width: "100%", padding: 18, borderRadius: 18, border: "none",
+                      background: "linear-gradient(135deg, #06D6A0, #00F5D4)",
+                      fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
+                      letterSpacing: "0.04em", cursor: "pointer",
+                      boxShadow: "0 0 30px rgba(6,214,160,0.25), 0 6px 20px rgba(0,0,0,0.4)",
+                    }}
+                  >
+                    Got it! Let's keep scrolling
+                  </button>
+                </div>
               ) : (
                 <div
                   style={{
@@ -1780,8 +1927,8 @@ function App() {
                           key={i}
                           onClick={() => {
                             const win = i === currentData.bossQuiz.correctIndex;
-                            setQuizResult(win);
                             if (win) {
+                              setQuizResult(true);
                               setXp((p) => p + 50);
                               setStreak((p) => p + 1);
                               setBossWins((p) => p + 1);
@@ -1800,6 +1947,7 @@ function App() {
                               });
                             } else {
                               setStreak(0);
+                              setBossExplanation(currentData.bossQuiz.explanation || "The correct answer connects to a deeper principle. Review the lessons to strengthen your understanding before the next attempt.");
                             }
                           }}
                           style={{

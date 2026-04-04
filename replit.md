@@ -42,9 +42,16 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - Track labels: Tech-Mentor Track / Performance Track / Strategist Track
 - Radio tips match persona tone (premium podcast host style — Diary of a CEO / MasterClass)
 
+### Charismatic Tutor Intervention System
+- AI generates `explanation` field for every miniGame and bossQuiz question
+- **Mini-game wrong answer**: Shows "INSIGHT UNLOCKED" glassmorphic panel with tap-to-reveal explanation + "Listen" button (speech synthesis). Warm emerald glow, not harsh red.
+- **Boss quiz wrong answer**: Shows "HOLD UP — LET'S BREAK THIS DOWN" modal with explanation + listen button + "Got it! Let's keep scrolling" to return to feed. Streak is reset but no harsh fail screen. Removes last completed slide + its answer to allow re-earning.
+- `speakExplanation()` helper: reads explanation aloud with music ducking (0.05 during speech, restore to 0.15)
+- Answer lock check uses `slideAnswers[card.id] === undefined` (not falsy check) to prevent index-0 replay exploit
+
 ### Core Logic (NEVER CHANGE)
-- `generateCards()` — AI card generation
-- State variables (appStarted, ageGroup, currentData, loading, isFetchingMore, isFetchingRef, completedSlides, slideAnswers, quizUnlocked, quizStarted, quizResult)
+- `generateCards()` — AI card generation with explanation field
+- State variables (appStarted, ageGroup, currentData, loading, isFetchingMore, isFetchingRef, completedSlides, slideAnswers, quizUnlocked, quizStarted, quizResult, revealedExplanations, bossExplanation)
 - `handleScroll` — infinite scroll tripwire
 - `handleMiniGame` — answer tracking + XP award (+10 per correct)
 - `handleShare` — native/WhatsApp/X sharing
