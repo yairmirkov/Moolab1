@@ -99,7 +99,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 mb-6 sm:mb-8">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[10px] sm:text-xs font-semibold text-emerald-700 tracking-wide uppercase">
-              Financial Literacy for the Next Generation
+              Building Financial Sharks Since Day One
             </span>
           </div>
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-5">
@@ -110,7 +110,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
             </span>
           </h1>
           <p className="text-base sm:text-lg text-[#1a3c2a]/45 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
-            The scroll experience your kids already love — reimagined to teach real financial skills through AI-powered lessons, games, and boss battles.
+            The financial system is designed to keep your kids in the rat race. Moolab is the escape hatch. AI-powered financial mastery to build Sharks, not employees.
           </p>
           <div id="download-section" className="mb-8">
             <DownloadBadges />
@@ -143,19 +143,19 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
-              Learning That Feels Like
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Playing</span>
+              WARNING: THIS IS NOT
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> FOR EVERY FAMILY.</span>
             </h2>
             <p className="text-sm sm:text-base text-[#1a3c2a]/40 font-medium max-w-lg mx-auto">
-              Every swipe delivers bite-sized financial wisdom wrapped in games, challenges, and rewards.
+              If your dream is for your kid to get a "safe" job, barely make rent, and spend 30 years paying off a mortgage... close this app. Moolab is for parents who want their kids to achieve financial freedom early. We teach healthy risk appetite, calculated leverage, and educated investments — not gambling. We are building the next generation of financial sharks.
             </p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
-              { icon: "🎮", title: "Kid-Friendly", desc: "No jargon — just fun, safe, age-appropriate money lessons." },
-              { icon: "🤖", title: "AI Content", desc: "Gemini AI generates fresh, personalized lessons every session." },
-              { icon: "⚔️", title: "Boss Battles", desc: "Beat the Boss Quiz to level up and unlock new modules." },
-              { icon: "🏆", title: "Gamification", desc: "Earn XP, build streaks, level up, and track boss wins." },
+              { icon: "🦈", title: "Shark Mindset", desc: "Ownership over wages. Leverage over savings. Speed over waiting." },
+              { icon: "🤖", title: "AI-Powered", desc: "Gemini AI generates aggressive, personalized wealth lessons every session." },
+              { icon: "⚔️", title: "Boss Battles", desc: "Prove mastery under pressure. No participation trophies here." },
+              { icon: "🏆", title: "Gamification", desc: "Earn XP, build streaks, level up, and track your dominance." },
             ].map((f) => (
               <div key={f.title} className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="text-2xl sm:text-3xl mb-3">{f.icon}</div>
@@ -171,31 +171,31 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
-              Three Paths.{" "}
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent">One Mission.</span>
+              Three Identities.{" "}
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent">One Predator.</span>
             </h2>
             <p className="text-sm sm:text-base text-[#1a3c2a]/40 font-medium max-w-lg mx-auto">
-              Content adapts to their age so every lesson hits home.
+              We don't water down the truth. We scale it to their age.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
             {[
               {
-                emoji: "🌟", mode: "EXPLORER", ages: "Ages 7–12",
-                desc: "Piggy banks, allowance math, and saving goals through stories and games.",
-                topics: ["What is money?", "Saving vs spending", "Setting goals"],
+                emoji: "🌟", mode: "MATRIX BREAKER", ages: "Ages 8–12",
+                desc: "Escaping the Matrix early. Teaching the mechanics of money, digital assets, and ownership before middle school.",
+                topics: ["How money really works", "Digital asset ownership", "Building vs. buying"],
                 accent: "emerald",
               },
               {
-                emoji: "🔥", mode: "HUSTLER", ages: "Ages 13–17",
-                desc: "Side hustles, budgeting, and investing basics. Real talk for teens.",
-                topics: ["Earning income", "Budgeting 101", "Intro to investing"],
+                emoji: "🔥", mode: "TEEN TYCOON", ages: "Ages 13–17",
+                desc: "Mastering the creator economy, cash flow, and building leverage while others are just playing video games.",
+                topics: ["High-velocity side hustles", "Trend recognition", "Aggressive reinvestment"],
                 accent: "amber",
               },
               {
-                emoji: "💎", mode: "INVESTOR", ages: "Ages 18–21",
-                desc: "Credit scores, crypto, real estate, and tax strategy. Zero fluff.",
-                topics: ["Credit & debt", "Crypto basics", "Tax strategies"],
+                emoji: "💎", mode: "APEX PREDATOR", ages: "Ages 18–21",
+                desc: "Aggressive portfolio expansion, educated risk in high-volatility markets, and hacking the credit system.",
+                topics: ["Capital leverage", "High-volatility assets", "Credit system mastery"],
                 accent: "violet",
               },
             ].map((card) => {
@@ -235,17 +235,17 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
               </div>
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
                 Parental
-                <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Command Center</span>
+                <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> War Room</span>
               </h2>
               <p className="text-sm text-[#1a3c2a]/45 font-medium leading-relaxed mb-6">
-                Complete visibility into your child's financial education. Real-time metrics, module progress, and learning insights.
+                Full operational intelligence on your child's financial training. Track every module conquered, every boss defeated, every level of mastery achieved.
               </p>
               <div className="space-y-3 mb-6">
                 {[
-                  { icon: "📊", text: "Real-time XP, streak, and level tracking" },
-                  { icon: "🎯", text: "Module-by-module progress bars" },
-                  { icon: "🧠", text: "Learning insights and competency assessment" },
-                  { icon: "👀", text: "Full transparency — kids see what parents see" },
+                  { icon: "📊", text: "Real-time XP, streak, and dominance tracking" },
+                  { icon: "🎯", text: "Module-by-module conquest progress" },
+                  { icon: "🧠", text: "Competency assessment and mastery insights" },
+                  { icon: "👀", text: "Full transparency — see exactly what they're learning" },
                 ].map((item) => (
                   <div key={item.text} className="flex items-start gap-2.5">
                     <span className="text-lg">{item.icon}</span>
@@ -307,16 +307,16 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
           </div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-3">
             Mastermind
-            <span className="bg-gradient-to-r from-amber-500 to-orange-400 bg-clip-text text-transparent"> Subscription</span>
+            <span className="bg-gradient-to-r from-amber-500 to-orange-400 bg-clip-text text-transparent"> Arsenal</span>
           </h2>
           <p className="text-sm text-[#1a3c2a]/40 font-medium max-w-md mx-auto mb-10">
-            Unlock the full Moolab experience for serious learners.
+            For families who refuse to raise average. Unlock the full weapons cache.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 max-w-2xl mx-auto mb-10">
             {[
-              { icon: "♾️", title: "Unlimited Scrolls", desc: "No daily limits — learn whenever you want." },
-              { icon: "📈", title: "Advanced Analytics", desc: "Deep reports on learning patterns and growth." },
-              { icon: "🎓", title: "Premium Modules", desc: "Exclusive topics like entrepreneurship and crypto." },
+              { icon: "♾️", title: "Unlimited Scrolls", desc: "No daily limits — infinite reps build infinite edge." },
+              { icon: "📈", title: "War Room Analytics", desc: "Deep performance intelligence on mastery velocity and gaps." },
+              { icon: "🎓", title: "Elite Modules", desc: "Exclusive topics: leverage strategies, crypto mechanics, empire building." },
             ].map((perk) => (
               <div key={perk.title} className="p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 text-center">
                 <div className="text-2xl mb-2">{perk.icon}</div>
@@ -332,11 +332,11 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-4xl mb-4">💸</div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
-            Ready to Build Their
-            <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Financial Future?</span>
+            Raise a Shark
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-400 bg-clip-text text-transparent"> Today.</span>
           </h2>
           <p className="text-sm text-[#1a3c2a]/35 font-medium mb-8 max-w-md mx-auto">
-            Free to start. No ads. No data selling. Just real financial education that sticks.
+            Free to start. No ads. No data selling. Just aggressive financial education that creates builders, not borrowers.
           </p>
           <DownloadBadges />
           <p className="text-[10px] text-[#1a3c2a]/20 font-medium mt-4">
@@ -354,7 +354,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
             </span>
           </div>
           <p className="text-[10px] text-[#1a3c2a]/20 font-medium text-center sm:text-right">
-            Building the next generation of financially literate humans.
+            Building the next generation of financial sharks.
           </p>
         </div>
       </footer>

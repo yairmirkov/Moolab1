@@ -51,6 +51,17 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - **Adults**: Capital leverage, high-volatility assets, aggressive portfolio expansion, real estate leverage, equity building
 - Prompt assembly: `${persona} ${coreDoctrine} ${ageShark} ${instructions}`
 
+### Landing Page Copy (Shark Doctrine)
+- Hero badge: "Building Financial Sharks Since Day One"
+- Subheadline: "The financial system is designed to keep your kids in the rat race..."
+- Anti-pitch warning: "WARNING: THIS IS NOT FOR EVERY FAMILY."
+- Feature cards: Shark Mindset, AI-Powered, Boss Battles, Gamification
+- Persona cards: MATRIX BREAKER (8-12), TEEN TYCOON (13-17), APEX PREDATOR (18-21)
+- Parent section: "Parental War Room"
+- Subscription: "Mastermind Arsenal"
+- Final CTA: "Raise a Shark Today."
+- Footer: "Building the next generation of financial sharks."
+
 ### Charismatic Tutor Intervention System
 - AI generates `explanation` field for every miniGame and bossQuiz question
 - **Mini-game wrong answer**: Shows "INSIGHT UNLOCKED" glassmorphic panel with tap-to-reveal explanation + "Listen" button (speech synthesis). Warm emerald glow, not harsh red.
