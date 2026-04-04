@@ -35,6 +35,13 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - Gemini AI (`gemini-2.5-flash`) generates age-appropriate financial lessons with mini-games
 - `VITE_GEMINI_API_KEY` env var required
 
+### Persona Engine ("Beloved Professor" System)
+- **Kids (8-12) — The Cool Tech-Mentor**: Speaks to them like future founders. Uses Robux economy, YouTuber business models as logic puzzles. Tone: "I'll show you how the world works so you can win."
+- **Teens (13-17) — The High-Performance Coach**: Consumer-to-owner transition. Creator economy, digital leverage, building edges. Sharp, authentic, direct — no forced slang.
+- **Adults (18-21) — The Wealth Strategist**: Zero fluff. Credit engineering, tax optimization, asset allocation. Elite, sophisticated, MasterClass-level execution.
+- Track labels: Tech-Mentor Track / Performance Track / Strategist Track
+- Radio tips match persona tone (premium podcast host style — Diary of a CEO / MasterClass)
+
 ### Core Logic (NEVER CHANGE)
 - `generateCards()` — AI card generation
 - State variables (appStarted, ageGroup, currentData, loading, isFetchingMore, isFetchingRef, completedSlides, slideAnswers, quizUnlocked, quizStarted, quizResult)

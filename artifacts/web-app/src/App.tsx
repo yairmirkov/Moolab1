@@ -27,12 +27,12 @@ const generateCards = async (ageGroup, topic?: string) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   let persona =
     ageGroup === "Kids"
-      ? "Older sibling (8-12)."
+      ? "You are The Cool Tech-Mentor for ages 8-12. Speak to them like future founders — never talk down. Use modern digital examples (Robux economy, YouTuber business models, in-app purchases) as real logic puzzles. Tone: 'I'm going to show you how the world actually works so you can win.' Be sharp, respectful, and fascinating."
       : ageGroup === "Teens"
-        ? "Gen-Z expert (13-17)."
-        : "Real-world mentor (18-21).";
+        ? "You are The High-Performance Coach for ages 13-17. Focus on the transition from consumer to owner. Talk about the mechanics of the creator economy, digital leverage, and building real competitive edges. Tone: sharp, authentic, direct. No forced slang — just real talk about building an edge and thinking like a strategist."
+        : "You are The Wealth Strategist for ages 18-21. Zero fluff. Focus on aggressive mastery of the global financial system — credit engineering, tax optimization, investment vehicles, asset allocation. Tone: elite, sophisticated, and focused on high-level execution. Think MasterClass instructor meets Wall Street analyst.";
   const topicLine = topic ? ` All lessons MUST focus on the topic of: ${topic}.` : "";
-  const prompt = `${persona} Generate 10 unique financial lessons with diverse topics. Each lesson MUST have a completely different question - never repeat similar questions.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0}}`;
+  const prompt = `${persona} Generate 10 unique financial lessons with diverse topics. Each lesson MUST have a completely different question - never repeat similar questions. Titles should be concise and professional (2-4 words). Descriptions should be insightful one-liners that reveal a non-obvious truth.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0}}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -163,40 +163,40 @@ const studyBeats = [
 
 const radioTips: Record<string, string[]> = {
   Kids: [
-    "Yo! Did you know a piggy bank is like a tiny fortress for your candy money?",
-    "Here's a secret — if you save one dollar every day, you'll have 365 dollars by next year! That's a LOT of toys!",
-    "Fun fact: The word 'bank' comes from the Italian word for bench! Old-timey money people sat on benches!",
-    "Quick tip: Before you buy something, wait one whole day. If you still want it tomorrow, maybe it's worth it!",
-    "Did you know? Even kids can start a lemonade stand or sell drawings. That's called being an entrepreneur!",
-    "Money hack: When you get money for your birthday, try saving half and spending half. Future you will say thanks!",
-    "Cool fact: The first coins were made over 2,600 years ago! People used to trade goats before that!",
-    "Pro move: Keep your savings somewhere you can't easily grab it. Out of sight, out of mind!",
-    "Here's the deal — needs are things like food and shoes. Wants are things like video games. Know the difference!",
-    "Secret tip: The richest people in the world started saving when they were YOUR age!",
+    "Interesting move there. Most people just spend, but you're starting to see the pattern. That's how you turn a small skin into a major asset. Let's keep that momentum.",
+    "Here's something most adults don't even know. Every Robux purchase is a micro-transaction. And the company that made Roblox? They turned those tiny purchases into billions. That's the power of scale.",
+    "Think about your favorite YouTuber. They didn't just get lucky. They built a system — content, audience, revenue. That's a business model. And you can learn to build one too.",
+    "You just made a smart call. The difference between someone who builds wealth and someone who doesn't? Patience. One day of waiting before buying saves more money than you'd think.",
+    "Every big company started as someone's idea. Apple started in a garage. The question isn't whether you can build something — it's what you'll build first.",
+    "Here's the real game. When you save half of what you earn, you're not losing money — you're funding your future self. That's what smart operators do.",
+    "Most people think money is about earning more. But the real secret? It's about keeping more of what you already have. That's the first rule of building wealth.",
+    "Notice how games make you want to spend? That's called design psychology. Once you see it, you can't unsee it. And that awareness? That's your superpower.",
+    "Fun fact — the word 'invest' comes from the Latin word for 'to clothe.' You're literally dressing your future in better options. Every smart choice layers on protection.",
+    "You're already ahead of most people your age. Why? Because you're learning how money actually works instead of just spending it. That's called a strategic advantage.",
   ],
   Teens: [
-    "Real talk — compound interest is basically free money. Start saving now and watch it multiply!",
-    "Quick flex: If you invest 50 bucks a month starting at 15, you could have over a million by retirement!",
-    "Money move: Always pay yourself first. Before spending on anything, put at least 10 percent in savings!",
-    "Hot tip: A credit score is like your financial GPA. Start building it early with a secured card!",
-    "Did you know? Index funds beat 90 percent of professional stock pickers. Keep it simple, keep it smart!",
-    "Side hustle alert: Freelancing, tutoring, reselling — there are so many ways to earn online right now!",
-    "Budget hack: Try the 50-30-20 rule. 50 for needs, 30 for wants, 20 for savings. Simple and effective!",
-    "Real talk — student loans can follow you for decades. Scholarships are literally free money. Apply to all of them!",
-    "Smart move: Before buying anything over 50 bucks, sleep on it for 48 hours. Impulse buys kill budgets!",
-    "Here's a secret: Most millionaires don't drive fancy cars. They invest the difference. That's the real flex!",
+    "You're reading the room perfectly. In a world of consumers, you're choosing to be an architect. That's where the real equity is. Stay focused.",
+    "Here's the shift most people miss. Scrolling is consuming. Creating is owning. Every hour you spend building something — a brand, a skill, a side project — compounds over time.",
+    "Compound interest isn't just a math concept. It's the single most powerful force in personal finance. Einstein reportedly called it the eighth wonder of the world. Start now and the math works in your favor.",
+    "Think about this. If you invest fifty dollars a month starting today, by the time you're forty, you could be looking at six figures. Not from luck — from consistency.",
+    "Credit scores are just trust scores. Banks, landlords, even some employers check them. Building yours early gives you leverage that most people don't have until their thirties.",
+    "The creator economy isn't a trend — it's the new infrastructure. Whether it's content, code, or design, the people who own their output will own their income.",
+    "Most financial advice tells you to cut spending. Better advice? Increase your value. Learn a skill that pays. Then the budgeting takes care of itself.",
+    "Scholarships aren't charity — they're competitive awards for people who put in the work. Every application is a chance to get paid for being prepared. Don't leave that on the table.",
+    "The 48-hour rule is one of the most effective tools against impulse spending. If you still want it two days later, it might be worth it. If not, you just saved yourself.",
+    "Here's what separates builders from consumers — builders ask 'how was this made?' every time they see something. Start asking that question, and everything changes.",
   ],
   Adults: [
-    "Pro tip: Your credit score is your financial passport. Keep it high, travel cheap!",
-    "Real estate insight: Your first property doesn't have to be your dream home. Think investment first!",
-    "Tax hack: Max out your retirement contributions before the deadline. That's money the taxman can't touch!",
-    "Investing 101: Diversification isn't just a buzzword. It's the only free lunch in finance!",
-    "Quick tip: An emergency fund should cover 3 to 6 months of expenses. Start building yours today!",
-    "Money wisdom: The best time to start investing was yesterday. The second best time is right now!",
-    "Credit tip: Keep your utilization below 30 percent. Your credit score will thank you!",
-    "Budget reality: Track every dollar for one month. You'll be shocked where your money actually goes!",
-    "Wealth building: Pay off high-interest debt before investing. Guaranteed return on your money!",
-    "Smart move: Automate your savings and investments. What you don't see, you won't spend!",
+    "High-level execution. We're looking at the macro-level now. Remember — leverage is a tool, not a trap, if you know the math. Let's move to the next asset class.",
+    "Your credit utilization ratio directly impacts your score. Keep it under thirty percent, but the real operators keep it under ten. That signals discipline to the system.",
+    "Tax-advantaged accounts aren't optional at this level — they're essential infrastructure. Every dollar in a Roth IRA grows tax-free. That's not a suggestion, that's a strategy.",
+    "Diversification isn't about spreading money thin. It's about strategic allocation across uncorrelated assets. Real estate, index funds, bonds — each serves a different function in the portfolio.",
+    "Your emergency fund isn't an investment — it's insurance. Three to six months of runway means you make decisions from strength, not desperation. That changes everything.",
+    "Dollar-cost averaging removes emotion from investing. Consistent contributions regardless of market conditions — that's how institutions operate, and it's available to you right now.",
+    "Real estate as a first purchase isn't about the dream home. It's about acquiring an appreciating asset with leveraged capital. Think like an investor, not a homeowner.",
+    "Debt has a hierarchy. High-interest consumer debt is the first target — every dollar of interest is a dollar that could have been compounding in your favor instead.",
+    "Automation is the key to consistent wealth building. Set up automatic transfers to savings and investments. Remove the decision from the process, and the results compound.",
+    "The gap between financial literacy and financial mastery is execution. Knowing what to do is common. Doing it consistently and systematically — that's rare, and that's where the edge is.",
   ],
 };
 
@@ -627,9 +627,9 @@ function App() {
                   {(() => {
                     const age = getAgeFromYear(birthYear);
                     const group = getAgeGroup(age);
-                    if (group === "Kids") return "🌟 EXPLORER MODE — Ages 8-12";
-                    if (group === "Teens") return "🔥 HUSTLER MODE — Ages 13-16";
-                    return "💎 INVESTOR MODE — Ages 17+";
+                    if (group === "Kids") return "🌟 TECH-MENTOR TRACK — Ages 8-12";
+                    if (group === "Teens") return "🔥 PERFORMANCE TRACK — Ages 13-16";
+                    return "💎 STRATEGIST TRACK — Ages 17+";
                   })()}
                 </span>
               </div>
@@ -793,7 +793,7 @@ function App() {
               {(() => {
                 const age = getAgeFromYear(birthYear);
                 const g = getAgeGroup(age);
-                return g === "Kids" ? `Age ~${age} · Explorer Mode` : g === "Teens" ? `Age ~${age} · Hustler Mode` : `Age ~${age} · Investor Mode`;
+                return g === "Kids" ? `Age ~${age} · Tech-Mentor Track` : g === "Teens" ? `Age ~${age} · Performance Track` : `Age ~${age} · Strategist Track`;
               })()}
             </div>
           </div>
@@ -1500,7 +1500,7 @@ function App() {
                       color: isCorrect ? "#06D6A0" : "#E76F51",
                       letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center",
                     }}>
-                      {isCorrect ? "+10 XP EARNED" : "WRONG — KEEP SWIPING"}
+                      {isCorrect ? "+10 XP — WELL PLAYED" : "NOT QUITE — KEEP GOING"}
                     </div>
                   )}
                 </div>
@@ -1715,7 +1715,7 @@ function App() {
                 BOSS FIGHT
               </h2>
               <p style={{ color: "rgba(255,255,255,0.3)", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.12em", marginBottom: 6 }}>
-                PROVE YOUR KNOWLEDGE
+                DEMONSTRATE MASTERY
               </p>
               <p style={{ color: "rgba(255,255,255,0.2)", fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.06em", marginBottom: 36 }}>
                 {currentModule?.icon} {currentModule?.name?.toUpperCase()} &middot; WIN {currentModuleWins + 1}/{currentModule?.winsNeeded || 10}
@@ -1737,7 +1737,7 @@ function App() {
                     letterSpacing: "0.06em",
                   }}
                 >
-                  ENTER ARENA
+                  BEGIN CHALLENGE
                 </button>
               ) : (
                 <div
@@ -1835,30 +1835,30 @@ function App() {
             </div>
           ) : (() => {
             const winTitles = [
-              { emoji: "🏆", title: "LEGENDARY", sub: "You just crushed it!" },
-              { emoji: "🔥", title: "ON FIRE", sub: "Unstoppable!" },
-              { emoji: "⚡", title: "GENIUS MOVE", sub: "Big brain energy!" },
-              { emoji: "💎", title: "DIAMOND HANDS", sub: "You held it down!" },
-              { emoji: "🚀", title: "MOON SHOT", sub: "To the moon!" },
-              { emoji: "👑", title: "BOSS STATUS", sub: "You own this!" },
-              { emoji: "🎯", title: "BULLSEYE", sub: "Nailed it perfectly!" },
-              { emoji: "💰", title: "MONEY MOVES", sub: "Smart play!" },
-              { emoji: "🌟", title: "ALL STAR", sub: "Nothing but net!" },
-              { emoji: "🧠", title: "BIG BRAIN", sub: "Galaxy brain moment!" },
+              { emoji: "🏆", title: "MASTERY ACHIEVED", sub: "Exceptional performance. That's how it's done." },
+              { emoji: "⚡", title: "FLAWLESS EXECUTION", sub: "Precision under pressure. Well played." },
+              { emoji: "💎", title: "ELITE STATUS", sub: "You've proven your understanding at the highest level." },
+              { emoji: "🚀", title: "BREAKTHROUGH", sub: "That's the kind of thinking that builds real wealth." },
+              { emoji: "👑", title: "CERTIFIED", sub: "Knowledge confirmed. You've earned this." },
+              { emoji: "🎯", title: "PRECISION", sub: "Sharp analysis, sharp results." },
+              { emoji: "💰", title: "STRATEGIC WIN", sub: "Smart decisions lead to smart outcomes." },
+              { emoji: "🌟", title: "OUTSTANDING", sub: "Consistently excellent. Keep compounding." },
+              { emoji: "🧠", title: "DEEP MASTERY", sub: "You see what others miss. That's the edge." },
+              { emoji: "🔥", title: "TOP PERFORMER", sub: "Results speak for themselves." },
             ];
             const loseTitles = [
-              { emoji: "💀", title: "REKT", sub: "Review the lessons and run it back." },
-              { emoji: "😤", title: "NOT YET", sub: "Almost had it — go again!" },
-              { emoji: "💪", title: "COMEBACK SZN", sub: "Legends bounce back." },
-              { emoji: "🔄", title: "RELOAD", sub: "One more try — you got this!" },
-              { emoji: "📚", title: "STUDY UP", sub: "Hit the lessons and come back stronger." },
+              { emoji: "📊", title: "REVIEW & RETURN", sub: "Revisit the material. The concepts are worth mastering." },
+              { emoji: "🔄", title: "NOT YET", sub: "Close, but mastery requires precision. Go again." },
+              { emoji: "💪", title: "RESILIENCE", sub: "Every expert failed first. The next attempt is sharper." },
+              { emoji: "📖", title: "STUDY MODE", sub: "Revisit the lessons with fresh eyes. You'll see it differently." },
+              { emoji: "🎯", title: "RECALIBRATE", sub: "Adjust your approach and come back stronger." },
             ];
             const pick = quizResult
               ? winTitles[Math.floor(Math.random() * winTitles.length)]
               : loseTitles[Math.floor(Math.random() * loseTitles.length)];
             const shareText = quizResult
-              ? `${pick.emoji} I just conquered ${currentModule?.name} on Moolab! Level ${level} | ${xp} XP | ${bossWins} Boss Wins 🔥 Learn money skills the fun way!`
-              : `I'm leveling up my money skills on Moolab! 💰 ${currentModule?.name} is tough but I'm going again! 🚀`;
+              ? `${pick.emoji} Just achieved mastery in ${currentModule?.name} on Moolab. Level ${level} | ${xp} XP | ${bossWins} Wins. Building real financial intelligence.`
+              : `Sharpening my financial skills on Moolab. ${currentModule?.name} — challenging but worth mastering. Level ${level} | ${xp} XP.`;
             const shareUrl = "https://moolab.app";
             const encodedText = encodeURIComponent(shareText);
             const encodedUrl = encodeURIComponent(shareUrl);
@@ -1885,7 +1885,7 @@ function App() {
                 margin: "8px 0 20px 0", fontWeight: 700, fontSize: "0.85rem",
                 textShadow: "0 1px 6px rgba(0,0,0,0.5)",
               }}>
-                {quizResult ? `${pick.sub} +50 XP earned!` : pick.sub}
+                {quizResult ? `${pick.sub} +50 XP awarded.` : pick.sub}
               </p>
 
               {quizResult && (
