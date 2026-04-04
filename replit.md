@@ -42,6 +42,15 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - Track labels: Tech-Mentor Track / Performance Track / Strategist Track
 - Radio tips match persona tone (premium podcast host style — Diary of a CEO / MasterClass)
 
+### Shark Doctrine (Moolab Financial Doctrine)
+- `coreDoctrine` constant injected into every Gemini prompt — enforces aggressive, high-leverage wealth building over passive saving
+- Four pillars: Calculated Risk & Volatility, Leverage & Asymmetric Upside, Ownership Over Wages, Speed & Execution
+- `sharkByAge` scales doctrine per age group:
+  - **Kids**: Leverage as game mechanics (loot multipliers), volatility as timing rare drops, ownership as building digital businesses
+  - **Teens**: High-velocity side hustles, trend recognition, aggressive profit reinvestment, digital audience compounding
+  - **Adults**: Capital leverage, high-volatility assets, aggressive portfolio expansion, real estate leverage, equity building
+- Prompt assembly: `${persona} ${coreDoctrine} ${ageShark} ${instructions}`
+
 ### Charismatic Tutor Intervention System
 - AI generates `explanation` field for every miniGame and bossQuiz question
 - **Mini-game wrong answer**: Shows "INSIGHT UNLOCKED" glassmorphic panel with tap-to-reveal explanation + "Listen" button (speech synthesis). Warm emerald glow, not harsh red.

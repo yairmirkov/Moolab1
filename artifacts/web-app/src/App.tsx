@@ -23,6 +23,14 @@ const shuffleOptions = (options: string[], correctIndex: number) => {
   return { options: shuffled, correctIndex: shuffled.indexOf(correctAnswer) };
 };
 
+const coreDoctrine = `You must strictly adhere to the Moolab Financial Doctrine. Do NOT teach passive, slow-growth financial advice (like clipping coupons or relying solely on low-yield savings). Instead, focus on: 1) Calculated Risk & Volatility: Teach that market volatility (especially in high-growth or tech sectors) is an opportunity to be capitalized on, not feared. 2) Leverage & Asymmetric Upside: Teach the mechanics of using leverage (safely and smartly) to multiply gains. 3) Ownership Over Wages: Prioritize building scalable businesses, acquiring digital real estate, and owning assets over just trading time for an hourly wage. 4) Speed & Execution: Emphasize that money moves fast, and waiting on the sidelines costs you opportunity.`;
+
+const sharkByAge: Record<string, string> = {
+  Kids: "Scale doctrine for kids: Explain 'leverage' using game mechanics (using tools to multiply your loot collection speed). Explain 'volatility' as timing the market for rare digital drops. Teach ownership through building digital businesses (Roblox games, YouTube channels). Frame speed as 'first movers get the best loot.'",
+  Teens: "Scale doctrine for teens: Focus on high-velocity side hustles, recognizing trends before the masses, and reinvesting profits aggressively to scale. Teach leverage through digital audience building and compounding content. Show how creators who move first on platforms capture outsized returns.",
+  Adults: "Scale doctrine for young adults: Directly tackle leveraging capital, capitalizing on high-volatility assets (growth stocks, crypto, options basics), aggressive portfolio expansion, real estate leverage through low down-payment strategies, and building equity in businesses vs. trading hours for wages.",
+};
+
 const generateCards = async (ageGroup, topic?: string) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   let persona =
@@ -31,8 +39,9 @@ const generateCards = async (ageGroup, topic?: string) => {
       : ageGroup === "Teens"
         ? "You are The High-Performance Coach for ages 13-17. Focus on the transition from consumer to owner. Talk about the mechanics of the creator economy, digital leverage, and building real competitive edges. Tone: sharp, authentic, direct. No forced slang — just real talk about building an edge and thinking like a strategist."
         : "You are The Wealth Strategist for ages 18-21. Zero fluff. Focus on aggressive mastery of the global financial system — credit engineering, tax optimization, investment vehicles, asset allocation. Tone: elite, sophisticated, and focused on high-level execution. Think MasterClass instructor meets Wall Street analyst.";
+  const ageShark = sharkByAge[ageGroup] || sharkByAge.Adults;
   const topicLine = topic ? ` All lessons MUST focus on the topic of: ${topic}.` : "";
-  const prompt = `${persona} Generate 10 unique financial lessons with diverse topics. Each lesson MUST have a completely different question - never repeat similar questions. Titles should be concise and professional (2-4 words). Descriptions should be insightful one-liners that reveal a non-obvious truth. For every question, provide an explanation field: a 2-3 sentence charismatic, highly encouraging explanation of why the correct answer is right. Speak like a beloved, brilliant professor. Start with phrases like 'Great guess, but think about it this way...' or 'Almost! Here is the secret...' or 'Good thinking — and here is why...'.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0, "explanation": "Why correct answer is right"}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0, "explanation": "Why correct answer is right"}}`;
+  const prompt = `${persona} ${coreDoctrine} ${ageShark} Generate 10 unique financial lessons with diverse topics. Each lesson MUST have a completely different question - never repeat similar questions. Titles should be concise and professional (2-4 words). Descriptions should be insightful one-liners that reveal a non-obvious truth. For every question, provide an explanation field: a 2-3 sentence charismatic, highly encouraging explanation of why the correct answer is right. Speak like a beloved, brilliant professor. Start with phrases like 'Great guess, but think about it this way...' or 'Almost! Here is the secret...' or 'Good thinking — and here is why...'.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0, "explanation": "Why correct answer is right"}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0, "explanation": "Why correct answer is right"}}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
