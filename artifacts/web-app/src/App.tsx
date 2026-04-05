@@ -229,6 +229,35 @@ const saveStr = (k, v) => localStorage.setItem(`ws_${k}`, v);
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
+const VOICE_PROFILES = [
+  { gender: "male", namePatterns: /daniel|james|david|tom|google.*uk.*male|microsoft.*mark|male/i, pitch: 0.95, rateMultiplier: 1.0 },
+  { gender: "male", namePatterns: /aaron|alex|jorge|rishi|fred|google.*us.*male|microsoft.*david/i, pitch: 1.05, rateMultiplier: 0.95 },
+  { gender: "male", namePatterns: /thomas|oliver|lee|microsoft.*james|grandpa|junior/i, pitch: 0.9, rateMultiplier: 1.05 },
+  { gender: "female", namePatterns: /samantha|karen|victoria|kate|tessa|google.*us.*female|microsoft.*zira/i, pitch: 1.1, rateMultiplier: 1.0 },
+  { gender: "female", namePatterns: /moira|fiona|allison|susan|microsoft.*hazel|female/i, pitch: 1.15, rateMultiplier: 0.95 },
+];
+
+const pickRandomVoice = (): { voice: SpeechSynthesisVoice | null; pitch: number; rateMultiplier: number } => {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return { voice: null, pitch: 1.0, rateMultiplier: 1.0 };
+
+  const shuffledProfiles = [...VOICE_PROFILES].sort(() => Math.random() - 0.5);
+
+  for (const profile of shuffledProfiles) {
+    const match = voices.find(v => profile.namePatterns.test(v.name));
+    if (match) return { voice: match, pitch: profile.pitch, rateMultiplier: profile.rateMultiplier };
+  }
+
+  const enVoices = voices.filter(v => /en/i.test(v.lang));
+  if (enVoices.length > 0) {
+    const pick = enVoices[Math.floor(Math.random() * enVoices.length)];
+    const profile = shuffledProfiles[0];
+    return { voice: pick, pitch: profile.pitch, rateMultiplier: profile.rateMultiplier };
+  }
+
+  return { voice: null, pitch: 1.0, rateMultiplier: 1.0 };
+};
+
 const getAgeFromYear = (yearStr: string): number => {
   if (!yearStr) return 0;
   const year = parseInt(yearStr, 10);
@@ -371,12 +400,11 @@ function App() {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(tip);
-      utter.rate = 1.05 * speechSpeedRef.current;
-      utter.pitch = 1.1;
+      const picked = pickRandomVoice();
+      utter.rate = 1.05 * speechSpeedRef.current * picked.rateMultiplier;
+      utter.pitch = picked.pitch;
       utter.volume = 0.8;
-      const voices = window.speechSynthesis.getVoices();
-      const preferred = voices.find(v => /samantha|karen|daniel|google.*us|natural/i.test(v.name));
-      if (preferred) utter.voice = preferred;
+      if (picked.voice) utter.voice = picked.voice;
       utter.onend = restoreAudio;
       utter.onerror = restoreAudio;
       window.speechSynthesis.speak(utter);
@@ -465,12 +493,11 @@ function App() {
     if (isMutedRef.current || speechSpeedRef.current === 0 || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.95 * speechSpeedRef.current;
-    utter.pitch = 1.0;
+    const picked = pickRandomVoice();
+    utter.rate = 0.95 * speechSpeedRef.current * picked.rateMultiplier;
+    utter.pitch = picked.pitch;
     utter.volume = 0.85;
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => /samantha|karen|daniel|google.*us|natural/i.test(v.name));
-    if (preferred) utter.voice = preferred;
+    if (picked.voice) utter.voice = picked.voice;
     if (musicRef.current) musicRef.current.volume = 0.05;
     utter.onend = () => { if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15; };
     utter.onerror = () => { if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15; };
