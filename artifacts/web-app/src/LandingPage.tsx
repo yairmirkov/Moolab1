@@ -123,7 +123,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
             </span>
           </h1>
           <p className="text-base sm:text-lg text-[#0c2d48]/45 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
-            The financial system is designed to keep your kids in the rat race. Moolab is the escape hatch. AI-powered financial mastery to build Sharks, not employees.
+            Your kids were never meant for the rat race. Moolab teaches them to think like Sharks — AI-powered financial mastery to build owners, not employees.
           </p>
           <div id="download-section" className="mb-8">
             <DownloadBadges />

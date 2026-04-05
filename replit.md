@@ -61,7 +61,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 
 ### Landing Page Copy (Shark Doctrine)
 - Hero badge: "Building Financial Sharks Since Day One"
-- Subheadline: "The financial system is designed to keep your kids in the rat race..."
+- Subheadline: "Your kids were never meant for the rat race..."
 - Anti-pitch warning: "WARNING: THIS IS NOT FOR EVERY FAMILY."
 - Feature cards: Shark Mindset, AI-Powered, Boss Battles, Gamification
 - Persona cards: MATRIX BREAKER (8-12), TEEN TYCOON (13-17), APEX PREDATOR (18-21)
