@@ -166,11 +166,11 @@ const getVideoForCard = (cardId: string): string => {
 };
 
 const bgGradients = [
-  "radial-gradient(ellipse at 20% 50%, #064e3b 0%, #0f172a 60%, #020617 100%)",
+  "radial-gradient(ellipse at 20% 50%, #0c2d48 0%, #0f172a 60%, #020617 100%)",
   "radial-gradient(ellipse at 80% 30%, #1e3a5f 0%, #0c1524 50%, #020617 100%)",
   "radial-gradient(ellipse at 50% 80%, #312e81 0%, #0f172a 55%, #020617 100%)",
   "radial-gradient(ellipse at 30% 20%, #7c2d12 0%, #1c1917 55%, #020617 100%)",
-  "radial-gradient(ellipse at 70% 60%, #065f46 0%, #0f172a 55%, #020617 100%)",
+  "radial-gradient(ellipse at 70% 60%, #145374 0%, #0f172a 55%, #020617 100%)",
   "radial-gradient(ellipse at 40% 40%, #1e40af 0%, #0f172a 55%, #020617 100%)",
 ];
 
@@ -329,7 +329,7 @@ function App() {
   const progress = Math.min((completedSlides.length / 5) * 100, 100);
 
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [flashGreen, setFlashGreen] = useState(false);
+  const [flashBlue, setFlashBlue] = useState(false);
 
   const currentModule = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
   const currentModuleWins = moduleProgress[currentModuleIdx] || 0;
@@ -485,8 +485,8 @@ function App() {
   }, [quizResult, resetJourney]);
 
   const triggerGreenFlash = () => {
-    setFlashGreen(true);
-    setTimeout(() => setFlashGreen(false), 300);
+    setFlashBlue(true);
+    setTimeout(() => setFlashBlue(false), 300);
   };
 
   const speakExplanation = (text: string) => {
@@ -736,7 +736,7 @@ function App() {
         style={{
           width: "100vw",
           height: "100dvh",
-          background: "linear-gradient(160deg, #f0faf4 0%, #e6f7ed 30%, #d4f1e0 60%, #f5faf7 100%)",
+          background: "linear-gradient(160deg, #eef6fb 0%, #e0f0f8 30%, #d0e8f2 60%, #f2f8fb 100%)",
           color: "#0c2d48",
           display: "flex",
           flexDirection: "column",
@@ -761,7 +761,7 @@ function App() {
           .ws-btn:active { transform: scale(0.96) !important; }
         `}</style>
         <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,rgba(46,139,192,0.1) 0%,transparent 70%)",top:"15%",left:"-10%",filter:"blur(60px)",animation:"orbDrift1 10s ease-in-out infinite"}} />
-        <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(52,211,153,0.08) 0%,transparent 70%)",bottom:"18%",right:"-8%",filter:"blur(60px)",animation:"orbDrift2 12s ease-in-out infinite"}} />
+        <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(177,212,224,0.12) 0%,transparent 70%)",bottom:"18%",right:"-8%",filter:"blur(60px)",animation:"orbDrift2 12s ease-in-out infinite"}} />
 
         {onboardStep > 0 && (
           <button
@@ -845,14 +845,14 @@ function App() {
 
       <div style={{ padding: "20px 20px 8px" }}>
         <div style={{
-          background: "rgba(6,214,160,0.04)", border: "1px solid rgba(6,214,160,0.1)",
+          background: "rgba(46,139,192,0.04)", border: "1px solid rgba(46,139,192,0.1)",
           borderRadius: 20, padding: "20px 22px", display: "flex", alignItems: "center", gap: 16,
         }} className="pd-card">
           <div style={{
             width: 56, height: 56, borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(6,214,160,0.2), rgba(0,245,212,0.1))",
+            background: "linear-gradient(135deg, rgba(46,139,192,0.2), rgba(177,212,224,0.1))",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "1.6rem", border: "2px solid rgba(6,214,160,0.3)",
+            fontSize: "1.6rem", border: "2px solid rgba(46,139,192,0.3)",
           }}>
             {userName ? userName.charAt(0).toUpperCase() : "?"}
           </div>
@@ -978,7 +978,7 @@ function App() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(160deg, #f0faf4 0%, #e6f7ed 30%, #d4f1e0 60%, #f5faf7 100%)",
+          background: "linear-gradient(160deg, #eef6fb 0%, #e0f0f8 30%, #d0e8f2 60%, #f2f8fb 100%)",
           color: "#0c2d48",
           fontFamily: FONT,
         }}
@@ -1013,8 +1013,8 @@ function App() {
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes vidFade { from{opacity:0;transform:scale(1.04)} to{opacity:1;transform:scale(1)} }
         @keyframes arenaPulse {
-          0%, 100% { background: radial-gradient(ellipse at center, rgba(6,214,160,0.06) 0%, #050505 60%, #020202 100%); }
-          50% { background: radial-gradient(ellipse at center, rgba(6,214,160,0.12) 0%, #080808 55%, #020202 100%); }
+          0%, 100% { background: radial-gradient(ellipse at center, rgba(46,139,192,0.06) 0%, #050505 60%, #020202 100%); }
+          50% { background: radial-gradient(ellipse at center, rgba(46,139,192,0.12) 0%, #080808 55%, #020202 100%); }
         }
         @keyframes arenaPulseLose {
           0%, 100% { background: radial-gradient(ellipse at center, rgba(255,107,107,0.06) 0%, #050505 60%, #020202 100%); }
@@ -1025,7 +1025,7 @@ function App() {
           0%,100% { box-shadow: 0 0 6px rgba(255,68,68,0.3); opacity: 0.85; }
           50% { box-shadow: 0 0 14px rgba(255,68,68,0.6); opacity: 1; }
         }
-        @keyframes greenFlash {
+        @keyframes blueFlash {
           0% { box-shadow: inset 0 0 0 3px rgba(46,139,192,0.9), 0 0 30px rgba(46,139,192,0.4); }
           100% { box-shadow: inset 0 0 0 0px rgba(46,139,192,0), 0 0 0px rgba(46,139,192,0); }
         }
@@ -1035,11 +1035,11 @@ function App() {
       `}</style>
 
       {/* GREEN FLASH HAPTIC OVERLAY */}
-      {flashGreen && (
+      {flashBlue && (
         <div style={{
           position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
           zIndex: 999, pointerEvents: "none", borderRadius: 0,
-          animation: "greenFlash 0.3s ease-out forwards",
+          animation: "blueFlash 0.3s ease-out forwards",
         }} />
       )}
 
@@ -1228,7 +1228,7 @@ function App() {
             </div>
             <span style={{
               color: "#2e8bc0", fontWeight: 900, fontSize: "0.75rem",
-              textShadow: "0 0 12px rgba(6,214,160,0.4)",
+              textShadow: "0 0 12px rgba(46,139,192,0.4)",
               letterSpacing: "0.02em",
             }}>
               {xp} XP
@@ -1273,7 +1273,7 @@ function App() {
           <span style={{
             color: "#2e8bc0", fontWeight: 800, fontSize: "0.55rem",
             marginLeft: 4, padding: "2px 6px", borderRadius: 6,
-            background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.2)",
+            background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.2)",
           }}>
             {currentModuleWins}/{currentModule?.winsNeeded || 10}
           </span>
@@ -1322,12 +1322,12 @@ function App() {
               return (
                 <div key={mod.id} style={{
                   background: isCurrent
-                    ? "rgba(6,214,160,0.06)"
+                    ? "rgba(46,139,192,0.06)"
                     : isComplete
                       ? "rgba(255,217,61,0.04)"
                       : "rgba(255,255,255,0.02)",
                   border: isCurrent
-                    ? "1px solid rgba(6,214,160,0.25)"
+                    ? "1px solid rgba(46,139,192,0.25)"
                     : isComplete
                       ? "1px solid rgba(255,217,61,0.15)"
                       : "1px solid rgba(255,255,255,0.06)",
@@ -1341,7 +1341,7 @@ function App() {
                     width: `${pct}%`,
                     background: isComplete
                       ? "rgba(255,217,61,0.05)"
-                      : "rgba(6,214,160,0.04)",
+                      : "rgba(46,139,192,0.04)",
                     transition: "width 0.5s ease",
                   }} />
 
@@ -1351,12 +1351,12 @@ function App() {
                       background: isComplete
                         ? "rgba(255,217,61,0.12)"
                         : isCurrent
-                          ? "rgba(6,214,160,0.12)"
+                          ? "rgba(46,139,192,0.12)"
                           : "rgba(255,255,255,0.04)",
                       border: isComplete
                         ? "1px solid rgba(255,217,61,0.3)"
                         : isCurrent
-                          ? "1px solid rgba(6,214,160,0.25)"
+                          ? "1px solid rgba(46,139,192,0.25)"
                           : "1px solid rgba(255,255,255,0.08)",
                       display: "flex", justifyContent: "center", alignItems: "center",
                       fontSize: "1.2rem",
@@ -1394,7 +1394,7 @@ function App() {
                     {isCurrent && !isComplete && (
                       <div style={{
                         padding: "3px 8px", borderRadius: 8,
-                        background: "rgba(6,214,160,0.15)", border: "1px solid rgba(6,214,160,0.3)",
+                        background: "rgba(46,139,192,0.15)", border: "1px solid rgba(46,139,192,0.3)",
                         fontSize: "0.5rem", fontWeight: 800, color: "#2e8bc0",
                         letterSpacing: "0.08em", flexShrink: 0,
                       }}>ACTIVE</div>
@@ -1496,8 +1496,8 @@ function App() {
                       height: 48,
                       borderRadius: "50%",
                       background: "transparent",
-                      border: "2px solid rgba(6,214,160,0.4)",
-                      boxShadow: "0 0 15px rgba(6,214,160,0.15)",
+                      border: "2px solid rgba(46,139,192,0.4)",
+                      boxShadow: "0 0 15px rgba(46,139,192,0.15)",
                     }}
                   />
                   <h1
@@ -1563,10 +1563,10 @@ function App() {
                       let bg = "rgba(255,255,255,0.07)";
                       let border = "1px solid rgba(255,255,255,0.08)";
                       if (isAnswered && isSelected) {
-                        if (isRight) { bg = "rgba(6,214,160,0.2)"; border = "1px solid rgba(6,214,160,0.5)"; }
+                        if (isRight) { bg = "rgba(46,139,192,0.2)"; border = "1px solid rgba(46,139,192,0.5)"; }
                         else { bg = "rgba(231,111,81,0.2)"; border = "1px solid rgba(231,111,81,0.5)"; }
                       } else if (isAnswered && isRight) {
-                        bg = "rgba(6,214,160,0.08)"; border = "1px solid rgba(6,214,160,0.2)";
+                        bg = "rgba(46,139,192,0.08)"; border = "1px solid rgba(46,139,192,0.2)";
                       }
 
                       return (
@@ -1622,8 +1622,8 @@ function App() {
                   {answered !== undefined && !isCorrect && (
                     <div style={{
                       marginTop: 14,
-                      background: "linear-gradient(135deg, rgba(6,214,160,0.08), rgba(0,245,212,0.06))",
-                      border: "1px solid rgba(6,214,160,0.2)",
+                      background: "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(177,212,224,0.06))",
+                      border: "1px solid rgba(46,139,192,0.2)",
                       borderRadius: 16,
                       padding: "14px 16px",
                       backdropFilter: "blur(16px)",
@@ -1645,7 +1645,7 @@ function App() {
                           onClick={() => setRevealedExplanations(p => ({ ...p, [card.id]: true }))}
                           style={{
                             width: "100%", padding: "10px 16px", borderRadius: 12,
-                            background: "rgba(6,214,160,0.12)", border: "1px solid rgba(6,214,160,0.25)",
+                            background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.25)",
                             color: "#2e8bc0", fontWeight: 700, fontSize: "0.78rem",
                             cursor: "pointer", fontFamily: FONT,
                           }}
@@ -1665,7 +1665,7 @@ function App() {
                             onClick={() => speakExplanation(card.miniGame.explanation || "Review the lesson to understand this concept better.")}
                             style={{
                               padding: "6px 14px", borderRadius: 10,
-                              background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.2)",
+                              background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.2)",
                               color: "#2e8bc0", fontWeight: 700, fontSize: "0.68rem",
                               cursor: "pointer", fontFamily: FONT,
                               display: "flex", alignItems: "center", gap: 6,
@@ -1813,8 +1813,8 @@ function App() {
                   }}
                   style={{
                     padding: "10px 14px", borderRadius: 12, fontFamily: FONT,
-                    background: idx === currentModuleIdx ? "rgba(6,214,160,0.1)" : "rgba(255,255,255,0.02)",
-                    border: idx === currentModuleIdx ? "1px solid rgba(6,214,160,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                    background: idx === currentModuleIdx ? "rgba(46,139,192,0.1)" : "rgba(255,255,255,0.02)",
+                    border: idx === currentModuleIdx ? "1px solid rgba(46,139,192,0.3)" : "1px solid rgba(255,255,255,0.05)",
                     color: idx === currentModuleIdx ? "#2e8bc0" : "rgba(255,255,255,0.5)",
                     fontWeight: 700, fontSize: "0.7rem", cursor: "pointer",
                     display: "flex", alignItems: "center", gap: 8,
@@ -1861,7 +1861,7 @@ function App() {
                 ? "arenaPulseLose 1.5s ease-in-out infinite"
                 : undefined,
             background: quizResult === true
-              ? "radial-gradient(ellipse at center, rgba(6,214,160,0.04) 0%, #050505 50%, #020202 100%)"
+              ? "radial-gradient(ellipse at center, rgba(46,139,192,0.04) 0%, #050505 50%, #020202 100%)"
               : "transparent",
             display: "flex",
             flexDirection: "column",
@@ -1916,26 +1916,26 @@ function App() {
               ) : bossExplanation ? (
                 <div
                   style={{
-                    background: "linear-gradient(135deg, rgba(6,214,160,0.06), rgba(0,245,212,0.04))",
+                    background: "linear-gradient(135deg, rgba(46,139,192,0.06), rgba(177,212,224,0.04))",
                     padding: 30,
                     borderRadius: 28,
-                    border: "1px solid rgba(6,214,160,0.2)",
+                    border: "1px solid rgba(46,139,192,0.2)",
                     width: "100%",
                     maxWidth: 380,
                     backdropFilter: "blur(20px)",
                     WebkitBackdropFilter: "blur(20px)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 60px rgba(6,214,160,0.08)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 60px rgba(46,139,192,0.08)",
                     animation: "popIn 0.5s ease-out",
                     textAlign: "center",
                   }}
                 >
-                  <div style={{ fontSize: "3rem", marginBottom: 12, filter: "drop-shadow(0 0 20px rgba(6,214,160,0.4))" }}>🧠</div>
+                  <div style={{ fontSize: "3rem", marginBottom: 12, filter: "drop-shadow(0 0 20px rgba(46,139,192,0.4))" }}>🧠</div>
                   <h3 style={{
                     color: "#2e8bc0", fontSize: "1.3rem", fontWeight: 900,
                     letterSpacing: "0.04em", marginBottom: 6,
                   }}>HOLD UP</h3>
                   <p style={{
-                    color: "rgba(6,214,160,0.6)", fontSize: "0.68rem", fontWeight: 700,
+                    color: "rgba(46,139,192,0.6)", fontSize: "0.68rem", fontWeight: 700,
                     letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20,
                   }}>LET'S BREAK THIS DOWN</p>
                   <p style={{
@@ -1950,7 +1950,7 @@ function App() {
                     onClick={() => speakExplanation(bossExplanation)}
                     style={{
                       padding: "8px 18px", borderRadius: 12, marginBottom: 20,
-                      background: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.25)",
+                      background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.25)",
                       color: "#2e8bc0", fontWeight: 700, fontSize: "0.75rem",
                       cursor: "pointer", fontFamily: FONT,
                       display: "inline-flex", alignItems: "center", gap: 6,
@@ -1975,7 +1975,7 @@ function App() {
                       background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
                       fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
                       letterSpacing: "0.04em", cursor: "pointer",
-                      boxShadow: "0 0 30px rgba(6,214,160,0.25), 0 6px 20px rgba(0,0,0,0.4)",
+                      boxShadow: "0 0 30px rgba(46,139,192,0.25), 0 6px 20px rgba(0,0,0,0.4)",
                     }}
                   >
                     Got it! Let's keep scrolling
@@ -2157,7 +2157,7 @@ function App() {
                     background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
                     fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
                     letterSpacing: "0.04em", cursor: "pointer",
-                    boxShadow: "0 0 30px rgba(6,214,160,0.25), 0 6px 20px rgba(0,0,0,0.4)",
+                    boxShadow: "0 0 30px rgba(46,139,192,0.25), 0 6px 20px rgba(0,0,0,0.4)",
                   }}>NEXT QUEST 🚀</button>
                 ) : (
                   <button className="ws-btn" onClick={() => {
