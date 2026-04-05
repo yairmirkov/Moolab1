@@ -78,7 +78,23 @@ const generateCards = async (ageGroup, topic?: string) => {
   }
 };
 
-const allVideos = [
+const sharkVideos = [
+  "https://videos.pexels.com/video-files/5968033/5968033-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/7997336/7997336-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/5548359/5548359-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2274223/2274223-hd_1920_1080_24fps.mp4",
+  "https://videos.pexels.com/video-files/2556894/2556894-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/1580507/1580507-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1093658/1093658-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1093662/1093662-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/1093665/1093665-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/2795167/2795167-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2795173/2795173-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2795391/2795391-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2795407/2795407-hd_1920_1080_25fps.mp4",
+];
+
+const oceanVideos = [
   "https://videos.pexels.com/video-files/853789/853789-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/853970/853970-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/854029/854029-hd_1920_1080_30fps.mp4",
@@ -99,13 +115,9 @@ const allVideos = [
   "https://videos.pexels.com/video-files/856462/856462-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/856934/856934-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/857288/857288-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/1093658/1093658-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/1093662/1093662-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/1093665/1093665-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/1321208/1321208-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/1409899/1409899-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/1437396/1437396-hd_1920_1080_24fps.mp4",
-  "https://videos.pexels.com/video-files/1580507/1580507-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/1851190/1851190-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/2098989/2098989-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/2257010/2257010-hd_1920_1080_24fps.mp4",
@@ -115,10 +127,6 @@ const allVideos = [
   "https://videos.pexels.com/video-files/2620041/2620041-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/2759477/2759477-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/2792370/2792370-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/2795167/2795167-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/2795173/2795173-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/2795391/2795391-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/2795407/2795407-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/3141207/3141207-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/3163534/3163534-hd_1920_1080_30fps.mp4",
@@ -133,6 +141,8 @@ const allVideos = [
   "https://videos.pexels.com/video-files/4469565/4469565-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/4763824/4763824-hd_1920_1080_24fps.mp4",
 ];
+
+const allVideos = [...sharkVideos, ...sharkVideos, ...oceanVideos];
 
 const shuffleArray = <T,>(arr: T[]): T[] => {
   const shuffled = [...arr];
@@ -278,6 +288,8 @@ function App() {
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const isMutedRef = useRef(false);
+  const [speechSpeed, setSpeechSpeed] = useState<number>(1);
+  const speechSpeedRef = useRef<number>(1);
   const [radioLive, setRadioLive] = useState(false);
   const radioSpeakingRef = useRef(false);
   const slidesScrolledRef = useRef(0);
@@ -337,7 +349,7 @@ function App() {
 
   const triggerRadioHost = useCallback((forceAgeGroup?: string) => {
     const ag = forceAgeGroup || ageGroup;
-    if (radioSpeakingRef.current || isMutedRef.current || !ag) return;
+    if (radioSpeakingRef.current || isMutedRef.current || !ag || speechSpeedRef.current === 0) return;
     const tips = radioTips[ag] || radioTips.Teens;
     if (usedTipsRef.current.size >= tips.length) usedTipsRef.current.clear();
     let tipIdx: number;
@@ -359,7 +371,7 @@ function App() {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(tip);
-      utter.rate = 1.05;
+      utter.rate = 1.05 * speechSpeedRef.current;
       utter.pitch = 1.1;
       utter.volume = 0.8;
       const voices = window.speechSynthesis.getVoices();
@@ -450,10 +462,10 @@ function App() {
   };
 
   const speakExplanation = (text: string) => {
-    if (isMutedRef.current || !('speechSynthesis' in window)) return;
+    if (isMutedRef.current || speechSpeedRef.current === 0 || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.95;
+    utter.rate = 0.95 * speechSpeedRef.current;
     utter.pitch = 1.0;
     utter.volume = 0.85;
     const voices = window.speechSynthesis.getVoices();
@@ -1146,6 +1158,41 @@ function App() {
             >
               {isMuted ? "🔇" : "🔊"}
             </button>
+            <button
+              className="ws-btn"
+              onClick={() => {
+                if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+                  window.speechSynthesis.cancel();
+                  radioSpeakingRef.current = false;
+                  setRadioLive(false);
+                  if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
+                }
+                const speeds = [1, 1.5, 2, 0];
+                const currentIdx = speeds.indexOf(speechSpeed);
+                const nextSpeed = speeds[(currentIdx + 1) % speeds.length];
+                speechSpeedRef.current = nextSpeed;
+                setSpeechSpeed(nextSpeed);
+              }}
+              style={{
+                background: speechSpeed === 0 ? "rgba(231,111,81,0.12)" : "rgba(255,255,255,0.06)",
+                border: speechSpeed === 0 ? "1px solid rgba(231,111,81,0.3)" : "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                padding: "8px 10px",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                fontSize: "0.6rem",
+                fontWeight: 800,
+                fontFamily: FONT,
+                color: speechSpeed === 0 ? "#e76f51" : "#fff",
+                lineHeight: 1,
+                minWidth: 38,
+              }}
+              title={speechSpeed === 0 ? "Speech stopped — tap for 1x" : `Speech speed: ${speechSpeed}x`}
+            >
+              {speechSpeed === 0 ? "⏹" : `${speechSpeed}x`}
+            </button>
             <div style={{
               padding: "5px 10px", borderRadius: 10,
               background: "rgba(255,217,61,0.08)", border: "1px solid rgba(255,217,61,0.15)",
@@ -1434,7 +1481,7 @@ function App() {
                       margin: 0,
                       letterSpacing: "-0.03em",
                       lineHeight: 1.1,
-                      textShadow: "0 2px 12px rgba(0,0,0,0.6)",
+                      textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)",
                     }}
                   >
                     {card.title}
@@ -1442,12 +1489,15 @@ function App() {
                 </div>
                 <p
                   style={{
-                    color: "rgba(255,255,255,0.85)",
+                    color: "rgba(255,255,255,0.95)",
                     marginBottom: 20,
                     fontSize: "1rem",
                     lineHeight: 1.5,
                     fontWeight: 600,
-                    textShadow: "0 1px 8px rgba(0,0,0,0.7)",
+                    textShadow: "0 1px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.6)",
+                    background: "rgba(0,0,0,0.35)",
+                    padding: "10px 14px",
+                    borderRadius: 14,
                   }}
                 >
                   {card.desc}
