@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react";
 
-const MoolabLogo = ({ size = 32, glow = false }: { size?: number; glow?: boolean }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 64 64"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={glow ? {
-      filter: "drop-shadow(0 0 6px #2e8bc0) drop-shadow(0 0 14px rgba(46,139,192,0.4))",
-      animation: "logoGlow 2s ease-in-out infinite",
-    } : undefined}
-  >
-    <rect x="6" y="46" width="7" height="12" fill="#2e8bc0" opacity="0.3" rx="1" />
-    <rect x="17" y="38" width="7" height="20" fill="#2e8bc0" opacity="0.5" rx="1" />
-    <rect x="28" y="28" width="7" height="30" fill="#2e8bc0" opacity="0.7" rx="1" />
-    <path d="M39 58 L39 20 L46 20 L46 58 Z" fill="#2e8bc0" opacity="0.85" />
-    <path d="M46 20 L46 4 L58 4 L46 20Z" fill="#145374" />
-    <path d="M46 4 L58 4 L52 12 Z" fill="#145374" opacity="0.5" />
-  </svg>
+const MoolabLogo = ({ height = 32, glow = false }: { height?: number; glow?: boolean }) => (
+  <img
+    src="/moolab-logo-trimmed.png"
+    alt="Moolab"
+    style={{
+      height,
+      width: "auto",
+      objectFit: "contain",
+      ...(glow ? {
+        filter: "drop-shadow(0 0 6px #2e8bc0) drop-shadow(0 0 14px rgba(46,139,192,0.4))",
+        animation: "logoGlow 2s ease-in-out infinite",
+      } : {}),
+    }}
+  />
 );
 
 interface LandingPageESProps {
@@ -83,10 +78,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-sky-100">
         <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MoolabLogo size={30} glow />
-            <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-lg font-black tracking-tight bg-gradient-to-r from-[#2e8bc0] to-[#145374] bg-clip-text text-transparent">
-              MOOLAB
-            </span>
+            <MoolabLogo height={34} glow />
           </div>
           <div className="flex items-center gap-2.5">
             <a
@@ -350,7 +342,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
 
       <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-sky-50/50">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="mb-4"><MoolabLogo size={48} glow /></div>
+          <div className="mb-4"><MoolabLogo height={56} glow /></div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
             ¿Listos Para Construir Su
             <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> Futuro Financiero?</span>
@@ -368,10 +360,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
       <footer className="py-8 px-6 border-t border-sky-100">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <MoolabLogo size={22} />
-            <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm font-black bg-gradient-to-r from-[#2e8bc0] to-[#145374] bg-clip-text text-transparent">
-              MOOLAB
-            </span>
+            <MoolabLogo height={24} />
           </div>
           <p className="text-[10px] text-[#0c2d48]/20 font-medium text-center sm:text-right">
             Construyendo la proxima generacion de tiburones financieros.

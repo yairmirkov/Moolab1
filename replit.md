@@ -51,13 +51,13 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - **Adults**: Capital leverage, high-volatility assets, aggressive portfolio expansion, real estate leverage, equity building
 - Prompt assembly: `${persona} ${coreDoctrine} ${ageShark} ${instructions}`
 
-### Apex Logo System
-- Custom inline SVG: ascending bar chart where the tallest bar morphs into an angular shark fin
-- Color: Ocean Breeze palette `#2e8bc0` (bright blue) with opacity gradient (0.3 → 0.5 → 0.7 → 0.85), `#145374` (mid-dark blue) for fin
+### Logo
+- Custom shark-fin wordmark: dark navy "MOOLAB" text with shark fin emerging from the "M"
+- Source: user-designed sketch, background removed via sharp (threshold 30, feather 20)
+- Files: `public/moolab-logo.png` (full, 784x1168), `public/moolab-logo-trimmed.png` (cropped, 671x306), `public/favicon-64.png`
+- Rendered as `<img>` in: LandingPage nav (34px, glow), LandingPage CTA (56px, glow), LandingPage footer (24px), LandingPageES (same), App.tsx onboarding splash (80px, float animation)
 - Pulsing `logoGlow` CSS animation (drop-shadow pulses between 6px and 10px spread, blue glow)
 - Brand font: **Inter** (font-black) — clean, modern sans-serif
-- Rendered in: LandingPage nav (30px, glow), LandingPage CTA (48px, glow), LandingPage footer (22px), LandingPageES (same), App.tsx HUD (22px, static glow)
-- Text "MOOLAB" uses Inter font-black with `#2e8bc0` → `#145374` gradient
 
 ### Landing Page Copy (Shark Doctrine)
 - Hero badge: "Building Financial Sharks Since Day One"

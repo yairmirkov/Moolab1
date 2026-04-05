@@ -534,12 +534,15 @@ function App() {
       if (onboardStep === 0) {
         return (
           <>
-            <div style={{fontSize:"4rem",marginBottom:8,animation:"splashFloat 3s ease-in-out infinite",filter:"drop-shadow(0 0 25px rgba(46,139,192,0.3))"}}>💸</div>
-            <h1 style={{
-              fontSize: "3.2rem", fontWeight: 900, letterSpacing: "-0.04em", margin: "0 0 6px 0", textAlign: "center",
-              background: "linear-gradient(135deg, #0c2d48, #145374, #2e8bc0)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            }}>Moolab</h1>
+            <img
+              src="/moolab-logo-trimmed.png"
+              alt="Moolab"
+              style={{
+                height: 80, width: "auto", objectFit: "contain", marginBottom: 8,
+                animation: "splashFloat 3s ease-in-out infinite",
+                filter: "drop-shadow(0 0 25px rgba(46,139,192,0.3))",
+              }}
+            />
             <p style={{
               color: "rgba(12,45,72,0.35)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
               marginBottom: 6, textTransform: "uppercase",
