@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import LandingPage from "./LandingPage";
 import LandingPageES from "./LandingPageES";
+import translations, { type Lang } from "./translations";
 
-const MODULES = [
-  { id: 0, name: "Saving Basics", icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
-  { id: 1, name: "Smart Budgeting", icon: "📊", topic: "budgeting, tracking expenses, needs vs wants, spending plans", winsNeeded: 10 },
-  { id: 2, name: "Earning Money", icon: "💰", topic: "earning income, allowance, side hustles, entrepreneurship", winsNeeded: 10 },
-  { id: 3, name: "Investing 101", icon: "📈", topic: "investing basics, stocks, compound interest, index funds", winsNeeded: 10 },
-  { id: 4, name: "Credit & Debt", icon: "💳", topic: "credit scores, debt management, loans, interest rates", winsNeeded: 10 },
-  { id: 5, name: "Taxes & Gov", icon: "🏛️", topic: "taxes, government spending, tax filing, deductions", winsNeeded: 10 },
-  { id: 6, name: "Real Estate", icon: "🏠", topic: "real estate, renting vs buying, mortgages, property value", winsNeeded: 10 },
-  { id: 7, name: "Crypto & Digital", icon: "🪙", topic: "cryptocurrency, digital assets, blockchain, DeFi basics", winsNeeded: 10 },
+const MODULE_DATA = [
+  { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
+  { id: 1, icon: "📊", topic: "budgeting, tracking expenses, needs vs wants, spending plans", winsNeeded: 10 },
+  { id: 2, icon: "💰", topic: "earning income, allowance, side hustles, entrepreneurship", winsNeeded: 10 },
+  { id: 3, icon: "📈", topic: "investing basics, stocks, compound interest, index funds", winsNeeded: 10 },
+  { id: 4, icon: "💳", topic: "credit scores, debt management, loans, interest rates", winsNeeded: 10 },
+  { id: 5, icon: "🏛️", topic: "taxes, government spending, tax filing, deductions", winsNeeded: 10 },
+  { id: 6, icon: "🏠", topic: "real estate, renting vs buying, mortgages, property value", winsNeeded: 10 },
+  { id: 7, icon: "🪙", topic: "cryptocurrency, digital assets, blockchain, DeFi basics", winsNeeded: 10 },
 ];
+
+const getModules = (lang: Lang) =>
+  MODULE_DATA.map((m, i) => ({ ...m, name: translations.modules.names[lang][i] }));
 
 const shuffleOptions = (options: string[], correctIndex: number) => {
   const correctAnswer = options[correctIndex];
@@ -23,25 +27,15 @@ const shuffleOptions = (options: string[], correctIndex: number) => {
   return { options: shuffled, correctIndex: shuffled.indexOf(correctAnswer) };
 };
 
-const coreDoctrine = `You must strictly adhere to the Moolab Financial Doctrine. Do NOT teach passive, slow-growth financial advice (like clipping coupons or relying solely on low-yield savings). Instead, focus on: 1) Calculated Risk & Volatility: Teach that market volatility (especially in high-growth or tech sectors) is an opportunity to be capitalized on, not feared. 2) Leverage & Asymmetric Upside: Teach the mechanics of using leverage (safely and smartly) to multiply gains. 3) Ownership Over Wages: Prioritize building scalable businesses, acquiring digital real estate, and owning assets over just trading time for an hourly wage. 4) Speed & Execution: Emphasize that money moves fast, and waiting on the sidelines costs you opportunity.`;
-
-const sharkByAge: Record<string, string> = {
-  Kids: "Scale doctrine for kids: Explain 'leverage' using game mechanics (using tools to multiply your loot collection speed). Explain 'volatility' as timing the market for rare digital drops. Teach ownership through building digital businesses (Roblox games, YouTube channels). Frame speed as 'first movers get the best loot.'",
-  Teens: "Scale doctrine for teens: Focus on high-velocity side hustles, recognizing trends before the masses, and reinvesting profits aggressively to scale. Teach leverage through digital audience building and compounding content. Show how creators who move first on platforms capture outsized returns.",
-  Adults: "Scale doctrine for young adults: Directly tackle leveraging capital, capitalizing on high-volatility assets (growth stocks, crypto, options basics), aggressive portfolio expansion, real estate leverage through low down-payment strategies, and building equity in businesses vs. trading hours for wages.",
-};
-
-const generateCards = async (ageGroup, topic?: string) => {
+const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en") => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  let persona =
-    ageGroup === "Kids"
-      ? "You are The Cool Tech-Mentor for ages 8-12. Speak to them like future founders — never talk down. Use modern digital examples (Robux economy, YouTuber business models, in-app purchases) as real logic puzzles. Tone: 'I'm going to show you how the world actually works so you can win.' Be sharp, respectful, and fascinating."
-      : ageGroup === "Teens"
-        ? "You are The High-Performance Coach for ages 13-17. Focus on the transition from consumer to owner. Talk about the mechanics of the creator economy, digital leverage, and building real competitive edges. Tone: sharp, authentic, direct. No forced slang — just real talk about building an edge and thinking like a strategist."
-        : "You are The Wealth Strategist for ages 18-21. Zero fluff. Focus on aggressive mastery of the global financial system — credit engineering, tax optimization, investment vehicles, asset allocation. Tone: elite, sophisticated, and focused on high-level execution. Think MasterClass instructor meets Wall Street analyst.";
-  const ageShark = sharkByAge[ageGroup] || sharkByAge.Adults;
-  const topicLine = topic ? ` All lessons MUST focus on the topic of: ${topic}.` : "";
-  const prompt = `${persona} ${coreDoctrine} ${ageShark} Generate 10 unique financial lessons with diverse topics. Each lesson MUST have a completely different question - never repeat similar questions. Titles should be concise and professional (2-4 words). Descriptions should be insightful one-liners that reveal a non-obvious truth. For every question, provide an explanation field: a 2-3 sentence charismatic, highly encouraging explanation of why the correct answer is right. Speak like a beloved, brilliant professor. Start with phrases like 'Great guess, but think about it this way...' or 'Almost! Here is the secret...' or 'Good thinking — and here is why...'.${topicLine} RAW JSON ONLY. Structure: {"lessons": [{"id": 1, "title": "Title", "desc": "1-sentence", "miniGame": {"question": "Q", "options": ["A", "B"], "correctIndex": 0, "explanation": "Why correct answer is right"}}], "bossQuiz": {"question": "Final Q", "options": ["A", "B", "C"], "correctIndex": 0, "explanation": "Why correct answer is right"}}`;
+  const personaKey = ageGroup === "Kids" ? "Kids" : ageGroup === "Teens" ? "Teens" : "Adults";
+  const persona = translations.gemini.persona[personaKey][lang];
+  const doctrine = translations.gemini.coreDoctrine[lang];
+  const ageShark = translations.gemini.sharkByAge[personaKey][lang];
+  const suffix = translations.gemini.promptSuffix[lang];
+  const topicLine = topic ? (lang === "es" ? ` Todas las lecciones DEBEN enfocarse en el tema de: ${topic}.` : ` All lessons MUST focus on the topic of: ${topic}.`) : "";
+  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -180,44 +174,6 @@ const studyBeats = [
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
 ];
 
-const radioTips: Record<string, string[]> = {
-  Kids: [
-    "Interesting move there. Most people just spend, but you're starting to see the pattern. That's how you turn a small skin into a major asset. Let's keep that momentum.",
-    "Here's something most adults don't even know. Every Robux purchase is a micro-transaction. And the company that made Roblox? They turned those tiny purchases into billions. That's the power of scale.",
-    "Think about your favorite YouTuber. They didn't just get lucky. They built a system — content, audience, revenue. That's a business model. And you can learn to build one too.",
-    "You just made a smart call. The difference between someone who builds wealth and someone who doesn't? Patience. One day of waiting before buying saves more money than you'd think.",
-    "Every big company started as someone's idea. Apple started in a garage. The question isn't whether you can build something — it's what you'll build first.",
-    "Here's the real game. When you save half of what you earn, you're not losing money — you're funding your future self. That's what smart operators do.",
-    "Most people think money is about earning more. But the real secret? It's about keeping more of what you already have. That's the first rule of building wealth.",
-    "Notice how games make you want to spend? That's called design psychology. Once you see it, you can't unsee it. And that awareness? That's your superpower.",
-    "Fun fact — the word 'invest' comes from the Latin word for 'to clothe.' You're literally dressing your future in better options. Every smart choice layers on protection.",
-    "You're already ahead of most people your age. Why? Because you're learning how money actually works instead of just spending it. That's called a strategic advantage.",
-  ],
-  Teens: [
-    "You're reading the room perfectly. In a world of consumers, you're choosing to be an architect. That's where the real equity is. Stay focused.",
-    "Here's the shift most people miss. Scrolling is consuming. Creating is owning. Every hour you spend building something — a brand, a skill, a side project — compounds over time.",
-    "Compound interest isn't just a math concept. It's the single most powerful force in personal finance. Einstein reportedly called it the eighth wonder of the world. Start now and the math works in your favor.",
-    "Think about this. If you invest fifty dollars a month starting today, by the time you're forty, you could be looking at six figures. Not from luck — from consistency.",
-    "Credit scores are just trust scores. Banks, landlords, even some employers check them. Building yours early gives you leverage that most people don't have until their thirties.",
-    "The creator economy isn't a trend — it's the new infrastructure. Whether it's content, code, or design, the people who own their output will own their income.",
-    "Most financial advice tells you to cut spending. Better advice? Increase your value. Learn a skill that pays. Then the budgeting takes care of itself.",
-    "Scholarships aren't charity — they're competitive awards for people who put in the work. Every application is a chance to get paid for being prepared. Don't leave that on the table.",
-    "The 48-hour rule is one of the most effective tools against impulse spending. If you still want it two days later, it might be worth it. If not, you just saved yourself.",
-    "Here's what separates builders from consumers — builders ask 'how was this made?' every time they see something. Start asking that question, and everything changes.",
-  ],
-  Adults: [
-    "High-level execution. We're looking at the macro-level now. Remember — leverage is a tool, not a trap, if you know the math. Let's move to the next asset class.",
-    "Your credit utilization ratio directly impacts your score. Keep it under thirty percent, but the real operators keep it under ten. That signals discipline to the system.",
-    "Tax-advantaged accounts aren't optional at this level — they're essential infrastructure. Every dollar in a Roth IRA grows tax-free. That's not a suggestion, that's a strategy.",
-    "Diversification isn't about spreading money thin. It's about strategic allocation across uncorrelated assets. Real estate, index funds, bonds — each serves a different function in the portfolio.",
-    "Your emergency fund isn't an investment — it's insurance. Three to six months of runway means you make decisions from strength, not desperation. That changes everything.",
-    "Dollar-cost averaging removes emotion from investing. Consistent contributions regardless of market conditions — that's how institutions operate, and it's available to you right now.",
-    "Real estate as a first purchase isn't about the dream home. It's about acquiring an appreciating asset with leveraged capital. Think like an investor, not a homeowner.",
-    "Debt has a hierarchy. High-interest consumer debt is the first target — every dollar of interest is a dollar that could have been compounding in your favor instead.",
-    "Automation is the key to consistent wealth building. Set up automatic transfers to savings and investments. Remove the decision from the process, and the results compound.",
-    "The gap between financial literacy and financial mastery is execution. Knowing what to do is common. Doing it consistently and systematically — that's rare, and that's where the edge is.",
-  ],
-};
 
 const load = (k, d) => {
   const v = localStorage.getItem(`ws_${k}`);
@@ -237,9 +193,18 @@ const VOICE_PROFILES = [
   { gender: "female", namePatterns: /moira|fiona|allison|susan|microsoft.*hazel|female/i, pitch: 1.15, rateMultiplier: 0.95 },
 ];
 
-const pickRandomVoice = (): { voice: SpeechSynthesisVoice | null; pitch: number; rateMultiplier: number } => {
+const pickRandomVoice = (lang: Lang = "en"): { voice: SpeechSynthesisVoice | null; pitch: number; rateMultiplier: number } => {
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return { voice: null, pitch: 1.0, rateMultiplier: 1.0 };
+
+  if (lang === "es") {
+    const esVoices = voices.filter(v => /es/i.test(v.lang));
+    if (esVoices.length > 0) {
+      const pick = esVoices[Math.floor(Math.random() * esVoices.length)];
+      return { voice: pick, pitch: 1.0, rateMultiplier: 1.0 };
+    }
+    return { voice: null, pitch: 1.0, rateMultiplier: 1.0 };
+  }
 
   const shuffledProfiles = [...VOICE_PROFILES].sort(() => Math.random() - 0.5);
 
@@ -272,6 +237,11 @@ const getAgeGroup = (age: number): string => {
 };
 
 function App() {
+  const [lang, setLang] = useState<Lang>(() => (loadStr("lang", "en") as Lang));
+  const langRef = useRef<Lang>(loadStr("lang", "en") as Lang);
+  const MODULES = getModules(lang);
+  const t = translations;
+
   const [appStarted, setAppStarted] = useState(false);
   const [ageGroup, setAgeGroup] = useState("");
   const [currentData, setCurrentData] = useState(null);
@@ -360,7 +330,7 @@ function App() {
     radioSpeakingRef.current = false;
     setRadioLive(false);
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
-    generateCards(ageGroup, mod?.topic).then((data) => {
+    generateCards(ageGroup, mod?.topic, langRef.current).then((data) => {
       if (data) {
         data.lessons = data.lessons.map((l) => ({
           ...l,
@@ -379,7 +349,8 @@ function App() {
   const triggerRadioHost = useCallback((forceAgeGroup?: string) => {
     const ag = forceAgeGroup || ageGroup;
     if (radioSpeakingRef.current || isMutedRef.current || !ag || speechSpeedRef.current === 0) return;
-    const tips = radioTips[ag] || radioTips.Teens;
+    const tipsByLang = translations.radioTips[langRef.current];
+    const tips = tipsByLang[ag as keyof typeof tipsByLang] || tipsByLang.Teens;
     if (usedTipsRef.current.size >= tips.length) usedTipsRef.current.clear();
     let tipIdx: number;
     do { tipIdx = Math.floor(Math.random() * tips.length); } while (usedTipsRef.current.has(tipIdx));
@@ -400,7 +371,8 @@ function App() {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(tip);
-      const picked = pickRandomVoice();
+      const picked = pickRandomVoice(langRef.current);
+      utter.lang = langRef.current === "es" ? "es-MX" : "en-US";
       utter.rate = 1.05 * speechSpeedRef.current * picked.rateMultiplier;
       utter.pitch = picked.pitch;
       utter.volume = 0.8;
@@ -454,7 +426,7 @@ function App() {
     if (slidesFromEnd <= 3 && !isFetchingRef.current) {
       isFetchingRef.current = true;
       setIsFetchingMore(true);
-      const newData = await generateCards(ageGroup, currentModule?.topic);
+      const newData = await generateCards(ageGroup, currentModule?.topic, langRef.current);
       if (newData) {
         const nl = newData.lessons.slice(0, 5).map((l) => ({
           ...l,
@@ -493,7 +465,8 @@ function App() {
     if (isMutedRef.current || speechSpeedRef.current === 0 || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    const picked = pickRandomVoice();
+    const picked = pickRandomVoice(langRef.current);
+    utter.lang = langRef.current === "es" ? "es-MX" : "en-US";
     utter.rate = 0.95 * speechSpeedRef.current * picked.rateMultiplier;
     utter.pitch = picked.pitch;
     utter.volume = 0.85;
@@ -519,10 +492,10 @@ function App() {
       setTimeout(() => setFadeIn(false), 700);
     };
     const landingLang = new URLSearchParams(window.location.search).get("lang");
-    if (landingLang === "es") {
-      return <LandingPageES onParentLogin={parentLoginHandler} onTestApp={testAppHandler} />;
+    if (landingLang === "es" || lang === "es") {
+      return <LandingPageES onParentLogin={() => { setLang("es"); langRef.current = "es"; saveStr("lang", "es"); parentLoginHandler(); }} onTestApp={() => { setLang("es"); langRef.current = "es"; saveStr("lang", "es"); testAppHandler(); }} />;
     }
-    return <LandingPage onParentLogin={parentLoginHandler} onTestApp={testAppHandler} />;
+    return <LandingPage onParentLogin={() => { setLang("en"); langRef.current = "en"; saveStr("lang", "en"); parentLoginHandler(); }} onTestApp={() => { setLang("en"); langRef.current = "en"; saveStr("lang", "en"); testAppHandler(); }} />;
   }
 
   if (!appStarted) {
@@ -547,9 +520,9 @@ function App() {
               color: "rgba(12,45,72,0.35)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
               marginBottom: 6, textTransform: "uppercase",
               animation: "splashPulse 3s ease-in-out infinite",
-            }}>SWIPE &middot; LEARN &middot; EARN</p>
+            }}>{t.onboard.tagline[lang]}</p>
             <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.75rem", fontWeight: 600, maxWidth: 280, textAlign: "center", lineHeight: 1.5, marginBottom: 36 }}>
-              Financial literacy for kids &amp; teens. Learn money skills through bite-sized lessons and games.
+              {t.onboard.subtitle[lang]}
             </p>
             <button
               className="ws-btn"
@@ -563,10 +536,10 @@ function App() {
                 boxShadow: "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)",
               }}
             >
-              GET STARTED
+              {t.onboard.getStarted[lang]}
             </button>
             <p style={{ color: "rgba(12,45,72,0.2)", fontSize: "0.6rem", fontWeight: 600, marginTop: 14 }}>
-              Free &middot; No ads &middot; Safe for kids
+              {t.onboard.freeTag[lang]}
             </p>
           </>
         );
@@ -576,14 +549,14 @@ function App() {
         return (
           <>
             <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>👋</div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>Who's signing up?</h2>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>{t.onboard.whoSigningUp[lang]}</h2>
             <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 32 }}>
-              This helps us personalize the experience
+              {t.onboard.personalizeExp[lang]}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340 }}>
               {[
-                { key: "learner", icon: "🎒", title: "I'm a Kid or Teen", desc: "I want to learn about money" },
-                { key: "parent", icon: "👨‍👩‍👧", title: "I'm a Parent", desc: "Setting this up for my child" },
+                { key: "learner", icon: "🎒", title: t.onboard.imKidTeen[lang], desc: t.onboard.wantLearn[lang] },
+                { key: "parent", icon: "👨‍👩‍👧", title: t.onboard.imParent[lang], desc: t.onboard.settingUp[lang] },
               ].map((opt) => (
                 <button
                   className="ws-btn"
@@ -620,19 +593,19 @@ function App() {
               {accountType === "parent" ? "👨‍👩‍👧" : "✏️"}
             </div>
             <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
-              {accountType === "parent" ? "Parent Setup" : "Tell us about you"}
+              {accountType === "parent" ? t.onboard.parentSetup[lang] : t.onboard.tellAboutYou[lang]}
             </h2>
             <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
-              {accountType === "parent" ? "We'll personalize lessons for your child" : "We'll pick the right level for you"}
+              {accountType === "parent" ? t.onboard.personalizeLessons[lang] : t.onboard.pickLevel[lang]}
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
               {accountType === "parent" && (
                 <div>
-                  <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>YOUR NAME</label>
+                  <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>{t.onboard.yourName[lang]}</label>
                   <input
                     type="text"
-                    placeholder="Parent's name"
+                    placeholder={t.onboard.parentPlaceholder[lang]}
                     value={parentName}
                     onChange={(e) => { setParentName(e.target.value); saveStr("parentName", e.target.value); }}
                     style={{
@@ -647,11 +620,11 @@ function App() {
               )}
               <div>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {accountType === "parent" ? "CHILD'S NAME" : "YOUR NAME"}
+                  {accountType === "parent" ? t.onboard.childName[lang] : t.onboard.yourName[lang]}
                 </label>
                 <input
                   type="text"
-                  placeholder={accountType === "parent" ? "Child's first name" : "What's your name?"}
+                  placeholder={accountType === "parent" ? t.onboard.childPlaceholder[lang] : t.onboard.namePlaceholder[lang]}
                   value={userName}
                   onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
                   style={{
@@ -665,7 +638,7 @@ function App() {
               </div>
               <div>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {accountType === "parent" ? "CHILD'S BIRTH YEAR" : "YOUR BIRTH YEAR"}
+                  {accountType === "parent" ? t.onboard.childBirthYear[lang] : t.onboard.yourBirthYear[lang]}
                 </label>
                 <select
                   value={birthYear}
@@ -681,7 +654,7 @@ function App() {
                     boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                   }}
                 >
-                  <option value="" disabled>Select year</option>
+                  <option value="" disabled>{t.onboard.selectYear[lang]}</option>
                   {Array.from({ length: 22 }, (_, i) => new Date().getFullYear() - 4 - i).map((yr) => (
                     <option key={yr} value={String(yr)} style={{ background: "#fff", color: "#0c2d48" }}>{yr}</option>
                   ))}
@@ -699,9 +672,9 @@ function App() {
                   {(() => {
                     const age = getAgeFromYear(birthYear);
                     const group = getAgeGroup(age);
-                    if (group === "Kids") return "🌟 TECH-MENTOR TRACK — Ages 8-12";
-                    if (group === "Teens") return "🔥 PERFORMANCE TRACK — Ages 13-16";
-                    return "💎 STRATEGIST TRACK — Ages 17+";
+                    if (group === "Kids") return t.onboard.trackKids[lang];
+                    if (group === "Teens") return t.onboard.trackTeens[lang];
+                    return t.onboard.trackAdults[lang];
                   })()}
                 </span>
               </div>
@@ -726,7 +699,7 @@ function App() {
                 transition: "all 0.3s ease",
               }}
             >
-              START LEARNING
+              {t.onboard.startLearning[lang]}
             </button>
           </>
         );
@@ -765,6 +738,23 @@ function App() {
         `}</style>
         <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,rgba(46,139,192,0.1) 0%,transparent 70%)",top:"15%",left:"-10%",filter:"blur(60px)",animation:"orbDrift1 10s ease-in-out infinite"}} />
         <div style={{position:"absolute",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(177,212,224,0.12) 0%,transparent 70%)",bottom:"18%",right:"-8%",filter:"blur(60px)",animation:"orbDrift2 12s ease-in-out infinite"}} />
+
+        <button
+          className="ws-btn"
+          onClick={() => {
+            const newLang = lang === "en" ? "es" : "en";
+            setLang(newLang as Lang);
+            langRef.current = newLang as Lang;
+            saveStr("lang", newLang);
+          }}
+          style={{
+            position: "absolute", top: 20, right: 20,
+            background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.15)",
+            borderRadius: 12, padding: "6px 12px",
+            color: "#145374", fontSize: "0.65rem", fontWeight: 800, cursor: "pointer", fontFamily: FONT,
+            zIndex: 10, letterSpacing: "0.08em",
+          }}
+        >{lang === "en" ? "ES 🇲🇽" : "EN 🇺🇸"}</button>
 
         {onboardStep > 0 && (
           <button
@@ -814,10 +804,10 @@ function App() {
       <div style={{ padding: "24px 20px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", marginBottom: 4 }}>
-            {accountType === "parent" ? "PARENT DASHBOARD" : "PARENT VIEW"}
+            {accountType === "parent" ? t.parentDash.dashboard[lang] : t.parentDash.parentView[lang]}
           </div>
           <h1 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 900, letterSpacing: "-0.02em" }}>
-            {accountType === "parent" ? `Hi, ${parentName || "Parent"}` : "What Your Parent Sees"}
+            {accountType === "parent" ? `${t.parentDash.hiParent[lang]}, ${parentName || t.parentDash.parent[lang]}` : t.parentDash.whatParentSees[lang]}
           </h1>
         </div>
         {accountType === "parent" ? (
@@ -836,7 +826,7 @@ function App() {
             background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
             borderRadius: 12, padding: "8px 14px", color: "rgba(255,255,255,0.5)",
             fontFamily: FONT, fontWeight: 700, fontSize: "0.65rem", cursor: "pointer",
-          }}>LOG OUT</button>
+          }}>{t.parentDash.logout[lang]}</button>
         ) : (
           <button className="ws-btn" onClick={() => setShowParentDash(false)} style={{
             background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
@@ -860,27 +850,27 @@ function App() {
             {userName ? userName.charAt(0).toUpperCase() : "?"}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 900, fontSize: "1.15rem", letterSpacing: "-0.01em" }}>{userName || "Learner"}</div>
+            <div style={{ fontWeight: 900, fontSize: "1.15rem", letterSpacing: "-0.01em" }}>{userName || t.parentDash.learner[lang]}</div>
             <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.65rem", fontWeight: 600, marginTop: 2 }}>
               {(() => {
                 const age = getAgeFromYear(birthYear);
                 const g = getAgeGroup(age);
-                return g === "Kids" ? `Age ~${age} · Tech-Mentor Track` : g === "Teens" ? `Age ~${age} · Performance Track` : `Age ~${age} · Strategist Track`;
+                return g === "Kids" ? `${t.parentDash.age[lang]} ~${age} · ${t.parentDash.trackKids[lang]}` : g === "Teens" ? `${t.parentDash.age[lang]} ~${age} · ${t.parentDash.trackTeens[lang]}` : `${t.parentDash.age[lang]} ~${age} · ${t.parentDash.trackAdults[lang]}`;
               })()}
             </div>
           </div>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#FFD93D" }}>{level}</div>
-            <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em" }}>LEVEL</div>
+            <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em" }}>{t.parentDash.level[lang]}</div>
           </div>
         </div>
       </div>
 
       <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
         {[
-          { label: "TOTAL XP", val: xp, color: "#2e8bc0", icon: "⚡" },
-          { label: "BOSS WINS", val: bossWins, color: "#FFD93D", icon: "🏆" },
-          { label: "STREAK", val: streak, color: "#FF6B6B", icon: "🔥" },
+          { label: t.parentDash.totalXp[lang], val: xp, color: "#2e8bc0", icon: "⚡" },
+          { label: t.parentDash.bossWins[lang], val: bossWins, color: "#FFD93D", icon: "🏆" },
+          { label: t.parentDash.streak[lang], val: streak, color: "#FF6B6B", icon: "🔥" },
         ].map((s, i) => (
           <div key={s.label} className="pd-card" style={{
             background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
@@ -896,8 +886,8 @@ function App() {
 
       <div style={{ padding: "16px 20px 8px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div style={{ fontSize: "0.85rem", fontWeight: 800 }}>Module Progress</div>
-          <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#2e8bc0" }}>{totalModulesComplete}/{MODULES.length} Complete</div>
+          <div style={{ fontSize: "0.85rem", fontWeight: 800 }}>{t.parentDash.moduleProgress[lang]}</div>
+          <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#2e8bc0" }}>{totalModulesComplete}/{MODULES.length} {t.parentDash.complete[lang]}</div>
         </div>
         <div style={{
           background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
@@ -921,7 +911,7 @@ function App() {
                       {mod.name}
                     </span>
                     <span style={{ fontSize: "0.5rem", fontWeight: 700, color: done ? "#2e8bc0" : isActive ? "#FFD93D" : "rgba(255,255,255,0.2)", letterSpacing: "0.08em" }}>
-                      {done ? "COMPLETE ✓" : isActive ? "IN PROGRESS" : `${wins}/${mod.winsNeeded}`}
+                      {done ? t.parentDash.completeCheck[lang] : isActive ? t.parentDash.inProgress[lang] : `${wins}/${mod.winsNeeded}`}
                     </span>
                   </div>
                   <div style={{ width: "100%", height: 4, borderRadius: 2, background: "rgba(255,255,255,0.06)" }}>
@@ -939,13 +929,13 @@ function App() {
       </div>
 
       <div style={{ padding: "16px 20px 8px" }}>
-        <div style={{ fontSize: "0.85rem", fontWeight: 800, marginBottom: 12 }}>Learning Insights</div>
+        <div style={{ fontSize: "0.85rem", fontWeight: 800, marginBottom: 12 }}>{t.parentDash.learningInsights[lang]}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           {[
-            { label: "Current Module", val: allModulesComplete ? "All Done!" : currentModule.name, sub: allModulesComplete ? "🎉" : currentModule.icon, color: "#E040FB" },
-            { label: "Overall Progress", val: `${overallPct}%`, sub: `${totalModulesComplete} of ${MODULES.length}`, color: "#2e8bc0" },
-            { label: "XP Per Level", val: `${xp % (level * 50)}/${level * 50}`, sub: "to next level", color: "#FFD93D" },
-            { label: "Sessions Played", val: bossWins + (streak > 0 ? streak : 0), sub: "total rounds", color: "#0c2d48" },
+            { label: t.parentDash.currentModule[lang], val: allModulesComplete ? t.parentDash.allDone[lang] : currentModule.name, sub: allModulesComplete ? "🎉" : currentModule.icon, color: "#E040FB" },
+            { label: t.parentDash.overallProgress[lang], val: `${overallPct}%`, sub: `${totalModulesComplete} ${t.parentDash.of[lang]} ${MODULES.length}`, color: "#2e8bc0" },
+            { label: t.parentDash.xpPerLevel[lang], val: `${xp % (level * 50)}/${level * 50}`, sub: t.parentDash.toNextLevel[lang], color: "#FFD93D" },
+            { label: t.parentDash.sessionsPlayed[lang], val: bossWins + (streak > 0 ? streak : 0), sub: t.parentDash.totalRounds[lang], color: "#0c2d48" },
           ].map((s, i) => (
             <div key={s.label} className="pd-card" style={{
               background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
@@ -962,7 +952,7 @@ function App() {
 
       <div style={{ padding: "20px 20px 40px", textAlign: "center" }}>
         <div style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.55rem", fontWeight: 600 }}>
-          Moolab · {accountType === "parent" ? "Parent Dashboard" : "Transparency View"}
+          Moolab · {accountType === "parent" ? t.parentDash.parentDashboard[lang] : t.parentDash.transparencyView[lang]}
         </div>
       </div>
     </div>
@@ -993,7 +983,7 @@ function App() {
         <div style={{ fontSize: "3rem", marginBottom: 16, animation: "ldBounce 2s ease-in-out infinite" }}>🧠</div>
         <div style={{ width:40,height:40,margin:"0 auto 16px",borderRadius:"50%",border:"3px solid rgba(46,139,192,0.12)",borderTopColor:"#145374",animation:"ldSpin 0.7s linear infinite" }} />
         <p style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: "-0.01em", background:"linear-gradient(90deg,#145374,#2e8bc0)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
-          Curating your feed...
+          {t.loading.curating[lang]}
         </p>
       </div>
     );
@@ -1111,7 +1101,7 @@ function App() {
                 letterSpacing: "0.04em",
               }}
             >
-              {userName || "PROFILE"}
+              {userName || t.hud.profile[lang]}
             </button>
             <button
               className="ws-btn"
@@ -1153,7 +1143,7 @@ function App() {
                   letterSpacing: "0.08em",
                   fontFamily: FONT,
                   textShadow: "0 0 8px rgba(255,68,68,0.5)",
-                }}>LIVE</span>
+                }}>{t.hud.live[lang]}</span>
               </div>
             )}
             <button
@@ -1223,11 +1213,40 @@ function App() {
             >
               {speechSpeed === 0 ? "⏹" : `${speechSpeed}x`}
             </button>
+            <button
+              className="ws-btn"
+              onClick={() => {
+                const newLang = lang === "en" ? "es" : "en";
+                setLang(newLang as Lang);
+                langRef.current = newLang as Lang;
+                saveStr("lang", newLang);
+                resetJourney();
+              }}
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                padding: "8px 10px",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                fontSize: "0.6rem",
+                fontWeight: 800,
+                fontFamily: FONT,
+                color: "#fff",
+                lineHeight: 1,
+                minWidth: 38,
+              }}
+              title={lang === "en" ? "Switch to Spanish" : "Cambiar a Inglés"}
+            >
+              {lang === "en" ? "ES" : "EN"}
+            </button>
             <div style={{
               padding: "5px 10px", borderRadius: 10,
               background: "rgba(255,217,61,0.08)", border: "1px solid rgba(255,217,61,0.15)",
             }}>
-              <span style={{ color: "#FFD93D", fontWeight: 800, fontSize: "0.65rem" }}>LVL {level}</span>
+              <span style={{ color: "#FFD93D", fontWeight: 800, fontSize: "0.65rem" }}>{t.hud.lvl[lang]} {level}</span>
             </div>
             <span style={{
               color: "#2e8bc0", fontWeight: 900, fontSize: "0.75rem",
@@ -1271,7 +1290,7 @@ function App() {
         >
           <span style={{ fontSize: "0.9rem" }}>{currentModule?.icon}</span>
           <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.08em" }}>
-            MODULE {currentModuleIdx + 1}: {currentModule?.name?.toUpperCase()}
+            {t.hud.module[lang]} {currentModuleIdx + 1}: {currentModule?.name?.toUpperCase()}
           </span>
           <span style={{
             color: "#2e8bc0", fontWeight: 800, fontSize: "0.55rem",
@@ -1309,9 +1328,9 @@ function App() {
             fontSize: "1.4rem", fontWeight: 900, marginBottom: 4,
             background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>MODULE MAP</h2>
+          }}>{t.moduleMap.title[lang]}</h2>
           <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 600, marginBottom: 24, letterSpacing: "0.1em" }}>
-            {Object.entries(moduleProgress).filter(([, v]) => v >= 3).length}/{MODULES.length} COMPLETED
+            {Object.entries(moduleProgress).filter(([, v]) => v >= 3).length}/{MODULES.length} {t.moduleMap.completed[lang]}
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 360 }}>
@@ -1400,7 +1419,7 @@ function App() {
                         background: "rgba(46,139,192,0.15)", border: "1px solid rgba(46,139,192,0.3)",
                         fontSize: "0.5rem", fontWeight: 800, color: "#2e8bc0",
                         letterSpacing: "0.08em", flexShrink: 0,
-                      }}>ACTIVE</div>
+                      }}>{t.moduleMap.active[lang]}</div>
                     )}
                   </div>
                 </div>
@@ -1619,7 +1638,7 @@ function App() {
                       color: "#2e8bc0",
                       letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center",
                     }}>
-                      +10 XP — WELL PLAYED
+                      {t.feed.wellPlayed[lang]}
                     </div>
                   )}
                   {answered !== undefined && !isCorrect && (
@@ -1640,7 +1659,7 @@ function App() {
                         <span style={{
                           color: "#2e8bc0", fontWeight: 800, fontSize: "0.65rem",
                           letterSpacing: "0.1em", textTransform: "uppercase",
-                        }}>INSIGHT UNLOCKED</span>
+                        }}>{t.feed.insightUnlocked[lang]}</span>
                       </div>
                       {!revealedExplanations[card.id] ? (
                         <button
@@ -1653,7 +1672,7 @@ function App() {
                             cursor: "pointer", fontFamily: FONT,
                           }}
                         >
-                          🧠 Tap to understand why
+                          {t.feed.tapToUnderstand[lang]}
                         </button>
                       ) : (
                         <div>
@@ -1661,7 +1680,7 @@ function App() {
                             color: "rgba(255,255,255,0.85)", fontSize: "0.82rem",
                             lineHeight: 1.55, fontWeight: 500, margin: "0 0 10px 0",
                           }}>
-                            {card.miniGame.explanation || "The correct answer builds on a key principle. Review the lesson to see the full picture."}
+                            {card.miniGame.explanation || t.quiz.defaultExplanation[lang]}
                           </p>
                           <button
                             className="ws-btn"
@@ -1674,7 +1693,7 @@ function App() {
                               display: "flex", alignItems: "center", gap: 6,
                             }}
                           >
-                            <span style={{ fontSize: "0.8rem" }}>▶</span> Listen
+                            <span style={{ fontSize: "0.8rem" }}>▶</span> {t.feed.listen[lang]}
                           </button>
                         </div>
                       )}
@@ -1750,7 +1769,7 @@ function App() {
               textAlign: "center",
             }}>
               <div style={{ fontSize: "2rem", fontWeight: 900, color: "#fff" }}>{level}</div>
-              <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em" }}>LEVEL</div>
+              <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em" }}>{t.profile.level[lang]}</div>
             </div>
           </div>
 
@@ -1760,10 +1779,10 @@ function App() {
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             margin: "0 0 6px 0",
           }}>
-            {userName ? userName.toUpperCase() : "YOUR PROFILE"}
+            {userName ? userName.toUpperCase() : t.profile.yourProfile[lang]}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontWeight: 600, margin: "0 0 30px 0" }}>
-            {xp} / {level * 50} XP to next level
+            {xp} / {level * 50} {t.profile.xpToNext[lang]}
           </p>
 
           <div
@@ -1776,10 +1795,10 @@ function App() {
             }}
           >
             {[
-              { label: "TOTAL XP", val: xp, color: "#2e8bc0" },
-              { label: "BOSS WINS", val: bossWins, color: "#FFD93D" },
-              { label: "STREAK", val: `${streak}🔥`, color: "#FF6B6B" },
-              { label: "MODULE", val: Math.floor(bossWins / 3) + 1, color: "#E040FB" },
+              { label: t.profile.totalXp[lang], val: xp, color: "#2e8bc0" },
+              { label: t.profile.bossWins[lang], val: bossWins, color: "#FFD93D" },
+              { label: t.profile.streak[lang], val: `${streak}🔥`, color: "#FF6B6B" },
+              { label: t.profile.module[lang], val: Math.floor(bossWins / 3) + 1, color: "#E040FB" },
             ].map((s) => (
               <div key={s.label} style={{
                 background: "rgba(255,255,255,0.03)",
@@ -1803,7 +1822,7 @@ function App() {
             <div style={{
               color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", fontWeight: 700,
               letterSpacing: "0.12em", marginBottom: 10, textAlign: "center",
-            }}>SWITCH MODULE (DEV)</div>
+            }}>{t.profile.switchModule[lang]}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {MODULES.map((mod, idx) => (
                 <button
@@ -1826,7 +1845,7 @@ function App() {
                   <span>{mod.icon}</span>
                   <span>{mod.name}</span>
                   {idx === currentModuleIdx && (
-                    <span style={{ marginLeft: "auto", fontSize: "0.5rem", fontWeight: 800, color: "#2e8bc0" }}>ACTIVE</span>
+                    <span style={{ marginLeft: "auto", fontSize: "0.5rem", fontWeight: 800, color: "#2e8bc0" }}>{t.moduleMap.active[lang]}</span>
                   )}
                 </button>
               ))}
@@ -1889,13 +1908,13 @@ function App() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                BOSS FIGHT
+                {t.quiz.bossFight[lang]}
               </h2>
               <p style={{ color: "rgba(255,255,255,0.3)", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.12em", marginBottom: 6 }}>
-                DEMONSTRATE MASTERY
+                {t.quiz.demonstrateMastery[lang]}
               </p>
               <p style={{ color: "rgba(255,255,255,0.2)", fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.06em", marginBottom: 36 }}>
-                {currentModule?.icon} {currentModule?.name?.toUpperCase()} &middot; WIN {currentModuleWins + 1}/{currentModule?.winsNeeded || 10}
+                {currentModule?.icon} {currentModule?.name?.toUpperCase()} &middot; {t.quiz.win[lang]} {currentModuleWins + 1}/{currentModule?.winsNeeded || 10}
               </p>
               {!quizStarted ? (
                 <button
@@ -1914,7 +1933,7 @@ function App() {
                     letterSpacing: "0.06em",
                   }}
                 >
-                  BEGIN CHALLENGE
+                  {t.quiz.beginChallenge[lang]}
                 </button>
               ) : bossExplanation ? (
                 <div
@@ -1936,11 +1955,11 @@ function App() {
                   <h3 style={{
                     color: "#2e8bc0", fontSize: "1.3rem", fontWeight: 900,
                     letterSpacing: "0.04em", marginBottom: 6,
-                  }}>HOLD UP</h3>
+                  }}>{t.quiz.holdUp[lang]}</h3>
                   <p style={{
                     color: "rgba(46,139,192,0.6)", fontSize: "0.68rem", fontWeight: 700,
                     letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20,
-                  }}>LET'S BREAK THIS DOWN</p>
+                  }}>{t.quiz.letsBreakDown[lang]}</p>
                   <p style={{
                     color: "rgba(255,255,255,0.85)", fontSize: "0.92rem",
                     lineHeight: 1.65, fontWeight: 500, margin: "0 0 20px 0",
@@ -1959,7 +1978,7 @@ function App() {
                       display: "inline-flex", alignItems: "center", gap: 6,
                     }}
                   >
-                    <span>▶</span> Listen to explanation
+                    <span>▶</span> {t.quiz.listenExplanation[lang]}
                   </button>
                   <button
                     className="ws-btn"
@@ -1981,7 +2000,7 @@ function App() {
                       boxShadow: "0 0 30px rgba(46,139,192,0.25), 0 6px 20px rgba(0,0,0,0.4)",
                     }}
                   >
-                    Got it! Let's keep scrolling
+                    {t.quiz.gotIt[lang]}
                   </button>
                 </div>
               ) : (
@@ -2045,7 +2064,7 @@ function App() {
                               });
                             } else {
                               setStreak(0);
-                              setBossExplanation(currentData.bossQuiz.explanation || "The correct answer connects to a deeper principle. Review the lessons to strengthen your understanding before the next attempt.");
+                              setBossExplanation(currentData.bossQuiz.explanation || t.quiz.defaultBossExplanation[lang]);
                             }
                           }}
                           style={{
@@ -2080,31 +2099,14 @@ function App() {
               )}
             </div>
           ) : (() => {
-            const winTitles = [
-              { emoji: "🏆", title: "MASTERY ACHIEVED", sub: "Exceptional performance. That's how it's done." },
-              { emoji: "⚡", title: "FLAWLESS EXECUTION", sub: "Precision under pressure. Well played." },
-              { emoji: "💎", title: "ELITE STATUS", sub: "You've proven your understanding at the highest level." },
-              { emoji: "🚀", title: "BREAKTHROUGH", sub: "That's the kind of thinking that builds real wealth." },
-              { emoji: "👑", title: "CERTIFIED", sub: "Knowledge confirmed. You've earned this." },
-              { emoji: "🎯", title: "PRECISION", sub: "Sharp analysis, sharp results." },
-              { emoji: "💰", title: "STRATEGIC WIN", sub: "Smart decisions lead to smart outcomes." },
-              { emoji: "🌟", title: "OUTSTANDING", sub: "Consistently excellent. Keep compounding." },
-              { emoji: "🧠", title: "DEEP MASTERY", sub: "You see what others miss. That's the edge." },
-              { emoji: "🔥", title: "TOP PERFORMER", sub: "Results speak for themselves." },
-            ];
-            const loseTitles = [
-              { emoji: "📊", title: "REVIEW & RETURN", sub: "Revisit the material. The concepts are worth mastering." },
-              { emoji: "🔄", title: "NOT YET", sub: "Close, but mastery requires precision. Go again." },
-              { emoji: "💪", title: "RESILIENCE", sub: "Every expert failed first. The next attempt is sharper." },
-              { emoji: "📖", title: "STUDY MODE", sub: "Revisit the lessons with fresh eyes. You'll see it differently." },
-              { emoji: "🎯", title: "RECALIBRATE", sub: "Adjust your approach and come back stronger." },
-            ];
+            const winTitles = t.winTitles[lang];
+            const loseTitles = t.loseTitles[lang];
             const pick = quizResult
               ? winTitles[Math.floor(Math.random() * winTitles.length)]
               : loseTitles[Math.floor(Math.random() * loseTitles.length)];
             const shareText = quizResult
-              ? `${pick.emoji} Just achieved mastery in ${currentModule?.name} on Moolab. Level ${level} | ${xp} XP | ${bossWins} Wins. Building real financial intelligence.`
-              : `Sharpening my financial skills on Moolab. ${currentModule?.name} — challenging but worth mastering. Level ${level} | ${xp} XP.`;
+              ? translations.share.winText[lang](currentModule?.name || "", level, xp, bossWins, pick.emoji)
+              : translations.share.loseText[lang](currentModule?.name || "", level, xp);
             const shareUrl = "https://moolab.app";
             const encodedText = encodeURIComponent(shareText);
             const encodedUrl = encodeURIComponent(shareUrl);
@@ -2131,7 +2133,7 @@ function App() {
                 margin: "8px 0 20px 0", fontWeight: 700, fontSize: "0.85rem",
                 textShadow: "0 1px 6px rgba(0,0,0,0.5)",
               }}>
-                {quizResult ? `${pick.sub} +50 XP awarded.` : pick.sub}
+                {quizResult ? `${pick.sub} ${t.quiz.xpAwarded[lang]}` : pick.sub}
               </p>
 
               {quizResult && (
@@ -2161,7 +2163,7 @@ function App() {
                     fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
                     letterSpacing: "0.04em", cursor: "pointer",
                     boxShadow: "0 0 30px rgba(46,139,192,0.25), 0 6px 20px rgba(0,0,0,0.4)",
-                  }}>NEXT QUEST 🚀</button>
+                  }}>{t.quiz.nextQuest[lang]}</button>
                 ) : (
                   <button className="ws-btn" onClick={() => {
                     setQuizResult(null); setQuizStarted(false);
@@ -2172,7 +2174,7 @@ function App() {
                     fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
                     letterSpacing: "0.04em", cursor: "pointer",
                     boxShadow: "0 0 30px rgba(255,107,107,0.25), 0 6px 20px rgba(0,0,0,0.4)",
-                  }}>TRY AGAIN 💪</button>
+                  }}>{t.quiz.tryAgain[lang]}</button>
                 )}
               </div>
 
@@ -2183,7 +2185,7 @@ function App() {
                 <p style={{
                   color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", fontWeight: 700,
                   textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 14,
-                }}>Share your progress</p>
+                }}>{t.quiz.shareProgress[lang]}</p>
                 <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
                   <button className="ws-btn" onClick={() => window.open(`https://wa.me/?text=${encodedText}%20${encodedUrl}`, "_blank")} style={{
                     flex: 1, minWidth: 60, padding: "12px 10px", borderRadius: 14,

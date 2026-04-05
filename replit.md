@@ -139,6 +139,19 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - Parent has LOG OUT button that clears all localStorage and returns to onboarding
 - Kid has ✕ close button to dismiss overlay and return to learning feed
 
+### Bilingual System (EN + ES)
+- `translations.ts` — central dictionary with all UI strings in EN and Latin American Spanish
+- `lang` state persisted via `ws_lang`, with `langRef` for closure-safe access in callbacks
+- `getModules(lang)` returns module names in the active language
+- Language toggle in HUD (main app) and onboarding screen
+- All UI surfaces wired through `t[section][key][lang]`: onboarding, HUD, feed, profile, quiz, parent dashboard, module map
+- Gemini prompts fully bilingual: persona, doctrine, shark-by-age all translated via `translations.gemini`
+- Voice synthesis: `pickRandomVoice(lang)` filters ES voices; `utter.lang` set to `es-MX` or `en-US`
+- Radio tips: `translations.radioTips[lang][ageGroup]` (3 age groups × 10 tips × 2 langs)
+- Win/lose titles, share text, boss explanations all from translations
+- Landing pages: `LandingPage.tsx` (EN) + `LandingPageES.tsx` (ES) — both use aggressive shark voice
+- URL param `?lang=es` triggers ES landing page
+
 ### Age Groups
 - `8-12` Explorer — fun/emoji tone
 - `13-16` Hustler — Gen-Z slang
