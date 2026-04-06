@@ -1,0 +1,21 @@
+SYSTEM ROLE: Lead Architecture & React Performance Engineer.
+OBJECTIVE: Revert lazy-loading and implement a strict "Loading Bay" pre-fetch architecture. The app MUST preload complete batches of 4 slides (Text + ElevenLabs Audio Blobs) to guarantee zero lag and flawless audio playback.
+​STEP 1: THE STRICT INITIAL PRELOAD (BATCH OF 4)
+​Open the feed loading logic (App.tsx or Feed.tsx).
+​On mount, trigger a request to Gemini for exactly 4 cards.
+​CRITICAL: Do NOT drop the loading screen yet. Once Gemini returns the text, immediately iterate through the 4 cards and fetch the ElevenLabs audio for each using the VOICE_MAP.
+​Convert the ElevenLabs audio responses into Blob URLs (URL.createObjectURL(blob)) and attach them to the card state.
+​ONLY set isLoading to false after ALL 4 cards and their audio blobs are fully loaded into memory.
+​STEP 2: THE AUTOPLAY UNLOCK (THE "START" BUTTON)
+​Browsers block autoplay without a click. To fix this, change the Loading Screen UX.
+​Once the 4 cards/audio are fully preloaded in the background, change the loading spinner to a massive, premium button: "ENTER THE LAB ⚡".
+​When the user clicks this button, the app enters the feed. Because this was a physical click, the browser will allow the preloaded blob audio on Slide 1 to play instantly.
+​STEP 3: THE OFFSET BACKGROUND PREFETCH
+​Implement the continuous background fetch logic exactly as follows:
+​Track the currentIndex of the swiper.
+​When the user reaches currentIndex === 1 (the 2nd slide), silently trigger fetchMoreCards(4) to fetch 4 more cards + their audio blobs, appending them to the array.
+​When the user reaches currentIndex === 5 (the 6th slide), fetch the next 4, and so on. (Trigger condition: currentIndex === cards.length - 3).
+​STEP 4: FORCE MEDIA-FIRST ENGAGEMENT
+​Update the Gemini system prompt: "The VERY FIRST card in any generated batch MUST be a highly engaging podcast_clip. Never start a batch with a text-heavy concept_breakdown. Hook the user immediately with conversational audio."
+​Ensure all text constraints remain strict: maximum 1 or 2 punchy sentences per screen. No text walls.
+​OUTPUT: Rewrite the feed state machine to strictly preload text + audio blobs in batches of 4, implement the "Enter" button to unlock browser audio, and wire the n-3 index prefetch trigger.

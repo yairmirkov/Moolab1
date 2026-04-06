@@ -4,7 +4,7 @@ import LandingPageES from "./LandingPageES";
 import CommandCenter from "./CommandCenter";
 import ConceptCard from "./ConceptCard";
 import translations, { type Lang } from "./translations";
-import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole } from "./elevenlabs";
+import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob } from "./elevenlabs";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -64,10 +64,15 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
       ? " IMPORTANTE: TODAS las lecciones en este lote DEBEN ser de tipo concept_breakdown. NO generes radio_highlight, podcast_clip ni miniGame. Solo concept_breakdown con campos term, definition y analogy."
       : " IMPORTANT: ALL lessons in this batch MUST be type concept_breakdown. Do NOT generate radio_highlight, podcast_clip, or miniGame cards. Only concept_breakdown with term, definition, and analogy fields.")
     : "";
+  const mediaFirstRule = !opts?.conceptOnly
+    ? (lang === "es"
+      ? " REGLA OBLIGATORIA: La PRIMERA lección del lote DEBE ser tipo podcast_clip con diálogo envolvente. NUNCA empieces un lote con concept_breakdown. Engancha al usuario inmediatamente con audio conversacional."
+      : " MANDATORY RULE: The VERY FIRST lesson in this batch MUST be type podcast_clip with engaging dialogue. NEVER start a batch with a text-heavy concept_breakdown. Hook the user immediately with conversational audio.")
+    : "";
   const tiktokTextRule = lang === "es"
     ? " REGLA CRÍTICA DE UI: NUNCA generes párrafos largos. El texto en cualquier tarjeta DEBE ser 1 o 2 oraciones cortas máximo (menos de 120 caracteres en total). Piensa en subtítulos rápidos y contundentes estilo TikTok. Si generas un muro de texto, la app se romperá."
     : " CRITICAL UI RULE: NEVER generate long paragraphs. Text on any card MUST be 1 or 2 short sentences maximum (under 120 characters total). Think fast, punchy, TikTok-style captions. If you generate a wall of text, the app will break.";
-  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}${conceptOnlyLine}${tiktokTextRule}`;
+  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}${conceptOnlyLine}${mediaFirstRule}${tiktokTextRule}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -538,21 +543,53 @@ function PodcastClipSlide({
       }
 
       setSpeakingIdx(i);
-      const result = await speakPodcastLine(
-        dialogue[i].text,
-        dialogue[i].speaker,
-        lang,
-        { speed: speechSpeedRef.current, signal: ac.signal },
-      );
 
-      if (result === "aborted") break;
-      if (!ac.signal.aborted) setSpeakingIdx(-1);
+      const cacheKey = `podcast_${card.id}_${i}_${lang}`;
+      const cachedUrl = audioBlobCache.get(cacheKey);
 
-      if (result === "error") {
-        await new Promise<void>((r) => {
-          const tid = setTimeout(r, 2000);
-          ac.signal.addEventListener("abort", () => { clearTimeout(tid); r(); }, { once: true });
+      if (cachedUrl) {
+        const result = await new Promise<"done" | "aborted" | "error">((resolve) => {
+          const audio = new Audio(cachedUrl);
+          audio.playbackRate = speechSpeedRef.current || 1;
+          audio.volume = 0.85;
+
+          const onAbort = () => { audio.pause(); audio.src = ""; resolve("aborted"); };
+          ac.signal.addEventListener("abort", onAbort, { once: true });
+
+          audio.onended = () => { ac.signal.removeEventListener("abort", onAbort); resolve("done"); };
+          audio.onerror = () => { ac.signal.removeEventListener("abort", onAbort); resolve("error"); };
+          audio.play().catch(() => {
+            setNeedsTap(true);
+            ac.signal.removeEventListener("abort", onAbort);
+            resolve("error");
+          });
         });
+
+        if (result === "aborted") break;
+        if (!ac.signal.aborted) setSpeakingIdx(-1);
+        if (result === "error") {
+          await new Promise<void>((r) => {
+            const tid = setTimeout(r, 2000);
+            ac.signal.addEventListener("abort", () => { clearTimeout(tid); r(); }, { once: true });
+          });
+        }
+      } else {
+        const result = await speakPodcastLine(
+          dialogue[i].text,
+          dialogue[i].speaker,
+          lang,
+          { speed: speechSpeedRef.current, signal: ac.signal },
+        );
+
+        if (result === "aborted") break;
+        if (!ac.signal.aborted) setSpeakingIdx(-1);
+
+        if (result === "error") {
+          await new Promise<void>((r) => {
+            const tid = setTimeout(r, 2000);
+            ac.signal.addEventListener("abort", () => { clearTimeout(tid); r(); }, { once: true });
+          });
+        }
       }
     }
 
@@ -561,7 +598,7 @@ function PodcastClipSlide({
       setSpeakingIdx(-1);
     }
     if (abortRef.current === ac) abortRef.current = null;
-  }, [dialogue, lang, isMutedRef, speechSpeedRef]);
+  }, [dialogue, lang, isMutedRef, speechSpeedRef, card.id]);
 
   useEffect(() => {
     return () => {
@@ -794,6 +831,8 @@ function App() {
   const [countdown, setCountdown] = useState(10);
   const [muted, setMuted] = useState(false);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [preloadReady, setPreloadReady] = useState(false);
+  const [preloadProgress, setPreloadProgress] = useState("");
   const [userName, setUserName] = useState(() => loadStr("name", ""));
   const [birthYear, setBirthYear] = useState(() => loadStr("birth", ""));
   const [accountType, setAccountType] = useState(() => loadStr("acctType", ""));
@@ -876,8 +915,51 @@ function App() {
     localStorage.setItem("ws_modProg", JSON.stringify(moduleProgress));
   }, [xp, streak, level, bossWins, currentModuleIdx, moduleProgress]);
 
+  const preloadAudioForCards = useCallback(async (cards: any[], currentLang: Lang) => {
+    if (!isElevenLabsAvailable()) return;
+    const SPEAKER_TO_ROLE: Record<string, "Host" | "Expert" | "Guest1" | "Guest2" | "Narrator"> = {
+      host: "Host", presentador: "Host", presentadora: "Host",
+      expert: "Expert", experto: "Expert", experta: "Expert",
+      guest1: "Guest1", invitado1: "Guest1",
+      guest2: "Guest2", invitado2: "Guest2",
+      narrator: "Narrator", narrador: "Narrator", narradora: "Narrator",
+    };
+    const promises: Promise<void>[] = [];
+    for (const card of cards) {
+      if (card.type === "radio_highlight" && card.audioText) {
+        const cacheKey = `radio_${card.id}_${currentLang}`;
+        if (!audioBlobCache.has(cacheKey)) {
+          const voiceId = getVoiceIdForRole("Narrator", currentLang);
+          promises.push(
+            fetchAudioBlob(card.audioText, voiceId).then((url) => {
+              if (url) audioBlobCache.set(cacheKey, url);
+            })
+          );
+        }
+      }
+      if (card.type === "podcast_clip" && card.dialogue) {
+        for (let i = 0; i < card.dialogue.length; i++) {
+          const line = card.dialogue[i];
+          const cacheKey = `podcast_${card.id}_${i}_${currentLang}`;
+          if (!audioBlobCache.has(cacheKey)) {
+            const role = SPEAKER_TO_ROLE[line.speaker?.toLowerCase()?.trim()] || "Narrator";
+            const voiceId = getVoiceIdForRole(role, currentLang);
+            promises.push(
+              fetchAudioBlob(line.text, voiceId).then((url) => {
+                if (url) audioBlobCache.set(cacheKey, url);
+              })
+            );
+          }
+        }
+      }
+    }
+    await Promise.allSettled(promises);
+  }, []);
+
   const resetJourney = useCallback(() => {
     setLoading(true);
+    setPreloadReady(false);
+    setPreloadProgress("");
     setCompletedSlides([]);
     setSlideAnswers({});
     setQuizUnlocked(false);
@@ -895,37 +977,30 @@ function App() {
     stopElevenLabsAudio();
     radioSpeakingRef.current = false;
     setRadioLive(false);
+    isFetchingRef.current = false;
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
     const topic = mod?.topic;
     const country = loadStr("country", "");
-    console.time("Initial render (1 concept card)");
-    generateCards(ageGroup, topic, langRef.current, country, 1, { conceptOnly: true }).then((data) => {
-      if (data) {
-        data.lessons = data.lessons.map((l) => ({
-          ...l,
-          id: Math.random().toString(36).substr(2, 9),
-        }));
-        setCurrentData(data);
+    const currentLang = langRef.current;
+    console.time("Loading Bay (4 cards + audio)");
+    setPreloadProgress(currentLang === "es" ? "Generando lecciones..." : "Generating lessons...");
+    generateCards(ageGroup, topic, currentLang, country, 4).then(async (data) => {
+      if (!data?.lessons?.length) {
+        setLoading(false);
+        console.timeEnd("Loading Bay (4 cards + audio)");
+        return;
       }
-      setLoading(false);
-      console.timeEnd("Initial render (1 concept card)");
-      isFetchingRef.current = true;
-      setIsFetchingMore(true);
-      generateCards(ageGroup, topic, langRef.current, country, 4).then((bgData) => {
-        if (bgData) {
-          const bgLessons = bgData.lessons.map((l: any) => ({
-            ...l,
-            id: Math.random().toString(36).substr(2, 9),
-          }));
-          setCurrentData((prev: any) => prev
-            ? ({ ...prev, lessons: [...prev.lessons, ...bgLessons] })
-            : ({ lessons: bgLessons, bossQuiz: bgData.bossQuiz || null }));
-        }
-        setIsFetchingMore(false);
-        isFetchingRef.current = false;
-      });
+      data.lessons = data.lessons.map((l: any) => ({
+        ...l,
+        id: Math.random().toString(36).substr(2, 9),
+      }));
+      setCurrentData(data);
+      setPreloadProgress(currentLang === "es" ? "Preparando audio..." : "Preparing audio...");
+      await preloadAudioForCards(data.lessons, currentLang);
+      console.timeEnd("Loading Bay (4 cards + audio)");
+      setPreloadReady(true);
     });
-  }, [ageGroup, currentModuleIdx]);
+  }, [ageGroup, currentModuleIdx, preloadAudioForCards]);
 
   useEffect(() => {
     if (appStarted && ageGroup && accountType !== "parent") resetJourney();
@@ -980,13 +1055,6 @@ function App() {
     if (effectiveAccountType === "parent") return;
   };
 
-  const unlockAudio = useCallback(() => {
-    const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
-    silentAudio.volume = 0;
-    silentAudio.play().catch(() => {});
-    setAudioUnlocked(true);
-  }, []);
-
   const handleScroll = async (e: any) => {
     if (!currentData || quizUnlocked) return;
     const { scrollTop, scrollHeight, clientHeight } = e.target;
@@ -1008,23 +1076,25 @@ function App() {
     }
 
     const totalSlides = currentData.lessons?.length || 0;
-    const slidesFromEnd = totalSlides - currentSlideIdx;
+    const triggerIndex = totalSlides - 3;
 
-    if (slidesFromEnd <= 2 && !isFetchingRef.current) {
+    if (currentSlideIdx >= triggerIndex && triggerIndex > 0 && !isFetchingRef.current) {
       isFetchingRef.current = true;
       setIsFetchingMore(true);
       setTimeout(async () => {
-        const newData = await generateCards(ageGroup, currentModule?.topic, langRef.current, loadStr("country", ""), 4);
+        const currentLang = langRef.current;
+        const newData = await generateCards(ageGroup, currentModule?.topic, currentLang, loadStr("country", ""), 4);
         if (newData) {
           const nl = newData.lessons.map((l: any) => ({
             ...l,
             id: Math.random().toString(36).substr(2, 9),
           }));
+          await preloadAudioForCards(nl, currentLang);
           setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
         }
         setIsFetchingMore(false);
         isFetchingRef.current = false;
-      }, 600);
+      }, 300);
     }
   };
 
@@ -2129,20 +2199,61 @@ function App() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(160deg, #eef6fb 0%, #e0f0f8 30%, #d0e8f2 60%, #f2f8fb 100%)",
-          color: "#0c2d48",
+          background: preloadReady
+            ? "radial-gradient(ellipse at center, #0c2d48 0%, #020a14 100%)"
+            : "linear-gradient(160deg, #eef6fb 0%, #e0f0f8 30%, #d0e8f2 60%, #f2f8fb 100%)",
+          color: preloadReady ? "#fff" : "#0c2d48",
           fontFamily: FONT,
+          transition: "background 0.8s ease, color 0.8s ease",
         }}
       >
         <style>{`
           @keyframes ldSpin { to{transform:rotate(360deg)} }
           @keyframes ldBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+          @keyframes enterPulse { 0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(46,139,192,0.3),0 8px 32px rgba(0,0,0,0.5)} 50%{transform:scale(1.04);box-shadow:0 0 80px rgba(46,139,192,0.5),0 12px 48px rgba(0,0,0,0.6)} }
+          @keyframes enterFadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         `}</style>
-        <div style={{ fontSize: "3rem", marginBottom: 16, animation: "ldBounce 2s ease-in-out infinite" }}>🧠</div>
-        <div style={{ width:40,height:40,margin:"0 auto 16px",borderRadius:"50%",border:"3px solid rgba(46,139,192,0.12)",borderTopColor:"#145374",animation:"ldSpin 0.7s linear infinite" }} />
-        <p style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: "-0.01em", background:"linear-gradient(90deg,#145374,#2e8bc0)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
-          {t.loading.curating[lang]}
-        </p>
+        {preloadReady ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", animation: "enterFadeIn 0.6s ease-out both" }}>
+            <div style={{ fontSize: "4rem", marginBottom: 24 }}>🧪</div>
+            <p style={{
+              fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.3em",
+              color: "rgba(46,139,192,0.6)", textTransform: "uppercase", marginBottom: 12,
+            }}>
+              {lang === "es" ? "LECCIONES LISTAS" : "LESSONS LOADED"}
+            </p>
+            <button
+              onClick={() => {
+                const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+                silentAudio.volume = 0;
+                silentAudio.play().catch(() => {});
+                setAudioUnlocked(true);
+                setLoading(false);
+                setPreloadReady(false);
+              }}
+              style={{
+                padding: "24px 56px", borderRadius: 60,
+                background: "linear-gradient(135deg, #2e8bc0 0%, #145374 100%)",
+                border: "2px solid rgba(177,212,224,0.4)",
+                color: "#fff", fontWeight: 900, fontSize: "1.2rem",
+                fontFamily: FONT, cursor: "pointer",
+                letterSpacing: "0.06em",
+                animation: "enterPulse 2.5s ease-in-out infinite",
+                display: "flex", alignItems: "center", gap: 16,
+              }}
+            >
+              {lang === "es" ? "ENTRAR AL LAB" : "ENTER THE LAB"} ⚡
+            </button>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: "3rem", marginBottom: 16, animation: "ldBounce 2s ease-in-out infinite" }}>🧠</div>
+            <div style={{ width:40,height:40,margin:"0 auto 16px",borderRadius:"50%",border:"3px solid rgba(46,139,192,0.12)",borderTopColor:"#145374",animation:"ldSpin 0.7s linear infinite" }} />
+            <p style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: "-0.01em", background:"linear-gradient(90deg,#145374,#2e8bc0)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
+              {preloadProgress || t.loading.curating[lang]}
+            </p>
+          </>
+        )}
       </div>
     );
 
@@ -2474,33 +2585,6 @@ function App() {
           scrollbarWidth: "none",
         }}
       >
-        {!audioUnlocked && activeSlideIndex === 0 && (
-          <div style={{
-            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-            zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-          }}>
-            <button
-              onClick={unlockAudio}
-              style={{
-                padding: "22px 48px", borderRadius: 60,
-                background: "linear-gradient(135deg, #2e8bc0, #145374)",
-                border: "2px solid rgba(177,212,224,0.4)",
-                color: "#fff", fontWeight: 900, fontSize: "1.1rem",
-                fontFamily: FONT, cursor: "pointer",
-                letterSpacing: "0.04em",
-                boxShadow: "0 0 60px rgba(46,139,192,0.4), 0 8px 32px rgba(0,0,0,0.5)",
-                animation: "contextPulse 2.5s ease-in-out infinite",
-                display: "flex", alignItems: "center", gap: 14,
-              }}
-            >
-              <span style={{ fontSize: "1.6rem" }}>🔊</span>
-              {lang === "es" ? "Toca para Iniciar Lab" : "Tap to Begin Lab"}
-            </button>
-          </div>
-        )}
-
         {currentData.lessons.map((card, i) => {
           if (card.type === "radio_highlight") {
             return (
