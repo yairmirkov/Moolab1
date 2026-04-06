@@ -47,6 +47,11 @@ function getVoiceId(speaker: string, voiceLang?: VoiceLang): string {
   return VOICE_MAP[lang][role];
 }
 
+export function getVoiceIdForRole(role: "Host" | "Expert" | "Guest1" | "Guest2" | "Narrator", lang?: "en" | "es"): string {
+  const vl = resolveVoiceLang(lang);
+  return VOICE_MAP[vl][role];
+}
+
 let currentAudio: HTMLAudioElement | null = null;
 
 export const isElevenLabsAvailable = (): boolean => !!ELEVENLABS_API_KEY;

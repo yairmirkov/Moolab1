@@ -4,7 +4,7 @@ import LandingPageES from "./LandingPageES";
 import CommandCenter from "./CommandCenter";
 import ConceptCard from "./ConceptCard";
 import translations, { type Lang } from "./translations";
-import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine } from "./elevenlabs";
+import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole } from "./elevenlabs";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -251,19 +251,20 @@ const RADIO_VIZ_BARS = Array.from({ length: 48 }, (_, i) => ({
   height: 0.3 + Math.random() * 0.7,
 }));
 
+const audioBlobCache = new Map<string, string>();
+
 function RadioHighlightSlide({
-  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, played, onPlayed, fallbackBrowserSpeak,
+  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, isActive,
 }: {
   card: any; videoSrc: string; bgGradient: string; lang: Lang;
   isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
   feedRef: React.MutableRefObject<HTMLDivElement | null>;
-  slideIndex: number; played: boolean; onPlayed: () => void;
-  fallbackBrowserSpeak: (text: string, onDone: () => void) => void;
+  slideIndex: number; isActive: boolean;
 }) {
   const [speaking, setSpeaking] = useState(false);
   const [done, setDone] = useState(false);
-  const slideRef = useRef<HTMLDivElement>(null);
-  const triggeredRef = useRef(false);
+  const [needsTap, setNeedsTap] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const mountedRef = useRef(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -272,56 +273,117 @@ function RadioHighlightSlide({
     return () => {
       mountedRef.current = false;
       if (timerRef.current) clearTimeout(timerRef.current);
-      stopElevenLabsAudio();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
     };
   }, []);
 
+  const playAudioBlob = useCallback(async (blobUrl: string) => {
+    if (!mountedRef.current) return;
+    const audio = new Audio(blobUrl);
+    audio.playbackRate = speechSpeedRef.current || 1;
+    audio.volume = 0.85;
+    audioRef.current = audio;
+
+    const finish = () => {
+      if (!mountedRef.current) return;
+      setSpeaking(false);
+      setDone(true);
+      timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 2000);
+    };
+
+    audio.onended = finish;
+    audio.onerror = finish;
+
+    try {
+      setSpeaking(true);
+      setNeedsTap(false);
+      await audio.play();
+    } catch (e: any) {
+      if (e?.name === "NotAllowedError") {
+        setSpeaking(false);
+        setNeedsTap(true);
+      } else {
+        finish();
+      }
+    }
+  }, [speechSpeedRef]);
+
   useEffect(() => {
-    if (played || triggeredRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry.isIntersecting && entry.intersectionRatio > 0.6 && !triggeredRef.current) {
-          triggeredRef.current = true;
-          onPlayed();
-          if (isMutedRef.current || speechSpeedRef.current === 0) {
-            if (mountedRef.current) setDone(true);
-            timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
-            return;
-          }
-          if (mountedRef.current) setSpeaking(true);
-          const finish = () => {
-            if (!mountedRef.current) return;
-            setSpeaking(false);
-            setDone(true);
-            timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 2000);
-          };
-          if (isElevenLabsAvailable()) {
-            speakWithElevenLabs(card.audioText, lang, {
-              speed: speechSpeedRef.current,
-              onStart: () => {},
-              onEnd: finish,
-              onError: () => {
-                if (mountedRef.current) fallbackBrowserSpeak(card.audioText, finish);
-              },
-            }).then(ok => {
-              if (!ok && mountedRef.current) fallbackBrowserSpeak(card.audioText, finish);
-            });
-          } else {
-            fallbackBrowserSpeak(card.audioText, finish);
-          }
+    if (!isActive) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+      setSpeaking(false);
+      setNeedsTap(false);
+      return;
+    }
+
+    if (isMutedRef.current || speechSpeedRef.current === 0 || !card.audioText) {
+      setDone(true);
+      timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
+      return;
+    }
+
+    if (!isElevenLabsAvailable()) {
+      setDone(true);
+      timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
+      return;
+    }
+
+    const cacheKey = `radio_${card.id}_${lang}`;
+    if (audioBlobCache.has(cacheKey)) {
+      playAudioBlob(audioBlobCache.get(cacheKey)!);
+      return;
+    }
+
+    const timerLabel = `ElevenLabs API (radio, ${card.audioText?.substring(0, 25)}...)`;
+    console.time(timerLabel);
+    let timerEnded = false;
+    const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
+
+    const voiceId = getVoiceIdForRole("Narrator", lang);
+    const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
+
+    fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "xi-api-key": apiKey },
+      body: JSON.stringify({
+        text: card.audioText,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.4, use_speaker_boost: true },
+      }),
+    })
+      .then((res) => {
+        endTimer();
+        if (!res.ok) throw new Error(`TTS ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        audioBlobCache.set(cacheKey, url);
+        if (mountedRef.current && isActive) playAudioBlob(url);
+      })
+      .catch(() => {
+        endTimer();
+        if (mountedRef.current) {
+          setDone(true);
+          timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
         }
-        if (entry && !entry.isIntersecting && triggeredRef.current) {
-          stopElevenLabsAudio();
-          if (mountedRef.current) { setSpeaking(false); setDone(true); }
-          if (timerRef.current) clearTimeout(timerRef.current);
-        }
-      },
-      { threshold: [0.6, 0] },
-    );
-    if (slideRef.current) observer.observe(slideRef.current);
-    return () => observer.disconnect();
-  }, [played]);
+      });
+  }, [isActive, card.id]);
+
+  const handleTapToPlay = () => {
+    const cacheKey = `radio_${card.id}_${lang}`;
+    if (audioBlobCache.has(cacheKey)) {
+      playAudioBlob(audioBlobCache.get(cacheKey)!);
+    }
+  };
 
   const autoAdvance = () => {
     if (!feedRef.current) return;
@@ -331,7 +393,6 @@ function RadioHighlightSlide({
 
   return (
     <div
-      ref={slideRef}
       style={{
         height: "100dvh", width: "100%", position: "relative",
         scrollSnapAlign: "start", scrollSnapStop: "always",
@@ -409,6 +470,23 @@ function RadioHighlightSlide({
           ))}
         </div>
 
+        {needsTap && (
+          <button
+            onClick={handleTapToPlay}
+            style={{
+              padding: "14px 28px", borderRadius: 50, border: "2px solid rgba(46,139,192,0.5)",
+              background: "rgba(46,139,192,0.15)", backdropFilter: "blur(12px)",
+              color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
+              cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
+              animation: "radioTextFade 0.4s ease-out both",
+              boxShadow: "0 0 30px rgba(46,139,192,0.2)",
+            }}
+          >
+            <span style={{ fontSize: "1.3rem" }}>🔊</span>
+            {lang === "es" ? "Toca para Reproducir" : "Tap to Play Audio"}
+          </button>
+        )}
+
         {done && (
           <p style={{
             color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", fontWeight: 700,
@@ -424,15 +502,16 @@ function RadioHighlightSlide({
 }
 
 function PodcastClipSlide({
-  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef,
+  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, isActive,
 }: {
   card: any; videoSrc: string; bgGradient: string; lang: Lang;
   isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
+  isActive: boolean;
 }) {
   const [visibleLines, setVisibleLines] = useState(0);
   const [speakingIdx, setSpeakingIdx] = useState(-1);
+  const [needsTap, setNeedsTap] = useState(false);
   const slideRef = useRef<HTMLDivElement>(null);
-  const triggeredRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const dialogue: { speaker: string; text: string }[] = card.dialogue || [];
 
@@ -489,25 +568,20 @@ function PodcastClipSlide({
   }, []);
 
   useEffect(() => {
-    if (triggeredRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry?.isIntersecting && entry.intersectionRatio > 0.6 && !triggeredRef.current) {
-          triggeredRef.current = true;
-          runPlaybackQueue();
-        }
-        if (entry && !entry.isIntersecting && triggeredRef.current) {
-          if (abortRef.current) abortRef.current.abort();
-          stopElevenLabsAudio();
-          setSpeakingIdx(-1);
-        }
-      },
-      { threshold: [0.6, 0] },
-    );
-    if (slideRef.current) observer.observe(slideRef.current);
-    return () => observer.disconnect();
-  }, [dialogue.length, runPlaybackQueue]);
+    if (isActive) {
+      setNeedsTap(false);
+      runPlaybackQueue().catch(() => {});
+    } else {
+      if (abortRef.current) abortRef.current.abort();
+      stopElevenLabsAudio();
+      setSpeakingIdx(-1);
+    }
+  }, [isActive]);
+
+  const handleTapToPlay = () => {
+    setNeedsTap(false);
+    runPlaybackQueue().catch(() => {});
+  };
 
   const allRevealed = visibleLines >= dialogue.length;
   const isSpeaking = speakingIdx >= 0;
@@ -655,6 +729,28 @@ function PodcastClipSlide({
           })}
         </div>
 
+        {needsTap && (
+          <div style={{
+            position: "absolute", bottom: 140, left: 0, width: "100%",
+            display: "flex", justifyContent: "center",
+          }}>
+            <button
+              onClick={handleTapToPlay}
+              style={{
+                padding: "14px 28px", borderRadius: 50, border: "2px solid rgba(46,139,192,0.5)",
+                background: "rgba(46,139,192,0.15)", backdropFilter: "blur(12px)",
+                color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
+                animation: "radioTextFade 0.4s ease-out both",
+                boxShadow: "0 0 30px rgba(46,139,192,0.2)",
+              }}
+            >
+              <span style={{ fontSize: "1.3rem" }}>🔊</span>
+              {lang === "es" ? "Toca para Reproducir" : "Tap to Play Audio"}
+            </button>
+          </div>
+        )}
+
         {allRevealed && !isSpeaking && (
           <div style={{
             position: "absolute", bottom: 80, left: 0, width: "100%",
@@ -760,6 +856,7 @@ function App() {
   const progress = Math.min((completedSlides.length / 5) * 100, 100);
 
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [flashBlue, setFlashBlue] = useState(false);
 
   const currentModule = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
@@ -786,6 +883,7 @@ function App() {
     setBossExplanation(null);
     setRevealedSlides({});
     setRadioPlayedSlides({});
+    setActiveSlideIndex(0);
     slidesScrolledRef.current = 0;
     lastRadioSlideRef.current = -1;
     usedTipsRef.current.clear();
@@ -887,6 +985,7 @@ function App() {
     }
 
     const currentSlideIdx = Math.round(scrollTop / clientHeight);
+    setActiveSlideIndex(currentSlideIdx);
 
     if (currentSlideIdx !== lastRadioSlideRef.current) {
       lastRadioSlideRef.current = currentSlideIdx;
@@ -2374,9 +2473,7 @@ function App() {
                 speechSpeedRef={speechSpeedRef}
                 feedRef={feedRef}
                 slideIndex={i}
-                played={!!radioPlayedSlides[card.id]}
-                onPlayed={() => setRadioPlayedSlides(p => ({ ...p, [card.id]: true }))}
-                fallbackBrowserSpeak={fallbackBrowserSpeak}
+                isActive={activeSlideIndex === i}
               />
             );
           }
@@ -2391,6 +2488,7 @@ function App() {
                 lang={lang}
                 isMutedRef={isMutedRef}
                 speechSpeedRef={speechSpeedRef}
+                isActive={activeSlideIndex === i}
               />
             );
           }
