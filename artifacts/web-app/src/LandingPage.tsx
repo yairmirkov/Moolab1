@@ -473,11 +473,8 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
       </section>
 
       <footer className="py-8 px-6 border-t border-sky-100">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <MoolabLogo height={24} />
-          </div>
-          <p className="text-[10px] text-[#0c2d48]/20 font-medium text-center sm:text-right">
+        <div className="max-w-5xl mx-auto text-center">
+          <p className="text-[10px] text-[#0c2d48]/20 font-medium">
             Building the next generation of financial sharks.
           </p>
         </div>
