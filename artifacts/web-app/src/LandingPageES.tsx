@@ -456,7 +456,6 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
 
       <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-sky-50/50">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="mb-4"><MoolabLogo height={56} glow /></div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
             Cría un Tiburón
             <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> Hoy.</span>
@@ -472,7 +471,8 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
       </section>
 
       <footer className="py-8 px-6 border-t border-sky-100">
-        <div className="max-w-5xl mx-auto text-center">
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-3">
+          <MoolabLogo height={32} glow />
           <p className="text-[10px] text-[#0c2d48]/20 font-medium">
             Construyendo la proxima generacion de tiburones financieros.
           </p>
