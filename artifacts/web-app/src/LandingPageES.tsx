@@ -67,7 +67,7 @@ const MoolabRadio = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const audio = new Audio("/moolab-intro.mp3");
+    const audio = new Audio("/moolab-intro-es.mp3");
     audio.preload = "auto";
     audio.volume = 0.85;
     audio.onended = () => setPlaying(false);
