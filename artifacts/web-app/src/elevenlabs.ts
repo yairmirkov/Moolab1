@@ -101,6 +101,10 @@ export const speakPodcastLine = (
       resolve(result);
     };
 
+    const podTimerLabel = `ElevenLabs API (podcast, ${speaker}, ${text.substring(0, 25)}...)`;
+    console.time(podTimerLabel);
+    let podTimerEnded = false;
+    const endPodTimer = () => { if (!podTimerEnded) { podTimerEnded = true; console.timeEnd(podTimerLabel); } };
     try {
       const response = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
@@ -123,6 +127,8 @@ export const speakPodcastLine = (
           signal: opts?.signal,
         },
       );
+
+      endPodTimer();
 
       if (!response.ok) {
         console.error(`[ElevenLabs] Podcast TTS failed: ${response.status} ${response.statusText}`);
@@ -162,6 +168,7 @@ export const speakPodcastLine = (
 
       await audio.play();
     } catch (e: any) {
+      endPodTimer();
       if (e?.name === "AbortError") { settle("aborted"); return; }
       console.error("[ElevenLabs] Podcast TTS error:", e);
       settle("error");
@@ -182,6 +189,10 @@ async function _speak(
   if (!ELEVENLABS_API_KEY) return false;
 
   const speed = opts?.speed ?? 1.0;
+  const timerLabel = `ElevenLabs API (_speak, ${text.substring(0, 30)}...)`;
+  console.time(timerLabel);
+  let timerEnded = false;
+  const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
 
   try {
     const response = await fetch(
@@ -204,6 +215,8 @@ async function _speak(
         }),
       },
     );
+
+    endTimer();
 
     if (!response.ok) {
       console.error(`[ElevenLabs] TTS failed: ${response.status} ${response.statusText}`);
@@ -235,6 +248,7 @@ async function _speak(
     await audio.play();
     return true;
   } catch (e) {
+    endTimer();
     console.error("[ElevenLabs] TTS error:", e);
     opts?.onError?.();
     return false;

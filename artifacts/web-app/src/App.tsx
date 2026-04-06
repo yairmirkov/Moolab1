@@ -30,7 +30,11 @@ const shuffleOptions = (options: string[], correctIndex: number) => {
   return { options: shuffled, correctIndex: shuffled.indexOf(correctAnswer) };
 };
 
-const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en", country?: string, batchSize: number = 10) => {
+const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en", country?: string, batchSize: number = 10, opts?: { conceptOnly?: boolean }) => {
+  const timerLabel = `Gemini API (batch=${batchSize}${opts?.conceptOnly ? ', conceptOnly' : ''})`;
+  console.time(timerLabel);
+  let timerEnded = false;
+  const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const personaKey = ageGroup === "Kids" ? "Kids" : ageGroup === "Teens" ? "Teens" : "Adults";
   const persona = translations.gemini.persona[personaKey][lang];
@@ -55,7 +59,12 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
   const batchLine = lang === "es"
     ? ` GENERA EXACTAMENTE ${batchSize} lecciones en el array "lessons". Ni más, ni menos.`
     : ` Generate EXACTLY ${batchSize} lessons in the "lessons" array. No more, no less.`;
-  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}`;
+  const conceptOnlyLine = opts?.conceptOnly
+    ? (lang === "es"
+      ? " IMPORTANTE: TODAS las lecciones en este lote DEBEN ser de tipo concept_breakdown. NO generes radio_highlight, podcast_clip ni miniGame. Solo concept_breakdown con campos term, definition y analogy."
+      : " IMPORTANT: ALL lessons in this batch MUST be type concept_breakdown. Do NOT generate radio_highlight, podcast_clip, or miniGame cards. Only concept_breakdown with term, definition, and analogy fields.")
+    : "";
+  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}${conceptOnlyLine}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -66,6 +75,7 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
       },
     );
     const data = await response.json();
+    endTimer();
     const cleanText = data.candidates[0].content.parts[0].text
       .replace(/```json/g, "")
       .replace(/```/g, "")
@@ -88,6 +98,7 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
     }
     return parsed;
   } catch (e) {
+    endTimer();
     return null;
   }
 };
@@ -784,7 +795,8 @@ function App() {
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
     const topic = mod?.topic;
     const country = loadStr("country", "");
-    generateCards(ageGroup, topic, langRef.current, country, 3).then((data) => {
+    console.time("Initial render (1 concept card)");
+    generateCards(ageGroup, topic, langRef.current, country, 1, { conceptOnly: true }).then((data) => {
       if (data) {
         data.lessons = data.lessons.map((l) => ({
           ...l,
@@ -793,6 +805,7 @@ function App() {
         setCurrentData(data);
       }
       setLoading(false);
+      console.timeEnd("Initial render (1 concept card)");
       isFetchingRef.current = true;
       setIsFetchingMore(true);
       generateCards(ageGroup, topic, langRef.current, country, 4).then((bgData) => {
@@ -801,7 +814,9 @@ function App() {
             ...l,
             id: Math.random().toString(36).substr(2, 9),
           }));
-          setCurrentData((prev: any) => prev ? ({ ...prev, lessons: [...prev.lessons, ...bgLessons] }) : prev);
+          setCurrentData((prev: any) => prev
+            ? ({ ...prev, lessons: [...prev.lessons, ...bgLessons] })
+            : ({ lessons: bgLessons, bossQuiz: bgData.bossQuiz || null }));
         }
         setIsFetchingMore(false);
         isFetchingRef.current = false;
