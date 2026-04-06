@@ -315,7 +315,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
               onClick={onParentLogin}
               className="px-4 py-2 rounded-full border border-sky-200 text-[#145374] font-bold text-xs sm:text-sm tracking-wide hover:bg-sky-50 active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              Acceso Padres
+              Iniciar Sesión
             </button>
             <button
               onClick={onTestApp}

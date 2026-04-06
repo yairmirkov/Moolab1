@@ -399,6 +399,17 @@ const translations = {
     yourNickname: { en: "YOUR NICKNAME", es: "TU APODO" },
     sharkNamePlaceholder: { en: "What should we call you?", es: "¿Cómo te llamamos?" },
     startSwimming: { en: "START SWIMMING", es: "EMPEZAR A NADAR" },
+    signUpTitle: { en: "Create Account", es: "Crear Cuenta" },
+    signUpSubtitle: { en: "Choose how you want to get started", es: "Elige cómo quieres empezar" },
+    parentSignUp: { en: "Parent Sign Up", es: "Registro de Padres" },
+    parentSignUpDesc: { en: "Create your family account", es: "Crea tu cuenta familiar" },
+    loginTitle: { en: "Welcome Back", es: "Bienvenido de Nuevo" },
+    loginSubtitle: { en: "Log in to your account", es: "Inicia sesión en tu cuenta" },
+    parentLogin: { en: "Parent Login", es: "Acceso de Padres" },
+    logIn: { en: "Log In", es: "Iniciar Sesión" },
+    noAccountYet: { en: "No account yet? Sign up free", es: "¿No tienes cuenta? Regístrate gratis" },
+    alreadyHaveAccount: { en: "Already have an account? Log in", es: "¿Ya tienes cuenta? Inicia sesión" },
+    comingSoon: { en: "Coming soon", es: "Próximamente" },
   },
 } as const;
 

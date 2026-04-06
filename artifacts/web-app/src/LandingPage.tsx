@@ -315,7 +315,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
               onClick={onParentLogin}
               className="px-4 py-2 rounded-full border border-sky-200 text-[#145374] font-bold text-xs sm:text-sm tracking-wide hover:bg-sky-50 active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              Parent Login
+              Log In
             </button>
             <button
               onClick={onTestApp}
