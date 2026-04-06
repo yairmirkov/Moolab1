@@ -387,6 +387,18 @@ const translations = {
     mute: { en: "Mute", es: "Silenciar" },
     unmute: { en: "Unmute", es: "Activar sonido" },
     switchLang: { en: "Switch to Spanish", es: "Cambiar a Inglés" },
+    chooseWho: { en: "Who are you?", es: "¿Quién eres?" },
+    chooseSubtitle: { en: "Pick your path to start learning", es: "Elige tu camino para empezar a aprender" },
+    imAShark: { en: "I'm a Shark", es: "Soy un Tiburón" },
+    sharkDesc: { en: "Jump straight into learning", es: "Empieza a aprender de una vez" },
+    imAParent: { en: "I'm a Parent", es: "Soy Padre/Madre" },
+    parentDesc: { en: "Set up & manage your family", es: "Configura y gestiona tu familia" },
+    returningShark: { en: "Returning Shark? Enter your PIN", es: "¿Tiburón de regreso? Ingresa tu PIN" },
+    sharkSetup: { en: "Let's set you up", es: "Vamos a configurarte" },
+    sharkSetupDesc: { en: "Tell us a bit about yourself so we can pick the right level", es: "Cuéntanos un poco sobre ti para elegir el nivel correcto" },
+    yourNickname: { en: "YOUR NICKNAME", es: "TU APODO" },
+    sharkNamePlaceholder: { en: "What should we call you?", es: "¿Cómo te llamamos?" },
+    startSwimming: { en: "START SWIMMING", es: "EMPEZAR A NADAR" },
   },
 } as const;
 

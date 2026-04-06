@@ -961,76 +961,91 @@ function App() {
                 filter: "drop-shadow(0 0 25px rgba(46,139,192,0.3))",
               }}
             />
-            <p style={{
-              color: "rgba(12,45,72,0.35)", fontWeight: 800, letterSpacing: "0.2em", fontSize: "0.65rem",
-              marginBottom: 6, textTransform: "uppercase",
-              animation: "splashPulse 3s ease-in-out infinite",
-            }}>{t.onboard.tagline[lang]}</p>
-            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.75rem", fontWeight: 600, maxWidth: 280, textAlign: "center", lineHeight: 1.5, marginBottom: 36 }}>
-              {t.onboard.subtitle[lang]}
+            <h2 style={{ fontSize: "1.6rem", fontWeight: 900, margin: "0 0 4px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
+              {t.auth.chooseWho[lang]}
+            </h2>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.75rem", fontWeight: 600, marginBottom: 32 }}>
+              {t.auth.chooseSubtitle[lang]}
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 340, marginBottom: 24 }}>
               <button
                 className="ws-btn"
                 onClick={() => {
-                  setAccountType("parent");
-                  saveStr("acctType", "parent");
-                  setOnboardStep(1);
+                  setAccountType("learner");
+                  saveStr("acctType", "learner");
+                  setOnboardStep(5);
                 }}
                 style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                  width: "100%", padding: "16px 24px", borderRadius: 16,
-                  background: "#000", border: "none", color: "#fff",
-                  fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  display: "flex", alignItems: "center", gap: 16,
+                  width: "100%", padding: "22px 24px", borderRadius: 20,
+                  background: "linear-gradient(135deg, #0c2d48, #145374)",
+                  border: "none", color: "#fff", textAlign: "left",
+                  fontFamily: FONT, cursor: "pointer",
+                  boxShadow: "0 8px 30px rgba(12,45,72,0.25)",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
                 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-                {t.auth.continueApple[lang]}
+                <span style={{ fontSize: "2.2rem", flexShrink: 0 }}>🦈</span>
+                <div>
+                  <div style={{ fontWeight: 900, fontSize: "1.1rem", letterSpacing: "-0.01em", marginBottom: 2 }}>
+                    {t.auth.imAShark[lang]}
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: "0.7rem", opacity: 0.7 }}>
+                    {t.auth.sharkDesc[lang]}
+                  </div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white" style={{ marginLeft: "auto", flexShrink: 0, opacity: 0.5 }}>
+                  <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+                </svg>
               </button>
-              <button
-                className="ws-btn"
-                onClick={() => {
-                  setAccountType("parent");
-                  saveStr("acctType", "parent");
-                  setOnboardStep(1);
-                }}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                  width: "100%", padding: "16px 24px", borderRadius: 16,
-                  background: "#fff", border: "1px solid rgba(12,45,72,0.12)", color: "#0c2d48",
-                  fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                {t.auth.continueGoogle[lang]}
-              </button>
-            </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", maxWidth: 340, margin: "8px 0" }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(12,45,72,0.08)" }} />
-              <span style={{ color: "rgba(12,45,72,0.25)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em" }}>
-                {t.auth.or[lang]}
-              </span>
-              <div style={{ flex: 1, height: 1, background: "rgba(12,45,72,0.08)" }} />
+              <button
+                className="ws-btn"
+                onClick={() => {
+                  setAccountType("parent");
+                  saveStr("acctType", "parent");
+                  setOnboardStep(1);
+                }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 16,
+                  width: "100%", padding: "22px 24px", borderRadius: 20,
+                  background: "#fff", border: "2px solid rgba(12,45,72,0.1)",
+                  color: "#0c2d48", textAlign: "left",
+                  fontFamily: FONT, cursor: "pointer",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                }}
+              >
+                <span style={{ fontSize: "2.2rem", flexShrink: 0 }}>👨‍👩‍👧</span>
+                <div>
+                  <div style={{ fontWeight: 900, fontSize: "1.1rem", letterSpacing: "-0.01em", marginBottom: 2, color: "#0c2d48" }}>
+                    {t.auth.imAParent[lang]}
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: "0.7rem", color: "rgba(12,45,72,0.45)" }}>
+                    {t.auth.parentDesc[lang]}
+                  </div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(12,45,72,0.3)" style={{ marginLeft: "auto", flexShrink: 0 }}>
+                  <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+                </svg>
+              </button>
             </div>
 
             <button
               className="ws-btn"
               onClick={() => setOnboardStep(3)}
               style={{
-                width: "100%", maxWidth: 340, padding: "14px 24px", borderRadius: 16, marginTop: 8,
-                background: "rgba(46,139,192,0.06)", border: "1px solid rgba(46,139,192,0.15)",
-                color: "#145374", fontFamily: FONT, fontWeight: 800, fontSize: "0.85rem",
-                cursor: "pointer",
+                background: "none", border: "none", color: "rgba(12,45,72,0.35)",
+                fontFamily: FONT, fontWeight: 700, fontSize: "0.7rem",
+                cursor: "pointer", padding: "8px 0",
+                textDecoration: "underline", textUnderlineOffset: 3,
               }}
             >
-              🎓 {t.auth.studentPinAccess[lang]}
+              {t.auth.returningShark[lang]}
             </button>
 
-            <p style={{ color: "rgba(12,45,72,0.2)", fontSize: "0.6rem", fontWeight: 600, marginTop: 14 }}>
+            <p style={{ color: "rgba(12,45,72,0.2)", fontSize: "0.6rem", fontWeight: 600, marginTop: 10 }}>
               {t.onboard.freeTag[lang]}
             </p>
           </>
@@ -1132,6 +1147,130 @@ function App() {
               }}
             >
               {t.auth.enter[lang]}
+            </button>
+          </>
+        );
+      }
+
+      if (onboardStep === 5) {
+        const sharkReady = userName.trim() && birthYear;
+        return (
+          <>
+            <div style={{ fontSize: "2.8rem", marginBottom: 12 }}>🦈</div>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
+              {t.auth.sharkSetup[lang]}
+            </h2>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28, maxWidth: 300, textAlign: "center", lineHeight: 1.5 }}>
+              {t.auth.sharkSetupDesc[lang]}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {t.auth.yourNickname[lang]}
+                </label>
+                <input
+                  type="text"
+                  placeholder={t.auth.sharkNamePlaceholder[lang]}
+                  value={userName}
+                  onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {t.auth.birthYear[lang]}
+                </label>
+                <select
+                  value={birthYear}
+                  onChange={(e) => { setBirthYear(e.target.value); saveStr("birth", e.target.value); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: birthYear ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", boxSizing: "border-box", colorScheme: "light",
+                    appearance: "none", WebkitAppearance: "none",
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                >
+                  <option value="" disabled>{t.onboard.selectYear[lang]}</option>
+                  {Array.from({ length: 22 }, (_, i) => new Date().getFullYear() - 4 - i).map((yr) => (
+                    <option key={yr} value={String(yr)} style={{ background: "#fff", color: "#0c2d48" }}>{yr}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {t.onboard.countryLabel[lang]}
+                </label>
+                <select
+                  value={userCountry}
+                  onChange={(e) => { setUserCountry(e.target.value); saveStr("country", e.target.value); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: userCountry ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", boxSizing: "border-box", colorScheme: "light",
+                    appearance: "none", WebkitAppearance: "none",
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                >
+                  <option value="" disabled>{countryLoading ? t.onboard.detectingLocation[lang] : t.onboard.countryPlaceholder[lang]}</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c} style={{ background: "#fff", color: "#0c2d48" }}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {birthYear && (
+              <div style={{
+                marginBottom: 16, padding: "8px 16px", borderRadius: 12,
+                background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.2)",
+                animation: "ageBtn 0.3s ease-out both",
+              }}>
+                <span style={{ color: "#145374", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
+                  {(() => {
+                    const age = getAgeFromYear(birthYear);
+                    const group = getAgeGroup(age);
+                    if (group === "Kids") return t.onboard.trackKids[lang];
+                    if (group === "Teens") return t.onboard.trackTeens[lang];
+                    return t.onboard.trackAdults[lang];
+                  })()}
+                </span>
+              </div>
+            )}
+
+            <button
+              className="ws-btn"
+              onClick={() => startSession({ birthYear, accountType: "learner" })}
+              disabled={!sharkReady}
+              style={{
+                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                border: "none", fontFamily: FONT,
+                background: sharkReady
+                  ? "linear-gradient(135deg, #0c2d48, #145374)"
+                  : "rgba(12,45,72,0.08)",
+                color: sharkReady ? "#fff" : "rgba(12,45,72,0.25)",
+                fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
+                cursor: sharkReady ? "pointer" : "default",
+                boxShadow: sharkReady
+                  ? "0 0 40px rgba(12,45,72,0.3), 0 8px 24px rgba(0,0,0,0.12)"
+                  : "none",
+                transition: "all 0.3s ease",
+              }}
+            >
+              🦈 {t.auth.startSwimming[lang]}
             </button>
           </>
         );
