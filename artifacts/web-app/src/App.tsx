@@ -886,19 +886,25 @@ function App() {
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
                   {t.onboard.countryLabel[lang]}
                 </label>
-                <input
-                  type="text"
-                  placeholder={countryLoading ? t.onboard.detectingLocation[lang] : t.onboard.countryPlaceholder[lang]}
+                <select
                   value={userCountry}
                   onChange={(e) => { setUserCountry(e.target.value); saveStr("country", e.target.value); }}
                   style={{
                     width: "100%", padding: "14px 18px", borderRadius: 14,
                     background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
                     color: userCountry ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
+                    outline: "none", boxSizing: "border-box", colorScheme: "light",
+                    appearance: "none", WebkitAppearance: "none",
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                   }}
-                />
+                >
+                  <option value="" disabled>{countryLoading ? t.onboard.detectingLocation[lang] : t.onboard.countryPlaceholder[lang]}</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c} style={{ background: "#fff", color: "#0c2d48" }}>{c}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
