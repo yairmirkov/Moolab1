@@ -1,0 +1,48 @@
+SYSTEM ROLE: Lead Growth Marketer & React Developer.
+OBJECTIVE: Overhaul LandingPage.tsx using the StoryBrand framework. The messaging must focus on daily micro-learning (5-10 minutes a day), utilizing AI to build financial wisdom, and raising an "excellent financier." Remove all references to "simulator" or "Command Center".
+
+STEP 1: THE "MICRO-LEARNING" HERO SECTION
+
+Update the main headline to a high-contrast hook: "Raise a financial expert in just 5 minutes a day."
+
+Sub-headline: "Put AI to work for your family. A daily, bite-sized curriculum that makes your child fluent in modern financial terms, tactics, and the wisdom needed to build wealth."
+
+Change the primary CTA button text to: "Start Their Bulletproof Plan ⚡".
+
+Keep the "Moolab Radio" audio player directly below the CTA.
+
+STEP 2: THE "AUTHORITY" STRIP (SOCIAL PROOF)
+
+Directly below the Hero section, add a minimalist, low-opacity logo strip.
+
+Text above it: "The AI-driven curriculum redefining financial literacy."
+
+Include 4 placeholder text logos in a sleek, muted gray font: "Smart Habit", "NextGen Finance", "EdTech Daily", "Wealth Wisdom".
+
+STEP 3: THE "OLD WAY VS. NEW WAY" CONTRAST TABLE
+
+Build a sleek, two-column comparison section titled: "The Learning Paradigm Shift".
+
+Left Column (The Old Way - Red/Gray accents): Memorizing formulas, Piggy banks & allowances, Boring textbooks, "We'll teach them later."
+
+Right Column (The Moolab Way - Navy Blue/Gold accents): 5-10 minutes of daily AI learning, Real-world market terminology, Engaging audio & podcasts, Bulletproof financial habits.
+
+Add checkmarks to the right column and "X"s to the left.
+
+STEP 4: RETAIN THE ECOSYSTEM MOCKUPS
+
+Keep the CSS Device Mockups (Laptop, iPad, iPhone), but update the headline above them to: "One App. 5 Minutes a Day. A Lifetime of Financial Wisdom."
+
+Ensure the laptop mockup is referred to as the "Parent Growth Dashboard" instead of Command Center.
+
+STEP 5: THE URGENCY / FINAL CTA SECTION
+
+At the bottom of the page, create a dark Navy section.
+
+Headline: "Give them the financial foundation you wish you had."
+
+Add a sleek pricing anchor: "Cheaper than a tutor. More valuable than a degree."
+
+Final CTA Button: "Begin Their Financial Education".
+
+OUTPUT: Rewrite LandingPage.tsx to include this precise, education-focused psychological flow. Ensure animations are smooth and the typography reflects a premium learning platform.

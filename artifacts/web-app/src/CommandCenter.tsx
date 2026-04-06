@@ -1,4 +1,5 @@
 import { useState } from "react";
+import translations from "./translations";
 import type { Lang } from "./translations";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
@@ -60,8 +61,7 @@ const MOCK_RADAR = [
   { label: "Asset Management", value: 62 },
 ];
 
-const TABS_EN = ["Overview", "Lab Progress", "Family Users", "Billing"];
-const TABS_ES = ["Resumen", "Progreso del Lab", "Usuarios Familia", "Facturación"];
+const t = translations;
 
 function getAgeFromYear(y: string) {
   return new Date().getFullYear() - parseInt(y || "2010");
@@ -98,16 +98,16 @@ export default function CommandCenter({
   xp, level, streak, bossWins, userName, onLogout, onCreateStudent, onLangToggle,
 }: CommandCenterProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const tabs = lang === "es" ? TABS_ES : TABS_EN;
+  const tabs = [t.cc.tabOverview[lang], t.cc.tabLabProgress[lang], t.cc.tabFamilyUsers[lang], t.cc.tabBilling[lang]];
   const totalModulesComplete = modules.filter((mod, idx) => (moduleProgress[idx] || 0) >= mod.winsNeeded).length;
   const overallPct = modules.length > 0 ? Math.round((totalModulesComplete / modules.length) * 100) : 0;
   const students = familyState.students || [];
 
   const getMasteryLabel = () => {
-    if (level >= 10) return lang === "es" ? "Dominio de Apalancamiento Compuesto" : "Compound Leverage Mastery";
-    if (level >= 7) return lang === "es" ? "Comprender el Apalancamiento Compuesto" : "Understanding Compound Leverage";
-    if (level >= 4) return lang === "es" ? "Mecánicas del Mercado" : "Market Mechanics";
-    return lang === "es" ? "Fundamentos Financieros" : "Financial Foundations";
+    if (level >= 10) return t.cc.masteryCompoundLeverage[lang];
+    if (level >= 7) return t.cc.masteryUnderstanding[lang];
+    if (level >= 4) return t.cc.masteryMarket[lang];
+    return t.cc.masteryFoundations[lang];
   };
 
   const renderOverview = () => (
@@ -119,10 +119,10 @@ export default function CommandCenter({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", color: NAVY_TEXT_MUTED, marginBottom: 6, textTransform: "uppercase" }}>
-              {lang === "es" ? "RESUMEN DE COMPETENCIA FINANCIERA" : "FINANCIAL COMPETENCY SUMMARY"}
+              {t.cc.financialSummary[lang]}
             </div>
             <div style={{ fontSize: "1.3rem", fontWeight: 900, color: NAVY, letterSpacing: "-0.02em" }}>
-              {userName || (lang === "es" ? "Aprendiz" : "Learner")}
+              {userName || t.cc.learner[lang]}
             </div>
             <div style={{ fontSize: "0.72rem", fontWeight: 500, color: NAVY_TEXT_MUTED, marginTop: 2 }}>
               {modules[currentModuleIdx]?.name || "—"}
@@ -137,14 +137,14 @@ export default function CommandCenter({
               }}>{overallPct}%</div>
             </div>
             <div style={{ fontSize: "0.5rem", fontWeight: 700, color: NAVY_TEXT_MUTED, letterSpacing: "0.1em", marginTop: 4 }}>
-              {lang === "es" ? "PROGRESO" : "PROGRESS"}
+              {t.cc.progress[lang]}
             </div>
           </div>
         </div>
 
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <span style={{ fontSize: "0.65rem", fontWeight: 700, color: NAVY }}>{lang === "es" ? "Progreso del Módulo Actual" : "Current Module Progress"}</span>
+            <span style={{ fontSize: "0.65rem", fontWeight: 700, color: NAVY }}>{t.cc.currentModuleProgress[lang]}</span>
             <span style={{ fontSize: "0.6rem", fontWeight: 600, color: NAVY_TEXT_MUTED }}>
               {moduleProgress[currentModuleIdx] || 0}/{modules[currentModuleIdx]?.winsNeeded || 10}
             </span>
@@ -162,18 +162,18 @@ export default function CommandCenter({
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
           {[
             {
-              label: lang === "es" ? "Racha Activa" : "Active Streak",
-              value: `${streak} ${lang === "es" ? "Días" : "Days"}`,
-              sub: lang === "es" ? "de Enfoque al Mercado" : "of Market Focus",
+              label: t.cc.activeStreak[lang],
+              value: `${streak} ${t.cc.days[lang]}`,
+              sub: t.cc.marketFocus[lang],
             },
             {
               label: "M-XP",
               value: `${xp.toLocaleString()} XP`,
-              sub: lang === "es" ? "Experiencia Acumulada" : "Earned Experience",
+              sub: t.cc.earnedXp[lang],
             },
             {
-              label: lang === "es" ? "Nivel de Dominio" : "Mastery Level",
-              value: `${lang === "es" ? "Nivel" : "Level"} ${level}`,
+              label: t.cc.masteryLevel[lang],
+              value: `${t.cc.levelWord[lang]} ${level}`,
               sub: getMasteryLabel(),
             },
           ].map((metric) => (
@@ -200,7 +200,7 @@ export default function CommandCenter({
         border: `1px solid ${NAVY_BORDER}`, boxShadow: "0 1px 3px rgba(0,31,91,0.04)",
       }}>
         <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", color: NAVY_TEXT_MUTED, marginBottom: 16, textTransform: "uppercase" }}>
-          {lang === "es" ? "PROGRESO DE MÓDULOS" : "MODULE PROGRESS"}
+          {t.cc.moduleProgress[lang]}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           {modules.map((mod, idx) => {
@@ -225,7 +225,7 @@ export default function CommandCenter({
                       background: done ? NAVY : isActive ? "rgba(0,61,153,0.08)" : "transparent",
                       color: done ? "#fff" : isActive ? NAVY_LIGHT : NAVY_TEXT_MUTED,
                     }}>
-                      {done ? (lang === "es" ? "COMPLETO" : "COMPLETE") : isActive ? (lang === "es" ? "ACTIVO" : "ACTIVE") : `${wins}/${mod.winsNeeded}`}
+                      {done ? (t.cc.complete[lang]) : isActive ? (t.cc.active[lang]) : `${wins}/${mod.winsNeeded}`}
                     </span>
                   </div>
                   <div style={{ width: "100%", height: 4, borderRadius: 2, background: NAVY_SUBTLE }}>
@@ -251,7 +251,7 @@ export default function CommandCenter({
         border: `1px solid ${NAVY_BORDER}`, boxShadow: "0 1px 3px rgba(0,31,91,0.04)",
       }}>
         <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", color: NAVY_TEXT_MUTED, marginBottom: 18, textTransform: "uppercase" }}>
-          {lang === "es" ? "RESULTADOS RECIENTES DE QUIZZES" : "RECENT QUIZ RESULTS"}
+          {t.cc.recentQuizResults[lang]}
         </div>
 
         <div style={{
@@ -260,9 +260,9 @@ export default function CommandCenter({
           gap: 8,
         }}>
           {[
-            lang === "es" ? "Fecha" : "Date",
-            lang === "es" ? "Materia" : "Subject",
-            lang === "es" ? "Puntaje" : "Score",
+            t.cc.date[lang],
+            t.cc.subject[lang],
+            t.cc.score[lang],
             "Status",
           ].map((h) => (
             <div key={h} style={{ fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.12em", color: NAVY_TEXT_MUTED, textTransform: "uppercase" }}>
@@ -288,8 +288,8 @@ export default function CommandCenter({
                 color: row.status === "shark" ? "#fff" : "#c0392b",
               }}>
                 {row.status === "shark"
-                  ? (lang === "es" ? "NIVEL TIBURÓN" : "SHARK LEVEL")
-                  : (lang === "es" ? "REVISAR" : "NEEDS REVIEW")}
+                  ? (t.cc.sharkLevel[lang])
+                  : (t.cc.needsReview[lang])}
               </span>
             </div>
           </div>
@@ -301,7 +301,7 @@ export default function CommandCenter({
         border: `1px solid ${NAVY_BORDER}`, boxShadow: "0 1px 3px rgba(0,31,91,0.04)",
       }}>
         <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", color: NAVY_TEXT_MUTED, marginBottom: 20, textTransform: "uppercase" }}>
-          {lang === "es" ? "DESGLOSE DE COMPETENCIAS" : "COMPETENCY BREAKDOWN"}
+          {t.cc.competencyBreakdown[lang]}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
           {MOCK_RADAR.map((cat) => (
@@ -314,11 +314,9 @@ export default function CommandCenter({
                 }}>{cat.value}%</div>
               </div>
               <div style={{ fontSize: "0.6rem", fontWeight: 700, color: NAVY, lineHeight: 1.3 }}>
-                {lang === "es"
-                  ? cat.label === "Risk Appetite" ? "Apetito de Riesgo"
-                    : cat.label === "Market Mechanics" ? "Mecánicas del Mercado"
-                    : "Gestión de Activos"
-                  : cat.label}
+                {cat.label === "Risk Appetite" ? t.cc.riskAppetite[lang]
+                  : cat.label === "Market Mechanics" ? t.cc.marketMechanics[lang]
+                  : t.cc.assetManagement[lang]}
               </div>
             </div>
           ))}
@@ -336,10 +334,10 @@ export default function CommandCenter({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", color: NAVY_TEXT_MUTED, marginBottom: 4, textTransform: "uppercase" }}>
-              {lang === "es" ? "SUB-CUENTAS" : "SUB-ACCOUNTS"}
+              {t.cc.subAccounts[lang]}
             </div>
             <div style={{ fontSize: "0.75rem", fontWeight: 500, color: NAVY_TEXT_MUTED }}>
-              {students.length} {lang === "es" ? "estudiante(s) registrado(s)" : "student(s) registered"}
+              {students.length} {t.cc.studentsRegistered[lang]}
             </div>
           </div>
         </div>
@@ -350,10 +348,10 @@ export default function CommandCenter({
             border: `2px dashed ${NAVY_BORDER}`, borderRadius: 12,
           }}>
             <div style={{ fontSize: "0.8rem", fontWeight: 600, color: NAVY_TEXT_MUTED, marginBottom: 4 }}>
-              {lang === "es" ? "No hay estudiantes aún" : "No students yet"}
+              {t.cc.noStudentsYet[lang]}
             </div>
             <div style={{ fontSize: "0.65rem", fontWeight: 500, color: NAVY_TEXT_MUTED }}>
-              {lang === "es" ? "Crea una cuenta para comenzar" : "Create an account to get started"}
+              {t.cc.createAccountToStart[lang]}
             </div>
           </div>
         ) : (
@@ -384,7 +382,7 @@ export default function CommandCenter({
                     background: NAVY_SUBTLE, textAlign: "center",
                   }}>
                     <div style={{ fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.15em", color: NAVY_TEXT_MUTED, marginBottom: 2 }}>
-                      {lang === "es" ? "PIN LAB" : "LAB PIN"}
+                      {t.cc.labPin[lang]}
                     </div>
                     <div style={{ fontSize: "1rem", fontWeight: 900, color: NAVY, letterSpacing: "0.15em", fontFamily: "monospace" }}>
                       {student.pin}
@@ -410,7 +408,7 @@ export default function CommandCenter({
         onMouseEnter={(e) => { (e.target as HTMLButtonElement).style.background = NAVY_LIGHT; }}
         onMouseLeave={(e) => { (e.target as HTMLButtonElement).style.background = NAVY; }}
       >
-        {lang === "es" ? "CREAR NUEVA CUENTA DE ESTUDIANTE" : "PROVISION NEW STUDENT ACCOUNT"}
+        {t.cc.provisionStudent[lang]}
       </button>
     </div>
   );
@@ -422,7 +420,7 @@ export default function CommandCenter({
         border: `1px solid ${NAVY_BORDER}`, boxShadow: "0 1px 3px rgba(0,31,91,0.04)",
       }}>
         <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", color: NAVY_TEXT_MUTED, marginBottom: 20, textTransform: "uppercase" }}>
-          {lang === "es" ? "PLAN ACTIVO" : "ACTIVE PLAN"}
+          {t.cc.activePlan[lang]}
         </div>
 
         <div style={{
@@ -433,22 +431,22 @@ export default function CommandCenter({
             <div>
               <div style={{ fontSize: "1.1rem", fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 4 }}>Moolab Apex Plan</div>
               <div style={{ fontSize: "0.65rem", fontWeight: 500, opacity: 0.6 }}>
-                {lang === "es" ? "Facturación mensual · Renueva el 1 de Mayo, 2026" : "Monthly billing · Renews May 1, 2026"}
+                {t.cc.billingMonthly[lang]}
               </div>
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>$19.99</div>
-              <div style={{ fontSize: "0.55rem", fontWeight: 500, opacity: 0.5 }}>/{lang === "es" ? "mes" : "mo"}</div>
+              <div style={{ fontSize: "0.55rem", fontWeight: 500, opacity: 0.5 }}>/{t.cc.perMonth[lang]}</div>
             </div>
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {[
-            { label: lang === "es" ? "Acceso completo al currículo" : "Full curriculum access", check: true },
-            { label: lang === "es" ? "Hasta 5 sub-cuentas" : "Up to 5 sub-accounts", check: true },
-            { label: lang === "es" ? "Perspectivas para padres en tiempo real" : "Real-time parent insights", check: true },
-            { label: lang === "es" ? "Narración por voz con IA" : "AI voice narration", check: true },
+            { label: t.cc.fullCurriculum[lang], check: true },
+            { label: t.cc.upTo5[lang], check: true },
+            { label: t.cc.realtimeInsights[lang], check: true },
+            { label: t.cc.aiVoice[lang], check: true },
           ].map((feature) => (
             <div key={feature.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{
@@ -467,7 +465,7 @@ export default function CommandCenter({
         border: `1px solid ${NAVY_BORDER}`, boxShadow: "0 1px 3px rgba(0,31,91,0.04)",
       }}>
         <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", color: NAVY_TEXT_MUTED, marginBottom: 16, textTransform: "uppercase" }}>
-          {lang === "es" ? "MÉTODO DE PAGO" : "PAYMENT METHOD"}
+          {t.cc.paymentMethod[lang]}
         </div>
         <div style={{
           display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
@@ -481,7 +479,7 @@ export default function CommandCenter({
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: "0.75rem", fontWeight: 700, color: NAVY }}>•••• •••• •••• 4242</div>
             <div style={{ fontSize: "0.55rem", fontWeight: 500, color: NAVY_TEXT_MUTED }}>
-              {lang === "es" ? "Expira 12/2028" : "Expires 12/2028"}
+              {t.cc.expires[lang]}
             </div>
           </div>
         </div>
@@ -493,7 +491,7 @@ export default function CommandCenter({
             color: NAVY, fontSize: "0.68rem", fontWeight: 700,
             cursor: "pointer", fontFamily: FONT,
           }}>
-            {lang === "es" ? "Actualizar Método" : "Update Payment Method"}
+            {t.cc.updatePayment[lang]}
           </button>
           <button style={{
             padding: "12px 16px", borderRadius: 10,
@@ -501,7 +499,7 @@ export default function CommandCenter({
             color: NAVY, fontSize: "0.68rem", fontWeight: 700,
             cursor: "pointer", fontFamily: FONT,
           }}>
-            {lang === "es" ? "Ver Facturas" : "View Invoices"}
+            {t.cc.viewInvoices[lang]}
           </button>
         </div>
       </div>
@@ -528,10 +526,10 @@ export default function CommandCenter({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <div>
             <div style={{ fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.18em", color: NAVY_TEXT_MUTED, marginBottom: 2, textTransform: "uppercase" }}>
-              {lang === "es" ? "CENTRO DE COMANDO" : "COMMAND CENTER"}
+              {t.cc.commandCenter[lang]}
             </div>
             <h1 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, color: NAVY, letterSpacing: "-0.02em" }}>
-              {lang === "es" ? "Bienvenido" : "Welcome"}, {parentName || (lang === "es" ? "Family Office" : "Family Office")}
+              {t.cc.welcome[lang]}, {parentName || (t.cc.familyOffice[lang])}
             </h1>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -557,7 +555,7 @@ export default function CommandCenter({
                 letterSpacing: "0.08em",
               }}
             >
-              {lang === "es" ? "CERRAR SESIÓN" : "SECURE LOGOUT"}
+              {t.cc.secureLogout[lang]}
             </button>
           </div>
         </div>
@@ -588,7 +586,7 @@ export default function CommandCenter({
 
       <div style={{ padding: "20px 24px 40px", textAlign: "center" }}>
         <div style={{ color: NAVY_TEXT_MUTED, fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.05em" }}>
-          Moolab · {lang === "es" ? "Panel de Padres" : "Parent Dashboard"} · {lang === "es" ? "Datos encriptados" : "Encrypted Data"}
+          Moolab · {t.cc.parentDashboard[lang]} · {t.cc.encryptedData[lang]}
         </div>
       </div>
     </div>
