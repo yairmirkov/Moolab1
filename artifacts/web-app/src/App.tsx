@@ -30,13 +30,20 @@ const shuffleOptions = (options: string[], correctIndex: number) => {
   return { options: shuffled, correctIndex: shuffled.indexOf(correctAnswer) };
 };
 
-const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en", country?: string) => {
+const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en", country?: string, batchSize: number = 10) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const personaKey = ageGroup === "Kids" ? "Kids" : ageGroup === "Teens" ? "Teens" : "Adults";
   const persona = translations.gemini.persona[personaKey][lang];
   const doctrine = translations.gemini.coreDoctrine[lang];
   const ageShark = translations.gemini.sharkByAge[personaKey][lang];
-  const suffix = translations.gemini.promptSuffix[lang];
+  const baseSuffix = translations.gemini.promptSuffix[lang];
+  const suffix = baseSuffix
+    .replace(/Generate 10 unique/i, `Generate exactly ${batchSize} unique`)
+    .replace(/Genera 10 lecciones/i, `Genera exactamente ${batchSize} lecciones`)
+    .replace(/Among the 10 lessons/gi, `Among the ${batchSize} lessons`)
+    .replace(/Entre las 10 lecciones/gi, `Entre las ${batchSize} lecciones`)
+    .replace(/among the 10 lessons/gi, `among the ${batchSize} lessons`)
+    .replace(/entre las 10 lecciones/gi, `entre las ${batchSize} lecciones`);
   const topicLine = topic ? (lang === "es" ? ` Todas las lecciones DEBEN enfocarse en el tema de: ${topic}.` : ` All lessons MUST focus on the topic of: ${topic}.`) : "";
   const countryLine = country ? (lang === "es"
     ? ` El usuario se encuentra en: ${country}. Debes usar una división de localización 30/70. El 70% de tus conceptos financieros, ejemplos y mecánicas de mercado deben ser Globales (Wall Street, Crypto, clases de activos amplias). El 30% de tus ejemplos DEBEN estar hiperlocalizados al país del usuario. Por ejemplo, si están en Estados Unidos, usa Bank of America o conceptos fiscales locales. Si están en República Dominicana, menciona específicamente instituciones locales como Banco Popular o BHD, y matices económicos locales. Haz que las referencias locales se sientan naturales y fluidas.`
@@ -45,7 +52,10 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
   const langLine = lang === "es"
     ? " IMPORTANTE: TODA tu respuesta DEBE estar completamente en ESPAÑOL. No mezcles idiomas."
     : " IMPORTANT: Your ENTIRE response MUST be in ENGLISH. Do not mix languages.";
-  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}`;
+  const batchLine = lang === "es"
+    ? ` GENERA EXACTAMENTE ${batchSize} lecciones en el array "lessons". Ni más, ni menos.`
+    : ` Generate EXACTLY ${batchSize} lessons in the "lessons" array. No more, no less.`;
+  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -772,7 +782,9 @@ function App() {
     radioSpeakingRef.current = false;
     setRadioLive(false);
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
-    generateCards(ageGroup, mod?.topic, langRef.current, loadStr("country", "")).then((data) => {
+    const topic = mod?.topic;
+    const country = loadStr("country", "");
+    generateCards(ageGroup, topic, langRef.current, country, 3).then((data) => {
       if (data) {
         data.lessons = data.lessons.map((l) => ({
           ...l,
@@ -781,6 +793,19 @@ function App() {
         setCurrentData(data);
       }
       setLoading(false);
+      isFetchingRef.current = true;
+      setIsFetchingMore(true);
+      generateCards(ageGroup, topic, langRef.current, country, 4).then((bgData) => {
+        if (bgData) {
+          const bgLessons = bgData.lessons.map((l: any) => ({
+            ...l,
+            id: Math.random().toString(36).substr(2, 9),
+          }));
+          setCurrentData((prev: any) => prev ? ({ ...prev, lessons: [...prev.lessons, ...bgLessons] }) : prev);
+        }
+        setIsFetchingMore(false);
+        isFetchingRef.current = false;
+      });
     });
   }, [ageGroup, currentModuleIdx]);
 
@@ -859,16 +884,16 @@ function App() {
     const totalSlides = currentData.lessons?.length || 0;
     const slidesFromEnd = totalSlides - currentSlideIdx;
 
-    if (slidesFromEnd <= 3 && !isFetchingRef.current) {
+    if (slidesFromEnd <= 2 && !isFetchingRef.current) {
       isFetchingRef.current = true;
       setIsFetchingMore(true);
-      const newData = await generateCards(ageGroup, currentModule?.topic, langRef.current, loadStr("country", ""));
+      const newData = await generateCards(ageGroup, currentModule?.topic, langRef.current, loadStr("country", ""), 4);
       if (newData) {
-        const nl = newData.lessons.slice(0, 5).map((l) => ({
+        const nl = newData.lessons.map((l: any) => ({
           ...l,
           id: Math.random().toString(36).substr(2, 9),
         }));
-        setCurrentData((p) => ({ ...p, lessons: [...p.lessons, ...nl] }));
+        setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
       }
       setIsFetchingMore(false);
       isFetchingRef.current = false;
@@ -1877,6 +1902,7 @@ function App() {
           @keyframes orbDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-40px) scale(1.15)} }
           @keyframes orbDrift2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-25px,30px) scale(0.9)} }
           @keyframes ageBtn { from{transform:translateY(18px);opacity:0} to{transform:translateY(0);opacity:1} }
+          @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
           @keyframes stepSlide { from{transform:translateX(30px);opacity:0} to{transform:translateX(0);opacity:1} }
           .ws-btn { transition: transform 0.12s cubic-bezier(0.25,0.46,0.45,0.94) !important; }
           .ws-btn:active { transform: scale(0.96) !important; }
@@ -2655,6 +2681,25 @@ function App() {
             </div>
           );
         })}
+        {isFetchingMore && (
+          <div style={{
+            display: "flex", justifyContent: "center", alignItems: "center",
+            padding: "16px 0", gap: 8,
+          }}>
+            <div style={{
+              width: 14, height: 14, borderRadius: "50%",
+              border: "2px solid rgba(46,139,192,0.2)",
+              borderTopColor: "#2e8bc0",
+              animation: "spin 0.8s linear infinite",
+            }} />
+            <span style={{
+              color: "rgba(255,255,255,0.3)", fontSize: "0.55rem",
+              fontWeight: 700, letterSpacing: "0.1em", fontFamily: FONT,
+            }}>
+              {lang === "en" ? "LOADING MORE..." : "CARGANDO MÁS..."}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* THE DASHBOARD */}
