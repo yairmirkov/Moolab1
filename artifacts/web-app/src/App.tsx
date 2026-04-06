@@ -2412,50 +2412,34 @@ function App() {
                   animation: "fadeIn 0.5s ease-out both",
                 }}
               >
-                <div
+                <h1
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    marginBottom: 12,
+                    color: "#fff",
+                    fontSize: "1.8rem",
+                    fontWeight: 900,
+                    margin: 0,
+                    marginBottom: 14,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1.15,
+                    textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)",
+                    textAlign: "center",
                   }}
                 >
-                  <img
-                    src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(card.title)}`}
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: "50%",
-                      background: "transparent",
-                      border: "2px solid rgba(46,139,192,0.4)",
-                      boxShadow: "0 0 15px rgba(46,139,192,0.15)",
-                    }}
-                  />
-                  <h1
-                    style={{
-                      color: "#fff",
-                      fontSize: "1.8rem",
-                      fontWeight: 900,
-                      margin: 0,
-                      letterSpacing: "-0.03em",
-                      lineHeight: 1.1,
-                      textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)",
-                    }}
-                  >
-                    {card.title}
-                  </h1>
-                </div>
+                  {card.title}
+                </h1>
                 <p
                   style={{
-                    color: "rgba(255,255,255,0.95)",
-                    marginBottom: 20,
-                    fontSize: "1rem",
-                    lineHeight: 1.5,
-                    fontWeight: 600,
+                    color: "rgba(255,255,255,0.9)",
+                    marginBottom: 22,
+                    fontSize: "0.95rem",
+                    lineHeight: 1.55,
+                    fontWeight: 500,
                     textShadow: "0 1px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.6)",
-                    background: "rgba(0,0,0,0.35)",
-                    padding: "10px 14px",
+                    background: "rgba(0,0,0,0.3)",
+                    padding: "12px 16px",
                     borderRadius: 14,
+                    textAlign: "center",
+                    letterSpacing: "0.01em",
                   }}
                 >
                   {card.desc}
