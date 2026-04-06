@@ -28,7 +28,7 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
     -   **Gamification**: XP, streak, level, and boss win tracking persisted via `localStorage`. SVG progress rings for profile dashboard.
     -   **Visuals**: Video backgrounds from Pexels, glassmorphism effects for cards, animated blob shapes, and per-slide color accents.
     -   **Two-Part Slides**: Mini-game cards render in two phases: context setup and action question.
-    -   **Multimedia**: Dual-track audio (study beats + speech synthesis), ElevenLabs TTS integration for explanations and radio shows, and dynamically generated avatars.
+    -   **Multimedia**: ElevenLabs TTS integration for explanations, radio shows, and podcast dialogue (no background music). Landing page intro MP3s are kept (`/moolab-intro.mp3`, `/moolab-intro-es.mp3`). Dynamically generated avatars.
 -   **Gamified Learning**:
     -   **Charismatic Tutor Intervention**: AI-generated explanations for incorrect answers, presented in a non-punitive manner with speech synthesis.
     -   **Module System**: Content is organized into 12 modules, advancing every 3 boss wins.
@@ -60,6 +60,7 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
 
 ## Podcast Clip Slides
 - **AI Schema**: Gemini prompt instructs AI to occasionally generate 1 `podcast_clip` card per batch with `type: "podcast_clip"`, `title`, and `dialogue` array of `{speaker, text}` objects (Host/Expert or Presentador/Experto).
-- **PodcastClipSlide Component**: Cinematic fullscreen dark slide with blurred video BG, radial gradient overlay, "MOOLAB PODCAST" branding, animated 24-bar mini-visualizer, and chat-bubble-style dialogue transcript.
-- **Dialogue Animation**: `IntersectionObserver` (threshold 0.6) triggers sequential reveal — each dialogue line appears every 1.4s. Host lines align left (neon cyan), Expert lines align right (light blue).
-- **Swipe Indicator**: Pulsing "Swipe to continue" appears after all lines revealed.
+- **PodcastClipSlide Component**: Cinematic fullscreen dark slide with blurred video BG, radial gradient overlay, "MOOLAB PODCAST" branding with LIVE indicator during TTS, animated 24-bar mini-visualizer (neon cyan when speaking), and chat-bubble-style dialogue transcript.
+- **Dialogue Animation**: `IntersectionObserver` (threshold 0.6) triggers sequential reveal — each dialogue line appears every 1.4s with TTS narration. Host lines align left (neon cyan `#00ffd5`), Expert lines align right (light blue `#6cb4ee`). Active speaking line gets glow border and brighter text.
+- **Audio Stop on Scroll-Away**: Both `RadioHighlightSlide` and `PodcastClipSlide` use `IntersectionObserver` exit detection to stop ElevenLabs/browser TTS when user scrolls away.
+- **Swipe Indicator**: Pulsing "Swipe to continue" appears after all lines revealed and speaking is done.

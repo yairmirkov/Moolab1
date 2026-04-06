@@ -196,13 +196,6 @@ const COUNTRIES = [
   "Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe",
 ];
 
-const studyBeats = [
-  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
-];
-
-
 const load = (k, d) => {
   const v = localStorage.getItem(`ws_${k}`);
   return v ? parseInt(v, 10) : d;
@@ -270,11 +263,10 @@ const RADIO_VIZ_BARS = Array.from({ length: 48 }, (_, i) => ({
 }));
 
 function RadioHighlightSlide({
-  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, musicRef, feedRef, slideIndex, played, onPlayed, fallbackBrowserSpeak,
+  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, played, onPlayed, fallbackBrowserSpeak,
 }: {
   card: any; videoSrc: string; bgGradient: string; lang: Lang;
   isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
-  musicRef: React.MutableRefObject<HTMLAudioElement | null>;
   feedRef: React.MutableRefObject<HTMLDivElement | null>;
   slideIndex: number; played: boolean; onPlayed: () => void;
   fallbackBrowserSpeak: (text: string, onDone: () => void) => void;
@@ -310,12 +302,10 @@ function RadioHighlightSlide({
             return;
           }
           if (mountedRef.current) setSpeaking(true);
-          if (musicRef.current) musicRef.current.volume = 0.03;
           const finish = () => {
             if (!mountedRef.current) return;
             setSpeaking(false);
             setDone(true);
-            if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
             timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 2000);
           };
           if (isElevenLabsAvailable()) {
@@ -333,8 +323,14 @@ function RadioHighlightSlide({
             fallbackBrowserSpeak(card.audioText, finish);
           }
         }
+        if (entry && !entry.isIntersecting && triggeredRef.current) {
+          stopElevenLabsAudio();
+          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+          if (mountedRef.current) { setSpeaking(false); setDone(true); }
+          if (timerRef.current) clearTimeout(timerRef.current);
+        }
       },
-      { threshold: 0.6 },
+      { threshold: [0.6, 0] },
     );
     if (slideRef.current) observer.observe(slideRef.current);
     return () => observer.disconnect();
@@ -441,35 +437,82 @@ function RadioHighlightSlide({
 }
 
 function PodcastClipSlide({
-  card, videoSrc, bgGradient, lang,
+  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, fallbackBrowserSpeak,
 }: {
   card: any; videoSrc: string; bgGradient: string; lang: Lang;
+  isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
+  fallbackBrowserSpeak: (text: string, onDone: () => void) => void;
 }) {
   const [visibleLines, setVisibleLines] = useState(0);
+  const [speakingIdx, setSpeakingIdx] = useState(-1);
   const slideRef = useRef<HTMLDivElement>(null);
   const triggeredRef = useRef(false);
+  const mountedRef = useRef(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dialogue: { speaker: string; text: string }[] = card.dialogue || [];
 
   useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      stopElevenLabsAudio();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (triggeredRef.current) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting && entries[0].intersectionRatio > 0.6 && !triggeredRef.current) {
+        const entry = entries[0];
+        if (entry?.isIntersecting && entry.intersectionRatio > 0.6 && !triggeredRef.current) {
           triggeredRef.current = true;
           let line = 0;
-          const iv = setInterval(() => {
+
+          const speakLine = (idx: number) => {
+            if (!mountedRef.current || idx >= dialogue.length) return;
+            if (isMutedRef.current || speechSpeedRef.current === 0) return;
+            if (!mountedRef.current) return;
+            setSpeakingIdx(idx);
+            const text = dialogue[idx].text;
+            const onDone = () => {
+              if (!mountedRef.current) return;
+              setSpeakingIdx(-1);
+            };
+            if (isElevenLabsAvailable()) {
+              speakWithElevenLabs(text, lang, {
+                speed: speechSpeedRef.current,
+                onEnd: onDone,
+                onError: () => { if (mountedRef.current) fallbackBrowserSpeak(text, onDone); },
+              }).then(ok => { if (!ok && mountedRef.current) fallbackBrowserSpeak(text, onDone); });
+            } else {
+              fallbackBrowserSpeak(text, onDone);
+            }
+          };
+
+          intervalRef.current = setInterval(() => {
+            if (!mountedRef.current) { if (intervalRef.current) clearInterval(intervalRef.current); return; }
             line++;
             setVisibleLines(line);
-            if (line >= dialogue.length) clearInterval(iv);
+            speakLine(line - 1);
+            if (line >= dialogue.length) { if (intervalRef.current) clearInterval(intervalRef.current); }
           }, 1400);
         }
+        if (entry && !entry.isIntersecting && triggeredRef.current) {
+          stopElevenLabsAudio();
+          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+          setSpeakingIdx(-1);
+        }
       },
-      { threshold: 0.6 },
+      { threshold: [0.6, 0] },
     );
     if (slideRef.current) observer.observe(slideRef.current);
     return () => observer.disconnect();
   }, [dialogue.length]);
 
   const allRevealed = visibleLines >= dialogue.length;
+  const isSpeaking = speakingIdx >= 0;
 
   return (
     <div
@@ -512,11 +555,24 @@ function PodcastClipSlide({
             fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.25em",
             color: "#2e8bc0", textTransform: "uppercase",
           }}>MOOLAB PODCAST</span>
+          {isSpeaking && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              padding: "2px 8px", borderRadius: 20,
+              background: "rgba(46,139,192,0.15)", marginLeft: 4,
+            }}>
+              <span style={{
+                width: 6, height: 6, borderRadius: "50%", background: "#00ffd5",
+                animation: "contextPulse 1s ease-in-out infinite",
+              }} />
+              <span style={{ fontSize: "0.55rem", fontWeight: 800, color: "#00ffd5", letterSpacing: "0.15em" }}>LIVE</span>
+            </span>
+          )}
         </div>
 
         <h3 style={{
           fontSize: "1.3rem", fontWeight: 900, color: "#fff", letterSpacing: "-0.02em",
-          marginBottom: 32, textAlign: "center",
+          marginBottom: 28, textAlign: "center",
           animation: "radioTextFade 0.8s ease-out both",
         }}>
           {card.title || "Shark Talk"}
@@ -524,7 +580,7 @@ function PodcastClipSlide({
 
         <div style={{
           display: "flex", alignItems: "end", justifyContent: "center", gap: 2,
-          height: 40, width: "60%", maxWidth: 240, marginBottom: 32,
+          height: 40, width: "60%", maxWidth: 240, marginBottom: 28,
           padding: "0 8px",
         }}>
           {Array.from({ length: 24 }, (_, i) => (
@@ -533,10 +589,12 @@ function PodcastClipSlide({
               style={{
                 flex: 1, borderRadius: 1,
                 height: `${20 + Math.random() * 80}%`,
-                background: visibleLines > 0
-                  ? `linear-gradient(to top, rgba(46,139,192,0.6), rgba(177,212,224,0.4))`
-                  : "rgba(46,139,192,0.1)",
-                animation: visibleLines > 0 && !allRevealed
+                background: isSpeaking
+                  ? `linear-gradient(to top, rgba(0,255,213,0.6), rgba(46,139,192,0.5))`
+                  : visibleLines > 0
+                    ? "rgba(46,139,192,0.2)"
+                    : "rgba(46,139,192,0.06)",
+                animation: isSpeaking
                   ? `vizBar ${0.3 + Math.random() * 0.5}s ease-in-out ${Math.random() * 0.3}s infinite`
                   : "none",
                 transition: "background 0.5s ease",
@@ -547,11 +605,14 @@ function PodcastClipSlide({
         </div>
 
         <div style={{
-          display: "flex", flexDirection: "column", gap: 16,
+          display: "flex", flexDirection: "column", gap: 14,
           width: "100%", maxWidth: 380,
+          overflowY: "auto", maxHeight: "55dvh",
+          scrollbarWidth: "none",
         }}>
           {dialogue.slice(0, visibleLines).map((line, idx) => {
             const isHost = line.speaker.toLowerCase() === "host" || line.speaker.toLowerCase() === "presentador";
+            const isActive = idx === speakingIdx;
             return (
               <div
                 key={idx}
@@ -564,23 +625,29 @@ function PodcastClipSlide({
                 <span style={{
                   fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.15em",
                   textTransform: "uppercase",
-                  color: isHost ? "#2e8bc0" : "#b1d4e0",
+                  color: isHost ? "#00ffd5" : "#6cb4ee",
                 }}>
                   {line.speaker}
                 </span>
                 <div style={{
-                  padding: "12px 16px", borderRadius: 16,
+                  padding: "14px 18px", borderRadius: 16,
                   background: isHost
-                    ? "rgba(46,139,192,0.12)"
-                    : "rgba(177,212,224,0.08)",
-                  border: `1px solid ${isHost ? "rgba(46,139,192,0.25)" : "rgba(177,212,224,0.15)"}`,
-                  maxWidth: "88%",
+                    ? isActive ? "rgba(0,255,213,0.12)" : "rgba(0,255,213,0.06)"
+                    : isActive ? "rgba(108,180,238,0.12)" : "rgba(108,180,238,0.05)",
+                  border: `1px solid ${isHost
+                    ? isActive ? "rgba(0,255,213,0.4)" : "rgba(0,255,213,0.15)"
+                    : isActive ? "rgba(108,180,238,0.4)" : "rgba(108,180,238,0.12)"}`,
+                  maxWidth: "90%",
                   borderTopLeftRadius: isHost ? 4 : 16,
                   borderTopRightRadius: isHost ? 16 : 4,
+                  boxShadow: isActive ? `0 0 20px ${isHost ? "rgba(0,255,213,0.15)" : "rgba(108,180,238,0.15)"}` : "none",
+                  transition: "all 0.3s ease",
                 }}>
                   <p style={{
-                    color: "#fff", fontSize: "0.85rem", fontWeight: 600,
-                    lineHeight: 1.5, margin: 0, fontFamily: FONT,
+                    color: isActive ? "#fff" : "rgba(255,255,255,0.85)",
+                    fontSize: "0.9rem", fontWeight: isActive ? 700 : 600,
+                    lineHeight: 1.55, margin: 0, fontFamily: FONT,
+                    textShadow: isActive ? "0 0 8px rgba(255,255,255,0.1)" : "none",
                   }}>
                     {line.text}
                   </p>
@@ -590,7 +657,7 @@ function PodcastClipSlide({
           })}
         </div>
 
-        {allRevealed && (
+        {allRevealed && !isSpeaking && (
           <div style={{
             position: "absolute", bottom: 80, left: 0, width: "100%",
             display: "flex", justifyContent: "center",
@@ -678,7 +745,6 @@ function App() {
       .finally(() => setCountryLoading(false));
   }, []);
 
-  const musicRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const isMutedRef = useRef(false);
   const [speechSpeed, setSpeechSpeed] = useState<number>(1);
@@ -772,12 +838,9 @@ function App() {
     radioSpeakingRef.current = true;
     setRadioLive(true);
 
-    if (musicRef.current) musicRef.current.volume = 0.05;
-
     const restoreAudio = () => {
       radioSpeakingRef.current = false;
       setRadioLive(false);
-      if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
     };
 
     if (isElevenLabsAvailable()) {
@@ -803,14 +866,6 @@ function App() {
     setAgeGroup(getAgeGroup(age));
     setAppStarted(true);
     if (effectiveAccountType === "parent") return;
-    const randomTrack =
-      studyBeats[Math.floor(Math.random() * studyBeats.length)];
-    if (!musicRef.current) {
-      musicRef.current = new Audio(randomTrack);
-      musicRef.current.loop = true;
-      musicRef.current.volume = 0.15;
-    }
-    musicRef.current.play().catch(() => {});
     if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
   };
 
@@ -876,22 +931,19 @@ function App() {
 
   const speakExplanation = async (text: string) => {
     if (isMutedRef.current || speechSpeedRef.current === 0) return;
-    if (musicRef.current) musicRef.current.volume = 0.05;
-    const restoreMusic = () => { if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15; };
-
+    const noop = () => {};
     if (isElevenLabsAvailable()) {
       stopElevenLabsAudio();
       const ok = await speakWithElevenLabs(text, langRef.current, {
         speed: speechSpeedRef.current,
-        onEnd: restoreMusic,
-        onError: restoreMusic,
+        onEnd: noop,
+        onError: noop,
       });
-      if (!ok) {
-        if (isMutedRef.current || speechSpeedRef.current === 0) { restoreMusic(); }
-        else { fallbackBrowserSpeak(text, restoreMusic); }
+      if (!ok && !isMutedRef.current && speechSpeedRef.current !== 0) {
+        fallbackBrowserSpeak(text, noop);
       }
     } else {
-      fallbackBrowserSpeak(text, restoreMusic);
+      fallbackBrowserSpeak(text, noop);
     }
   };
 
@@ -1977,10 +2029,6 @@ function App() {
               onClick={() => {
                 const newMuted = !isMuted;
                 isMutedRef.current = newMuted;
-                if (musicRef.current) {
-                  if (newMuted) { musicRef.current.volume = 0; musicRef.current.pause(); }
-                  else { musicRef.current.volume = 0.15; musicRef.current.play().catch(() => {}); }
-                }
                 if (newMuted) {
                   stopElevenLabsAudio();
                   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -2014,7 +2062,6 @@ function App() {
                 }
                 radioSpeakingRef.current = false;
                 setRadioLive(false);
-                if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
                 const speeds = [1, 1.5, 2, 0];
                 const currentIdx = speeds.indexOf(speechSpeed);
                 const nextSpeed = speeds[(currentIdx + 1) % speeds.length];
@@ -2279,7 +2326,6 @@ function App() {
                 lang={lang}
                 isMutedRef={isMutedRef}
                 speechSpeedRef={speechSpeedRef}
-                musicRef={musicRef}
                 feedRef={feedRef}
                 slideIndex={i}
                 played={!!radioPlayedSlides[card.id]}
@@ -2297,6 +2343,9 @@ function App() {
                 videoSrc={getVideoForCard(card.id)}
                 bgGradient={bgGradients[i % bgGradients.length]}
                 lang={lang}
+                isMutedRef={isMutedRef}
+                speechSpeedRef={speechSpeedRef}
+                fallbackBrowserSpeak={fallbackBrowserSpeak}
               />
             );
           }
