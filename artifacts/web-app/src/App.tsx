@@ -211,43 +211,6 @@ const saveStr = (k, v) => localStorage.setItem(`ws_${k}`, v);
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
-const VOICE_PROFILES = [
-  { gender: "male", namePatterns: /daniel|james|david|tom|google.*uk.*male|microsoft.*mark|male/i, pitch: 0.95, rateMultiplier: 1.0 },
-  { gender: "male", namePatterns: /aaron|alex|jorge|rishi|fred|google.*us.*male|microsoft.*david/i, pitch: 1.05, rateMultiplier: 0.95 },
-  { gender: "male", namePatterns: /thomas|oliver|lee|microsoft.*james|grandpa|junior/i, pitch: 0.9, rateMultiplier: 1.05 },
-  { gender: "female", namePatterns: /samantha|karen|victoria|kate|tessa|google.*us.*female|microsoft.*zira/i, pitch: 1.1, rateMultiplier: 1.0 },
-  { gender: "female", namePatterns: /moira|fiona|allison|susan|microsoft.*hazel|female/i, pitch: 1.15, rateMultiplier: 0.95 },
-];
-
-const pickRandomVoice = (lang: Lang = "en"): { voice: SpeechSynthesisVoice | null; pitch: number; rateMultiplier: number } => {
-  const voices = window.speechSynthesis.getVoices();
-  if (!voices.length) return { voice: null, pitch: 1.0, rateMultiplier: 1.0 };
-
-  if (lang === "es") {
-    const esVoices = voices.filter(v => /es/i.test(v.lang));
-    if (esVoices.length > 0) {
-      const pick = esVoices[Math.floor(Math.random() * esVoices.length)];
-      return { voice: pick, pitch: 1.0, rateMultiplier: 1.0 };
-    }
-    return { voice: null, pitch: 1.0, rateMultiplier: 1.0 };
-  }
-
-  const shuffledProfiles = [...VOICE_PROFILES].sort(() => Math.random() - 0.5);
-
-  for (const profile of shuffledProfiles) {
-    const match = voices.find(v => profile.namePatterns.test(v.name));
-    if (match) return { voice: match, pitch: profile.pitch, rateMultiplier: profile.rateMultiplier };
-  }
-
-  const enVoices = voices.filter(v => /en/i.test(v.lang));
-  if (enVoices.length > 0) {
-    const pick = enVoices[Math.floor(Math.random() * enVoices.length)];
-    const profile = shuffledProfiles[0];
-    return { voice: pick, pitch: profile.pitch, rateMultiplier: profile.rateMultiplier };
-  }
-
-  return { voice: null, pitch: 1.0, rateMultiplier: 1.0 };
-};
 
 const getAgeFromYear = (yearStr: string): number => {
   if (!yearStr) return 0;
@@ -289,7 +252,6 @@ function RadioHighlightSlide({
       mountedRef.current = false;
       if (timerRef.current) clearTimeout(timerRef.current);
       stopElevenLabsAudio();
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     };
   }, []);
 
@@ -330,7 +292,6 @@ function RadioHighlightSlide({
         }
         if (entry && !entry.isIntersecting && triggeredRef.current) {
           stopElevenLabsAudio();
-          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
           if (mountedRef.current) { setSpeaking(false); setDone(true); }
           if (timerRef.current) clearTimeout(timerRef.current);
         }
@@ -808,7 +769,6 @@ function App() {
     lastRadioSlideRef.current = -1;
     usedTipsRef.current.clear();
     stopElevenLabsAudio();
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     radioSpeakingRef.current = false;
     setRadioLive(false);
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
@@ -828,19 +788,9 @@ function App() {
     if (appStarted && ageGroup && accountType !== "parent") resetJourney();
   }, [appStarted, ageGroup, accountType, resetJourney]);
 
-  const fallbackBrowserSpeak = useCallback((text: string, onDone: () => void) => {
-    if (!('speechSynthesis' in window)) { setTimeout(onDone, 5000); return; }
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    const picked = pickRandomVoice(langRef.current);
-    utter.lang = langRef.current === "es" ? "es-MX" : "en-US";
-    utter.rate = 1.05 * speechSpeedRef.current * picked.rateMultiplier;
-    utter.pitch = picked.pitch;
-    utter.volume = 0.8;
-    if (picked.voice) utter.voice = picked.voice;
-    utter.onend = onDone;
-    utter.onerror = onDone;
-    window.speechSynthesis.speak(utter);
+  const fallbackBrowserSpeak = useCallback((_text: string, onDone: () => void) => {
+    console.error("[Moolab] ElevenLabs TTS unavailable, skipping speech");
+    onDone();
   }, []);
 
   const triggerRadioHost = useCallback(async (forceAgeGroup?: string) => {
@@ -885,7 +835,6 @@ function App() {
     setAgeGroup(getAgeGroup(age));
     setAppStarted(true);
     if (effectiveAccountType === "parent") return;
-    if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
   };
 
   const handleScroll = async (e: any) => {
@@ -1706,6 +1655,12 @@ function App() {
       userName={userName}
       onLogout={accountType === "parent" ? handleParentLogout : () => setShowParentDash(false)}
       onCreateStudent={() => { setAppStarted(false); setOnboardStep(4); }}
+      onLangToggle={() => {
+        const newLang = lang === "en" ? "es" : "en";
+        setLang(newLang as Lang);
+        langRef.current = newLang as Lang;
+        saveStr("lang", newLang);
+      }}
     />
   );
 
@@ -1908,7 +1863,6 @@ function App() {
                 isMutedRef.current = newMuted;
                 if (newMuted) {
                   stopElevenLabsAudio();
-                  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
                   radioSpeakingRef.current = false;
                   setRadioLive(false);
                 }
@@ -1934,9 +1888,6 @@ function App() {
               className="ws-btn"
               onClick={() => {
                 stopElevenLabsAudio();
-                if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
-                  window.speechSynthesis.cancel();
-                }
                 radioSpeakingRef.current = false;
                 setRadioLive(false);
                 const speeds = [1, 1.5, 2, 0];

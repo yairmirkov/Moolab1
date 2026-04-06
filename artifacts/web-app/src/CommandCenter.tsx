@@ -42,6 +42,7 @@ interface CommandCenterProps {
   userName: string;
   onLogout: () => void;
   onCreateStudent: () => void;
+  onLangToggle?: () => void;
 }
 
 const MOCK_QUIZ_RESULTS = [
@@ -94,7 +95,7 @@ function ProgressCircle({ value, size = 72, strokeWidth = 5, color = NAVY }: { v
 
 export default function CommandCenter({
   lang, parentName, familyState, modules, moduleProgress, currentModuleIdx,
-  xp, level, streak, bossWins, userName, onLogout, onCreateStudent,
+  xp, level, streak, bossWins, userName, onLogout, onCreateStudent, onLangToggle,
 }: CommandCenterProps) {
   const [activeTab, setActiveTab] = useState(0);
   const tabs = lang === "es" ? TABS_ES : TABS_EN;
@@ -533,17 +534,32 @@ export default function CommandCenter({
               {lang === "es" ? "Bienvenido" : "Welcome"}, {parentName || (lang === "es" ? "Family Office" : "Family Office")}
             </h1>
           </div>
-          <button
-            onClick={onLogout}
-            style={{
-              background: "#fff", border: `1px solid ${NAVY_BORDER}`,
-              borderRadius: 8, padding: "8px 16px", color: NAVY_TEXT_MUTED,
-              fontFamily: FONT, fontWeight: 700, fontSize: "0.6rem", cursor: "pointer",
-              letterSpacing: "0.08em",
-            }}
-          >
-            {lang === "es" ? "CERRAR SESIÓN" : "SECURE LOGOUT"}
-          </button>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {onLangToggle && (
+              <button
+                onClick={onLangToggle}
+                style={{
+                  background: "#fff", border: `1px solid ${NAVY_BORDER}`,
+                  borderRadius: 8, padding: "8px 12px", color: NAVY,
+                  fontFamily: FONT, fontWeight: 800, fontSize: "0.6rem", cursor: "pointer",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {lang === "en" ? "ES" : "EN"}
+              </button>
+            )}
+            <button
+              onClick={onLogout}
+              style={{
+                background: "#fff", border: `1px solid ${NAVY_BORDER}`,
+                borderRadius: 8, padding: "8px 16px", color: NAVY_TEXT_MUTED,
+                fontFamily: FONT, fontWeight: 700, fontSize: "0.6rem", cursor: "pointer",
+                letterSpacing: "0.08em",
+              }}
+            >
+              {lang === "es" ? "CERRAR SESIÓN" : "SECURE LOGOUT"}
+            </button>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: 4 }}>
