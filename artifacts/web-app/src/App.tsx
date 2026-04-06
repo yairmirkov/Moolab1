@@ -980,6 +980,7 @@ function App() {
           const voiceId = getVoiceIdForRole("Narrator", currentLang);
           promises.push(
             fetchAudioBlob(card.audioText, voiceId).then((url) => {
+              logAudio(`Preload radio ${cacheKey}: url=${url ? "OK("+url.substring(0,20)+")" : "NULL"}`);
               if (url) audioBlobCache.set(cacheKey, url);
             })
           );
@@ -994,6 +995,7 @@ function App() {
             const voiceId = getVoiceIdForRole(role, currentLang);
             promises.push(
               fetchAudioBlob(line.text, voiceId).then((url) => {
+                logAudio(`Preload podcast ${cacheKey}: url=${url ? "OK("+url.substring(0,20)+")" : "NULL"}`);
                 if (url) audioBlobCache.set(cacheKey, url);
               })
             );

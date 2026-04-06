@@ -60,8 +60,9 @@ export const fetchAudioBlob = async (
   text: string,
   voiceId: string,
 ): Promise<string | null> => {
-  if (!ELEVENLABS_API_KEY) return null;
+  if (!ELEVENLABS_API_KEY) { console.warn("[ElevenLabs] fetchAudioBlob: no API key"); return null; }
   try {
+    console.log(`[ElevenLabs] fetchAudioBlob: voiceId=${voiceId}, text="${text.substring(0, 30)}..."`);
     const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "xi-api-key": ELEVENLABS_API_KEY },
@@ -72,11 +73,14 @@ export const fetchAudioBlob = async (
       }),
     });
     if (!res.ok) {
-      console.error(`[ElevenLabs] fetchAudioBlob: HTTP ${res.status}`);
+      const body = await res.text().catch(() => "");
+      console.error(`[ElevenLabs] fetchAudioBlob: HTTP ${res.status} ${res.statusText} - ${body.substring(0, 200)}`);
       return null;
     }
     const blob = await res.blob();
-    return URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
+    console.log(`[ElevenLabs] fetchAudioBlob: OK, blob size=${blob.size}, type=${blob.type}, url=${url.substring(0, 30)}`);
+    return url;
   } catch (e) {
     console.error("[ElevenLabs] fetchAudioBlob error:", e);
     return null;
