@@ -4,7 +4,7 @@ import LandingPageES from "./LandingPageES";
 import CommandCenter from "./CommandCenter";
 import ConceptCard from "./ConceptCard";
 import translations, { type Lang } from "./translations";
-import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio } from "./elevenlabs";
+import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine } from "./elevenlabs";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -439,27 +439,67 @@ function RadioHighlightSlide({
 }
 
 function PodcastClipSlide({
-  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, fallbackBrowserSpeak,
+  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef,
 }: {
   card: any; videoSrc: string; bgGradient: string; lang: Lang;
   isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
-  fallbackBrowserSpeak: (text: string, onDone: () => void) => void;
 }) {
   const [visibleLines, setVisibleLines] = useState(0);
   const [speakingIdx, setSpeakingIdx] = useState(-1);
   const slideRef = useRef<HTMLDivElement>(null);
   const triggeredRef = useRef(false);
-  const mountedRef = useRef(true);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const dialogue: { speaker: string; text: string }[] = card.dialogue || [];
 
+  const runPlaybackQueue = useCallback(async () => {
+    const ac = new AbortController();
+    abortRef.current = ac;
+
+    for (let i = 0; i < dialogue.length; i++) {
+      if (ac.signal.aborted) break;
+
+      setVisibleLines(i + 1);
+
+      if (isMutedRef.current || speechSpeedRef.current === 0 || !isElevenLabsAvailable()) {
+        setSpeakingIdx(i);
+        await new Promise<void>((r) => {
+          const tid = setTimeout(r, 2200);
+          ac.signal.addEventListener("abort", () => { clearTimeout(tid); r(); }, { once: true });
+        });
+        if (!ac.signal.aborted) setSpeakingIdx(-1);
+        continue;
+      }
+
+      setSpeakingIdx(i);
+      const result = await speakPodcastLine(
+        dialogue[i].text,
+        dialogue[i].speaker,
+        lang,
+        { speed: speechSpeedRef.current, signal: ac.signal },
+      );
+
+      if (result === "aborted") break;
+      if (!ac.signal.aborted) setSpeakingIdx(-1);
+
+      if (result === "error") {
+        await new Promise<void>((r) => {
+          const tid = setTimeout(r, 2000);
+          ac.signal.addEventListener("abort", () => { clearTimeout(tid); r(); }, { once: true });
+        });
+      }
+    }
+
+    if (!ac.signal.aborted) {
+      setVisibleLines(dialogue.length);
+      setSpeakingIdx(-1);
+    }
+    if (abortRef.current === ac) abortRef.current = null;
+  }, [dialogue, lang, isMutedRef, speechSpeedRef]);
+
   useEffect(() => {
-    mountedRef.current = true;
     return () => {
-      mountedRef.current = false;
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (abortRef.current) abortRef.current.abort();
       stopElevenLabsAudio();
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     };
   }, []);
 
@@ -470,40 +510,11 @@ function PodcastClipSlide({
         const entry = entries[0];
         if (entry?.isIntersecting && entry.intersectionRatio > 0.6 && !triggeredRef.current) {
           triggeredRef.current = true;
-          let line = 0;
-
-          const speakLine = (idx: number) => {
-            if (!mountedRef.current || idx >= dialogue.length) return;
-            if (isMutedRef.current || speechSpeedRef.current === 0) return;
-            if (!mountedRef.current) return;
-            setSpeakingIdx(idx);
-            const text = dialogue[idx].text;
-            const onDone = () => {
-              if (!mountedRef.current) return;
-              setSpeakingIdx(-1);
-            };
-            if (isElevenLabsAvailable()) {
-              speakWithElevenLabs(text, lang, {
-                speed: speechSpeedRef.current,
-                onEnd: onDone,
-                onError: () => { if (mountedRef.current) fallbackBrowserSpeak(text, onDone); },
-              }).then(ok => { if (!ok && mountedRef.current) fallbackBrowserSpeak(text, onDone); });
-            } else {
-              fallbackBrowserSpeak(text, onDone);
-            }
-          };
-
-          intervalRef.current = setInterval(() => {
-            if (!mountedRef.current) { if (intervalRef.current) clearInterval(intervalRef.current); return; }
-            line++;
-            setVisibleLines(line);
-            speakLine(line - 1);
-            if (line >= dialogue.length) { if (intervalRef.current) clearInterval(intervalRef.current); }
-          }, 1400);
+          runPlaybackQueue();
         }
         if (entry && !entry.isIntersecting && triggeredRef.current) {
+          if (abortRef.current) abortRef.current.abort();
           stopElevenLabsAudio();
-          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
           setSpeakingIdx(-1);
         }
       },
@@ -511,7 +522,7 @@ function PodcastClipSlide({
     );
     if (slideRef.current) observer.observe(slideRef.current);
     return () => observer.disconnect();
-  }, [dialogue.length]);
+  }, [dialogue.length, runPlaybackQueue]);
 
   const allRevealed = visibleLines >= dialogue.length;
   const isSpeaking = speakingIdx >= 0;
@@ -2208,7 +2219,6 @@ function App() {
                 lang={lang}
                 isMutedRef={isMutedRef}
                 speechSpeedRef={speechSpeedRef}
-                fallbackBrowserSpeak={fallbackBrowserSpeak}
               />
             );
           }
