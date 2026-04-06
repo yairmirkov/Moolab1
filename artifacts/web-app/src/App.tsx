@@ -237,6 +237,182 @@ const getAgeGroup = (age: number): string => {
   return "Adults";
 };
 
+const RADIO_VIZ_BARS = Array.from({ length: 48 }, (_, i) => ({
+  delay: (i * 0.06) % 1.2,
+  height: 0.3 + Math.random() * 0.7,
+}));
+
+function RadioHighlightSlide({
+  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, musicRef, feedRef, slideIndex, played, onPlayed, fallbackBrowserSpeak,
+}: {
+  card: any; videoSrc: string; bgGradient: string; lang: Lang;
+  isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
+  musicRef: React.MutableRefObject<HTMLAudioElement | null>;
+  feedRef: React.MutableRefObject<HTMLDivElement | null>;
+  slideIndex: number; played: boolean; onPlayed: () => void;
+  fallbackBrowserSpeak: (text: string, onDone: () => void) => void;
+}) {
+  const [speaking, setSpeaking] = useState(false);
+  const [done, setDone] = useState(false);
+  const slideRef = useRef<HTMLDivElement>(null);
+  const triggeredRef = useRef(false);
+  const mountedRef = useRef(true);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (timerRef.current) clearTimeout(timerRef.current);
+      stopElevenLabsAudio();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (played || triggeredRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && entry.intersectionRatio > 0.6 && !triggeredRef.current) {
+          triggeredRef.current = true;
+          onPlayed();
+          if (isMutedRef.current || speechSpeedRef.current === 0) {
+            if (mountedRef.current) setDone(true);
+            timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
+            return;
+          }
+          if (mountedRef.current) setSpeaking(true);
+          if (musicRef.current) musicRef.current.volume = 0.03;
+          const finish = () => {
+            if (!mountedRef.current) return;
+            setSpeaking(false);
+            setDone(true);
+            if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
+            timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 2000);
+          };
+          if (isElevenLabsAvailable()) {
+            speakWithElevenLabs(card.audioText, lang, {
+              speed: speechSpeedRef.current,
+              onStart: () => {},
+              onEnd: finish,
+              onError: () => {
+                if (mountedRef.current) fallbackBrowserSpeak(card.audioText, finish);
+              },
+            }).then(ok => {
+              if (!ok && mountedRef.current) fallbackBrowserSpeak(card.audioText, finish);
+            });
+          } else {
+            fallbackBrowserSpeak(card.audioText, finish);
+          }
+        }
+      },
+      { threshold: 0.6 },
+    );
+    if (slideRef.current) observer.observe(slideRef.current);
+    return () => observer.disconnect();
+  }, [played]);
+
+  const autoAdvance = () => {
+    if (!feedRef.current) return;
+    const target = feedRef.current.children[slideIndex + 1] as HTMLElement | undefined;
+    if (target) target.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <div
+      ref={slideRef}
+      style={{
+        height: "100dvh", width: "100%", position: "relative",
+        scrollSnapAlign: "start", scrollSnapStop: "always",
+        background: "#050508", overflow: "hidden",
+      }}
+    >
+      <div style={{ position: "absolute", width: "100%", height: "100%", background: bgGradient }} />
+      <video
+        autoPlay muted loop playsInline preload="auto"
+        onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
+        style={{
+          position: "absolute", width: "100%", height: "100%",
+          objectFit: "cover", opacity: 0.25, filter: "blur(2px)",
+          animation: "vidFade 0.8s ease-out both",
+        }}
+      >
+        <source src={videoSrc} type="video/mp4" />
+      </video>
+      <div style={{
+        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+        background: "radial-gradient(ellipse at center, rgba(12,45,72,0.3) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.95) 100%)",
+        zIndex: 1,
+      }} />
+
+      <div style={{
+        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        zIndex: 2, padding: "40px 24px",
+      }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8, marginBottom: 32,
+          animation: "radioTextFade 0.6s ease-out both",
+        }}>
+          <span style={{ fontSize: "1.3rem" }}>🎙️</span>
+          <span style={{
+            fontSize: "0.65rem", fontWeight: 900, letterSpacing: "0.25em",
+            color: "#2e8bc0", textTransform: "uppercase",
+          }}>MOOLAB RADIO</span>
+          {speaking && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              padding: "2px 8px", borderRadius: 20,
+              background: "rgba(46,139,192,0.15)", marginLeft: 4,
+            }}>
+              <span style={{
+                width: 6, height: 6, borderRadius: "50%", background: "#2e8bc0",
+                animation: "contextPulse 1s ease-in-out infinite",
+              }} />
+              <span style={{ fontSize: "0.55rem", fontWeight: 800, color: "#2e8bc0", letterSpacing: "0.15em" }}>LIVE</span>
+            </span>
+          )}
+        </div>
+
+        <div style={{
+          display: "flex", alignItems: "end", justifyContent: "center", gap: 3,
+          height: 120, width: "80%", maxWidth: 360, marginBottom: 36,
+          animation: "vizGlow 3s ease-in-out infinite",
+          padding: "0 12px", borderRadius: 16,
+        }}>
+          {RADIO_VIZ_BARS.map((bar, idx) => (
+            <div
+              key={idx}
+              style={{
+                flex: 1, borderRadius: 2,
+                height: `${bar.height * 100}%`,
+                background: speaking
+                  ? `linear-gradient(to top, #2e8bc0, #b1d4e0)`
+                  : done ? "rgba(46,139,192,0.15)" : "rgba(46,139,192,0.08)",
+                animation: speaking ? `vizBar ${0.4 + bar.delay * 0.6}s ease-in-out ${bar.delay}s infinite` : "none",
+                transition: "background 0.5s ease, height 0.3s ease",
+                transformOrigin: "bottom",
+                boxShadow: speaking ? "0 0 6px rgba(46,139,192,0.2)" : "none",
+              }}
+            />
+          ))}
+        </div>
+
+        {done && (
+          <p style={{
+            color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", fontWeight: 700,
+            letterSpacing: "0.1em", textTransform: "uppercase",
+            animation: "radioTextFade 0.5s ease-out both",
+          }}>
+            {lang === "es" ? "CONTINUANDO..." : "CONTINUING..."}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [lang, setLang] = useState<Lang>(() => (loadStr("lang", "en") as Lang));
   const langRef = useRef<Lang>(loadStr("lang", "en") as Lang);
@@ -285,6 +461,7 @@ function App() {
   const [revealedExplanations, setRevealedExplanations] = useState<Record<string, boolean>>({});
   const [bossExplanation, setBossExplanation] = useState<string | null>(null);
   const [revealedSlides, setRevealedSlides] = useState<Record<string, boolean>>({});
+  const [radioPlayedSlides, setRadioPlayedSlides] = useState<Record<string, boolean>>({});
 
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -326,6 +503,7 @@ function App() {
     setRevealedExplanations({});
     setBossExplanation(null);
     setRevealedSlides({});
+    setRadioPlayedSlides({});
     slidesScrolledRef.current = 0;
     lastRadioSlideRef.current = -1;
     usedTipsRef.current.clear();
@@ -1027,6 +1205,9 @@ function App() {
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes contextPulse { 0%, 100% { box-shadow: 0 0 20px rgba(46,139,192,0.15); } 50% { box-shadow: 0 0 30px rgba(46,139,192,0.35), 0 0 60px rgba(46,139,192,0.1); } }
+        @keyframes vizBar { 0% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0.3); } }
+        @keyframes vizGlow { 0%, 100% { box-shadow: 0 0 40px rgba(46,139,192,0.2), 0 0 80px rgba(46,139,192,0.05); } 50% { box-shadow: 0 0 60px rgba(46,139,192,0.4), 0 0 120px rgba(46,139,192,0.15); } }
+        @keyframes radioTextFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes vidFade { from{opacity:0;transform:scale(1.04)} to{opacity:1;transform:scale(1)} }
         @keyframes arenaPulse {
@@ -1467,6 +1648,26 @@ function App() {
         }}
       >
         {currentData.lessons.map((card, i) => {
+          if (card.type === "radio_highlight") {
+            return (
+              <RadioHighlightSlide
+                key={card.id}
+                card={card}
+                videoSrc={getVideoForCard(card.id)}
+                bgGradient={bgGradients[i % bgGradients.length]}
+                lang={lang}
+                isMutedRef={isMutedRef}
+                speechSpeedRef={speechSpeedRef}
+                musicRef={musicRef}
+                feedRef={feedRef}
+                slideIndex={i}
+                played={!!radioPlayedSlides[card.id]}
+                onPlayed={() => setRadioPlayedSlides(p => ({ ...p, [card.id]: true }))}
+                fallbackBrowserSpeak={fallbackBrowserSpeak}
+              />
+            );
+          }
+
           const answered = slideAnswers[card.id];
           const isCorrect = answered !== undefined && answered === card.miniGame.correctIndex;
 

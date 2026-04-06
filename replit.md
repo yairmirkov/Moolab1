@@ -113,6 +113,11 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - All mute/reset/speed-change flows call `stopElevenLabsAudio()` + `speechSynthesis.cancel()`
 - Fallback path re-checks `isMutedRef`/`speechSpeedRef` before speaking to avoid stale playback
 
+### Radio Show Intermissions
+- **Landing Page Teaser**: `MoolabRadio` component on both `LandingPage.tsx` (EN) and `LandingPageES.tsx` (ES) — dark navy gradient card with play button, 32-bar neon-blue audio visualizer, and "Listen to a sample broadcast" text. Uses browser speechSynthesis to read the Moolab tagline. `radioBar`/`radioBarES` CSS keyframes animate bars during playback. LIVE badge pulses when active.
+- **Feed Intermissions**: Gemini prompt now generates 1-2 `radio_highlight` cards per batch among the 10 lessons. These have `{ type: 'radio_highlight', audioText: '...' }` instead of `miniGame`. The `audioText` contains punchy financial fun facts or Moolab hype from a premium podcast host voice.
+- **RadioHighlightSlide Component**: When a `radio_highlight` card appears in the feed, it renders a cinematic fullscreen slide with: looping background video (blurred), radial gradient overlay, centered 48-bar audio visualizer with `vizBar`/`vizGlow` animations, and 🎙️ MOOLAB RADIO branding with LIVE badge. Uses `IntersectionObserver` (threshold 0.6) to auto-trigger TTS when the slide scrolls into view. After audio finishes, auto-advances to the next slide with smooth scroll. `radioPlayedSlides` state prevents re-triggering. Muted/speed=0 mode skips audio and auto-advances after 3s.
+
 ### Multimedia Features
 - **Video backgrounds**: 53 verified Pexels HD videos with Fisher-Yates shuffle queue (`videoQueue`), per-card stable mapping (`cardVideoMap`), gradient fallbacks
 - **Dual-track audio**: `musicRef` (study beats, vol 0.15) + speech synthesis commentary (vol 0.8). Music "ducks" to 0.05 when radio host speaks.
