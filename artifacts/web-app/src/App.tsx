@@ -1785,14 +1785,14 @@ function App() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
 
-            <svg width="22" height="22" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 0 4px #2e8bc0)", flexShrink: 0 }}>
-              <rect x="6" y="46" width="7" height="12" fill="#2e8bc0" opacity="0.3" rx="1" />
-              <rect x="17" y="38" width="7" height="20" fill="#2e8bc0" opacity="0.5" rx="1" />
-              <rect x="28" y="28" width="7" height="30" fill="#2e8bc0" opacity="0.7" rx="1" />
-              <path d="M39 58 L39 20 L46 20 L46 58 Z" fill="#2e8bc0" opacity="0.85" />
-              <path d="M46 20 L46 4 L58 4 L46 20Z" fill="#145374" />
-              <path d="M46 4 L58 4 L52 12 Z" fill="#145374" opacity="0.5" />
-            </svg>
+            <img
+              src="/moolab-logo-trimmed.png"
+              alt="Moolab"
+              style={{
+                height: 28, width: "auto", objectFit: "contain", flexShrink: 0,
+                filter: "drop-shadow(0 0 6px rgba(46,139,192,0.5)) brightness(1.1)",
+              }}
+            />
             <button
               className="ws-btn"
               onClick={() => setShowProfile(true)}
