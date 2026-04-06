@@ -261,6 +261,35 @@ const RADIO_VIZ_BARS = Array.from({ length: 48 }, (_, i) => ({
 
 const audioBlobCache = new Map<string, string>();
 
+const audioLog: string[] = [];
+const logAudio = (msg: string) => {
+  const ts = new Date().toLocaleTimeString();
+  const entry = `[${ts}] ${msg}`;
+  console.log(`[Audio] ${entry}`);
+  audioLog.push(entry);
+  if (audioLog.length > 30) audioLog.shift();
+};
+
+function AudioDebugPanel({ activeSlideIndex, cardCount, types }: { activeSlideIndex: number; cardCount: number; types: string }) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 500);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
+      background: "rgba(0,0,0,0.85)", color: "#0f0", fontSize: "0.55rem",
+      fontFamily: "monospace", padding: "4px 8px", maxHeight: 120,
+      overflowY: "auto", pointerEvents: "none",
+      borderBottom: "1px solid #333",
+    }}>
+      <div>Cache: {audioBlobCache.size} | Slide: {activeSlideIndex} | Cards: {cardCount} | Types: {types}</div>
+      {audioLog.slice(-6).map((l, i) => <div key={i} style={{ opacity: 0.8 }}>{l}</div>)}
+    </div>
+  );
+}
+
 function RadioHighlightSlide({
   card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, isActive,
 }: {
@@ -290,7 +319,8 @@ function RadioHighlightSlide({
   }, []);
 
   const playAudioBlob = useCallback(async (blobUrl: string) => {
-    if (!mountedRef.current) return;
+    if (!mountedRef.current) { logAudio("Radio: playAudioBlob skipped (unmounted)"); return; }
+    logAudio(`Radio: playAudioBlob starting, url=${blobUrl.substring(0, 30)}`);
     const audio = new Audio(blobUrl);
     audio.playbackRate = speechSpeedRef.current || 1;
     audio.volume = 0.85;
@@ -303,14 +333,16 @@ function RadioHighlightSlide({
       timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 2000);
     };
 
-    audio.onended = finish;
-    audio.onerror = finish;
+    audio.onended = () => { logAudio("Radio: audio.onended"); finish(); };
+    audio.onerror = (e) => { logAudio(`Radio: audio.onerror ${e}`); finish(); };
 
     try {
       setSpeaking(true);
       setNeedsTap(false);
       await audio.play();
+      logAudio("Radio: audio.play() succeeded");
     } catch (e: any) {
+      logAudio(`Radio: audio.play() FAILED: ${e?.name} ${e?.message}`);
       if (e?.name === "NotAllowedError") {
         setSpeaking(false);
         setNeedsTap(true);
@@ -332,13 +364,17 @@ function RadioHighlightSlide({
       return;
     }
 
+    logAudio(`Radio: isActive=true, muted=${isMutedRef.current}, speed=${speechSpeedRef.current}, audioText=${!!card.audioText}, elevenlabs=${isElevenLabsAvailable()}`);
+
     if (isMutedRef.current || speechSpeedRef.current === 0 || !card.audioText) {
+      logAudio("Radio: Skipping audio (muted/no speed/no audioText)");
       setDone(true);
       timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
       return;
     }
 
     if (!isElevenLabsAvailable()) {
+      logAudio("Radio: Skipping audio (ElevenLabs unavailable)");
       setDone(true);
       timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
       return;
@@ -346,10 +382,12 @@ function RadioHighlightSlide({
 
     const cacheKey = `radio_${card.id}_${lang}`;
     if (audioBlobCache.has(cacheKey)) {
+      logAudio(`Radio: Cache HIT for ${cacheKey}`);
       playAudioBlob(audioBlobCache.get(cacheKey)!);
       return;
     }
 
+    logAudio(`Radio: Cache MISS for ${cacheKey}, fetching live`);
     const timerLabel = `ElevenLabs API (radio, ${card.audioText?.substring(0, 25)}...)`;
     console.time(timerLabel);
     let timerEnded = false;
@@ -546,6 +584,7 @@ function PodcastClipSlide({
 
       const cacheKey = `podcast_${card.id}_${i}_${lang}`;
       const cachedUrl = audioBlobCache.get(cacheKey);
+      logAudio(`Podcast[${i}]: speaker=${dialogue[i].speaker}, cached=${!!cachedUrl}, cacheKey=${cacheKey}`);
 
       if (cachedUrl) {
         const result = await new Promise<"done" | "aborted" | "error">((resolve) => {
@@ -556,9 +595,12 @@ function PodcastClipSlide({
           const onAbort = () => { audio.pause(); audio.src = ""; resolve("aborted"); };
           ac.signal.addEventListener("abort", onAbort, { once: true });
 
-          audio.onended = () => { ac.signal.removeEventListener("abort", onAbort); resolve("done"); };
-          audio.onerror = () => { ac.signal.removeEventListener("abort", onAbort); resolve("error"); };
-          audio.play().catch(() => {
+          audio.onended = () => { logAudio(`Podcast[${i}]: cached audio ended`); ac.signal.removeEventListener("abort", onAbort); resolve("done"); };
+          audio.onerror = (e) => { logAudio(`Podcast[${i}]: cached audio error ${e}`); ac.signal.removeEventListener("abort", onAbort); resolve("error"); };
+          audio.play().then(() => {
+            logAudio(`Podcast[${i}]: cached audio playing`);
+          }).catch((err) => {
+            logAudio(`Podcast[${i}]: cached audio play FAILED: ${err?.name} ${err?.message}`);
             setNeedsTap(true);
             ac.signal.removeEventListener("abort", onAbort);
             resolve("error");
@@ -609,6 +651,7 @@ function PodcastClipSlide({
 
   useEffect(() => {
     if (isActive) {
+      logAudio(`Podcast: isActive=true, dialogue=${dialogue.length} lines, card.id=${card.id}`);
       setNeedsTap(false);
       runPlaybackQueue().catch(() => {});
     } else {
@@ -616,6 +659,10 @@ function PodcastClipSlide({
       stopElevenLabsAudio();
       setSpeakingIdx(-1);
     }
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+      stopElevenLabsAudio();
+    };
   }, [isActive]);
 
   const handleTapToPlay = () => {
@@ -916,7 +963,8 @@ function App() {
   }, [xp, streak, level, bossWins, currentModuleIdx, moduleProgress]);
 
   const preloadAudioForCards = useCallback(async (cards: any[], currentLang: Lang) => {
-    if (!isElevenLabsAvailable()) return;
+    logAudio(`Preload: ${cards.length} cards, types=[${cards.map(c => c.type).join(",")}], elAvail=${isElevenLabsAvailable()}`);
+    if (!isElevenLabsAvailable()) { logAudio("Preload: SKIPPED (ElevenLabs unavailable)"); return; }
     const SPEAKER_TO_ROLE: Record<string, "Host" | "Expert" | "Guest1" | "Guest2" | "Narrator"> = {
       host: "Host", presentador: "Host", presentadora: "Host",
       expert: "Expert", experto: "Expert", experta: "Expert",
@@ -953,7 +1001,10 @@ function App() {
         }
       }
     }
-    await Promise.allSettled(promises);
+    logAudio(`Preload: Fetching ${promises.length} audio blobs...`);
+    const results = await Promise.allSettled(promises);
+    const succeeded = results.filter(r => r.status === "fulfilled").length;
+    logAudio(`Preload: Done. ${succeeded}/${promises.length} succeeded. Cache size=${audioBlobCache.size}`);
   }, []);
 
   const resetJourney = useCallback(() => {
@@ -2224,9 +2275,10 @@ function App() {
             </p>
             <button
               onClick={() => {
+                logAudio(`ENTER clicked. Cache size=${audioBlobCache.size}`);
                 const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
                 silentAudio.volume = 0;
-                silentAudio.play().catch(() => {});
+                silentAudio.play().then(() => logAudio("Silent audio unlocked OK")).catch((e) => logAudio(`Silent audio FAILED: ${e}`));
                 setAudioUnlocked(true);
                 setLoading(false);
                 setPreloadReady(false);
@@ -2573,6 +2625,9 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* AUDIO DEBUG PANEL */}
+      <AudioDebugPanel activeSlideIndex={activeSlideIndex} cardCount={currentData.lessons.length} types={currentData.lessons.map((c: any) => c.type?.charAt(0)).join("")} />
 
       {/* FEED */}
       <div
