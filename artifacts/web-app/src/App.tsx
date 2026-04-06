@@ -1880,7 +1880,7 @@ function App() {
                 fontSize: "1rem",
                 lineHeight: 1,
               }}
-              title={isMuted ? "Unmute" : "Mute"}
+              title={isMuted ? t.auth.unmute[lang] : t.auth.mute[lang]}
             >
               {isMuted ? "🔇" : "🔊"}
             </button>
@@ -1941,7 +1941,7 @@ function App() {
                 lineHeight: 1,
                 minWidth: 38,
               }}
-              title={lang === "en" ? "Switch to Spanish" : "Cambiar a Inglés"}
+              title={t.auth.switchLang[lang]}
             >
               {lang === "en" ? "ES" : "EN"}
             </button>

@@ -384,6 +384,9 @@ const translations = {
     saveProfile: { en: "SAVE PROFILE", es: "GUARDAR PERFIL" },
     continuing: { en: "CONTINUING...", es: "CONTINUANDO..." },
     swipeToContinue: { en: "⬆ Swipe to continue", es: "⬆ Desliza para continuar" },
+    mute: { en: "Mute", es: "Silenciar" },
+    unmute: { en: "Unmute", es: "Activar sonido" },
+    switchLang: { en: "Switch to Spanish", es: "Cambiar a Inglés" },
   },
 } as const;
 
