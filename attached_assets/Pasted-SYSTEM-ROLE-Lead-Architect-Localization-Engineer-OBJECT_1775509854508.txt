@@ -1,0 +1,36 @@
+SYSTEM ROLE: Lead Architect & Localization Engineer.
+OBJECTIVE: Decouple language from geography. Implement a global UI Language State (EN/ES), translate the static UI, and route the ElevenLabs Voice Map and Gemini AI output based entirely on the user's selected language.
+
+STEP 1: GLOBAL LANGUAGE CONTEXT
+
+Create a LanguageContext.tsx to manage a global uiLanguage state (defaulting to 'EN', with 'ES' as the alternative).
+
+Persist this selection in localStorage so the app remembers their preference.
+
+Build a clean, minimalist LanguageToggle component (e.g., a small "EN | ES" button) and place it in the AuthModal header and the CommandCenter navigation.
+
+STEP 2: STATIC UI TRANSLATION DICTIONARY
+
+Inside LanguageContext, create a simple translation dictionary for all static UI elements.
+
+Example keys: login, signUp, parentPortal, studentAccess, tapToContinue, welcome, secureLogout.
+
+Replace hardcoded text across LandingPage.tsx, AuthModal.tsx, CommandCenter.tsx, and the feed buttons with the dynamic dictionary references (e.g., t('tapToContinue')).
+
+STEP 3: AUDIO ROUTING UPDATE
+
+Open the TTS utility (audioUtils.ts or PodcastClip.tsx).
+
+Modify the routing logic. Do not look at the user's country anymore. > - Pull the current uiLanguage (EN or ES) from the context or local storage.
+
+Route the ElevenLabs VOICE_MAP selection strictly using this UI language (e.g., VOICE_MAP[uiLanguage][speakerRole]).
+
+STEP 4: AI PROMPT UPDATE (CRITICAL)
+
+Open the function that calls the Gemini API (generateCards).
+
+Pass the uiLanguage state to the prompt.
+
+Add this strict instruction to Gemini: "The user's preferred language is [INSERT uiLanguage]. You MUST generate all text, dialogue, terms, and scenarios entirely in this language. Maintain the 30/70 geographic localization rules for the content itself based on their country, but the final output language must strictly match their UI preference."
+
+OUTPUT: Create LanguageContext, translate static elements, add the EN/ES toggle, update the audio router to use the toggle state, and instruct Gemini to output in the selected language.

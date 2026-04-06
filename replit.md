@@ -58,7 +58,7 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
 -   **Validation**: Zod (`zod/v4`), `drizzle-zod`
 -   **API Codegen**: Orval
 -   **Geolocation**: `ipapi.co`
--   **Text-to-Speech**: ElevenLabs (`eleven_turbo_v2_5` model). Multi-voice for podcasts: Host→"Adam" (`pNInz6obpgDQGcFmaJgB`), Expert→"Rachel" (`21m00Tcm4TlvDq8ikWAM`). Browser `speechSynthesis` fallback for non-podcast slides only.
+-   **Text-to-Speech**: ElevenLabs (`eleven_multilingual_v2` model). Bilingual voice map with 5 roles per language (Host, Expert, Guest1, Guest2, Narrator) × 2 languages (EN/ES). Language resolved dynamically: country from `ws_country` checked against Spanish-speaking regions first, then explicit `lang` param, then `ws_lang`. Browser `speechSynthesis` fallback for non-podcast slides only; podcasts log errors on API failure.
 -   **Avatars**: Removed — ultra-clean text-forward UI with no character images
 -   **Video Content**: Pexels (for background videos)
 -   **Payment Processors (Planned)**: Stripe, PayPal (badges displayed on landing page)
@@ -67,6 +67,6 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
 - **AI Schema**: Gemini prompt instructs AI to occasionally generate 1 `podcast_clip` card per batch with `type: "podcast_clip"`, `title`, and `dialogue` array of `{speaker, text}` objects (Host/Expert or Presentador/Experto).
 - **PodcastClipSlide Component**: Cinematic fullscreen dark slide with blurred video BG, radial gradient overlay, "MOOLAB PODCAST" branding with LIVE indicator during TTS, animated 24-bar mini-visualizer (neon cyan when speaking), and chat-bubble-style dialogue transcript.
 - **Sequential Playback Queue**: Replaced interval-based typewriter with async/await state machine. Each dialogue line's full text is revealed instantly, then ElevenLabs audio plays to completion before the next line renders. Uses `AbortController` for clean cancellation.
-- **Multi-Voice Router**: `speakPodcastLine()` maps speaker names to distinct ElevenLabs voices — Host/Presentador uses "Adam" (charismatic male), Expert/Experto/Experta uses "Rachel" (professional female). No browser `speechSynthesis` fallback for podcasts.
+- **Bilingual Multi-Voice Router**: `speakPodcastLine()` resolves voice language from user's country (Spanish-speaking countries → ES voices, else EN). Maps speaker names to roles via `SPEAKER_TO_ROLE` (Host/Presentador→Host, Expert/Experto→Expert, Guest/Invitado→Guest1/Guest2, Narrator/Narrador→Narrator). Each role has a unique ElevenLabs Voice ID per language. No browser `speechSynthesis` fallback for podcasts.
 - **Audio Stop on Scroll-Away**: Both `RadioHighlightSlide` and `PodcastClipSlide` use `IntersectionObserver` exit detection. PodcastClipSlide aborts the entire playback queue via `AbortController.abort()`, immediately pausing and destroying audio instances.
 - **Swipe Indicator**: Pulsing "Swipe to continue" appears after all lines revealed and speaking is done.

@@ -1,17 +1,63 @@
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY as string | undefined;
 
-const VOICE_IDS = {
-  en: "pNInz6obpgDQGcFmaJgB",
-  es: "onwK4e9ZLuTAKqWW03F9",
+const VOICE_MAP = {
+  EN: {
+    Host: "1fz2mW1imKTf5Ryjk5su",
+    Expert: "kdmDKE6EkgrWrrykO9Qt",
+    Guest1: "l4Coq6695JDX9xtLqXDE",
+    Guest2: "RexqLjNzkCjWogguKyff",
+    Narrator: "G7ILShrCNLfmS0A37SXS",
+  },
+  ES: {
+    Host: "RexqLjNzkCjWogguKyff",
+    Expert: "WEXRePkZGpmcFLvCOaB1",
+    Guest1: "PetzKiU5nxNtLzFt4ipu",
+    Guest2: "G7ILShrCNLfmS0A37SXS",
+    Narrator: "spPXlKT5a4JMfbhPRAzA",
+  },
 } as const;
 
-const PODCAST_VOICE_MAP: Record<string, string> = {
-  host: "pNInz6obpgDQGcFmaJgB",
-  presentador: "pNInz6obpgDQGcFmaJgB",
-  expert: "21m00Tcm4TlvDq8ikWAM",
-  experto: "21m00Tcm4TlvDq8ikWAM",
-  experta: "21m00Tcm4TlvDq8ikWAM",
+type VoiceLang = keyof typeof VOICE_MAP;
+type VoiceRole = keyof typeof VOICE_MAP.EN;
+
+const SPANISH_COUNTRIES = new Set([
+  "dominican republic", "spain", "mexico", "colombia", "argentina",
+  "peru", "venezuela", "chile", "ecuador", "guatemala", "cuba",
+  "bolivia", "honduras", "paraguay", "el salvador", "nicaragua",
+  "costa rica", "panama", "uruguay", "puerto rico",
+  "república dominicana", "españa", "méxico", "panamá",
+]);
+
+const SPEAKER_TO_ROLE: Record<string, VoiceRole> = {
+  host: "Host",
+  presentador: "Host",
+  presentadora: "Host",
+  expert: "Expert",
+  experto: "Expert",
+  experta: "Expert",
+  guest1: "Guest1",
+  invitado1: "Guest1",
+  guest2: "Guest2",
+  invitado2: "Guest2",
+  narrator: "Narrator",
+  narrador: "Narrator",
+  narradora: "Narrator",
 };
+
+export function resolveVoiceLang(explicitLang?: "en" | "es"): VoiceLang {
+  try {
+    const country = localStorage.getItem("ws_country") || "";
+    if (SPANISH_COUNTRIES.has(country.toLowerCase().trim())) return "ES";
+  } catch {}
+  const lang = explicitLang ?? (() => { try { return localStorage.getItem("ws_lang") || "en"; } catch { return "en"; } })();
+  return lang === "es" ? "ES" : "EN";
+}
+
+function getVoiceId(speaker: string, voiceLang?: VoiceLang): string {
+  const lang = voiceLang ?? resolveVoiceLang();
+  const role = SPEAKER_TO_ROLE[speaker.toLowerCase().trim()] || "Narrator";
+  return VOICE_MAP[lang][role];
+}
 
 let currentAudio: HTMLAudioElement | null = null;
 
@@ -37,7 +83,8 @@ export const speakWithElevenLabs = async (
 ): Promise<boolean> => {
   if (!ELEVENLABS_API_KEY) return false;
 
-  const voiceId = VOICE_IDS[lang] || VOICE_IDS.en;
+  const voiceLang = resolveVoiceLang(lang);
+  const voiceId = VOICE_MAP[voiceLang].Narrator;
   return _speak(text, voiceId, opts);
 };
 
@@ -52,8 +99,8 @@ export const speakPodcastLine = (
 ): Promise<"done" | "aborted" | "error"> => {
   if (!ELEVENLABS_API_KEY) return Promise.resolve("error");
 
-  const key = speaker.toLowerCase().trim();
-  const voiceId = PODCAST_VOICE_MAP[key] || VOICE_IDS[lang] || VOICE_IDS.en;
+  const voiceLang = resolveVoiceLang(lang);
+  const voiceId = getVoiceId(speaker, voiceLang);
   const speed = opts?.speed ?? 1.0;
 
   return new Promise(async (resolve) => {
@@ -77,7 +124,7 @@ export const speakPodcastLine = (
           },
           body: JSON.stringify({
             text,
-            model_id: "eleven_turbo_v2_5",
+            model_id: "eleven_multilingual_v2",
             voice_settings: {
               stability: 0.5,
               similarity_boost: 0.75,
@@ -89,7 +136,11 @@ export const speakPodcastLine = (
         },
       );
 
-      if (!response.ok) { settle("error"); return; }
+      if (!response.ok) {
+        console.error(`[ElevenLabs] Podcast TTS failed: ${response.status} ${response.statusText}`);
+        settle("error");
+        return;
+      }
 
       const blob = await response.blob();
       if (opts?.signal?.aborted) { settle("aborted"); return; }
@@ -124,6 +175,7 @@ export const speakPodcastLine = (
       await audio.play();
     } catch (e: any) {
       if (e?.name === "AbortError") { settle("aborted"); return; }
+      console.error("[ElevenLabs] Podcast TTS error:", e);
       settle("error");
     }
   });
@@ -154,7 +206,7 @@ async function _speak(
         },
         body: JSON.stringify({
           text,
-          model_id: "eleven_turbo_v2_5",
+          model_id: "eleven_multilingual_v2",
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
@@ -166,6 +218,7 @@ async function _speak(
     );
 
     if (!response.ok) {
+      console.error(`[ElevenLabs] TTS failed: ${response.status} ${response.statusText}`);
       opts?.onError?.();
       return false;
     }
@@ -193,7 +246,8 @@ async function _speak(
     opts?.onStart?.();
     await audio.play();
     return true;
-  } catch {
+  } catch (e) {
+    console.error("[ElevenLabs] TTS error:", e);
     opts?.onError?.();
     return false;
   }
