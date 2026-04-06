@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const MoolabLogo = ({ height = 32, glow = false }: { height?: number; glow?: boolean }) => (
   <img
@@ -61,31 +61,30 @@ const DownloadBadges = () => (
   </div>
 );
 
-const RADIO_SAMPLE_TEXT_ES = "Bienvenido a Moolab. El único lugar que está construyendo la próxima generación de depredadores financieros apex.";
-
 const MoolabRadio = () => {
   const [playing, setPlaying] = useState(false);
   const [bars] = useState(() => Array.from({ length: 32 }, () => Math.random()));
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio("/moolab-intro.mp3");
+    audio.preload = "auto";
+    audio.volume = 0.85;
+    audio.onended = () => setPlaying(false);
+    audio.onerror = () => setPlaying(false);
+    audio.onpause = () => setPlaying(false);
+    audioRef.current = audio;
+    return () => { audio.pause(); audio.src = ""; };
+  }, []);
 
   const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
     if (playing) {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      audio.pause();
       setPlaying(false);
     } else {
-      setPlaying(true);
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(RADIO_SAMPLE_TEXT_ES);
-        utter.lang = "es-MX";
-        utter.rate = 0.95;
-        utter.pitch = 0.9;
-        utter.volume = 0.85;
-        utter.onend = () => setPlaying(false);
-        utter.onerror = () => setPlaying(false);
-        window.speechSynthesis.speak(utter);
-      } else {
-        setTimeout(() => setPlaying(false), 5000);
-      }
+      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
     }
   };
 

@@ -31,6 +31,9 @@ const translations = {
     trackTeens: { en: "\ud83d\udd25 PERFORMANCE TRACK \u2014 Ages 13-16", es: "\ud83d\udd25 RUTA DE RENDIMIENTO \u2014 Edades 13-16" },
     trackAdults: { en: "\ud83d\udc8e STRATEGIST TRACK \u2014 Ages 17+", es: "\ud83d\udc8e RUTA ESTRATEGA \u2014 Edades 17+" },
     startLearning: { en: "START LEARNING", es: "EMPEZAR A APRENDER" },
+    countryLabel: { en: "NATIONALITY / REGION", es: "NACIONALIDAD / REGIÓN" },
+    countryPlaceholder: { en: "Your country", es: "Tu país" },
+    detectingLocation: { en: "Detecting location...", es: "Detectando ubicación..." },
   },
   hud: {
     profile: { en: "PROFILE", es: "PERFIL" },

@@ -28,7 +28,7 @@ const shuffleOptions = (options: string[], correctIndex: number) => {
   return { options: shuffled, correctIndex: shuffled.indexOf(correctAnswer) };
 };
 
-const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en") => {
+const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en", country?: string) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const personaKey = ageGroup === "Kids" ? "Kids" : ageGroup === "Teens" ? "Teens" : "Adults";
   const persona = translations.gemini.persona[personaKey][lang];
@@ -36,7 +36,11 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
   const ageShark = translations.gemini.sharkByAge[personaKey][lang];
   const suffix = translations.gemini.promptSuffix[lang];
   const topicLine = topic ? (lang === "es" ? ` Todas las lecciones DEBEN enfocarse en el tema de: ${topic}.` : ` All lessons MUST focus on the topic of: ${topic}.`) : "";
-  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}`;
+  const countryLine = country ? (lang === "es"
+    ? ` El usuario se encuentra en: ${country}. Debes usar una división de localización 30/70. El 70% de tus conceptos financieros, ejemplos y mecánicas de mercado deben ser Globales (Wall Street, Crypto, clases de activos amplias). El 30% de tus ejemplos DEBEN estar hiperlocalizados al país del usuario. Por ejemplo, si están en Estados Unidos, usa Bank of America o conceptos fiscales locales. Si están en República Dominicana, menciona específicamente instituciones locales como Banco Popular o BHD, y matices económicos locales. Haz que las referencias locales se sientan naturales y fluidas.`
+    : ` The user is based in: ${country}. You must use a 30/70 localization split. 70% of your financial concepts, examples, and market mechanics should be Global (Wall Street, Crypto, broad asset classes). 30% of your examples MUST be hyper-localized to the user's country. For example, if they are in the US, use Bank of America or local tax concepts. If they are in the Dominican Republic, specifically mention local institutions like Banco Popular or BHD, and local economic nuances. Make the local references feel seamless and natural.`
+  ) : "";
+  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -437,6 +441,8 @@ function App() {
   const [birthYear, setBirthYear] = useState(() => loadStr("birth", ""));
   const [accountType, setAccountType] = useState(() => loadStr("acctType", ""));
   const [parentName, setParentName] = useState(() => loadStr("parentName", ""));
+  const [userCountry, setUserCountry] = useState(() => loadStr("country", ""));
+  const [countryLoading, setCountryLoading] = useState(false);
   const [onboardStep, setOnboardStep] = useState(() => {
     const savedType = loadStr("acctType", "");
     const savedName = loadStr("name", "");
@@ -462,6 +468,21 @@ function App() {
   const [bossExplanation, setBossExplanation] = useState<string | null>(null);
   const [revealedSlides, setRevealedSlides] = useState<Record<string, boolean>>({});
   const [radioPlayedSlides, setRadioPlayedSlides] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (userCountry) return;
+    setCountryLoading(true);
+    fetch("https://ipapi.co/json/")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.country_name) {
+          setUserCountry(d.country_name);
+          saveStr("country", d.country_name);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setCountryLoading(false));
+  }, []);
 
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -512,7 +533,7 @@ function App() {
     radioSpeakingRef.current = false;
     setRadioLive(false);
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
-    generateCards(ageGroup, mod?.topic, langRef.current).then((data) => {
+    generateCards(ageGroup, mod?.topic, langRef.current, loadStr("country", "")).then((data) => {
       if (data) {
         data.lessons = data.lessons.map((l) => ({
           ...l,
@@ -622,7 +643,7 @@ function App() {
     if (slidesFromEnd <= 3 && !isFetchingRef.current) {
       isFetchingRef.current = true;
       setIsFetchingMore(true);
-      const newData = await generateCards(ageGroup, currentModule?.topic, langRef.current);
+      const newData = await generateCards(ageGroup, currentModule?.topic, langRef.current, loadStr("country", ""));
       if (newData) {
         const nl = newData.lessons.slice(0, 5).map((l) => ({
           ...l,
@@ -861,6 +882,24 @@ function App() {
                   ))}
                 </select>
               </div>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {t.onboard.countryLabel[lang]}
+                </label>
+                <input
+                  type="text"
+                  placeholder={countryLoading ? t.onboard.detectingLocation[lang] : t.onboard.countryPlaceholder[lang]}
+                  value={userCountry}
+                  onChange={(e) => { setUserCountry(e.target.value); saveStr("country", e.target.value); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: userCountry ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                />
+              </div>
             </div>
 
             {birthYear && (
@@ -1023,6 +1062,8 @@ function App() {
             saveStr("name", "");
             setBirthYear("");
             saveStr("birth", "");
+            setUserCountry("");
+            saveStr("country", "");
           }} style={{
             background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
             borderRadius: 12, padding: "8px 14px", color: "rgba(255,255,255,0.5)",
