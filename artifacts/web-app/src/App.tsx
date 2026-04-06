@@ -64,7 +64,10 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
       ? " IMPORTANTE: TODAS las lecciones en este lote DEBEN ser de tipo concept_breakdown. NO generes radio_highlight, podcast_clip ni miniGame. Solo concept_breakdown con campos term, definition y analogy."
       : " IMPORTANT: ALL lessons in this batch MUST be type concept_breakdown. Do NOT generate radio_highlight, podcast_clip, or miniGame cards. Only concept_breakdown with term, definition, and analogy fields.")
     : "";
-  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}${conceptOnlyLine}`;
+  const tiktokTextRule = lang === "es"
+    ? " REGLA CRÍTICA DE UI: NUNCA generes párrafos largos. El texto en cualquier tarjeta DEBE ser 1 o 2 oraciones cortas máximo (menos de 120 caracteres en total). Piensa en subtítulos rápidos y contundentes estilo TikTok. Si generas un muro de texto, la app se romperá."
+    : " CRITICAL UI RULE: NEVER generate long paragraphs. Text on any card MUST be 1 or 2 short sentences maximum (under 120 characters total). Think fast, punchy, TikTok-style captions. If you generate a wall of text, the app will break.";
+  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}${conceptOnlyLine}${tiktokTextRule}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -790,6 +793,7 @@ function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [muted, setMuted] = useState(false);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [userName, setUserName] = useState(() => loadStr("name", ""));
   const [birthYear, setBirthYear] = useState(() => loadStr("birth", ""));
   const [accountType, setAccountType] = useState(() => loadStr("acctType", ""));
@@ -884,6 +888,7 @@ function App() {
     setRevealedSlides({});
     setRadioPlayedSlides({});
     setActiveSlideIndex(0);
+    setAudioUnlocked(false);
     slidesScrolledRef.current = 0;
     lastRadioSlideRef.current = -1;
     usedTipsRef.current.clear();
@@ -975,6 +980,13 @@ function App() {
     if (effectiveAccountType === "parent") return;
   };
 
+  const unlockAudio = useCallback(() => {
+    const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+    silentAudio.volume = 0;
+    silentAudio.play().catch(() => {});
+    setAudioUnlocked(true);
+  }, []);
+
   const handleScroll = async (e: any) => {
     if (!currentData || quizUnlocked) return;
     const { scrollTop, scrollHeight, clientHeight } = e.target;
@@ -1001,16 +1013,18 @@ function App() {
     if (slidesFromEnd <= 2 && !isFetchingRef.current) {
       isFetchingRef.current = true;
       setIsFetchingMore(true);
-      const newData = await generateCards(ageGroup, currentModule?.topic, langRef.current, loadStr("country", ""), 4);
-      if (newData) {
-        const nl = newData.lessons.map((l: any) => ({
-          ...l,
-          id: Math.random().toString(36).substr(2, 9),
-        }));
-        setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
-      }
-      setIsFetchingMore(false);
-      isFetchingRef.current = false;
+      setTimeout(async () => {
+        const newData = await generateCards(ageGroup, currentModule?.topic, langRef.current, loadStr("country", ""), 4);
+        if (newData) {
+          const nl = newData.lessons.map((l: any) => ({
+            ...l,
+            id: Math.random().toString(36).substr(2, 9),
+          }));
+          setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
+        }
+        setIsFetchingMore(false);
+        isFetchingRef.current = false;
+      }, 600);
     }
   };
 
@@ -2460,6 +2474,33 @@ function App() {
           scrollbarWidth: "none",
         }}
       >
+        {!audioUnlocked && activeSlideIndex === 0 && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+            zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+          }}>
+            <button
+              onClick={unlockAudio}
+              style={{
+                padding: "22px 48px", borderRadius: 60,
+                background: "linear-gradient(135deg, #2e8bc0, #145374)",
+                border: "2px solid rgba(177,212,224,0.4)",
+                color: "#fff", fontWeight: 900, fontSize: "1.1rem",
+                fontFamily: FONT, cursor: "pointer",
+                letterSpacing: "0.04em",
+                boxShadow: "0 0 60px rgba(46,139,192,0.4), 0 8px 32px rgba(0,0,0,0.5)",
+                animation: "contextPulse 2.5s ease-in-out infinite",
+                display: "flex", alignItems: "center", gap: 14,
+              }}
+            >
+              <span style={{ fontSize: "1.6rem" }}>🔊</span>
+              {lang === "es" ? "Toca para Iniciar Lab" : "Tap to Begin Lab"}
+            </button>
+          </div>
+        )}
+
         {currentData.lessons.map((card, i) => {
           if (card.type === "radio_highlight") {
             return (
@@ -2564,9 +2605,10 @@ function App() {
               <div
                 style={{
                   position: "absolute",
-                  bottom: 55,
-                  left: 20,
-                  width: "calc(100% - 40px)",
+                  top: 0, left: 0, width: "100%", height: "100%",
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center",
+                  padding: "60px 24px",
                   zIndex: 2,
                   animation: "fadeIn 0.5s ease-out both",
                 }}
@@ -2574,12 +2616,12 @@ function App() {
                 <h1
                   style={{
                     color: "#fff",
-                    fontSize: "1.8rem",
+                    fontSize: "clamp(1.8rem, 7vw, 2.6rem)",
                     fontWeight: 900,
                     margin: 0,
-                    marginBottom: 14,
+                    marginBottom: 10,
                     letterSpacing: "-0.03em",
-                    lineHeight: 1.15,
+                    lineHeight: 1.1,
                     textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)",
                     textAlign: "center",
                   }}
@@ -2588,17 +2630,15 @@ function App() {
                 </h1>
                 <p
                   style={{
-                    color: "rgba(255,255,255,0.9)",
-                    marginBottom: 22,
-                    fontSize: "0.95rem",
-                    lineHeight: 1.55,
-                    fontWeight: 500,
-                    textShadow: "0 1px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.6)",
-                    background: "rgba(0,0,0,0.3)",
-                    padding: "12px 16px",
-                    borderRadius: 14,
+                    color: "rgba(255,255,255,0.95)",
+                    marginBottom: 18,
+                    fontSize: "clamp(0.85rem, 3.5vw, 1.05rem)",
+                    lineHeight: 1.45,
+                    fontWeight: 700,
+                    textShadow: "0 1px 8px rgba(0,0,0,0.9)",
                     textAlign: "center",
                     letterSpacing: "0.01em",
+                    maxWidth: 340,
                   }}
                 >
                   {card.desc}
@@ -2612,6 +2652,8 @@ function App() {
                     WebkitBackdropFilter: "blur(30px)",
                     border: "1px solid rgba(255,255,255,0.1)",
                     boxShadow: "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+                    width: "100%",
+                    maxWidth: 400,
                   }}
                 >
                   {!revealedSlides[card.id] ? (
@@ -2621,9 +2663,10 @@ function App() {
                         letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 14,
                       }}>{t.slide.part1[lang]}</div>
                       <p style={{
-                        color: "#fff", fontSize: "1.05rem", fontWeight: 700,
-                        lineHeight: 1.55, marginBottom: 24,
+                        color: "#fff", fontSize: "clamp(1rem, 4vw, 1.2rem)", fontWeight: 800,
+                        lineHeight: 1.4, marginBottom: 24,
                         textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                        textAlign: "center",
                       }}>
                         {card.miniGame.contextSetup || card.miniGame.question}
                       </p>
@@ -2653,11 +2696,12 @@ function App() {
                       <p
                         style={{
                           color: "#fff",
-                          fontSize: "0.9rem",
+                          fontSize: "clamp(0.95rem, 3.8vw, 1.15rem)",
                           fontWeight: 800,
                           marginBottom: 16,
-                          lineHeight: 1.4,
+                          lineHeight: 1.35,
                           textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                          textAlign: "center",
                         }}
                       >
                         {card.miniGame.actionQuestion || card.miniGame.question}

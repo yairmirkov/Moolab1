@@ -31,7 +31,7 @@ export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "60px 28px 80px",
+        padding: "60px 24px 80px",
         fontFamily: FONT,
         overflow: "hidden",
       }}
@@ -44,7 +44,7 @@ export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps
       <div style={{
         display: "inline-flex", alignItems: "center", gap: 6,
         padding: "6px 14px", borderRadius: 6,
-        background: NAVY, marginBottom: 40,
+        background: NAVY, marginBottom: 28,
         animation: "conceptFadeUp 0.5s ease-out both",
       }}>
         <span style={{
@@ -56,27 +56,27 @@ export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps
       </div>
 
       <h1 style={{
-        fontSize: "clamp(2rem, 8vw, 3.2rem)",
+        fontSize: "clamp(2.4rem, 10vw, 3.8rem)",
         fontWeight: 900,
         color: NAVY,
-        letterSpacing: "-0.03em",
-        lineHeight: 1.05,
+        letterSpacing: "-0.04em",
+        lineHeight: 1,
         textAlign: "center",
-        margin: "0 0 28px",
-        maxWidth: 500,
+        margin: "0 0 22px",
+        maxWidth: 420,
         animation: "conceptFadeUp 0.6s ease-out 0.1s both",
       }}>
         {term}
       </h1>
 
       <p style={{
-        fontSize: "1rem",
-        fontWeight: 500,
-        color: "rgba(0,31,91,0.75)",
-        lineHeight: 1.65,
+        fontSize: "clamp(1rem, 4.5vw, 1.25rem)",
+        fontWeight: 700,
+        color: "rgba(0,31,91,0.8)",
+        lineHeight: 1.45,
         textAlign: "center",
-        margin: "0 0 32px",
-        maxWidth: 440,
+        margin: "0 0 28px",
+        maxWidth: 380,
         animation: "conceptFadeUp 0.6s ease-out 0.2s both",
       }}>
         {definition}
@@ -84,25 +84,25 @@ export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps
 
       <div style={{
         width: "100%",
-        maxWidth: 440,
-        padding: "20px 24px",
-        borderRadius: 14,
+        maxWidth: 380,
+        padding: "18px 22px",
+        borderRadius: 16,
         background: "rgba(0,31,91,0.04)",
         border: "1px solid rgba(0,31,91,0.08)",
         animation: "conceptFadeUp 0.6s ease-out 0.3s both",
       }}>
         <div style={{
           fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.15em",
-          color: "rgba(0,31,91,0.35)", textTransform: "uppercase", marginBottom: 10,
+          color: "rgba(0,31,91,0.35)", textTransform: "uppercase", marginBottom: 8,
         }}>
           {lang === "es" ? "ANALOGÍA" : "ANALOGY"}
         </div>
         <p style={{
-          fontSize: "0.92rem",
-          fontWeight: 500,
+          fontSize: "clamp(0.9rem, 3.5vw, 1.05rem)",
+          fontWeight: 600,
           fontStyle: "italic",
           color: "rgba(0,31,91,0.6)",
-          lineHeight: 1.6,
+          lineHeight: 1.5,
           margin: 0,
         }}>
           "{analogy}"
@@ -114,12 +114,12 @@ export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps
         style={{
           position: "absolute",
           bottom: 60,
-          padding: "12px 28px",
-          borderRadius: 10,
+          padding: "14px 32px",
+          borderRadius: 12,
           background: NAVY,
           border: "none",
           color: "#fff",
-          fontSize: "0.72rem",
+          fontSize: "0.8rem",
           fontWeight: 800,
           letterSpacing: "0.06em",
           cursor: "pointer",
