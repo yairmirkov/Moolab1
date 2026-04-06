@@ -284,7 +284,7 @@ function AudioDebugPanel({ activeSlideIndex, cardCount, types }: { activeSlideIn
       overflowY: "auto", pointerEvents: "none",
       borderBottom: "1px solid #333",
     }}>
-      <div>Cache: {audioBlobCache.size} | Slide: {activeSlideIndex} | Cards: {cardCount} | Types: {types}</div>
+      <div>Cache: {audioBlobCache.size} | Slide: {activeSlideIndex} | Cards: {cardCount} | Types: {types} | EL: {isElevenLabsAvailable() ? "YES" : "NO"} | KEY: {import.meta.env.VITE_ELEVENLABS_API_KEY ? "SET(" + String(import.meta.env.VITE_ELEVENLABS_API_KEY).length + ")" : "MISSING"}</div>
       {audioLog.slice(-6).map((l, i) => <div key={i} style={{ opacity: 0.8 }}>{l}</div>)}
     </div>
   );
