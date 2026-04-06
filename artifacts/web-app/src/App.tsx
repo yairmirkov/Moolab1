@@ -916,7 +916,6 @@ function App() {
   }, [xp, streak, level, bossWins, currentModuleIdx, moduleProgress]);
 
   const preloadAudioForCards = useCallback(async (cards: any[], currentLang: Lang) => {
-    console.log(`[Preload] isElevenLabsAvailable=${isElevenLabsAvailable()}, cards=${cards.length}, types=${cards.map(c => c.type).join(",")}`);
     if (!isElevenLabsAvailable()) return;
     const SPEAKER_TO_ROLE: Record<string, "Host" | "Expert" | "Guest1" | "Guest2" | "Narrator"> = {
       host: "Host", presentador: "Host", presentadora: "Host",
