@@ -54,7 +54,6 @@ const PlayStoreBadge = () => (
   </a>
 );
 
-
 const DownloadBadges = () => (
   <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
     <AppStoreBadge />
@@ -90,77 +89,75 @@ const MoolabRadio = () => {
   };
 
   return (
-    <section className="py-10 sm:py-14 px-6">
-      <div className="max-w-2xl mx-auto">
-        <div
-          className="relative overflow-hidden rounded-2xl border border-sky-200/40"
-          style={{
-            background: "linear-gradient(135deg, #0c2d48 0%, #145374 50%, #0c2d48 100%)",
-            boxShadow: "0 8px 40px rgba(12,45,72,0.25), 0 0 80px rgba(46,139,192,0.08)",
-          }}
-        >
-          <div className="absolute inset-0 opacity-10" style={{
-            backgroundImage: "radial-gradient(circle at 20% 50%, rgba(46,139,192,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(177,212,224,0.2) 0%, transparent 50%)",
-          }} />
-          <div className="relative flex items-center gap-4 sm:gap-6 p-5 sm:p-7">
-            <button
-              onClick={togglePlay}
-              className="flex-shrink-0 group cursor-pointer"
-              style={{
-                width: 56, height: 56, borderRadius: "50%",
-                background: playing
-                  ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
-                  : "linear-gradient(135deg, rgba(46,139,192,0.15), rgba(177,212,224,0.1))",
-                border: playing ? "2px solid rgba(177,212,224,0.6)" : "2px solid rgba(46,139,192,0.3)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all 0.3s ease",
-                boxShadow: playing ? "0 0 30px rgba(46,139,192,0.4), 0 0 60px rgba(46,139,192,0.15)" : "0 0 20px rgba(46,139,192,0.1)",
-              }}
-            >
-              {playing ? (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <rect x="4" y="3" width="4" height="14" rx="1" fill={playing ? "#0c2d48" : "#b1d4e0"} />
-                  <rect x="12" y="3" width="4" height="14" rx="1" fill={playing ? "#0c2d48" : "#b1d4e0"} />
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M6 3.5L16 10L6 16.5V3.5Z" fill="#b1d4e0" />
-                </svg>
-              )}
-            </button>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase" style={{ color: "#2e8bc0" }}>
-                  MOOLAB RADIO
+    <div className="max-w-2xl mx-auto mt-8">
+      <div
+        className="relative overflow-hidden rounded-2xl border border-sky-200/40"
+        style={{
+          background: "linear-gradient(135deg, #0c2d48 0%, #145374 50%, #0c2d48 100%)",
+          boxShadow: "0 8px 40px rgba(12,45,72,0.25), 0 0 80px rgba(46,139,192,0.08)",
+        }}
+      >
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: "radial-gradient(circle at 20% 50%, rgba(46,139,192,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(177,212,224,0.2) 0%, transparent 50%)",
+        }} />
+        <div className="relative flex items-center gap-4 sm:gap-6 p-5 sm:p-7">
+          <button
+            onClick={togglePlay}
+            className="flex-shrink-0 group cursor-pointer"
+            style={{
+              width: 56, height: 56, borderRadius: "50%",
+              background: playing
+                ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
+                : "linear-gradient(135deg, rgba(46,139,192,0.15), rgba(177,212,224,0.1))",
+              border: playing ? "2px solid rgba(177,212,224,0.6)" : "2px solid rgba(46,139,192,0.3)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.3s ease",
+              boxShadow: playing ? "0 0 30px rgba(46,139,192,0.4), 0 0 60px rgba(46,139,192,0.15)" : "0 0 20px rgba(46,139,192,0.1)",
+            }}
+          >
+            {playing ? (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="4" y="3" width="4" height="14" rx="1" fill={playing ? "#0c2d48" : "#b1d4e0"} />
+                <rect x="12" y="3" width="4" height="14" rx="1" fill={playing ? "#0c2d48" : "#b1d4e0"} />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M6 3.5L16 10L6 16.5V3.5Z" fill="#b1d4e0" />
+              </svg>
+            )}
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase" style={{ color: "#2e8bc0" }}>
+                MOOLAB RADIO
+              </span>
+              {playing && (
+                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: "rgba(46,139,192,0.15)" }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2e8bc0] animate-pulse" />
+                  <span className="text-[9px] font-bold tracking-wider text-[#2e8bc0] uppercase">LIVE</span>
                 </span>
-                {playing && (
-                  <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: "rgba(46,139,192,0.15)" }}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#2e8bc0] animate-pulse" />
-                    <span className="text-[9px] font-bold tracking-wider text-[#2e8bc0] uppercase">LIVE</span>
-                  </span>
-                )}
-              </div>
-              <div className="flex items-end gap-[2px] h-8 mb-2">
-                {bars.map((h, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-sm"
-                    style={{
-                      height: playing ? `${20 + h * 80}%` : `${10 + h * 25}%`,
-                      background: playing
-                        ? `linear-gradient(to top, #2e8bc0, #b1d4e0)`
-                        : "rgba(46,139,192,0.2)",
-                      transition: "height 0.15s ease",
-                      animation: playing ? `radioBar ${0.3 + h * 0.5}s ease-in-out infinite alternate` : "none",
-                      boxShadow: playing ? "0 0 4px rgba(46,139,192,0.3)" : "none",
-                    }}
-                  />
-                ))}
-              </div>
-              <p className="text-xs sm:text-sm font-medium" style={{ color: "rgba(177,212,224,0.6)" }}>
-                Listen to a sample broadcast
-              </p>
+              )}
             </div>
+            <div className="flex items-end gap-[2px] h-8 mb-2">
+              {bars.map((h, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-sm"
+                  style={{
+                    height: playing ? `${20 + h * 80}%` : `${10 + h * 25}%`,
+                    background: playing
+                      ? `linear-gradient(to top, #2e8bc0, #b1d4e0)`
+                      : "rgba(46,139,192,0.2)",
+                    transition: "height 0.15s ease",
+                    animation: playing ? `radioBar ${0.3 + h * 0.5}s ease-in-out infinite alternate` : "none",
+                    boxShadow: playing ? "0 0 4px rgba(46,139,192,0.3)" : "none",
+                  }}
+                />
+              ))}
+            </div>
+            <p className="text-xs sm:text-sm font-medium" style={{ color: "rgba(177,212,224,0.6)" }}>
+              Listen to a sample broadcast
+            </p>
           </div>
         </div>
       </div>
@@ -170,7 +167,124 @@ const MoolabRadio = () => {
           100% { transform: scaleY(1); }
         }
       `}</style>
-    </section>
+    </div>
+  );
+};
+
+const DeviceMockups = () => {
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true); }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="relative flex items-end justify-center gap-4 sm:gap-6 mx-auto" style={{ maxWidth: 680, minHeight: 340 }}>
+      <div
+        className="hidden sm:block rounded-lg border-[3px] border-[#1a1a2e] overflow-hidden shadow-2xl"
+        style={{
+          width: 340, height: 210,
+          background: "linear-gradient(135deg, #0c2d48, #145374)",
+          transform: inView ? "translateY(0) scale(1)" : "translateY(30px) scale(0.95)",
+          opacity: inView ? 1 : 0,
+          transition: "all 0.8s cubic-bezier(0.16,1,0.3,1)",
+        }}
+      >
+        <div className="h-5 bg-[#1a1a2e] flex items-center px-2 gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+          <span className="ml-auto text-[7px] text-white/30 font-medium">Parent Growth Dashboard</span>
+        </div>
+        <div className="p-3 space-y-2">
+          <div className="flex gap-2">
+            <div className="flex-1 rounded bg-white/10 p-2">
+              <div className="text-[8px] text-white/40 font-bold mb-1">TOTAL XP</div>
+              <div className="text-sm font-black text-white">12,450</div>
+            </div>
+            <div className="flex-1 rounded bg-white/10 p-2">
+              <div className="text-[8px] text-white/40 font-bold mb-1">STREAK</div>
+              <div className="text-sm font-black text-[#2e8bc0]">21 days</div>
+            </div>
+            <div className="flex-1 rounded bg-white/10 p-2">
+              <div className="text-[8px] text-white/40 font-bold mb-1">LEVEL</div>
+              <div className="text-sm font-black text-[#b1d4e0]">Lv. 8</div>
+            </div>
+          </div>
+          {[85, 62, 40].map((w, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="text-[7px] text-white/30 font-bold w-16 truncate">
+                {["Investing", "Budgeting", "Earning"][i]}
+              </div>
+              <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-[#2e8bc0] to-[#b1d4e0]" style={{ width: `${w}%`, transition: "width 1.2s ease" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        className="rounded-lg border-[3px] border-[#1a1a2e] overflow-hidden shadow-2xl"
+        style={{
+          width: 200, height: 280,
+          background: "linear-gradient(180deg, #0c2d48, #145374)",
+          transform: inView ? "translateY(0) scale(1)" : "translateY(40px) scale(0.9)",
+          opacity: inView ? 1 : 0,
+          transition: "all 0.8s cubic-bezier(0.16,1,0.3,1) 0.15s",
+        }}
+      >
+        <div className="h-4 bg-[#1a1a2e] flex items-center justify-center">
+          <div className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+        <div className="p-3 space-y-2">
+          <div className="text-[8px] text-white/40 font-black tracking-wider">DAILY LESSON</div>
+          <div className="rounded bg-white/10 p-2">
+            <div className="text-[9px] text-white font-bold mb-1">Compound Interest</div>
+            <div className="text-[7px] text-white/40 leading-relaxed">How $5/day becomes $50,000...</div>
+          </div>
+          <div className="rounded bg-[#2e8bc0]/20 p-2 text-center">
+            <div className="text-[8px] text-[#b1d4e0] font-bold">QUIZ TIME</div>
+            <div className="text-[7px] text-white/30 mt-0.5">3 questions</div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="text-[7px] text-white/30 font-bold">XP EARNED</div>
+            <div className="text-[10px] text-[#2e8bc0] font-black">+150</div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="hidden sm:block rounded-xl border-[3px] border-[#1a1a2e] overflow-hidden shadow-2xl"
+        style={{
+          width: 130, height: 180,
+          background: "linear-gradient(180deg, #0c2d48, #145374)",
+          transform: inView ? "translateY(0) scale(1)" : "translateY(20px) scale(0.95)",
+          opacity: inView ? 1 : 0,
+          transition: "all 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s",
+        }}
+      >
+        <div className="h-3 bg-[#1a1a2e] flex items-center justify-center">
+          <div className="w-6 h-0.5 rounded-full bg-white/20" />
+        </div>
+        <div className="p-2 space-y-1.5">
+          <div className="text-[7px] text-white/40 font-black tracking-wider">PROGRESS</div>
+          <div className="flex flex-col items-center">
+            <div className="text-lg font-black text-[#2e8bc0]">Lv.5</div>
+            <div className="text-[6px] text-white/30 font-bold">EXPLORER</div>
+          </div>
+          <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+            <div className="h-full rounded-full bg-[#2e8bc0] w-3/4" />
+          </div>
+          <div className="text-[6px] text-white/30 text-center font-medium">750 / 1000 XP</div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -179,9 +293,6 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
   }, []);
-
-  const scrollToDownload = () =>
-    document.getElementById("download-section")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <div
@@ -207,16 +318,17 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
               Parent Login
             </button>
             <button
-              onClick={scrollToDownload}
+              onClick={onTestApp}
               className="px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-200/50 hover:shadow-sky-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              Download App
+              Start Free
             </button>
           </div>
         </div>
       </nav>
 
-      <section className="relative pt-28 sm:pt-32 pb-16 sm:pb-20 px-6 overflow-hidden">
+      {/* STEP 1: MICRO-LEARNING HERO */}
+      <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-20 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-sky-50/60 via-white to-white" />
         <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-sky-200/20 blur-3xl" />
         <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-sky-300/15 blur-3xl" />
@@ -224,34 +336,34 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200/60 mb-6 sm:mb-8">
             <span className="w-2 h-2 rounded-full bg-[#2e8bc0] animate-pulse" />
             <span className="text-[10px] sm:text-xs font-semibold text-[#145374] tracking-wide uppercase">
-              Building Financial Sharks Since Day One
+              AI-Powered Financial Education
             </span>
           </div>
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-5">
-            STOP SCROLLING.
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08] mb-5">
+            Raise a financial expert
             <br />
             <span className="bg-gradient-to-r from-[#0c2d48] via-[#145374] to-[#2e8bc0] bg-clip-text text-transparent">
-              START EARNING.
+              in just 5 minutes a day.
             </span>
           </h1>
           <p className="text-base sm:text-lg text-[#0c2d48]/45 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
-            Your kids were never meant for the rat race. Moolab teaches them to think like Sharks — AI-powered financial mastery to build owners, not employees.
+            Put AI to work for your family. A daily, bite-sized curriculum that makes your child fluent in modern financial terms, tactics, and the wisdom needed to build wealth.
           </p>
-          <div id="download-section" className="mb-8">
-            <DownloadBadges />
-            <p className="text-xs text-[#0c2d48]/25 font-medium mt-4">Free · No ads · Safe for kids</p>
-            {onTestApp && (
-              <button
-                onClick={onTestApp}
-                className="mt-3 text-xs text-[#2e8bc0]/60 font-semibold hover:text-[#145374] underline underline-offset-2 cursor-pointer transition-colors"
-              >
-                Try the web demo instead
-              </button>
-            )}
+          <div className="mb-6">
+            <button
+              onClick={onTestApp}
+              className="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm sm:text-base tracking-wide shadow-xl shadow-sky-300/30 hover:shadow-sky-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            >
+              Start Their Bulletproof Plan &#x26A1;
+            </button>
+            <p className="text-xs text-[#0c2d48]/25 font-medium mt-4">Free to start · No ads · Safe for kids</p>
           </div>
-          <div className="flex justify-center gap-10 sm:gap-14">
+
+          <MoolabRadio />
+
+          <div className="flex justify-center gap-10 sm:gap-14 mt-10">
             {[
-              { value: "8–21", label: "Age Range" },
+              { value: "5 min", label: "Per Day" },
               { value: "8", label: "Modules" },
               { value: "AI", label: "Powered" },
             ].map((s) => (
@@ -264,65 +376,132 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
         </div>
       </section>
 
-      <MoolabRadio />
-
-      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-sky-50/40">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
-              WARNING: THIS IS NOT
-              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> FOR EVERY FAMILY.</span>
-            </h2>
-            <p className="text-sm sm:text-base text-[#0c2d48]/40 font-medium max-w-lg mx-auto">
-              If your dream is for your kid to get a "safe" job, barely make rent, and spend 30 years paying off a mortgage... close this app. Moolab is for parents who want their kids to achieve financial freedom early. We teach healthy risk appetite, calculated leverage, and educated investments — not gambling. We are building the next generation of financial sharks.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {[
-              { icon: "🦈", title: "Shark Mindset", desc: "Ownership over wages. Leverage over savings. Speed over waiting." },
-              { icon: "🤖", title: "AI-Powered", desc: "Gemini AI generates aggressive, personalized wealth lessons every session." },
-              { icon: "⚔️", title: "Boss Battles", desc: "Prove mastery under pressure. No participation trophies here." },
-              { icon: "🏆", title: "Gamification", desc: "Earn XP, build streaks, level up, and track your dominance." },
-            ].map((f) => (
-              <div key={f.title} className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-sky-50/80 to-cyan-50/60 border border-sky-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className="text-2xl sm:text-3xl mb-3">{f.icon}</div>
-                <h3 className="text-sm sm:text-base font-extrabold mb-1.5 tracking-tight">{f.title}</h3>
-                <p className="text-xs sm:text-sm text-[#0c2d48]/40 font-medium leading-relaxed">{f.desc}</p>
-              </div>
+      {/* STEP 2: AUTHORITY / SOCIAL PROOF STRIP */}
+      <section className="py-10 sm:py-14 px-6 border-y border-sky-100/60 bg-sky-50/30">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[10px] sm:text-xs font-semibold text-[#0c2d48]/30 uppercase tracking-[0.2em] mb-6">
+            The AI-driven curriculum redefining financial literacy
+          </p>
+          <div className="flex items-center justify-center gap-8 sm:gap-14 flex-wrap">
+            {["Smart Habit", "NextGen Finance", "EdTech Daily", "Wealth Wisdom"].map((name) => (
+              <span
+                key={name}
+                className="text-base sm:text-lg font-extrabold tracking-tight"
+                style={{ color: "rgba(12,45,72,0.12)" }}
+              >
+                {name}
+              </span>
             ))}
           </div>
         </div>
       </section>
 
+      {/* STEP 3: OLD WAY VS. NEW WAY CONTRAST TABLE */}
+      <section className="py-16 sm:py-24 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
+              The Learning{" "}
+              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">Paradigm Shift</span>
+            </h2>
+            <p className="text-sm sm:text-base text-[#0c2d48]/40 font-medium max-w-lg mx-auto">
+              Traditional methods fail because the world has changed. Your child deserves a modern approach.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
+            <div className="rounded-2xl border border-red-200/50 bg-gradient-to-br from-red-50/60 to-gray-50/60 p-6 sm:p-8">
+              <div className="text-[10px] font-black tracking-[0.2em] uppercase text-red-400/70 mb-5">The Old Way</div>
+              <div className="space-y-4">
+                {[
+                  "Memorizing formulas",
+                  "Piggy banks & allowances",
+                  "Boring textbooks",
+                  "\"We'll teach them later.\"",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center mt-0.5">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2.5 2.5L7.5 7.5M7.5 2.5L2.5 7.5" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </span>
+                    <span className="text-sm font-semibold text-[#0c2d48]/50">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-sky-200/60 bg-gradient-to-br from-sky-50/80 to-white p-6 sm:p-8" style={{ boxShadow: "0 4px 30px rgba(46,139,192,0.08)" }}>
+              <div className="text-[10px] font-black tracking-[0.2em] uppercase text-[#2e8bc0] mb-5">The Moolab Way</div>
+              <div className="space-y-4">
+                {[
+                  "5-10 minutes of daily AI learning",
+                  "Real-world market terminology",
+                  "Engaging audio & podcasts",
+                  "Bulletproof financial habits",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#145374] flex items-center justify-center mt-0.5">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5.2L4.2 7.5L8 2.5" stroke="#b1d4e0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                    <span className="text-sm font-semibold text-[#0c2d48]/70">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* STEP 4: ECOSYSTEM DEVICE MOCKUPS */}
+      <section className="py-16 sm:py-24 px-6 bg-gradient-to-b from-white via-sky-50/30 to-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
+              One App. 5 Minutes a Day.
+              <br />
+              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">
+                A Lifetime of Financial Wisdom.
+              </span>
+            </h2>
+            <p className="text-sm sm:text-base text-[#0c2d48]/40 font-medium max-w-lg mx-auto">
+              From the Parent Growth Dashboard to bite-sized daily lessons, Moolab meets your family wherever they are.
+            </p>
+          </div>
+          <DeviceMockups />
+        </div>
+      </section>
+
+      {/* Three Age Tiers */}
       <section className="py-16 sm:py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
-              Three Identities.{" "}
-              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">One Predator.</span>
+              Built for Every Age.{" "}
+              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">Personalized by AI.</span>
             </h2>
             <p className="text-sm sm:text-base text-[#0c2d48]/40 font-medium max-w-lg mx-auto">
-              We don't water down the truth. We scale it to their age.
+              The curriculum adapts to your child's age, ensuring every lesson is relevant, engaging, and age-appropriate.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
             {[
               {
-                emoji: "🌟", mode: "MATRIX BREAKER", ages: "Ages 8–12",
-                desc: "Escaping the Matrix early. Teaching the mechanics of money, digital assets, and ownership before middle school.",
-                topics: ["How money really works", "Digital asset ownership", "Building vs. buying"],
+                emoji: "🌟", mode: "EXPLORER", ages: "Ages 8-12",
+                desc: "Building the foundation: how money works, saving habits, and the power of ownership.",
+                topics: ["How money really works", "Smart saving habits", "Ownership vs. spending"],
                 accent: "emerald",
               },
               {
-                emoji: "🔥", mode: "TEEN TYCOON", ages: "Ages 13–17",
-                desc: "Mastering the creator economy, cash flow, and building leverage while others are just playing video games.",
-                topics: ["High-velocity side hustles", "Trend recognition", "Aggressive reinvestment"],
+                emoji: "🔥", mode: "BUILDER", ages: "Ages 13-17",
+                desc: "Leveling up: earning strategies, budgeting mastery, and understanding real markets.",
+                topics: ["Earning & side projects", "Budgeting like a pro", "Market fundamentals"],
                 accent: "amber",
               },
               {
-                emoji: "💎", mode: "APEX PREDATOR", ages: "Ages 18–21",
-                desc: "Aggressive portfolio expansion, educated risk in high-volatility markets, and hacking the credit system.",
-                topics: ["Capital leverage", "High-volatility assets", "Credit system mastery"],
+                emoji: "💎", mode: "STRATEGIST", ages: "Ages 18-21",
+                desc: "Advanced wisdom: investing, credit systems, and building long-term wealth strategies.",
+                topics: ["Investment principles", "Credit & leverage", "Wealth-building tactics"],
                 accent: "violet",
               },
             ].map((card) => {
@@ -335,14 +514,14 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
                 <div key={card.mode} className={`relative rounded-2xl ${colors.bg} border ${colors.border} p-6 sm:p-7 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden`}>
                   <div className={`absolute top-0 left-0 right-0 h-1 ${colors.bar}`} />
                   <div className="text-3xl mb-3 mt-1">{card.emoji}</div>
-                  <div className={`text-[10px] font-black tracking-[0.2em] uppercase ${colors.text} mb-1`}>{card.mode} MODE</div>
+                  <div className={`text-[10px] font-black tracking-[0.2em] uppercase ${colors.text} mb-1`}>{card.mode}</div>
                   <div className="text-xs font-bold text-[#0c2d48]/40 mb-3">{card.ages}</div>
                   <p className="text-xs sm:text-sm text-[#0c2d48]/50 font-medium leading-relaxed mb-4">{card.desc}</p>
                   <div className="space-y-1.5">
-                    {card.topics.map((t) => (
-                      <div key={t} className="flex items-center gap-2 text-[11px] font-semibold text-[#0c2d48]/40">
+                    {card.topics.map((tp) => (
+                      <div key={tp} className="flex items-center gap-2 text-[11px] font-semibold text-[#0c2d48]/40">
                         <span className={`w-1.5 h-1.5 rounded-full ${colors.bar}`} />
-                        {t}
+                        {tp}
                       </div>
                     ))}
                   </div>
@@ -353,6 +532,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
         </div>
       </section>
 
+      {/* Parent Growth Dashboard */}
       <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-sky-50/40 to-white">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
@@ -361,17 +541,17 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
                 <span className="text-[10px] sm:text-xs font-bold text-[#145374] uppercase tracking-wider">For Parents</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
-                Parental
-                <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> War Room</span>
+                Parent
+                <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> Growth Dashboard</span>
               </h2>
               <p className="text-sm text-[#0c2d48]/45 font-medium leading-relaxed mb-6">
-                Full operational intelligence on your child's financial training. Track every module conquered, every boss defeated, every level of mastery achieved.
+                Full visibility into your child's financial education journey. Track every lesson completed, every skill mastered, every milestone achieved.
               </p>
               <div className="space-y-3 mb-6">
                 {[
-                  { icon: "📊", text: "Real-time XP, streak, and dominance tracking" },
-                  { icon: "🎯", text: "Module-by-module conquest progress" },
-                  { icon: "🧠", text: "Competency assessment and mastery insights" },
+                  { icon: "📊", text: "Real-time XP, streak, and progress tracking" },
+                  { icon: "🎯", text: "Module-by-module learning progress" },
+                  { icon: "🧠", text: "Competency insights and mastery reports" },
                   { icon: "👀", text: "Full transparency — see exactly what they're learning" },
                 ].map((item) => (
                   <div key={item.text} className="flex items-start gap-2.5">
@@ -395,7 +575,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
                   {[
                     { label: "XP", value: "2,450", icon: "⚡" },
                     { label: "Streak", value: "7 days", icon: "🔥" },
-                    { label: "Boss Wins", value: "4", icon: "🏆" },
+                    { label: "Quizzes", value: "12", icon: "🏆" },
                   ].map((stat) => (
                     <div key={stat.label} className="bg-sky-50 rounded-lg p-2.5 text-center">
                       <div className="text-base">{stat.icon}</div>
@@ -427,47 +607,34 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/50 mb-5">
-            <span className="text-[10px] sm:text-xs font-bold text-amber-700 uppercase tracking-wider">Coming Soon</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-3">
-            Mastermind
-            <span className="bg-gradient-to-r from-amber-500 to-orange-400 bg-clip-text text-transparent"> Arsenal</span>
-          </h2>
-          <p className="text-sm text-[#0c2d48]/40 font-medium max-w-md mx-auto mb-10">
-            For families who refuse to raise average. Unlock the full weapons cache.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 max-w-2xl mx-auto mb-10">
-            {[
-              { icon: "♾️", title: "Unlimited Scrolls", desc: "No daily limits — infinite reps build infinite edge." },
-              { icon: "📈", title: "War Room Analytics", desc: "Deep performance intelligence on mastery velocity and gaps." },
-              { icon: "🎓", title: "Elite Modules", desc: "Exclusive topics: leverage strategies, crypto mechanics, empire building." },
-            ].map((perk) => (
-              <div key={perk.title} className="p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 text-center">
-                <div className="text-2xl mb-2">{perk.icon}</div>
-                <h3 className="text-xs font-extrabold tracking-tight mb-1.5">{perk.title}</h3>
-                <p className="text-[11px] text-[#0c2d48]/40 font-medium leading-relaxed">{perk.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 sm:py-20 px-6 bg-gradient-to-b from-white to-sky-50/50">
+      {/* STEP 5: URGENCY / FINAL CTA */}
+      <section className="py-20 sm:py-28 px-6" style={{ background: "linear-gradient(135deg, #0c2d48 0%, #145374 50%, #0c2d48 100%)" }}>
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
-            Raise a Shark
-            <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent"> Today.</span>
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-4 text-white leading-tight">
+            Give them the financial foundation
+            <br />
+            <span style={{ color: "#b1d4e0" }}>you wish you had.</span>
           </h2>
-          <p className="text-sm text-[#0c2d48]/35 font-medium mb-8 max-w-md mx-auto">
-            Free to start. No ads. No data selling. Just aggressive financial education that creates builders, not borrowers.
+          <p className="text-sm sm:text-base font-semibold mb-10" style={{ color: "rgba(177,212,224,0.5)" }}>
+            Cheaper than a tutor. More valuable than a degree.
           </p>
-          <DownloadBadges />
-          <p className="text-[10px] text-[#0c2d48]/20 font-medium mt-4">
-            Available on iOS and Android · Ages 7–21
-          </p>
+          <button
+            onClick={onTestApp}
+            className="px-8 py-3.5 rounded-full font-bold text-sm sm:text-base tracking-wide shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            style={{
+              background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
+              color: "#0c2d48",
+              boxShadow: "0 4px 30px rgba(46,139,192,0.35), 0 0 60px rgba(46,139,192,0.15)",
+            }}
+          >
+            Begin Their Financial Education
+          </button>
+          <div className="mt-8">
+            <DownloadBadges />
+            <p className="text-[10px] font-medium mt-4" style={{ color: "rgba(177,212,224,0.25)" }}>
+              Available on iOS and Android · Ages 8-21
+            </p>
+          </div>
         </div>
       </section>
 
@@ -475,10 +642,17 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
         <div className="max-w-5xl mx-auto flex flex-col items-center gap-3">
           <MoolabLogo height={32} glow />
           <p className="text-[10px] text-[#0c2d48]/20 font-medium">
-            Building the next generation of financial sharks.
+            Building the next generation of financially literate leaders.
           </p>
         </div>
       </footer>
+
+      <style>{`
+        @keyframes logoGlow {
+          0%, 100% { filter: drop-shadow(0 0 6px #2e8bc0) drop-shadow(0 0 14px rgba(46,139,192,0.4)); }
+          50% { filter: drop-shadow(0 0 10px #2e8bc0) drop-shadow(0 0 20px rgba(46,139,192,0.6)); }
+        }
+      `}</style>
     </div>
   );
 }
