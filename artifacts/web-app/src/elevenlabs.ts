@@ -20,14 +20,6 @@ const VOICE_MAP = {
 type VoiceLang = keyof typeof VOICE_MAP;
 type VoiceRole = keyof typeof VOICE_MAP.EN;
 
-const SPANISH_COUNTRIES = new Set([
-  "dominican republic", "spain", "mexico", "colombia", "argentina",
-  "peru", "venezuela", "chile", "ecuador", "guatemala", "cuba",
-  "bolivia", "honduras", "paraguay", "el salvador", "nicaragua",
-  "costa rica", "panama", "uruguay", "puerto rico",
-  "república dominicana", "españa", "méxico", "panamá",
-]);
-
 const SPEAKER_TO_ROLE: Record<string, VoiceRole> = {
   host: "Host",
   presentador: "Host",
@@ -45,10 +37,6 @@ const SPEAKER_TO_ROLE: Record<string, VoiceRole> = {
 };
 
 export function resolveVoiceLang(explicitLang?: "en" | "es"): VoiceLang {
-  try {
-    const country = localStorage.getItem("ws_country") || "";
-    if (SPANISH_COUNTRIES.has(country.toLowerCase().trim())) return "ES";
-  } catch {}
   const lang = explicitLang ?? (() => { try { return localStorage.getItem("ws_lang") || "en"; } catch { return "en"; } })();
   return lang === "es" ? "ES" : "EN";
 }

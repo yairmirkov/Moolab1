@@ -42,7 +42,10 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
     ? ` El usuario se encuentra en: ${country}. Debes usar una división de localización 30/70. El 70% de tus conceptos financieros, ejemplos y mecánicas de mercado deben ser Globales (Wall Street, Crypto, clases de activos amplias). El 30% de tus ejemplos DEBEN estar hiperlocalizados al país del usuario. Por ejemplo, si están en Estados Unidos, usa Bank of America o conceptos fiscales locales. Si están en República Dominicana, menciona específicamente instituciones locales como Banco Popular o BHD, y matices económicos locales. Haz que las referencias locales se sientan naturales y fluidas.`
     : ` The user is based in: ${country}. You must use a 30/70 localization split. 70% of your financial concepts, examples, and market mechanics should be Global (Wall Street, Crypto, broad asset classes). 30% of your examples MUST be hyper-localized to the user's country. For example, if they are in the US, use Bank of America or local tax concepts. If they are in the Dominican Republic, specifically mention local institutions like Banco Popular or BHD, and local economic nuances. Make the local references feel seamless and natural.`
   ) : "";
-  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}`;
+  const langLine = lang === "es"
+    ? " IMPORTANTE: TODA tu respuesta DEBE estar completamente en ESPAÑOL. No mezcles idiomas."
+    : " IMPORTANT: Your ENTIRE response MUST be in ENGLISH. Do not mix languages.";
+  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -1649,7 +1652,7 @@ function App() {
             color: "#145374", fontSize: "0.65rem", fontWeight: 800, cursor: "pointer", fontFamily: FONT,
             zIndex: 10, letterSpacing: "0.08em",
           }}
-        >{lang === "en" ? "ES 🇲🇽" : "EN 🇺🇸"}</button>
+        >{lang === "en" ? "ES" : "EN"}</button>
 
         {onboardStep > 0 && (
           <button
