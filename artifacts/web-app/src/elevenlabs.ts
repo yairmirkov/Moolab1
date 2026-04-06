@@ -1,5 +1,13 @@
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY as string | undefined;
 
+const _log = (msg: string) => {
+  const ts = new Date().toLocaleTimeString();
+  const entry = `[${ts}] EL: ${msg}`;
+  console.log(entry);
+  const arr = (window as any).__audioLog;
+  if (arr) { arr.push(entry); if (arr.length > 40) arr.shift(); }
+};
+
 const VOICE_MAP = {
   EN: {
     Host: "1fz2mW1imKTf5Ryjk5su",
@@ -60,9 +68,9 @@ export const fetchAudioBlob = async (
   text: string,
   voiceId: string,
 ): Promise<string | null> => {
-  if (!ELEVENLABS_API_KEY) { console.warn("[ElevenLabs] fetchAudioBlob: no API key"); return null; }
+  if (!ELEVENLABS_API_KEY) { _log("fetchBlob: NO KEY"); return null; }
   try {
-    console.log(`[ElevenLabs] fetchAudioBlob: voiceId=${voiceId}, text="${text.substring(0, 30)}..."`);
+    _log(`fetchBlob: voice=${voiceId.substring(0,8)}, "${text.substring(0, 25)}..."`);
     const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "xi-api-key": ELEVENLABS_API_KEY },
@@ -74,15 +82,15 @@ export const fetchAudioBlob = async (
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
-      console.error(`[ElevenLabs] fetchAudioBlob: HTTP ${res.status} ${res.statusText} - ${body.substring(0, 200)}`);
+      _log(`fetchBlob: HTTP ${res.status} - ${body.substring(0, 80)}`);
       return null;
     }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-    console.log(`[ElevenLabs] fetchAudioBlob: OK, blob size=${blob.size}, type=${blob.type}, url=${url.substring(0, 30)}`);
+    _log(`fetchBlob: OK size=${blob.size} type=${blob.type}`);
     return url;
-  } catch (e) {
-    console.error("[ElevenLabs] fetchAudioBlob error:", e);
+  } catch (e: any) {
+    _log(`fetchBlob: ERROR ${e?.message?.substring(0, 60)}`);
     return null;
   }
 };

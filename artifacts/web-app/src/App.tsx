@@ -261,13 +261,14 @@ const RADIO_VIZ_BARS = Array.from({ length: 48 }, (_, i) => ({
 
 const audioBlobCache = new Map<string, string>();
 
-const audioLog: string[] = [];
+const audioLog: string[] = (window as any).__audioLog || [];
+(window as any).__audioLog = audioLog;
 const logAudio = (msg: string) => {
   const ts = new Date().toLocaleTimeString();
   const entry = `[${ts}] ${msg}`;
   console.log(`[Audio] ${entry}`);
   audioLog.push(entry);
-  if (audioLog.length > 30) audioLog.shift();
+  if (audioLog.length > 40) audioLog.shift();
 };
 
 function AudioDebugPanel({ activeSlideIndex, cardCount, types }: { activeSlideIndex: number; cardCount: number; types: string }) {
@@ -279,13 +280,13 @@ function AudioDebugPanel({ activeSlideIndex, cardCount, types }: { activeSlideIn
   return (
     <div style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-      background: "rgba(0,0,0,0.85)", color: "#0f0", fontSize: "0.55rem",
-      fontFamily: "monospace", padding: "4px 8px", maxHeight: 120,
+      background: "rgba(0,0,0,0.85)", color: "#0f0", fontSize: "0.5rem",
+      fontFamily: "monospace", padding: "4px 8px", maxHeight: 180,
       overflowY: "auto", pointerEvents: "none",
       borderBottom: "1px solid #333",
     }}>
       <div>Cache: {audioBlobCache.size} | Slide: {activeSlideIndex} | Cards: {cardCount} | Types: {types} | EL: {isElevenLabsAvailable() ? "YES" : "NO"} | KEY: {import.meta.env.VITE_ELEVENLABS_API_KEY ? "SET(" + String(import.meta.env.VITE_ELEVENLABS_API_KEY).length + ")" : "MISSING"}</div>
-      {audioLog.slice(-6).map((l, i) => <div key={i} style={{ opacity: 0.8 }}>{l}</div>)}
+      {audioLog.slice(-10).map((l, i) => <div key={i} style={{ opacity: 0.8 }}>{l}</div>)}
     </div>
   );
 }
