@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import LandingPage from "./LandingPage";
 import LandingPageES from "./LandingPageES";
+import CommandCenter from "./CommandCenter";
 import translations, { type Lang } from "./translations";
 import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio } from "./elevenlabs";
 
@@ -704,6 +705,9 @@ function App() {
   const [countryLoading, setCountryLoading] = useState(false);
   const [generatedPin, setGeneratedPin] = useState(() => String(Math.floor(1000 + Math.random() * 9000)));
   const [familyVersion, setFamilyVersion] = useState(0);
+  const getFamilyState = (): { parent?: string; students?: { nickname: string; pin: string; birthYear: string; country: string }[] } => {
+    try { return JSON.parse(localStorage.getItem("ws_family") || "{}"); } catch { return {}; }
+  };
   const [onboardStep, setOnboardStep] = useState(() => {
     const savedType = loadStr("acctType", "");
     const savedName = loadStr("name", "");
@@ -969,9 +973,7 @@ function App() {
   }
 
   if (!appStarted) {
-    const familyState: { parent?: string; students?: { nickname: string; pin: string; birthYear: string; country: string }[] } = (() => {
-      try { return JSON.parse(localStorage.getItem("ws_family") || "{}"); } catch { return {}; }
-    })();
+    const familyState = getFamilyState();
 
     const saveFamily = (state: typeof familyState) => {
       localStorage.setItem("ws_family", JSON.stringify(state));
@@ -1659,177 +1661,37 @@ function App() {
       </div>
     );
   }
-  const totalModulesComplete = Object.values(moduleProgress).filter((w) => w >= 3).length;
-  const overallPct = Math.round((totalModulesComplete / MODULES.length) * 100);
+  const handleParentLogout = () => {
+    setAppStarted(false);
+    setOnboardStep(0);
+    setAccountType("");
+    saveStr("acctType", "");
+    setParentName("");
+    saveStr("parentName", "");
+    setUserName("");
+    saveStr("name", "");
+    setBirthYear("");
+    saveStr("birth", "");
+    setUserCountry("");
+    saveStr("country", "");
+  };
 
   const parentDashContent = (
-    <div style={{
-      width: "100vw", minHeight: "100dvh",
-      background: "linear-gradient(160deg, #0a0a0f 0%, #111118 50%, #0a0a0f 100%)",
-      color: "#fff", fontFamily: FONT, overflowY: "auto",
-    }}>
-      <style>{`
-        @keyframes pdFadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        .pd-card { animation: pdFadeIn 0.4s ease-out both; }
-      `}</style>
-
-      <div style={{ padding: "24px 20px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <div style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", marginBottom: 4 }}>
-            {accountType === "parent" ? t.parentDash.dashboard[lang] : t.parentDash.parentView[lang]}
-          </div>
-          <h1 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 900, letterSpacing: "-0.02em" }}>
-            {accountType === "parent" ? `${t.parentDash.hiParent[lang]}, ${parentName || t.parentDash.parent[lang]}` : t.parentDash.whatParentSees[lang]}
-          </h1>
-        </div>
-        {accountType === "parent" ? (
-          <button className="ws-btn" onClick={() => {
-            setAppStarted(false);
-            setOnboardStep(0);
-            setAccountType("");
-            saveStr("acctType", "");
-            setParentName("");
-            saveStr("parentName", "");
-            setUserName("");
-            saveStr("name", "");
-            setBirthYear("");
-            saveStr("birth", "");
-            setUserCountry("");
-            saveStr("country", "");
-          }} style={{
-            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 12, padding: "8px 14px", color: "rgba(255,255,255,0.5)",
-            fontFamily: FONT, fontWeight: 700, fontSize: "0.65rem", cursor: "pointer",
-          }}>{t.parentDash.logout[lang]}</button>
-        ) : (
-          <button className="ws-btn" onClick={() => setShowParentDash(false)} style={{
-            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "50%", width: 40, height: 40, color: "#fff", fontSize: "1.2rem",
-            cursor: "pointer", fontFamily: FONT,
-          }}>✕</button>
-        )}
-      </div>
-
-      <div style={{ padding: "20px 20px 8px" }}>
-        <div style={{
-          background: "rgba(46,139,192,0.04)", border: "1px solid rgba(46,139,192,0.1)",
-          borderRadius: 20, padding: "20px 22px", display: "flex", alignItems: "center", gap: 16,
-        }} className="pd-card">
-          <div style={{
-            width: 56, height: 56, borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(46,139,192,0.2), rgba(177,212,224,0.1))",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "1.6rem", border: "2px solid rgba(46,139,192,0.3)",
-          }}>
-            {userName ? userName.charAt(0).toUpperCase() : "?"}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 900, fontSize: "1.15rem", letterSpacing: "-0.01em" }}>{userName || t.parentDash.learner[lang]}</div>
-            <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.65rem", fontWeight: 600, marginTop: 2 }}>
-              {(() => {
-                const age = getAgeFromYear(birthYear);
-                const g = getAgeGroup(age);
-                return g === "Kids" ? `${t.parentDash.age[lang]} ~${age} · ${t.parentDash.trackKids[lang]}` : g === "Teens" ? `${t.parentDash.age[lang]} ~${age} · ${t.parentDash.trackTeens[lang]}` : `${t.parentDash.age[lang]} ~${age} · ${t.parentDash.trackAdults[lang]}`;
-              })()}
-            </div>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#FFD93D" }}>{level}</div>
-            <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em" }}>{t.parentDash.level[lang]}</div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ padding: "8px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-        {[
-          { label: t.parentDash.totalXp[lang], val: xp, color: "#2e8bc0", icon: "⚡" },
-          { label: t.parentDash.bossWins[lang], val: bossWins, color: "#FFD93D", icon: "🏆" },
-          { label: t.parentDash.streak[lang], val: streak, color: "#FF6B6B", icon: "🔥" },
-        ].map((s, i) => (
-          <div key={s.label} className="pd-card" style={{
-            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
-            borderRadius: 18, padding: "18px 12px", textAlign: "center",
-            animationDelay: `${i * 0.08}s`,
-          }}>
-            <div style={{ fontSize: "1.2rem", marginBottom: 4 }}>{s.icon}</div>
-            <div style={{ color: s.color, fontSize: "1.6rem", fontWeight: 900, textShadow: `0 0 15px ${s.color}30` }}>{s.val}</div>
-            <div style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.1em", marginTop: 4 }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ padding: "16px 20px 8px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div style={{ fontSize: "0.85rem", fontWeight: 800 }}>{t.parentDash.moduleProgress[lang]}</div>
-          <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#2e8bc0" }}>{totalModulesComplete}/{MODULES.length} {t.parentDash.complete[lang]}</div>
-        </div>
-        <div style={{
-          background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
-          borderRadius: 18, padding: "6px 0", overflow: "hidden",
-        }}>
-          {MODULES.map((mod, idx) => {
-            const wins = moduleProgress[idx] || 0;
-            const done = wins >= mod.winsNeeded;
-            const isActive = idx === currentModuleIdx && !done;
-            const pct = Math.round((wins / mod.winsNeeded) * 100);
-            return (
-              <div key={mod.id} className="pd-card" style={{
-                display: "flex", alignItems: "center", gap: 12, padding: "14px 18px",
-                borderBottom: idx < MODULES.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
-                animationDelay: `${idx * 0.05}s`,
-              }}>
-                <div style={{ fontSize: "1.2rem", width: 28, textAlign: "center" }}>{mod.icon}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                    <span style={{ fontWeight: 700, fontSize: "0.75rem", color: done ? "#2e8bc0" : isActive ? "#fff" : "rgba(255,255,255,0.4)" }}>
-                      {mod.name}
-                    </span>
-                    <span style={{ fontSize: "0.5rem", fontWeight: 700, color: done ? "#2e8bc0" : isActive ? "#FFD93D" : "rgba(255,255,255,0.2)", letterSpacing: "0.08em" }}>
-                      {done ? t.parentDash.completeCheck[lang] : isActive ? t.parentDash.inProgress[lang] : `${wins}/${mod.winsNeeded}`}
-                    </span>
-                  </div>
-                  <div style={{ width: "100%", height: 4, borderRadius: 2, background: "rgba(255,255,255,0.06)" }}>
-                    <div style={{
-                      width: `${pct}%`, height: "100%", borderRadius: 2,
-                      background: done ? "#2e8bc0" : isActive ? "linear-gradient(90deg, #FFD93D, #FF6B6B)" : "rgba(255,255,255,0.1)",
-                      transition: "width 0.5s ease",
-                    }} />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div style={{ padding: "16px 20px 8px" }}>
-        <div style={{ fontSize: "0.85rem", fontWeight: 800, marginBottom: 12 }}>{t.parentDash.learningInsights[lang]}</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {[
-            { label: t.parentDash.currentModule[lang], val: allModulesComplete ? t.parentDash.allDone[lang] : currentModule.name, sub: allModulesComplete ? "🎉" : currentModule.icon, color: "#E040FB" },
-            { label: t.parentDash.overallProgress[lang], val: `${overallPct}%`, sub: `${totalModulesComplete} ${t.parentDash.of[lang]} ${MODULES.length}`, color: "#2e8bc0" },
-            { label: t.parentDash.xpPerLevel[lang], val: `${xp % (level * 50)}/${level * 50}`, sub: t.parentDash.toNextLevel[lang], color: "#FFD93D" },
-            { label: t.parentDash.sessionsPlayed[lang], val: bossWins + (streak > 0 ? streak : 0), sub: t.parentDash.totalRounds[lang], color: "#0c2d48" },
-          ].map((s, i) => (
-            <div key={s.label} className="pd-card" style={{
-              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: 16, padding: "16px 14px",
-              animationDelay: `${i * 0.08}s`,
-            }}>
-              <div style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6 }}>{s.label.toUpperCase()}</div>
-              <div style={{ color: s.color, fontSize: "1.1rem", fontWeight: 900 }}>{s.val}</div>
-              <div style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.55rem", fontWeight: 600, marginTop: 2 }}>{s.sub}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ padding: "20px 20px 40px", textAlign: "center" }}>
-        <div style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.55rem", fontWeight: 600 }}>
-          Moolab · {accountType === "parent" ? t.parentDash.parentDashboard[lang] : t.parentDash.transparencyView[lang]}
-        </div>
-      </div>
-    </div>
+    <CommandCenter
+      lang={lang}
+      parentName={parentName}
+      familyState={getFamilyState()}
+      modules={MODULES}
+      moduleProgress={moduleProgress}
+      currentModuleIdx={currentModuleIdx}
+      xp={xp}
+      level={level}
+      streak={streak}
+      bossWins={bossWins}
+      userName={userName}
+      onLogout={accountType === "parent" ? handleParentLogout : () => setShowParentDash(false)}
+      onCreateStudent={() => { setAppStarted(false); setOnboardStep(4); }}
+    />
   );
 
   if (accountType === "parent" && appStarted) {

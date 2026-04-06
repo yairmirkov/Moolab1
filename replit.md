@@ -42,7 +42,11 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
     -   **Step 4 (Create Student)**: Parent enters student nickname, birth year, country; system auto-generates a random 4-digit PIN. Saves to `ws_family` localStorage as `{parent, students: [{nickname, pin, birthYear, country}]}`.
     -   **Step 3 (Student PIN Login)**: Students enter nickname + 4-digit PIN, matched against `ws_family` state. On match, loads their profile (name, birthYear, country) and routes directly into the feed.
     -   **Step 2 (Legacy Fallback)**: Original form-based onboarding kept for backward compatibility.
--   **Parent Dashboard**: Provides transparency for parents, displaying child's progress, stats, and module completion.
+-   **Parent Command Center** (`CommandCenter.tsx`): Premium white (#F8F9FB) + navy (#001F5B) dashboard with 4 tabs:
+    -   **Overview**: Financial Competency Summary, current module progress bar, Active Streak / M-XP / Mastery Level metrics, and full module list with status badges.
+    -   **Lab Progress**: Mock quiz results data table (Date, Subject, Score, Status badges), competency breakdown with progress circles (Risk Appetite, Market Mechanics, Asset Management).
+    -   **Family Users**: Sub-accounts management listing student nicknames, age brackets, and 4-digit Lab PINs. "Provision New Student Account" button routes to Step 4.
+    -   **Billing**: Moolab Apex Plan ($19.99/mo) display, plan features checklist, mock VISA payment method, Update/View Invoices buttons.
 -   **Radio Show Intermissions**: Integrates "radio_highlight" cards with audio content (fun facts, hype) that auto-play when scrolled into view.
 
 ## External Dependencies

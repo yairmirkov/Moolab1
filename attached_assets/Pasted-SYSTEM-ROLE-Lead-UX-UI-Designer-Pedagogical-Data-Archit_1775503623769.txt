@@ -1,0 +1,48 @@
+SYSTEM ROLE: Lead UX/UI Designer & Pedagogical Data Architect.
+OBJECTIVE: Build a premium, high-fidelity CommandCenter.tsx dashboard for Parents. The UI must be ultra-clean, using a solid White background with Navy Blue (#001F5B) accents, conveying high-level financial trust. Use mock data so the UI renders perfectly right away.
+
+STEP 1: DASHBOARD LAYOUT & NAVIGATION
+
+Create a sleek, minimalist sidebar navigation with 4 tabs: Overview, Lab Progress, Family Users, Billing.
+
+The top header should welcome the parent (e.g., "Welcome, Family Office") with a "Secure Logout" button.
+
+STEP 2: THE PEDAGOGICAL OVERVIEW (TAB 1)
+
+Build a "Financial Competency Summary" card. Instead of just showing "points," show real-world metrics.
+
+Include a clean, horizontal progress bar for current modules.
+
+Display 3 key metric blocks:
+
+Active Streak (e.g., "14 Days of Market Focus")
+
+M-XP Earned (e.g., "12,500 XP")
+
+Current Mastery Level (e.g., "Understanding Compound Leverage").
+
+STEP 3: LAB PROGRESS & QUIZZES (TAB 2)
+
+Create a clean data table showing recent quiz results.
+
+Columns: Date, Subject (e.g., "Macro-Economics", "Credit Hacking"), Score, and a status badge (e.g., "Shark Level", "Needs Review").
+
+Add a radar chart or simple progress circles showing the student's breakdown across 3 categories: Risk Appetite, Market Mechanics, and Asset Management.
+
+STEP 4: FAMILY USERS MANAGEMENT (TAB 3)
+
+Build a sleek "Sub-Accounts" management section.
+
+Display a list of current students showing: Nickname, Age Bracket, and their unique 4-Digit Lab PIN.
+
+Include a prominent, premium button to "Provision New Student Account."
+
+STEP 5: BILLING & SUBSCRIPTION (TAB 4)
+
+Create a clean, simple billing interface.
+
+Show the current active plan (e.g., "Moolab Apex Plan - $19.99/mo").
+
+Include placeholder buttons for "Update Payment Method" and "View Invoices".
+
+OUTPUT: Build the comprehensive CommandCenter.tsx component with these 4 tabs, populate it with realistic FinTech mock data, and ensure it is fully responsive and cleanly styled.
