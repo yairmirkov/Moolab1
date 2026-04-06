@@ -36,7 +36,12 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
 -   **Localization**:
     -   **IP Geolocation**: Auto-detects user's country via `ipapi.co` for localized content.
     -   **Bilingual System**: Full support for English and Latin American Spanish (UI, Gemini prompts, voice synthesis, radio tips, landing pages). Content is 70% global, 30% localized based on detected country.
--   **Onboarding**: A 3-step sign-up flow for learners (name, birth year) and parents (parent name, child name, child birth year).
+-   **Authentication Architecture (Parent-First OAuth)**:
+    -   **Step 0 (OAuth Gateway)**: Premium splash with "Continue with Apple" and "Continue with Google" buttons (mock OAuth, black/white design) + "Student PIN Access" secondary button. Divider with "OR" separator.
+    -   **Step 1 (Command Center)**: Parent enters their name, views existing student profiles (nickname + PIN + country), and can click "Create Student Profile" to add new students.
+    -   **Step 4 (Create Student)**: Parent enters student nickname, birth year, country; system auto-generates a random 4-digit PIN. Saves to `ws_family` localStorage as `{parent, students: [{nickname, pin, birthYear, country}]}`.
+    -   **Step 3 (Student PIN Login)**: Students enter nickname + 4-digit PIN, matched against `ws_family` state. On match, loads their profile (name, birthYear, country) and routes directly into the feed.
+    -   **Step 2 (Legacy Fallback)**: Original form-based onboarding kept for backward compatibility.
 -   **Parent Dashboard**: Provides transparency for parents, displaying child's progress, stats, and module completion.
 -   **Radio Show Intermissions**: Integrates "radio_highlight" cards with audio content (fun facts, hype) that auto-play when scrolled into view.
 

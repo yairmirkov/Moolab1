@@ -635,6 +635,8 @@ function App() {
   const [parentName, setParentName] = useState(() => loadStr("parentName", ""));
   const [userCountry, setUserCountry] = useState(() => loadStr("country", ""));
   const [countryLoading, setCountryLoading] = useState(false);
+  const [generatedPin, setGeneratedPin] = useState(() => String(Math.floor(1000 + Math.random() * 9000)));
+  const [familyVersion, setFamilyVersion] = useState(0);
   const [onboardStep, setOnboardStep] = useState(() => {
     const savedType = loadStr("acctType", "");
     const savedName = loadStr("name", "");
@@ -794,11 +796,13 @@ function App() {
     }
   }, [ageGroup]);
 
-  const startSession = () => {
-    const age = getAgeFromYear(birthYear);
+  const startSession = (overrides?: { birthYear?: string; accountType?: string }) => {
+    const effectiveBirthYear = overrides?.birthYear || birthYear;
+    const effectiveAccountType = overrides?.accountType || accountType;
+    const age = getAgeFromYear(effectiveBirthYear);
     setAgeGroup(getAgeGroup(age));
     setAppStarted(true);
-    if (accountType === "parent") return;
+    if (effectiveAccountType === "parent") return;
     const randomTrack =
       studyBeats[Math.floor(Math.random() * studyBeats.length)];
     if (!musicRef.current) {
@@ -895,7 +899,7 @@ function App() {
     const parentLoginHandler = () => {
       setAccountType("parent");
       saveStr("acctType", "parent");
-      setOnboardStep(2);
+      setOnboardStep(1);
       setShowLanding(false);
       setFadeIn(true);
       setTimeout(() => setFadeIn(false), 700);
@@ -913,6 +917,15 @@ function App() {
   }
 
   if (!appStarted) {
+    const familyState: { parent?: string; students?: { nickname: string; pin: string; birthYear: string; country: string }[] } = (() => {
+      try { return JSON.parse(localStorage.getItem("ws_family") || "{}"); } catch { return {}; }
+    })();
+
+    const saveFamily = (state: typeof familyState) => {
+      localStorage.setItem("ws_family", JSON.stringify(state));
+      setFamilyVersion((v) => v + 1);
+    };
+
     const canFinish = accountType === "parent"
       ? (parentName.trim() && userName.trim() && birthYear)
       : (userName.trim() && birthYear);
@@ -938,20 +951,67 @@ function App() {
             <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.75rem", fontWeight: 600, maxWidth: 280, textAlign: "center", lineHeight: 1.5, marginBottom: 36 }}>
               {t.onboard.subtitle[lang]}
             </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 16 }}>
+              <button
+                className="ws-btn"
+                onClick={() => {
+                  setAccountType("parent");
+                  saveStr("acctType", "parent");
+                  setOnboardStep(1);
+                }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
+                  width: "100%", padding: "16px 24px", borderRadius: 16,
+                  background: "#000", border: "none", color: "#fff",
+                  fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                {lang === "es" ? "Continuar con Apple" : "Continue with Apple"}
+              </button>
+              <button
+                className="ws-btn"
+                onClick={() => {
+                  setAccountType("parent");
+                  saveStr("acctType", "parent");
+                  setOnboardStep(1);
+                }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
+                  width: "100%", padding: "16px 24px", borderRadius: 16,
+                  background: "#fff", border: "1px solid rgba(12,45,72,0.12)", color: "#0c2d48",
+                  fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                {lang === "es" ? "Continuar con Google" : "Continue with Google"}
+              </button>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", maxWidth: 340, margin: "8px 0" }}>
+              <div style={{ flex: 1, height: 1, background: "rgba(12,45,72,0.08)" }} />
+              <span style={{ color: "rgba(12,45,72,0.25)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em" }}>
+                {lang === "es" ? "O" : "OR"}
+              </span>
+              <div style={{ flex: 1, height: 1, background: "rgba(12,45,72,0.08)" }} />
+            </div>
+
             <button
               className="ws-btn"
-              onClick={() => setOnboardStep(1)}
+              onClick={() => setOnboardStep(3)}
               style={{
-                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
-                border: "none", fontFamily: FONT,
-                background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
-                color: "#fff", fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
+                width: "100%", maxWidth: 340, padding: "14px 24px", borderRadius: 16, marginTop: 8,
+                background: "rgba(46,139,192,0.06)", border: "1px solid rgba(46,139,192,0.15)",
+                color: "#145374", fontFamily: FONT, fontWeight: 800, fontSize: "0.85rem",
                 cursor: "pointer",
-                boxShadow: "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)",
               }}
             >
-              {t.onboard.getStarted[lang]}
+              🎓 {lang === "es" ? "Acceso PIN Estudiante" : "Student PIN Access"}
             </button>
+
             <p style={{ color: "rgba(12,45,72,0.2)", fontSize: "0.6rem", fontWeight: 600, marginTop: 14 }}>
               {t.onboard.freeTag[lang]}
             </p>
@@ -959,43 +1019,374 @@ function App() {
         );
       }
 
+      if (onboardStep === 3) {
+        const [pinNickname, setPinNickname] = [userName, setUserName];
+        const [pinCode, setPinCode] = [birthYear, setBirthYear];
+
+        const attemptPinLogin = () => {
+          const family = (() => { try { return JSON.parse(localStorage.getItem("ws_family") || "{}"); } catch { return {}; } })();
+          const students = family.students || [];
+          const match = students.find((s: any) => s.nickname.toLowerCase() === pinNickname.trim().toLowerCase() && s.pin === pinCode.trim());
+          if (match) {
+            setUserName(match.nickname);
+            saveStr("name", match.nickname);
+            setBirthYear(match.birthYear);
+            saveStr("birth", match.birthYear);
+            setUserCountry(match.country || "");
+            saveStr("country", match.country || "");
+            setAccountType("learner");
+            saveStr("acctType", "learner");
+            startSession({ birthYear: match.birthYear, accountType: "learner" });
+          } else {
+            alert(lang === "es" ? "PIN o apodo incorrecto. Pide a tu padre/madre que verifique." : "Incorrect PIN or nickname. Ask your parent to verify.");
+          }
+        };
+
+        return (
+          <>
+            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>🎓</div>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
+              {lang === "es" ? "Acceso Estudiante" : "Student Access"}
+            </h2>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
+              {lang === "es" ? "Ingresa tu apodo y PIN de 4 dígitos" : "Enter your nickname and 4-digit PIN"}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {lang === "es" ? "APODO" : "NICKNAME"}
+                </label>
+                <input
+                  type="text"
+                  placeholder={lang === "es" ? "Tu apodo" : "Your nickname"}
+                  value={pinNickname}
+                  onChange={(e) => { setPinNickname(e.target.value); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  PIN
+                </label>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={4}
+                  placeholder="• • • •"
+                  value={pinCode}
+                  onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPinCode(v); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "1.4rem",
+                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)", textAlign: "center",
+                    letterSpacing: "0.5em",
+                  }}
+                />
+              </div>
+            </div>
+
+            <button
+              className="ws-btn"
+              onClick={attemptPinLogin}
+              disabled={!pinNickname.trim() || pinCode.length !== 4}
+              style={{
+                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                border: "none", fontFamily: FONT,
+                background: (pinNickname.trim() && pinCode.length === 4)
+                  ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
+                  : "rgba(12,45,72,0.08)",
+                color: (pinNickname.trim() && pinCode.length === 4) ? "#fff" : "rgba(12,45,72,0.25)",
+                fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
+                cursor: (pinNickname.trim() && pinCode.length === 4) ? "pointer" : "default",
+                boxShadow: (pinNickname.trim() && pinCode.length === 4)
+                  ? "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)"
+                  : "none",
+                transition: "all 0.3s ease",
+              }}
+            >
+              {lang === "es" ? "ENTRAR" : "ENTER"}
+            </button>
+          </>
+        );
+      }
+
       if (onboardStep === 1) {
         return (
           <>
-            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>👋</div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>{t.onboard.whoSigningUp[lang]}</h2>
-            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 32 }}>
-              {t.onboard.personalizeExp[lang]}
+            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>✅</div>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
+              {lang === "es" ? "Centro de Comando" : "Command Center"}
+            </h2>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
+              {lang === "es" ? "Configura los perfiles de tus estudiantes" : "Set up your student profiles"}
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340 }}>
-              {[
-                { key: "learner", icon: "🎒", title: t.onboard.imKidTeen[lang], desc: t.onboard.wantLearn[lang] },
-                { key: "parent", icon: "👨‍👩‍👧", title: t.onboard.imParent[lang], desc: t.onboard.settingUp[lang] },
-              ].map((opt) => (
-                <button
-                  className="ws-btn"
-                  key={opt.key}
-                  onClick={() => {
-                    setAccountType(opt.key);
-                    saveStr("acctType", opt.key);
-                    setOnboardStep(2);
-                  }}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>{t.onboard.yourName[lang]}</label>
+                <input
+                  type="text"
+                  placeholder={t.onboard.parentPlaceholder[lang]}
+                  value={parentName}
+                  onChange={(e) => { setParentName(e.target.value); saveStr("parentName", e.target.value); }}
                   style={{
-                    display: "flex", alignItems: "center", gap: 14,
-                    width: "100%", padding: "18px 20px", borderRadius: 18,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.15)",
-                    color: "#0c2d48", fontFamily: FONT, cursor: "pointer", textAlign: "left",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                />
+              </div>
+            </div>
+
+            {(familyState.students || []).length > 0 && (
+              <div style={{ width: "100%", maxWidth: 340, marginBottom: 16 }}>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 8, paddingLeft: 4 }}>
+                  {lang === "es" ? "PERFILES DE ESTUDIANTES" : "STUDENT PROFILES"}
+                </label>
+                {familyState.students!.map((s, idx) => (
+                  <div key={idx} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "12px 16px", borderRadius: 14, marginBottom: 8,
+                    background: "rgba(46,139,192,0.06)", border: "1px solid rgba(46,139,192,0.12)",
+                  }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: "0.85rem", color: "#0c2d48" }}>{s.nickname}</div>
+                      <div style={{ fontSize: "0.6rem", color: "rgba(12,45,72,0.4)", fontWeight: 600 }}>
+                        PIN: {s.pin} · {s.country || "—"}
+                      </div>
+                    </div>
+                    <button
+                      className="ws-btn"
+                      onClick={() => {
+                        const updated = { ...familyState, students: familyState.students!.filter((_, i) => i !== idx) };
+                        saveFamily(updated);
+                      }}
+                      style={{
+                        background: "none", border: "none", color: "rgba(12,45,72,0.3)",
+                        cursor: "pointer", fontSize: "0.9rem", fontFamily: FONT,
+                      }}
+                    >✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              className="ws-btn"
+              onClick={() => { setGeneratedPin(String(Math.floor(1000 + Math.random() * 9000))); setUserName(""); setBirthYear(""); setOnboardStep(4); }}
+              style={{
+                width: "100%", maxWidth: 340, padding: "14px 20px", borderRadius: 16,
+                background: "rgba(46,139,192,0.08)", border: "1px dashed rgba(46,139,192,0.25)",
+                color: "#145374", fontFamily: FONT, fontWeight: 800, fontSize: "0.85rem",
+                cursor: "pointer", marginBottom: 12,
+              }}
+            >
+              + {lang === "es" ? "Crear Perfil de Estudiante" : "Create Student Profile"}
+            </button>
+
+            {parentName.trim() && (familyState.students || []).length > 0 && (
+              <button
+                className="ws-btn"
+                onClick={() => {
+                  const updated = { ...familyState, parent: parentName };
+                  saveFamily(updated);
+                  setAccountType("parent");
+                  saveStr("acctType", "parent");
+                  const firstStudent = familyState.students![0];
+                  setUserName(firstStudent.nickname);
+                  saveStr("name", firstStudent.nickname);
+                  setBirthYear(firstStudent.birthYear);
+                  saveStr("birth", firstStudent.birthYear);
+                  setUserCountry(firstStudent.country || "");
+                  saveStr("country", firstStudent.country || "");
+                  startSession({ birthYear: firstStudent.birthYear, accountType: "parent" });
+                }}
+                style={{
+                  width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                  border: "none", fontFamily: FONT,
+                  background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
+                  color: "#fff", fontWeight: 900, fontSize: "1.05rem", letterSpacing: "0.06em",
+                  cursor: "pointer",
+                  boxShadow: "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                {lang === "es" ? "ENTRAR AL PANEL" : "ENTER DASHBOARD"}
+              </button>
+            )}
+          </>
+        );
+      }
+
+      if (onboardStep === 4) {
+        const [newNickname, setNewNickname] = [userName, setUserName];
+        const [newBirthYear, setNewBirthYear] = [birthYear, setBirthYear];
+        const [newCountry, setNewCountry] = [userCountry, setUserCountry];
+
+
+        const canCreate = newNickname.trim() && newBirthYear;
+
+        return (
+          <>
+            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>🎓</div>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
+              {lang === "es" ? "Nuevo Estudiante" : "New Student"}
+            </h2>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
+              {lang === "es" ? "Crea un perfil de aprendizaje personalizado" : "Create a personalized learning profile"}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {lang === "es" ? "APODO" : "NICKNAME"}
+                </label>
+                <input
+                  type="text"
+                  placeholder={lang === "es" ? "Nombre del estudiante" : "Student's name"}
+                  value={newNickname}
+                  onChange={(e) => setNewNickname(e.target.value)}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {lang === "es" ? "AÑO DE NACIMIENTO" : "BIRTH YEAR"}
+                </label>
+                <select
+                  value={newBirthYear}
+                  onChange={(e) => setNewBirthYear(e.target.value)}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: newBirthYear ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", boxSizing: "border-box", colorScheme: "light",
+                    appearance: "none", WebkitAppearance: "none",
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                   }}
                 >
-                  <span style={{ fontSize: "1.6rem" }}>{opt.icon}</span>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: "0.95rem" }}>{opt.title}</div>
-                    <div style={{ fontWeight: 500, fontSize: "0.65rem", color: "rgba(12,45,72,0.4)", marginTop: 2 }}>{opt.desc}</div>
-                  </div>
-                </button>
-              ))}
+                  <option value="" disabled>{t.onboard.selectYear[lang]}</option>
+                  {Array.from({ length: 22 }, (_, i) => new Date().getFullYear() - 4 - i).map((yr) => (
+                    <option key={yr} value={String(yr)} style={{ background: "#fff", color: "#0c2d48" }}>{yr}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
+                  {t.onboard.countryLabel[lang]}
+                </label>
+                <select
+                  value={newCountry}
+                  onChange={(e) => setNewCountry(e.target.value)}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: newCountry ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", boxSizing: "border-box", colorScheme: "light",
+                    appearance: "none", WebkitAppearance: "none",
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                >
+                  <option value="" disabled>{countryLoading ? t.onboard.detectingLocation[lang] : t.onboard.countryPlaceholder[lang]}</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c} style={{ background: "#fff", color: "#0c2d48" }}>{c}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+
+            {newBirthYear && (
+              <div style={{
+                marginBottom: 16, padding: "8px 16px", borderRadius: 12,
+                background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.2)",
+                animation: "ageBtn 0.3s ease-out both",
+              }}>
+                <span style={{ color: "#145374", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
+                  {(() => {
+                    const age = getAgeFromYear(newBirthYear);
+                    const group = getAgeGroup(age);
+                    if (group === "Kids") return t.onboard.trackKids[lang];
+                    if (group === "Teens") return t.onboard.trackTeens[lang];
+                    return t.onboard.trackAdults[lang];
+                  })()}
+                </span>
+              </div>
+            )}
+
+            <div style={{
+              width: "100%", maxWidth: 340, marginBottom: 20, padding: "16px 20px", borderRadius: 16,
+              background: "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(177,212,224,0.08))",
+              border: "1px solid rgba(46,139,192,0.15)", textAlign: "center",
+            }}>
+              <p style={{ color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 8 }}>
+                {lang === "es" ? "PIN GENERADO" : "GENERATED PIN"}
+              </p>
+              <p style={{ color: "#0c2d48", fontSize: "2rem", fontWeight: 900, letterSpacing: "0.4em", margin: 0 }}>
+                {generatedPin}
+              </p>
+              <p style={{ color: "rgba(12,45,72,0.35)", fontSize: "0.55rem", fontWeight: 600, marginTop: 6 }}>
+                {lang === "es" ? "El estudiante usará este PIN para acceder" : "The student will use this PIN to log in"}
+              </p>
+            </div>
+
+            <button
+              className="ws-btn"
+              onClick={() => {
+                if (!canCreate) return;
+                const updated = {
+                  ...familyState,
+                  parent: parentName,
+                  students: [...(familyState.students || []), {
+                    nickname: newNickname.trim(),
+                    pin: generatedPin,
+                    birthYear: newBirthYear,
+                    country: newCountry,
+                  }],
+                };
+                saveFamily(updated);
+                setUserName("");
+                setBirthYear("");
+                setOnboardStep(1);
+              }}
+              disabled={!canCreate}
+              style={{
+                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                border: "none", fontFamily: FONT,
+                background: canCreate
+                  ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
+                  : "rgba(12,45,72,0.08)",
+                color: canCreate ? "#fff" : "rgba(12,45,72,0.25)",
+                fontWeight: 900, fontSize: "1.05rem", letterSpacing: "0.06em",
+                cursor: canCreate ? "pointer" : "default",
+                boxShadow: canCreate
+                  ? "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)"
+                  : "none",
+                transition: "all 0.3s ease",
+              }}
+            >
+              {lang === "es" ? "GUARDAR PERFIL" : "SAVE PROFILE"}
+            </button>
           </>
         );
       }
@@ -1197,7 +1588,11 @@ function App() {
         {onboardStep > 0 && (
           <button
             className="ws-btn"
-            onClick={() => setOnboardStep(onboardStep - 1)}
+            onClick={() => {
+              if (onboardStep === 3) setOnboardStep(0);
+              else if (onboardStep === 4) setOnboardStep(1);
+              else setOnboardStep(onboardStep - 1);
+            }}
             style={{
               position: "absolute", top: 20, left: 20, background: "none", border: "none",
               color: "rgba(12,45,72,0.4)", fontSize: "1.4rem", cursor: "pointer", fontFamily: FONT,
@@ -1206,25 +1601,12 @@ function App() {
           >←</button>
         )}
 
-        {onboardStep > 0 && (
-          <div style={{ position: "absolute", top: 28, display: "flex", gap: 6 }}>
-            {[1, 2].map((s) => (
-              <div key={s} style={{
-                width: s <= onboardStep ? 24 : 8, height: 4, borderRadius: 2,
-                background: s <= onboardStep ? "#145374" : "rgba(12,45,72,0.12)",
-                transition: "all 0.3s ease",
-              }} />
-            ))}
-          </div>
-        )}
-
         <div key={onboardStep} style={{ display: "flex", flexDirection: "column", alignItems: "center", animation: "stepSlide 0.35s ease-out both", width: "100%" }}>
           {stepContent()}
         </div>
       </div>
     );
   }
-
   const totalModulesComplete = Object.values(moduleProgress).filter((w) => w >= 3).length;
   const overallPct = Math.round((totalModulesComplete / MODULES.length) * 100);
 
