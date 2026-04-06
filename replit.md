@@ -47,6 +47,7 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
     -   **Lab Progress**: Mock quiz results data table (Date, Subject, Score, Status badges), competency breakdown with progress circles (Risk Appetite, Market Mechanics, Asset Management).
     -   **Family Users**: Sub-accounts management listing student nicknames, age brackets, and 4-digit Lab PINs. "Provision New Student Account" button routes to Step 4.
     -   **Billing**: Moolab Apex Plan ($19.99/mo) display, plan features checklist, mock VISA payment method, Update/View Invoices buttons.
+-   **Concept Breakdown Slides** (`ConceptCard.tsx`): `concept_breakdown` card type with white background + navy (#001F5B) typography. Shows "LAB CONCEPT" badge, large bold term, clear definition, and italicized analogy in a shaded block. Pulsing "Tap to Continue" button auto-scrolls to next slide. AI generates 1-2 per batch to teach Finance 101 terms before testing.
 -   **Radio Show Intermissions**: Integrates "radio_highlight" cards with audio content (fun facts, hype) that auto-play when scrolled into view.
 
 ## External Dependencies

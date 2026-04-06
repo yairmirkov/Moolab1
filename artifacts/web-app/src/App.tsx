@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import LandingPage from "./LandingPage";
 import LandingPageES from "./LandingPageES";
 import CommandCenter from "./CommandCenter";
+import ConceptCard from "./ConceptCard";
 import translations, { type Lang } from "./translations";
 import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio } from "./elevenlabs";
 
@@ -2208,6 +2209,22 @@ function App() {
                 isMutedRef={isMutedRef}
                 speechSpeedRef={speechSpeedRef}
                 fallbackBrowserSpeak={fallbackBrowserSpeak}
+              />
+            );
+          }
+
+          if (card.type === "concept_breakdown") {
+            return (
+              <ConceptCard
+                key={card.id}
+                card={card}
+                lang={lang}
+                onContinue={() => {
+                  if (feedRef.current) {
+                    const next = feedRef.current.children[i + 1] as HTMLElement | undefined;
+                    if (next) next.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
               />
             );
           }
