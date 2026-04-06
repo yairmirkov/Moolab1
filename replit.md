@@ -97,10 +97,26 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - `moduleNum = Math.floor(bossWins / 3) + 1` — module advances every 3 boss fights
 - Subject bar in HUD shows "MODULE X: SUBJECT" with 3-pip progress indicators
 
+### Two-Part Slide System
+- Each mini-game card renders in two phases: **Part 1 ("THE CONTEXT")** shows `contextSetup` text with a pulsing "Tap to Continue ⚡" button, **Part 2 ("YOUR MOVE")** reveals `actionQuestion` + answer options
+- `revealedSlides` state (`Record<string, boolean>`) tracks which cards have been tapped through
+- Backward compatible: falls back to `card.miniGame.question` for old cards missing `contextSetup`/`actionQuestion`
+- Gemini prompt in `translations.ts` instructs AI to generate `contextSetup` (≤2 sentences) + `actionQuestion` (1 sentence)
+- `contextPulse` CSS keyframe animates the tap button glow
+
+### ElevenLabs TTS Integration
+- `src/elevenlabs.ts` utility: `speakWithElevenLabs()`, `stopElevenLabsAudio()`, `isElevenLabsAvailable()`
+- Uses `eleven_turbo_v2_5` model. EN voice: `pNInz6obpgDQGcFmaJgB` (Adam), ES voice: `onwK4e9ZLuTAKqWW03F9`
+- `VITE_ELEVENLABS_API_KEY` env var required (client-side for demo)
+- `triggerRadioHost` and `speakExplanation` try ElevenLabs first, fall back to browser `speechSynthesis`
+- `fallbackBrowserSpeak()` helper centralizes browser TTS logic
+- All mute/reset/speed-change flows call `stopElevenLabsAudio()` + `speechSynthesis.cancel()`
+- Fallback path re-checks `isMutedRef`/`speechSpeedRef` before speaking to avoid stale playback
+
 ### Multimedia Features
 - **Video backgrounds**: 53 verified Pexels HD videos with Fisher-Yates shuffle queue (`videoQueue`), per-card stable mapping (`cardVideoMap`), gradient fallbacks
 - **Dual-track audio**: `musicRef` (study beats, vol 0.15) + speech synthesis commentary (vol 0.8). Music "ducks" to 0.05 when radio host speaks.
-- **Moolab Radio Show**: `triggerRadioHost()` fires every 5 cards scrolled OR after mini-game win. Uses `speechSynthesis` API with preferred natural voices. 10 tips per age group (Kids/Teens/Adults). Non-repeat tip selection via `usedTipsRef`. Shows pulsing "🎙️ LIVE" indicator in HUD during playback.
+- **Moolab Radio Show**: `triggerRadioHost()` fires every 5 cards scrolled OR after mini-game win. Uses ElevenLabs TTS with browser speechSynthesis fallback. 10 tips per age group (Kids/Teens/Adults). Non-repeat tip selection via `usedTipsRef`. Shows pulsing "🎙️ LIVE" indicator in HUD during playback.
 - **Audio start**: Music starts on session begin (user gesture) to bypass autoplay policy.
 - **Avatars**: DiceBear `adventurer` human-style SVG seeded by card title
 - **Glassmorphism**: `backdrop-filter: blur(24px)` on mini-game cards + quiz panels

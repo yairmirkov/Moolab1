@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import LandingPage from "./LandingPage";
 import LandingPageES from "./LandingPageES";
 import translations, { type Lang } from "./translations";
+import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio } from "./elevenlabs";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -283,6 +284,7 @@ function App() {
 
   const [revealedExplanations, setRevealedExplanations] = useState<Record<string, boolean>>({});
   const [bossExplanation, setBossExplanation] = useState<string | null>(null);
+  const [revealedSlides, setRevealedSlides] = useState<Record<string, boolean>>({});
 
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -323,9 +325,11 @@ function App() {
     setQuizResult(null);
     setRevealedExplanations({});
     setBossExplanation(null);
+    setRevealedSlides({});
     slidesScrolledRef.current = 0;
     lastRadioSlideRef.current = -1;
     usedTipsRef.current.clear();
+    stopElevenLabsAudio();
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     radioSpeakingRef.current = false;
     setRadioLive(false);
@@ -346,7 +350,22 @@ function App() {
     if (appStarted && ageGroup && accountType !== "parent") resetJourney();
   }, [appStarted, ageGroup, accountType, resetJourney]);
 
-  const triggerRadioHost = useCallback((forceAgeGroup?: string) => {
+  const fallbackBrowserSpeak = useCallback((text: string, onDone: () => void) => {
+    if (!('speechSynthesis' in window)) { setTimeout(onDone, 5000); return; }
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    const picked = pickRandomVoice(langRef.current);
+    utter.lang = langRef.current === "es" ? "es-MX" : "en-US";
+    utter.rate = 1.05 * speechSpeedRef.current * picked.rateMultiplier;
+    utter.pitch = picked.pitch;
+    utter.volume = 0.8;
+    if (picked.voice) utter.voice = picked.voice;
+    utter.onend = onDone;
+    utter.onerror = onDone;
+    window.speechSynthesis.speak(utter);
+  }, []);
+
+  const triggerRadioHost = useCallback(async (forceAgeGroup?: string) => {
     const ag = forceAgeGroup || ageGroup;
     if (radioSpeakingRef.current || isMutedRef.current || !ag || speechSpeedRef.current === 0) return;
     const tipsByLang = translations.radioTips[langRef.current];
@@ -368,20 +387,19 @@ function App() {
       if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
     };
 
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(tip);
-      const picked = pickRandomVoice(langRef.current);
-      utter.lang = langRef.current === "es" ? "es-MX" : "en-US";
-      utter.rate = 1.05 * speechSpeedRef.current * picked.rateMultiplier;
-      utter.pitch = picked.pitch;
-      utter.volume = 0.8;
-      if (picked.voice) utter.voice = picked.voice;
-      utter.onend = restoreAudio;
-      utter.onerror = restoreAudio;
-      window.speechSynthesis.speak(utter);
+    if (isElevenLabsAvailable()) {
+      const ok = await speakWithElevenLabs(tip, langRef.current, {
+        speed: speechSpeedRef.current,
+        onStart: () => {},
+        onEnd: restoreAudio,
+        onError: restoreAudio,
+      });
+      if (!ok) {
+        if (isMutedRef.current || speechSpeedRef.current === 0) { restoreAudio(); }
+        else { fallbackBrowserSpeak(tip, restoreAudio); }
+      }
     } else {
-      setTimeout(restoreAudio, 5000);
+      fallbackBrowserSpeak(tip, restoreAudio);
     }
   }, [ageGroup]);
 
@@ -461,20 +479,25 @@ function App() {
     setTimeout(() => setFlashBlue(false), 300);
   };
 
-  const speakExplanation = (text: string) => {
-    if (isMutedRef.current || speechSpeedRef.current === 0 || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    const picked = pickRandomVoice(langRef.current);
-    utter.lang = langRef.current === "es" ? "es-MX" : "en-US";
-    utter.rate = 0.95 * speechSpeedRef.current * picked.rateMultiplier;
-    utter.pitch = picked.pitch;
-    utter.volume = 0.85;
-    if (picked.voice) utter.voice = picked.voice;
+  const speakExplanation = async (text: string) => {
+    if (isMutedRef.current || speechSpeedRef.current === 0) return;
     if (musicRef.current) musicRef.current.volume = 0.05;
-    utter.onend = () => { if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15; };
-    utter.onerror = () => { if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15; };
-    window.speechSynthesis.speak(utter);
+    const restoreMusic = () => { if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15; };
+
+    if (isElevenLabsAvailable()) {
+      stopElevenLabsAudio();
+      const ok = await speakWithElevenLabs(text, langRef.current, {
+        speed: speechSpeedRef.current,
+        onEnd: restoreMusic,
+        onError: restoreMusic,
+      });
+      if (!ok) {
+        if (isMutedRef.current || speechSpeedRef.current === 0) { restoreMusic(); }
+        else { fallbackBrowserSpeak(text, restoreMusic); }
+      }
+    } else {
+      fallbackBrowserSpeak(text, restoreMusic);
+    }
   };
 
   if (showLanding) {
@@ -1003,6 +1026,7 @@ function App() {
     >
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes contextPulse { 0%, 100% { box-shadow: 0 0 20px rgba(46,139,192,0.15); } 50% { box-shadow: 0 0 30px rgba(46,139,192,0.35), 0 0 60px rgba(46,139,192,0.1); } }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes vidFade { from{opacity:0;transform:scale(1.04)} to{opacity:1;transform:scale(1)} }
         @keyframes arenaPulse {
@@ -1155,8 +1179,9 @@ function App() {
                   if (newMuted) { musicRef.current.volume = 0; musicRef.current.pause(); }
                   else { musicRef.current.volume = 0.15; musicRef.current.play().catch(() => {}); }
                 }
-                if (newMuted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
                 if (newMuted) {
+                  stopElevenLabsAudio();
+                  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
                   radioSpeakingRef.current = false;
                   setRadioLive(false);
                 }
@@ -1181,12 +1206,13 @@ function App() {
             <button
               className="ws-btn"
               onClick={() => {
+                stopElevenLabsAudio();
                 if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
                   window.speechSynthesis.cancel();
-                  radioSpeakingRef.current = false;
-                  setRadioLive(false);
-                  if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
                 }
+                radioSpeakingRef.current = false;
+                setRadioLive(false);
+                if (musicRef.current && !isMutedRef.current) musicRef.current.volume = 0.15;
                 const speeds = [1, 1.5, 2, 0];
                 const currentIdx = speeds.indexOf(speechSpeed);
                 const nextSpeed = speeds[(currentIdx + 1) % speeds.length];
@@ -1562,139 +1588,177 @@ function App() {
                     boxShadow: "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
                   }}
                 >
-                  <p
-                    style={{
-                      color: "#fff",
-                      fontSize: "0.9rem",
-                      fontWeight: 800,
-                      marginBottom: 16,
-                      lineHeight: 1.4,
-                      textShadow: "0 1px 4px rgba(0,0,0,0.5)",
-                    }}
-                  >
-                    {card.miniGame.question}
-                  </p>
-                  <div
-                    style={{ display: "flex", flexDirection: "column", gap: 10 }}
-                  >
-                    {card.miniGame.options.map((opt, idx) => {
-                      const isAnswered = answered !== undefined;
-                      const isSelected = answered === idx;
-                      const isRight = idx === card.miniGame.correctIndex;
-
-                      let bg = "rgba(255,255,255,0.07)";
-                      let border = "1px solid rgba(255,255,255,0.08)";
-                      if (isAnswered && isSelected) {
-                        if (isRight) { bg = "rgba(46,139,192,0.2)"; border = "1px solid rgba(46,139,192,0.5)"; }
-                        else { bg = "rgba(231,111,81,0.2)"; border = "1px solid rgba(231,111,81,0.5)"; }
-                      } else if (isAnswered && isRight) {
-                        bg = "rgba(46,139,192,0.08)"; border = "1px solid rgba(46,139,192,0.2)";
-                      }
-
-                      return (
-                        <button
-                          className="ws-btn"
-                          key={idx}
-                          onClick={() => {
-                            if (slideAnswers[card.id] === undefined) {
-                              setSlideAnswers((p) => ({ ...p, [card.id]: idx }));
-                              if (idx === card.miniGame.correctIndex) {
-                                setCompletedSlides((p) => [...p, card.id]);
-                                setXp((p) => p + 10);
-                                triggerGreenFlash();
-                                setTimeout(() => triggerRadioHost(), 1200);
-                                if (completedSlides.length + 1 >= 5)
-                                  setTimeout(() => setQuizUnlocked(true), 800);
-                              }
-                            }
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: 16,
-                            borderRadius: 16,
-                            border,
-                            background: bg,
-                            color: "#fff",
-                            fontWeight: 700,
-                            fontSize: "0.88rem",
-                            cursor: isAnswered ? "default" : "pointer",
-                            fontFamily: FONT,
-                            backdropFilter: "blur(8px)",
-                            WebkitBackdropFilter: "blur(8px)",
-                            textAlign: "center",
-                          }}
-                        >
-                          {opt}
-                          {isAnswered && isSelected && (
-                            <span style={{ marginLeft: 8 }}>{isRight ? "✅" : "❌"}</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {answered !== undefined && isCorrect && (
-                    <div style={{
-                      marginTop: 12, fontSize: "0.68rem", fontWeight: 700,
-                      color: "#2e8bc0",
-                      letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center",
-                    }}>
-                      {t.feed.wellPlayed[lang]}
-                    </div>
-                  )}
-                  {answered !== undefined && !isCorrect && (
-                    <div style={{
-                      marginTop: 14,
-                      background: "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(177,212,224,0.06))",
-                      border: "1px solid rgba(46,139,192,0.2)",
-                      borderRadius: 16,
-                      padding: "14px 16px",
-                      backdropFilter: "blur(16px)",
-                      WebkitBackdropFilter: "blur(16px)",
-                      animation: "fadeIn 0.4s ease-out",
-                    }}>
+                  {!revealedSlides[card.id] ? (
+                    <div style={{ textAlign: "center", animation: "fadeIn 0.5s ease-out" }}>
                       <div style={{
-                        display: "flex", alignItems: "center", gap: 8, marginBottom: 8,
+                        color: "rgba(46,139,192,0.5)", fontSize: "0.55rem", fontWeight: 800,
+                        letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 14,
+                      }}>{t.slide.part1[lang]}</div>
+                      <p style={{
+                        color: "#fff", fontSize: "1.05rem", fontWeight: 700,
+                        lineHeight: 1.55, marginBottom: 24,
+                        textShadow: "0 1px 4px rgba(0,0,0,0.5)",
                       }}>
-                        <span style={{ fontSize: "1.1rem" }}>🧠</span>
-                        <span style={{
-                          color: "#2e8bc0", fontWeight: 800, fontSize: "0.65rem",
-                          letterSpacing: "0.1em", textTransform: "uppercase",
-                        }}>{t.feed.insightUnlocked[lang]}</span>
+                        {card.miniGame.contextSetup || card.miniGame.question}
+                      </p>
+                      <button
+                        className="ws-btn"
+                        onClick={() => setRevealedSlides(p => ({ ...p, [card.id]: true }))}
+                        style={{
+                          padding: "14px 32px", borderRadius: 18,
+                          background: "linear-gradient(135deg, rgba(46,139,192,0.15), rgba(177,212,224,0.1))",
+                          border: "1px solid rgba(46,139,192,0.3)",
+                          color: "#b1d4e0", fontWeight: 800, fontSize: "0.85rem",
+                          cursor: "pointer", fontFamily: FONT,
+                          letterSpacing: "0.04em",
+                          animation: "contextPulse 2s ease-in-out infinite",
+                          boxShadow: "0 0 20px rgba(46,139,192,0.15)",
+                        }}
+                      >
+                        {t.slide.tapToContinue[lang]}
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ animation: "fadeIn 0.4s ease-out" }}>
+                      <div style={{
+                        color: "rgba(46,139,192,0.5)", fontSize: "0.55rem", fontWeight: 800,
+                        letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 10,
+                      }}>{t.slide.part2[lang]}</div>
+                      <p
+                        style={{
+                          color: "#fff",
+                          fontSize: "0.9rem",
+                          fontWeight: 800,
+                          marginBottom: 16,
+                          lineHeight: 1.4,
+                          textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                        }}
+                      >
+                        {card.miniGame.actionQuestion || card.miniGame.question}
+                      </p>
+                      <div
+                        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                      >
+                        {card.miniGame.options.map((opt, idx) => {
+                          const isAnswered = answered !== undefined;
+                          const isSelected = answered === idx;
+                          const isRight = idx === card.miniGame.correctIndex;
+
+                          let bg = "rgba(255,255,255,0.07)";
+                          let border = "1px solid rgba(255,255,255,0.08)";
+                          if (isAnswered && isSelected) {
+                            if (isRight) { bg = "rgba(46,139,192,0.2)"; border = "1px solid rgba(46,139,192,0.5)"; }
+                            else { bg = "rgba(231,111,81,0.2)"; border = "1px solid rgba(231,111,81,0.5)"; }
+                          } else if (isAnswered && isRight) {
+                            bg = "rgba(46,139,192,0.08)"; border = "1px solid rgba(46,139,192,0.2)";
+                          }
+
+                          return (
+                            <button
+                              className="ws-btn"
+                              key={idx}
+                              onClick={() => {
+                                if (slideAnswers[card.id] === undefined) {
+                                  setSlideAnswers((p) => ({ ...p, [card.id]: idx }));
+                                  if (idx === card.miniGame.correctIndex) {
+                                    setCompletedSlides((p) => [...p, card.id]);
+                                    setXp((p) => p + 10);
+                                    triggerGreenFlash();
+                                    setTimeout(() => triggerRadioHost(), 1200);
+                                    if (completedSlides.length + 1 >= 5)
+                                      setTimeout(() => setQuizUnlocked(true), 800);
+                                  }
+                                }
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: 16,
+                                borderRadius: 16,
+                                border,
+                                background: bg,
+                                color: "#fff",
+                                fontWeight: 700,
+                                fontSize: "0.88rem",
+                                cursor: isAnswered ? "default" : "pointer",
+                                fontFamily: FONT,
+                                backdropFilter: "blur(8px)",
+                                WebkitBackdropFilter: "blur(8px)",
+                                textAlign: "center",
+                              }}
+                            >
+                              {opt}
+                              {isAnswered && isSelected && (
+                                <span style={{ marginLeft: 8 }}>{isRight ? "✅" : "❌"}</span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
-                      {!revealedExplanations[card.id] ? (
-                        <button
-                          className="ws-btn"
-                          onClick={() => setRevealedExplanations(p => ({ ...p, [card.id]: true }))}
-                          style={{
-                            width: "100%", padding: "10px 16px", borderRadius: 12,
-                            background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.25)",
-                            color: "#2e8bc0", fontWeight: 700, fontSize: "0.78rem",
-                            cursor: "pointer", fontFamily: FONT,
-                          }}
-                        >
-                          {t.feed.tapToUnderstand[lang]}
-                        </button>
-                      ) : (
-                        <div>
-                          <p style={{
-                            color: "rgba(255,255,255,0.85)", fontSize: "0.82rem",
-                            lineHeight: 1.55, fontWeight: 500, margin: "0 0 10px 0",
+                      {answered !== undefined && isCorrect && (
+                        <div style={{
+                          marginTop: 12, fontSize: "0.68rem", fontWeight: 700,
+                          color: "#2e8bc0",
+                          letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center",
+                        }}>
+                          {t.feed.wellPlayed[lang]}
+                        </div>
+                      )}
+                      {answered !== undefined && !isCorrect && (
+                        <div style={{
+                          marginTop: 14,
+                          background: "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(177,212,224,0.06))",
+                          border: "1px solid rgba(46,139,192,0.2)",
+                          borderRadius: 16,
+                          padding: "14px 16px",
+                          backdropFilter: "blur(16px)",
+                          WebkitBackdropFilter: "blur(16px)",
+                          animation: "fadeIn 0.4s ease-out",
+                        }}>
+                          <div style={{
+                            display: "flex", alignItems: "center", gap: 8, marginBottom: 8,
                           }}>
-                            {card.miniGame.explanation || t.quiz.defaultExplanation[lang]}
-                          </p>
-                          <button
-                            className="ws-btn"
-                            onClick={() => speakExplanation(card.miniGame.explanation || "Review the lesson to understand this concept better.")}
-                            style={{
-                              padding: "6px 14px", borderRadius: 10,
-                              background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.2)",
-                              color: "#2e8bc0", fontWeight: 700, fontSize: "0.68rem",
-                              cursor: "pointer", fontFamily: FONT,
-                              display: "flex", alignItems: "center", gap: 6,
-                            }}
-                          >
-                            <span style={{ fontSize: "0.8rem" }}>▶</span> {t.feed.listen[lang]}
-                          </button>
+                            <span style={{ fontSize: "1.1rem" }}>🧠</span>
+                            <span style={{
+                              color: "#2e8bc0", fontWeight: 800, fontSize: "0.65rem",
+                              letterSpacing: "0.1em", textTransform: "uppercase",
+                            }}>{t.feed.insightUnlocked[lang]}</span>
+                          </div>
+                          {!revealedExplanations[card.id] ? (
+                            <button
+                              className="ws-btn"
+                              onClick={() => setRevealedExplanations(p => ({ ...p, [card.id]: true }))}
+                              style={{
+                                width: "100%", padding: "10px 16px", borderRadius: 12,
+                                background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.25)",
+                                color: "#2e8bc0", fontWeight: 700, fontSize: "0.78rem",
+                                cursor: "pointer", fontFamily: FONT,
+                              }}
+                            >
+                              {t.feed.tapToUnderstand[lang]}
+                            </button>
+                          ) : (
+                            <div>
+                              <p style={{
+                                color: "rgba(255,255,255,0.85)", fontSize: "0.82rem",
+                                lineHeight: 1.55, fontWeight: 500, margin: "0 0 10px 0",
+                              }}>
+                                {card.miniGame.explanation || t.quiz.defaultExplanation[lang]}
+                              </p>
+                              <button
+                                className="ws-btn"
+                                onClick={() => speakExplanation(card.miniGame.explanation || t.quiz.defaultExplanation[lang])}
+                                style={{
+                                  padding: "6px 14px", borderRadius: 10,
+                                  background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.2)",
+                                  color: "#2e8bc0", fontWeight: 700, fontSize: "0.68rem",
+                                  cursor: "pointer", fontFamily: FONT,
+                                  display: "flex", alignItems: "center", gap: 6,
+                                }}
+                              >
+                                <span style={{ fontSize: "0.8rem" }}>▶</span> {t.feed.listen[lang]}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
