@@ -1908,9 +1908,9 @@ function App() {
           position: "absolute",
           top: 0,
           width: "100%",
-          padding: "40px 20px 20px",
+          padding: "10px 14px 6px",
           zIndex: 10,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 60%, transparent 100%)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 80%, transparent 100%)",
           pointerEvents: "none",
         }}
       >
@@ -1922,81 +1922,13 @@ function App() {
             pointerEvents: "auto",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-
-            <img
-              src="/moolab-logo-trimmed.png"
-              alt="Moolab"
-              style={{
-                height: 28, width: "auto", objectFit: "contain", flexShrink: 0,
-                filter: "drop-shadow(0 0 6px rgba(46,139,192,0.5)) brightness(1.1)",
-              }}
-            />
-            <button
-              className="ws-btn"
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span
               onClick={() => setShowProfile(true)}
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 14,
-                padding: "10px 16px",
-                color: "#fff",
-                fontWeight: 800,
-                fontSize: "0.75rem",
-                cursor: "pointer",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                fontFamily: FONT,
-                letterSpacing: "0.04em",
-              }}
-            >
-              {userName || t.hud.profile[lang]}
-            </button>
-            <button
-              className="ws-btn"
-              onClick={() => setShowParentDash(true)}
-              style={{
-                background: "rgba(224,64,251,0.06)",
-                border: "1px solid rgba(224,64,251,0.15)",
-                borderRadius: 14,
-                padding: "10px 12px",
-                color: "#E040FB",
-                fontWeight: 800,
-                fontSize: "0.75rem",
-                cursor: "pointer",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                fontFamily: FONT,
-              }}
-            >
-              👪
-            </button>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {radioLive && (
-              <div style={{
-                background: "rgba(255,40,40,0.15)",
-                border: "1px solid rgba(255,60,60,0.4)",
-                borderRadius: 12,
-                padding: "6px 12px",
-                display: "flex", alignItems: "center", gap: 6,
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                animation: "radioGlow 1.5s ease-in-out infinite",
-              }}>
-                <span style={{ fontSize: "0.8rem" }}>🎙️</span>
-                <span style={{
-                  color: "#ff4444",
-                  fontWeight: 800,
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.08em",
-                  fontFamily: FONT,
-                  textShadow: "0 0 8px rgba(255,68,68,0.5)",
-                }}>{t.hud.live[lang]}</span>
-              </div>
-            )}
-            <button
-              className="ws-btn"
+              style={{ cursor: "pointer", fontSize: "0.95rem", lineHeight: 1 }}
+              title={userName || t.hud.profile[lang]}
+            >👤</span>
+            <span
               onClick={() => {
                 const newMuted = !isMuted;
                 isMutedRef.current = newMuted;
@@ -2007,24 +1939,10 @@ function App() {
                 }
                 setIsMuted(newMuted);
               }}
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 12,
-                padding: "8px 10px",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                fontSize: "1rem",
-                lineHeight: 1,
-              }}
+              style={{ cursor: "pointer", fontSize: "0.95rem", lineHeight: 1 }}
               title={isMuted ? t.auth.unmute[lang] : t.auth.mute[lang]}
-            >
-              {isMuted ? "🔇" : "🔊"}
-            </button>
-            <button
-              className="ws-btn"
+            >{isMuted ? "🔇" : "🔊"}</span>
+            <span
               onClick={() => {
                 stopElevenLabsAudio();
                 radioSpeakingRef.current = false;
@@ -2036,27 +1954,13 @@ function App() {
                 setSpeechSpeed(nextSpeed);
               }}
               style={{
-                background: speechSpeed === 0 ? "rgba(231,111,81,0.12)" : "rgba(255,255,255,0.06)",
-                border: speechSpeed === 0 ? "1px solid rgba(231,111,81,0.3)" : "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 12,
-                padding: "8px 10px",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                fontSize: "0.6rem",
-                fontWeight: 800,
-                fontFamily: FONT,
-                color: speechSpeed === 0 ? "#e76f51" : "#fff",
-                lineHeight: 1,
-                minWidth: 38,
+                cursor: "pointer", fontSize: "0.6rem", fontWeight: 800,
+                fontFamily: FONT, lineHeight: 1,
+                color: speechSpeed === 0 ? "#e76f51" : "rgba(255,255,255,0.7)",
               }}
               title={speechSpeed === 0 ? "Speech stopped — tap for 1x" : `Speech speed: ${speechSpeed}x`}
-            >
-              {speechSpeed === 0 ? "⏹" : `${speechSpeed}x`}
-            </button>
-            <button
-              className="ws-btn"
+            >{speechSpeed === 0 ? "⏹" : `${speechSpeed}x`}</span>
+            <span
               onClick={() => {
                 const newLang = lang === "en" ? "es" : "en";
                 setLang(newLang as Lang);
@@ -2065,47 +1969,44 @@ function App() {
                 resetJourney();
               }}
               style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 12,
-                padding: "8px 10px",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                fontSize: "0.6rem",
-                fontWeight: 800,
-                fontFamily: FONT,
-                color: "#fff",
-                lineHeight: 1,
-                minWidth: 38,
+                cursor: "pointer", fontSize: "0.6rem", fontWeight: 800,
+                fontFamily: FONT, lineHeight: 1,
+                color: "rgba(255,255,255,0.7)",
               }}
               title={t.auth.switchLang[lang]}
-            >
-              {lang === "en" ? "ES" : "EN"}
-            </button>
-            <div style={{
-              padding: "5px 10px", borderRadius: 10,
-              background: "rgba(255,217,61,0.08)", border: "1px solid rgba(255,217,61,0.15)",
-            }}>
-              <span style={{ color: "#FFD93D", fontWeight: 800, fontSize: "0.65rem" }}>{t.hud.lvl[lang]} {level}</span>
-            </div>
+            >{lang === "en" ? "ES" : "EN"}</span>
+            {radioLive && (
+              <span style={{
+                fontSize: "0.55rem", fontWeight: 800, color: "#ff4444",
+                letterSpacing: "0.06em", fontFamily: FONT,
+                animation: "radioGlow 1.5s ease-in-out infinite",
+              }}>🎙️ {t.hud.live[lang]}</span>
+            )}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span
+              onClick={(e) => { e.stopPropagation(); setShowModuleMap(true); }}
+              style={{ cursor: "pointer", fontSize: "0.85rem", lineHeight: 1 }}
+              title={`${t.hud.module[lang]} ${currentModuleIdx + 1}`}
+            >{currentModule?.icon}</span>
             <span style={{
-              color: "#2e8bc0", fontWeight: 900, fontSize: "0.75rem",
-              textShadow: "0 0 12px rgba(46,139,192,0.4)",
-              letterSpacing: "0.02em",
-            }}>
-              {xp} XP
-            </span>
+              color: "#FFD93D", fontWeight: 900, fontSize: "0.6rem",
+              fontFamily: FONT, letterSpacing: "0.04em",
+            }}>{t.hud.lvl[lang]}{level}</span>
+            <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", fontWeight: 400 }}>|</span>
+            <span style={{
+              color: "#2e8bc0", fontWeight: 900, fontSize: "0.6rem",
+              fontFamily: FONT, letterSpacing: "0.02em",
+            }}>{xp}XP</span>
           </div>
         </div>
         <div
           style={{
             width: "100%",
-            height: 4,
+            height: 2,
             background: "rgba(255,255,255,0.06)",
-            borderRadius: 2,
-            marginTop: 14,
+            borderRadius: 1,
+            marginTop: 6,
           }}
         >
           <div
@@ -2115,33 +2016,11 @@ function App() {
               background: progress >= 100
                 ? "linear-gradient(90deg, #FFD93D, #FF6B6B, #E040FB)"
                 : "linear-gradient(90deg, #2e8bc0, #b1d4e0)",
-              borderRadius: 2,
+              borderRadius: 1,
               transition: "width 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
-              boxShadow: progress > 0 ? "0 0 10px rgba(46,139,192,0.4)" : "none",
+              boxShadow: progress > 0 ? "0 0 6px rgba(46,139,192,0.3)" : "none",
             }}
           />
-        {/* Module indicator */}
-        <button
-          onClick={(e) => { e.stopPropagation(); setShowModuleMap(true); }}
-          style={{
-            marginTop: 10, display: "flex", alignItems: "center", gap: 8,
-            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 10, padding: "6px 12px", cursor: "pointer",
-            pointerEvents: "auto", width: "fit-content",
-          }}
-        >
-          <span style={{ fontSize: "0.9rem" }}>{currentModule?.icon}</span>
-          <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.08em" }}>
-            {t.hud.module[lang]} {currentModuleIdx + 1}: {currentModule?.name?.toUpperCase()}
-          </span>
-          <span style={{
-            color: "#2e8bc0", fontWeight: 800, fontSize: "0.55rem",
-            marginLeft: 4, padding: "2px 6px", borderRadius: 6,
-            background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.2)",
-          }}>
-            {currentModuleWins}/{currentModule?.winsNeeded || 10}
-          </span>
-        </button>
         </div>
       </div>
 
