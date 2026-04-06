@@ -440,6 +440,175 @@ function RadioHighlightSlide({
   );
 }
 
+function PodcastClipSlide({
+  card, videoSrc, bgGradient, lang,
+}: {
+  card: any; videoSrc: string; bgGradient: string; lang: Lang;
+}) {
+  const [visibleLines, setVisibleLines] = useState(0);
+  const slideRef = useRef<HTMLDivElement>(null);
+  const triggeredRef = useRef(false);
+  const dialogue: { speaker: string; text: string }[] = card.dialogue || [];
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && entries[0].intersectionRatio > 0.6 && !triggeredRef.current) {
+          triggeredRef.current = true;
+          let line = 0;
+          const iv = setInterval(() => {
+            line++;
+            setVisibleLines(line);
+            if (line >= dialogue.length) clearInterval(iv);
+          }, 1400);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    if (slideRef.current) observer.observe(slideRef.current);
+    return () => observer.disconnect();
+  }, [dialogue.length]);
+
+  const allRevealed = visibleLines >= dialogue.length;
+
+  return (
+    <div
+      ref={slideRef}
+      style={{
+        height: "100dvh", width: "100%", position: "relative",
+        scrollSnapAlign: "start", scrollSnapStop: "always",
+        background: "#050508", overflow: "hidden",
+      }}
+    >
+      <div style={{ position: "absolute", width: "100%", height: "100%", background: bgGradient }} />
+      <video
+        autoPlay muted loop playsInline preload="auto"
+        onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
+        style={{
+          position: "absolute", width: "100%", height: "100%",
+          objectFit: "cover", opacity: 0.15, filter: "blur(4px)",
+          animation: "vidFade 0.8s ease-out both",
+        }}
+      >
+        <source src={videoSrc} type="video/mp4" />
+      </video>
+      <div style={{
+        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+        background: "radial-gradient(ellipse at center, rgba(12,45,72,0.25) 0%, rgba(0,0,0,0.88) 55%, rgba(0,0,0,0.97) 100%)",
+        zIndex: 1,
+      }} />
+
+      <div style={{
+        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        zIndex: 2, padding: "60px 24px 80px",
+      }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8, marginBottom: 12,
+          animation: "radioTextFade 0.6s ease-out both",
+        }}>
+          <span style={{ fontSize: "1.2rem" }}>🎧</span>
+          <span style={{
+            fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.25em",
+            color: "#2e8bc0", textTransform: "uppercase",
+          }}>MOOLAB PODCAST</span>
+        </div>
+
+        <h3 style={{
+          fontSize: "1.3rem", fontWeight: 900, color: "#fff", letterSpacing: "-0.02em",
+          marginBottom: 32, textAlign: "center",
+          animation: "radioTextFade 0.8s ease-out both",
+        }}>
+          {card.title || "Shark Talk"}
+        </h3>
+
+        <div style={{
+          display: "flex", alignItems: "end", justifyContent: "center", gap: 2,
+          height: 40, width: "60%", maxWidth: 240, marginBottom: 32,
+          padding: "0 8px",
+        }}>
+          {Array.from({ length: 24 }, (_, i) => (
+            <div
+              key={i}
+              style={{
+                flex: 1, borderRadius: 1,
+                height: `${20 + Math.random() * 80}%`,
+                background: visibleLines > 0
+                  ? `linear-gradient(to top, rgba(46,139,192,0.6), rgba(177,212,224,0.4))`
+                  : "rgba(46,139,192,0.1)",
+                animation: visibleLines > 0 && !allRevealed
+                  ? `vizBar ${0.3 + Math.random() * 0.5}s ease-in-out ${Math.random() * 0.3}s infinite`
+                  : "none",
+                transition: "background 0.5s ease",
+                transformOrigin: "bottom",
+              }}
+            />
+          ))}
+        </div>
+
+        <div style={{
+          display: "flex", flexDirection: "column", gap: 16,
+          width: "100%", maxWidth: 380,
+        }}>
+          {dialogue.slice(0, visibleLines).map((line, idx) => {
+            const isHost = line.speaker.toLowerCase() === "host" || line.speaker.toLowerCase() === "presentador";
+            return (
+              <div
+                key={idx}
+                style={{
+                  display: "flex", flexDirection: "column", gap: 4,
+                  animation: "radioTextFade 0.5s ease-out both",
+                  alignItems: isHost ? "flex-start" : "flex-end",
+                }}
+              >
+                <span style={{
+                  fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: isHost ? "#2e8bc0" : "#b1d4e0",
+                }}>
+                  {line.speaker}
+                </span>
+                <div style={{
+                  padding: "12px 16px", borderRadius: 16,
+                  background: isHost
+                    ? "rgba(46,139,192,0.12)"
+                    : "rgba(177,212,224,0.08)",
+                  border: `1px solid ${isHost ? "rgba(46,139,192,0.25)" : "rgba(177,212,224,0.15)"}`,
+                  maxWidth: "88%",
+                  borderTopLeftRadius: isHost ? 4 : 16,
+                  borderTopRightRadius: isHost ? 16 : 4,
+                }}>
+                  <p style={{
+                    color: "#fff", fontSize: "0.85rem", fontWeight: 600,
+                    lineHeight: 1.5, margin: 0, fontFamily: FONT,
+                  }}>
+                    {line.text}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {allRevealed && (
+          <div style={{
+            position: "absolute", bottom: 80, left: 0, width: "100%",
+            display: "flex", justifyContent: "center",
+            animation: "contextPulse 2s ease-in-out infinite",
+          }}>
+            <span style={{
+              color: "rgba(255,255,255,0.35)", fontSize: "0.65rem", fontWeight: 700,
+              letterSpacing: "0.12em", textTransform: "uppercase",
+            }}>
+              {lang === "es" ? "⬆ Desliza para continuar" : "⬆ Swipe to continue"}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [lang, setLang] = useState<Lang>(() => (loadStr("lang", "en") as Lang));
   const langRef = useRef<Lang>(loadStr("lang", "en") as Lang);
@@ -1734,6 +1903,18 @@ function App() {
                 played={!!radioPlayedSlides[card.id]}
                 onPlayed={() => setRadioPlayedSlides(p => ({ ...p, [card.id]: true }))}
                 fallbackBrowserSpeak={fallbackBrowserSpeak}
+              />
+            );
+          }
+
+          if (card.type === "podcast_clip") {
+            return (
+              <PodcastClipSlide
+                key={card.id}
+                card={card}
+                videoSrc={getVideoForCard(card.id)}
+                bgGradient={bgGradients[i % bgGradients.length]}
+                lang={lang}
               />
             );
           }

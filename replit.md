@@ -52,3 +52,9 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
 -   **Avatars**: DiceBear (`adventurer` style)
 -   **Video Content**: Pexels (for background videos)
 -   **Payment Processors (Planned)**: Stripe, PayPal (badges displayed on landing page)
+
+## Podcast Clip Slides
+- **AI Schema**: Gemini prompt instructs AI to occasionally generate 1 `podcast_clip` card per batch with `type: "podcast_clip"`, `title`, and `dialogue` array of `{speaker, text}` objects (Host/Expert or Presentador/Experto).
+- **PodcastClipSlide Component**: Cinematic fullscreen dark slide with blurred video BG, radial gradient overlay, "MOOLAB PODCAST" branding, animated 24-bar mini-visualizer, and chat-bubble-style dialogue transcript.
+- **Dialogue Animation**: `IntersectionObserver` (threshold 0.6) triggers sequential reveal — each dialogue line appears every 1.4s. Host lines align left (neon cyan), Expert lines align right (light blue).
+- **Swipe Indicator**: Pulsing "Swipe to continue" appears after all lines revealed.
