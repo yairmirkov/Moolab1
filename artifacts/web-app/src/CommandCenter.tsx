@@ -263,7 +263,7 @@ export default function CommandCenter({
             t.cc.date[lang],
             t.cc.subject[lang],
             t.cc.score[lang],
-            "Status",
+            t.cc.status[lang],
           ].map((h) => (
             <div key={h} style={{ fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.12em", color: NAVY_TEXT_MUTED, textTransform: "uppercase" }}>
               {h}

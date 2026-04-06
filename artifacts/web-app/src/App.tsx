@@ -394,7 +394,7 @@ function RadioHighlightSlide({
             letterSpacing: "0.1em", textTransform: "uppercase",
             animation: "radioTextFade 0.5s ease-out both",
           }}>
-            {t.auth.continuing[lang]}
+            {translations.auth.continuing[lang]}
           </p>
         )}
       </div>
@@ -644,7 +644,7 @@ function PodcastClipSlide({
               color: "rgba(255,255,255,0.35)", fontSize: "0.65rem", fontWeight: 700,
               letterSpacing: "0.12em", textTransform: "uppercase",
             }}>
-              {t.auth.swipeToContinue[lang]}
+              {translations.auth.swipeToContinue[lang]}
             </span>
           </div>
         )}

@@ -357,6 +357,7 @@ const translations = {
     viewInvoices: { en: "View Invoices", es: "Ver Facturas" },
     parentDashboard: { en: "Parent Dashboard", es: "Panel de Padres" },
     encryptedData: { en: "Encrypted Data", es: "Datos encriptados" },
+    status: { en: "Status", es: "Estado" },
   },
   auth: {
     continueApple: { en: "Continue with Apple", es: "Continuar con Apple" },
@@ -381,7 +382,6 @@ const translations = {
     generatedPin: { en: "GENERATED PIN", es: "PIN GENERADO" },
     pinUsage: { en: "The student will use this PIN to log in", es: "El estudiante usará este PIN para acceder" },
     saveProfile: { en: "SAVE PROFILE", es: "GUARDAR PERFIL" },
-    createStudentProfile: { en: "Create Student Profile", es: "Crear Perfil de Estudiante" },
     continuing: { en: "CONTINUING...", es: "CONTINUANDO..." },
     swipeToContinue: { en: "⬆ Swipe to continue", es: "⬆ Desliza para continuar" },
   },
