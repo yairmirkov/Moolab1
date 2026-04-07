@@ -262,6 +262,20 @@ const RADIO_VIZ_BARS = Array.from({ length: 48 }, (_, i) => ({
 const audioBlobCache = new Map<string, string>();
 
 
+function getPlayButtonCopy(type: string, lang: "en" | "es"): string {
+  if (type === "podcast_clip") {
+    return lang === "es"
+      ? "Hora del podcast! Toca para aprender de los pros"
+      : "Money podcast time! Tap to learn from the pros";
+  }
+  if (type === "radio_highlight") {
+    return lang === "es"
+      ? "Dato financiero! Toca para escuchar"
+      : "Wanna hear a fun fact? Tap here";
+  }
+  return lang === "es" ? "Toca para escuchar" : "Tap to listen";
+}
+
 function RadioHighlightSlide({
   card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, isActive,
 }: {
@@ -271,163 +285,83 @@ function RadioHighlightSlide({
   slideIndex: number; isActive: boolean;
 }) {
   const [speaking, setSpeaking] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
   const [done, setDone] = useState(false);
-  const [needsTap, setNeedsTap] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const mountedRef = useRef(true);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      if (timerRef.current) clearTimeout(timerRef.current);
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        audioRef.current = null;
-      }
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     };
   }, []);
 
-  const playAudioBlob = useCallback(async (blobUrl: string) => {
-    if (!mountedRef.current) return;
+  useEffect(() => {
+    if (!isActive) {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      setSpeaking(false);
+    }
+  }, [isActive]);
+
+  const handlePlay = useCallback(async () => {
+    if (hasPlayed || !mountedRef.current) return;
+    setHasPlayed(true);
+
+    const cacheKey = `radio_${card.id}_${lang}`;
+    let blobUrl = audioBlobCache.get(cacheKey);
+
+    if (!blobUrl && isElevenLabsAvailable() && card.audioText) {
+      const voiceId = getVoiceIdForRole("Narrator", lang);
+      const result = await fetchAudioBlob(card.audioText, voiceId);
+      if (result.url) { audioBlobCache.set(cacheKey, result.url); blobUrl = result.url; }
+    }
+
+    if (!blobUrl || !mountedRef.current) { setDone(true); return; }
+
     const audio = new Audio(blobUrl);
     audio.playbackRate = speechSpeedRef.current || 1;
     audio.volume = 0.85;
     audioRef.current = audio;
 
-    const finish = () => {
-      if (!mountedRef.current) return;
-      setSpeaking(false);
-      setDone(true);
-      timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 2000);
-    };
-
+    const finish = () => { if (!mountedRef.current) return; setSpeaking(false); setDone(true); };
     audio.onended = finish;
     audio.onerror = finish;
 
-    try {
-      setSpeaking(true);
-      setNeedsTap(false);
-      await audio.play();
-    } catch (e: any) {
-      
-      if (e?.name === "NotAllowedError") {
-        setSpeaking(false);
-        setNeedsTap(true);
-      } else {
-        finish();
-      }
-    }
-  }, [speechSpeedRef]);
+    try { setSpeaking(true); await audio.play(); }
+    catch { finish(); }
+  }, [hasPlayed, card.id, card.audioText, lang, speechSpeedRef]);
 
-  useEffect(() => {
-    if (!isActive) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
-      setSpeaking(false);
-      setNeedsTap(false);
-      return;
-    }
-
-
-    if (isMutedRef.current || speechSpeedRef.current === 0 || !card.audioText) {
-      setDone(true);
-      timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
-      return;
-    }
-
-    if (!isElevenLabsAvailable()) {
-      setDone(true);
-      timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
-      return;
-    }
-
-    const cacheKey = `radio_${card.id}_${lang}`;
-    if (audioBlobCache.has(cacheKey)) {
-      playAudioBlob(audioBlobCache.get(cacheKey)!);
-      return;
-    }
-
-    const timerLabel = `ElevenLabs API (radio, ${card.audioText?.substring(0, 25)}...)`;
-    console.time(timerLabel);
-    let timerEnded = false;
-    const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
-
-    const voiceId = getVoiceIdForRole("Narrator", lang);
-
-    fetchAudioBlob(card.audioText, voiceId)
-      .then((result) => {
-        endTimer();
-        if (result.url) {
-          audioBlobCache.set(cacheKey, result.url);
-          if (mountedRef.current && isActive) playAudioBlob(result.url);
-        } else {
-          if (mountedRef.current) {
-            setDone(true);
-            timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
-          }
-        }
-      })
-      .catch(() => {
-        endTimer();
-        if (mountedRef.current) {
-          setDone(true);
-          timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
-        }
-      });
-  }, [isActive, card.id]);
-
-  const handleTapToPlay = () => {
-    const cacheKey = `radio_${card.id}_${lang}`;
-    if (audioBlobCache.has(cacheKey)) {
-      playAudioBlob(audioBlobCache.get(cacheKey)!);
-    }
-  };
-
-  const autoAdvance = () => {
-    if (!feedRef.current) return;
-    const target = feedRef.current.children[slideIndex + 1] as HTMLElement | undefined;
-    if (target) target.scrollIntoView({ behavior: "smooth" });
-  };
+  const audioAvailable = !!(card.audioText && isElevenLabsAvailable() && !isMutedRef.current);
+  const showPlayBtn = isActive && !hasPlayed && audioAvailable;
 
   return (
-    <div
-      style={{
-        height: "100dvh", width: "100%", position: "relative",
-        scrollSnapAlign: "start", scrollSnapStop: "always",
-        background: "#050508", overflow: "hidden",
-      }}
-    >
+    <div style={{
+      height: "100dvh", width: "100%", position: "relative",
+      scrollSnapAlign: "start", scrollSnapStop: "always",
+      background: "#050508", overflow: "hidden",
+    }}>
       <div style={{ position: "absolute", width: "100%", height: "100%", background: bgGradient }} />
       <video
         autoPlay muted loop playsInline preload="auto"
         onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
         style={{
-          position: "absolute", width: "100%", height: "100%",
-          objectFit: "cover", opacity: 0.25, filter: "blur(2px)",
+          position: "absolute", width: "100%", height: "60%", top: 0,
+          objectFit: "cover", opacity: 0.3, filter: "blur(2px)",
           animation: "vidFade 0.8s ease-out both",
         }}
       >
         <source src={videoSrc} type="video/mp4" />
       </video>
-      <div style={{
-        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
-        background: "radial-gradient(ellipse at center, rgba(12,45,72,0.3) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.95) 100%)",
-        zIndex: 1,
-      }} />
 
       <div style={{
-        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+        position: "absolute", top: 0, left: 0, width: "100%", height: "60%",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        zIndex: 2, padding: "40px 24px",
+        zIndex: 2, padding: "40px 24px 0",
       }}>
         <div style={{
-          display: "flex", alignItems: "center", gap: 8, marginBottom: 32,
+          display: "flex", alignItems: "center", gap: 8, marginBottom: 24,
           animation: "radioTextFade 0.6s ease-out both",
         }}>
           <span style={{ fontSize: "1.3rem" }}>🎙️</span>
@@ -452,7 +386,7 @@ function RadioHighlightSlide({
 
         <div style={{
           display: "flex", alignItems: "end", justifyContent: "center", gap: 3,
-          height: 120, width: "80%", maxWidth: 360, marginBottom: 36,
+          height: 100, width: "80%", maxWidth: 360,
           animation: "vizGlow 3s ease-in-out infinite",
           padding: "0 12px", borderRadius: 16,
         }}>
@@ -463,7 +397,7 @@ function RadioHighlightSlide({
                 flex: 1, borderRadius: 2,
                 height: `${bar.height * 100}%`,
                 background: speaking
-                  ? `linear-gradient(to top, #2e8bc0, #b1d4e0)`
+                  ? "linear-gradient(to top, #2e8bc0, #b1d4e0)"
                   : done ? "rgba(46,139,192,0.15)" : "rgba(46,139,192,0.08)",
                 animation: speaking ? `vizBar ${0.4 + bar.delay * 0.6}s ease-in-out ${bar.delay}s infinite` : "none",
                 transition: "background 0.5s ease, height 0.3s ease",
@@ -473,31 +407,65 @@ function RadioHighlightSlide({
             />
           ))}
         </div>
+      </div>
 
-        {needsTap && (
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, width: "100%", height: "45%",
+        background: "linear-gradient(to top, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0.7) 85%, transparent 100%)",
+        zIndex: 3,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        padding: "0 28px 60px",
+      }}>
+        {showPlayBtn && (
           <button
-            onClick={handleTapToPlay}
+            onClick={handlePlay}
             style={{
-              padding: "14px 28px", borderRadius: 50, border: "2px solid rgba(46,139,192,0.5)",
-              background: "rgba(46,139,192,0.15)", backdropFilter: "blur(12px)",
+              padding: "16px 32px", borderRadius: 50,
+              border: "2px solid rgba(46,139,192,0.5)",
+              background: "linear-gradient(135deg, rgba(46,139,192,0.25), rgba(20,83,116,0.35))",
+              backdropFilter: "blur(12px)",
               color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
-              cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
-              animation: "radioTextFade 0.4s ease-out both",
-              boxShadow: "0 0 30px rgba(46,139,192,0.2)",
+              cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+              animation: "enterPulse 2.5s ease-in-out infinite",
+              boxShadow: "0 0 40px rgba(46,139,192,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
+              marginBottom: 20,
             }}
           >
-            <span style={{ fontSize: "1.3rem" }}>🔊</span>
-            {lang === "es" ? "Toca para Reproducir" : "Tap to Play Audio"}
+            <span style={{ fontSize: "1.4rem" }}>▶️</span>
+            <span style={{ textAlign: "left", lineHeight: 1.3 }}>
+              {getPlayButtonCopy("radio_highlight", lang)}
+            </span>
           </button>
+        )}
+
+        {hasPlayed && card.audioText && (
+          <p style={{
+            color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 2.5vw, 1.15rem)",
+            fontWeight: 700, lineHeight: 1.5, textAlign: "center", margin: 0,
+            maxWidth: 380, fontFamily: FONT,
+            animation: "radioTextFade 0.5s ease-out both",
+          }}>
+            {card.audioText}
+          </p>
+        )}
+
+        {!audioAvailable && !hasPlayed && card.audioText && (
+          <p style={{
+            color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 2.5vw, 1.15rem)",
+            fontWeight: 700, lineHeight: 1.5, textAlign: "center", margin: 0,
+            maxWidth: 380, fontFamily: FONT,
+          }}>
+            {card.audioText}
+          </p>
         )}
 
         {done && (
           <p style={{
-            color: "rgba(255,255,255,0.35)", fontSize: "0.7rem", fontWeight: 700,
-            letterSpacing: "0.1em", textTransform: "uppercase",
-            animation: "radioTextFade 0.5s ease-out both",
+            color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 700,
+            letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 16,
+            animation: "contextPulse 2s ease-in-out infinite",
           }}>
-            {translations.auth.continuing[lang]}
+            {translations.auth.swipeToContinue[lang]}
           </p>
         )}
       </div>
@@ -514,18 +482,18 @@ function PodcastClipSlide({
 }) {
   const [visibleLines, setVisibleLines] = useState(0);
   const [speakingIdx, setSpeakingIdx] = useState(-1);
-  const [needsTap, setNeedsTap] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
   const slideRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const dialogue: { speaker: string; text: string }[] = card.dialogue || [];
 
   const runPlaybackQueue = useCallback(async () => {
+    if (abortRef.current) abortRef.current.abort();
     const ac = new AbortController();
     abortRef.current = ac;
 
     for (let i = 0; i < dialogue.length; i++) {
       if (ac.signal.aborted) break;
-
       setVisibleLines(i + 1);
 
       if (isMutedRef.current || speechSpeedRef.current === 0 || !isElevenLabsAvailable()) {
@@ -539,7 +507,6 @@ function PodcastClipSlide({
       }
 
       setSpeakingIdx(i);
-
       const cacheKey = `podcast_${card.id}_${i}_${lang}`;
       const cachedUrl = audioBlobCache.get(cacheKey);
 
@@ -554,8 +521,7 @@ function PodcastClipSlide({
 
           audio.onended = () => { ac.signal.removeEventListener("abort", onAbort); resolve("done"); };
           audio.onerror = () => { ac.signal.removeEventListener("abort", onAbort); resolve("error"); };
-          audio.play().catch((err) => {
-            setNeedsTap(true);
+          audio.play().catch(() => {
             ac.signal.removeEventListener("abort", onAbort);
             resolve("error");
           });
@@ -571,15 +537,11 @@ function PodcastClipSlide({
         }
       } else {
         const result = await speakPodcastLine(
-          dialogue[i].text,
-          dialogue[i].speaker,
-          lang,
+          dialogue[i].text, dialogue[i].speaker, lang,
           { speed: speechSpeedRef.current, signal: ac.signal },
         );
-
         if (result === "aborted") break;
         if (!ac.signal.aborted) setSpeakingIdx(-1);
-
         if (result === "error") {
           await new Promise<void>((r) => {
             const tid = setTimeout(r, 2000);
@@ -589,10 +551,7 @@ function PodcastClipSlide({
       }
     }
 
-    if (!ac.signal.aborted) {
-      setVisibleLines(dialogue.length);
-      setSpeakingIdx(-1);
-    }
+    if (!ac.signal.aborted) { setVisibleLines(dialogue.length); setSpeakingIdx(-1); }
     if (abortRef.current === ac) abortRef.current = null;
   }, [dialogue, lang, isMutedRef, speechSpeedRef, card.id]);
 
@@ -604,25 +563,21 @@ function PodcastClipSlide({
   }, []);
 
   useEffect(() => {
-    if (isActive) {
-      setNeedsTap(false);
-      runPlaybackQueue().catch(() => {});
-    } else {
+    if (!isActive) {
       if (abortRef.current) abortRef.current.abort();
       stopElevenLabsAudio();
       setSpeakingIdx(-1);
     }
-    return () => {
-      if (abortRef.current) abortRef.current.abort();
-      stopElevenLabsAudio();
-    };
   }, [isActive]);
 
-  const handleTapToPlay = () => {
-    setNeedsTap(false);
+  const handlePlay = () => {
+    if (hasPlayed) return;
+    setHasPlayed(true);
     runPlaybackQueue().catch(() => {});
   };
 
+  const audioAvailable = !!(isElevenLabsAvailable() && !isMutedRef.current);
+  const showPlayBtn = isActive && !hasPlayed && audioAvailable && dialogue.length > 0;
   const allRevealed = visibleLines >= dialogue.length;
   const isSpeaking = speakingIdx >= 0;
 
@@ -640,26 +595,21 @@ function PodcastClipSlide({
         autoPlay muted loop playsInline preload="auto"
         onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
         style={{
-          position: "absolute", width: "100%", height: "100%",
-          objectFit: "cover", opacity: 0.15, filter: "blur(4px)",
+          position: "absolute", width: "100%", height: "55%", top: 0,
+          objectFit: "cover", opacity: 0.2, filter: "blur(4px)",
           animation: "vidFade 0.8s ease-out both",
         }}
       >
         <source src={videoSrc} type="video/mp4" />
       </video>
-      <div style={{
-        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
-        background: "radial-gradient(ellipse at center, rgba(12,45,72,0.25) 0%, rgba(0,0,0,0.88) 55%, rgba(0,0,0,0.97) 100%)",
-        zIndex: 1,
-      }} />
 
       <div style={{
-        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+        position: "absolute", top: 0, left: 0, width: "100%", height: "55%",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        zIndex: 2, padding: "60px 24px 80px",
+        zIndex: 2, padding: "40px 24px 0",
       }}>
         <div style={{
-          display: "flex", alignItems: "center", gap: 8, marginBottom: 12,
+          display: "flex", alignItems: "center", gap: 8, marginBottom: 10,
           animation: "radioTextFade 0.6s ease-out both",
         }}>
           <span style={{ fontSize: "1.2rem" }}>🎧</span>
@@ -684,7 +634,7 @@ function PodcastClipSlide({
 
         <h3 style={{
           fontSize: "1.3rem", fontWeight: 900, color: "#fff", letterSpacing: "-0.02em",
-          marginBottom: 28, textAlign: "center",
+          marginBottom: 16, textAlign: "center",
           animation: "radioTextFade 0.8s ease-out both",
         }}>
           {card.title || "Shark Talk"}
@@ -692,7 +642,7 @@ function PodcastClipSlide({
 
         <div style={{
           display: "flex", alignItems: "end", justifyContent: "center", gap: 2,
-          height: 40, width: "60%", maxWidth: 240, marginBottom: 28,
+          height: 36, width: "60%", maxWidth: 240,
           padding: "0 8px",
         }}>
           {Array.from({ length: 24 }, (_, i) => (
@@ -702,10 +652,8 @@ function PodcastClipSlide({
                 flex: 1, borderRadius: 1,
                 height: `${20 + Math.random() * 80}%`,
                 background: isSpeaking
-                  ? `linear-gradient(to top, rgba(0,255,213,0.6), rgba(46,139,192,0.5))`
-                  : visibleLines > 0
-                    ? "rgba(46,139,192,0.2)"
-                    : "rgba(46,139,192,0.06)",
+                  ? "linear-gradient(to top, rgba(0,255,213,0.6), rgba(46,139,192,0.5))"
+                  : visibleLines > 0 ? "rgba(46,139,192,0.2)" : "rgba(46,139,192,0.06)",
                 animation: isSpeaking
                   ? `vizBar ${0.3 + Math.random() * 0.5}s ease-in-out ${Math.random() * 0.3}s infinite`
                   : "none",
@@ -716,22 +664,55 @@ function PodcastClipSlide({
           ))}
         </div>
 
+        {showPlayBtn && (
+          <button
+            onClick={handlePlay}
+            style={{
+              marginTop: 20,
+              padding: "14px 28px", borderRadius: 50,
+              border: "2px solid rgba(0,255,213,0.4)",
+              background: "linear-gradient(135deg, rgba(0,255,213,0.15), rgba(46,139,192,0.2))",
+              backdropFilter: "blur(12px)",
+              color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
+              cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+              animation: "enterPulse 2.5s ease-in-out infinite",
+              boxShadow: "0 0 40px rgba(0,255,213,0.15), inset 0 1px 0 rgba(255,255,255,0.1)",
+            }}
+          >
+            <span style={{ fontSize: "1.4rem" }}>▶️</span>
+            <span style={{ textAlign: "left", lineHeight: 1.3 }}>
+              {getPlayButtonCopy("podcast_clip", lang)}
+            </span>
+          </button>
+        )}
+      </div>
+
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, width: "100%", height: "48%",
+        background: "linear-gradient(to top, rgba(0,0,0,0.95) 55%, rgba(0,0,0,0.7) 80%, transparent 100%)",
+        zIndex: 3,
+        display: "flex", flexDirection: "column",
+        padding: "24px 20px 60px",
+        overflowY: "auto",
+        scrollbarWidth: "none",
+      }}>
         <div style={{
-          display: "flex", flexDirection: "column", gap: 14,
-          width: "100%", maxWidth: 380,
-          overflowY: "auto", maxHeight: "55dvh",
-          scrollbarWidth: "none",
+          display: "flex", flexDirection: "column", gap: 12,
+          width: "100%", maxWidth: 380, margin: "0 auto",
         }}>
-          {dialogue.slice(0, visibleLines).map((line, idx) => {
-            const isHost = line.speaker.toLowerCase() === "host" || line.speaker.toLowerCase() === "presentador";
-            const isActive = idx === speakingIdx;
+          {(hasPlayed ? dialogue.slice(0, visibleLines) : dialogue).map((line, idx) => {
+            const isHost = line.speaker.toLowerCase() === "host" || line.speaker.toLowerCase() === "presentador" || line.speaker.toLowerCase() === "presentadora";
+            const isLineActive = hasPlayed && idx === speakingIdx;
+            const isRevealed = !hasPlayed || idx < visibleLines;
             return (
               <div
                 key={idx}
                 style={{
                   display: "flex", flexDirection: "column", gap: 4,
-                  animation: "radioTextFade 0.5s ease-out both",
+                  animation: isRevealed ? "radioTextFade 0.5s ease-out both" : "none",
                   alignItems: isHost ? "flex-start" : "flex-end",
+                  opacity: !hasPlayed ? 0.4 : 1,
+                  transition: "opacity 0.4s ease",
                 }}
               >
                 <span style={{
@@ -742,24 +723,23 @@ function PodcastClipSlide({
                   {line.speaker}
                 </span>
                 <div style={{
-                  padding: "14px 18px", borderRadius: 16,
+                  padding: "12px 16px", borderRadius: 16,
                   background: isHost
-                    ? isActive ? "rgba(0,255,213,0.12)" : "rgba(0,255,213,0.06)"
-                    : isActive ? "rgba(108,180,238,0.12)" : "rgba(108,180,238,0.05)",
+                    ? isLineActive ? "rgba(0,255,213,0.12)" : "rgba(0,255,213,0.06)"
+                    : isLineActive ? "rgba(108,180,238,0.12)" : "rgba(108,180,238,0.05)",
                   border: `1px solid ${isHost
-                    ? isActive ? "rgba(0,255,213,0.4)" : "rgba(0,255,213,0.15)"
-                    : isActive ? "rgba(108,180,238,0.4)" : "rgba(108,180,238,0.12)"}`,
+                    ? isLineActive ? "rgba(0,255,213,0.4)" : "rgba(0,255,213,0.15)"
+                    : isLineActive ? "rgba(108,180,238,0.4)" : "rgba(108,180,238,0.12)"}`,
                   maxWidth: "90%",
                   borderTopLeftRadius: isHost ? 4 : 16,
                   borderTopRightRadius: isHost ? 16 : 4,
-                  boxShadow: isActive ? `0 0 20px ${isHost ? "rgba(0,255,213,0.15)" : "rgba(108,180,238,0.15)"}` : "none",
+                  boxShadow: isLineActive ? `0 0 20px ${isHost ? "rgba(0,255,213,0.15)" : "rgba(108,180,238,0.15)"}` : "none",
                   transition: "all 0.3s ease",
                 }}>
                   <p style={{
-                    color: isActive ? "#fff" : "rgba(255,255,255,0.85)",
-                    fontSize: "0.9rem", fontWeight: isActive ? 700 : 600,
-                    lineHeight: 1.55, margin: 0, fontFamily: FONT,
-                    textShadow: isActive ? "0 0 8px rgba(255,255,255,0.1)" : "none",
+                    color: isLineActive ? "#fff" : "rgba(255,255,255,0.85)",
+                    fontSize: "0.85rem", fontWeight: isLineActive ? 700 : 600,
+                    lineHeight: 1.5, margin: 0, fontFamily: FONT,
                   }}>
                     {line.text}
                   </p>
@@ -769,36 +749,13 @@ function PodcastClipSlide({
           })}
         </div>
 
-        {needsTap && (
+        {allRevealed && hasPlayed && !isSpeaking && (
           <div style={{
-            position: "absolute", bottom: 140, left: 0, width: "100%",
-            display: "flex", justifyContent: "center",
-          }}>
-            <button
-              onClick={handleTapToPlay}
-              style={{
-                padding: "14px 28px", borderRadius: 50, border: "2px solid rgba(46,139,192,0.5)",
-                background: "rgba(46,139,192,0.15)", backdropFilter: "blur(12px)",
-                color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
-                cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
-                animation: "radioTextFade 0.4s ease-out both",
-                boxShadow: "0 0 30px rgba(46,139,192,0.2)",
-              }}
-            >
-              <span style={{ fontSize: "1.3rem" }}>🔊</span>
-              {lang === "es" ? "Toca para Reproducir" : "Tap to Play Audio"}
-            </button>
-          </div>
-        )}
-
-        {allRevealed && !isSpeaking && (
-          <div style={{
-            position: "absolute", bottom: 80, left: 0, width: "100%",
-            display: "flex", justifyContent: "center",
+            display: "flex", justifyContent: "center", marginTop: 16,
             animation: "contextPulse 2s ease-in-out infinite",
           }}>
             <span style={{
-              color: "rgba(255,255,255,0.35)", fontSize: "0.65rem", fontWeight: 700,
+              color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 700,
               letterSpacing: "0.12em", textTransform: "uppercase",
             }}>
               {translations.auth.swipeToContinue[lang]}
