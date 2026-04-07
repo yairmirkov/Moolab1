@@ -973,18 +973,12 @@ function App() {
       guest2: "Guest2", invitado2: "Guest2",
       narrator: "Narrator", narrador: "Narrator", narradora: "Narrator",
     };
-    const promises: Promise<void>[] = [];
+    const jobs: { cacheKey: string; text: string; voiceId: string }[] = [];
     for (const card of cards) {
       if (card.type === "radio_highlight" && card.audioText) {
         const cacheKey = `radio_${card.id}_${currentLang}`;
         if (!audioBlobCache.has(cacheKey)) {
-          const voiceId = getVoiceIdForRole("Narrator", currentLang);
-          promises.push(
-            fetchAudioBlob(card.audioText, voiceId).then((url) => {
-              logAudio(`Preload radio ${cacheKey}: url=${url ? "OK("+url.substring(0,20)+")" : "NULL"}`);
-              if (url) audioBlobCache.set(cacheKey, url);
-            })
-          );
+          jobs.push({ cacheKey, text: card.audioText, voiceId: getVoiceIdForRole("Narrator", currentLang) });
         }
       }
       if (card.type === "podcast_clip" && card.dialogue) {
@@ -993,21 +987,32 @@ function App() {
           const cacheKey = `podcast_${card.id}_${i}_${currentLang}`;
           if (!audioBlobCache.has(cacheKey)) {
             const role = SPEAKER_TO_ROLE[line.speaker?.toLowerCase()?.trim()] || "Narrator";
-            const voiceId = getVoiceIdForRole(role, currentLang);
-            promises.push(
-              fetchAudioBlob(line.text, voiceId).then((url) => {
-                logAudio(`Preload podcast ${cacheKey}: url=${url ? "OK("+url.substring(0,20)+")" : "NULL"}`);
-                if (url) audioBlobCache.set(cacheKey, url);
-              })
-            );
+            jobs.push({ cacheKey, text: line.text, voiceId: getVoiceIdForRole(role, currentLang) });
           }
         }
       }
     }
-    logAudio(`Preload: Fetching ${promises.length} audio blobs...`);
-    const results = await Promise.allSettled(promises);
-    const succeeded = results.filter(r => r.status === "fulfilled").length;
-    logAudio(`Preload: Done. ${succeeded}/${promises.length} succeeded. Cache size=${audioBlobCache.size}`);
+    logAudio(`Preload: ${jobs.length} audio blobs to fetch (sequential)...`);
+    let ok = 0;
+    for (let j = 0; j < jobs.length; j++) {
+      const { cacheKey, text, voiceId } = jobs[j];
+      let url: string | null = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        url = await fetchAudioBlob(text, voiceId);
+        if (url) break;
+        logAudio(`Preload ${cacheKey}: attempt ${attempt+1} failed, retrying in 1.5s...`);
+        await new Promise(r => setTimeout(r, 1500));
+      }
+      if (url) {
+        audioBlobCache.set(cacheKey, url);
+        ok++;
+        logAudio(`Preload [${j+1}/${jobs.length}] ${cacheKey}: OK`);
+      } else {
+        logAudio(`Preload [${j+1}/${jobs.length}] ${cacheKey}: FAILED`);
+      }
+      if (j < jobs.length - 1) await new Promise(r => setTimeout(r, 300));
+    }
+    logAudio(`Preload: Done. ${ok}/${jobs.length} cached. Cache size=${audioBlobCache.size}`);
   }, []);
 
   const resetJourney = useCallback(() => {
