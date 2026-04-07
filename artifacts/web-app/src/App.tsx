@@ -4,7 +4,7 @@ import LandingPageES from "./LandingPageES";
 import CommandCenter from "./CommandCenter";
 import ConceptCard from "./ConceptCard";
 import translations, { type Lang } from "./translations";
-import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob } from "./elevenlabs";
+import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob, type FetchBlobResult } from "./elevenlabs";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -395,26 +395,21 @@ function RadioHighlightSlide({
     const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
 
     const voiceId = getVoiceIdForRole("Narrator", lang);
-    const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
 
-    fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "xi-api-key": apiKey },
-      body: JSON.stringify({
-        text: card.audioText,
-        model_id: "eleven_multilingual_v2",
-        voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.4, use_speaker_boost: true },
-      }),
-    })
-      .then((res) => {
+    fetchAudioBlob(card.audioText, voiceId)
+      .then((result) => {
         endTimer();
-        if (!res.ok) throw new Error(`TTS ${res.status}`);
-        return res.blob();
-      })
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        audioBlobCache.set(cacheKey, url);
-        if (mountedRef.current && isActive) playAudioBlob(url);
+        if (result.url) {
+          audioBlobCache.set(cacheKey, result.url);
+          logAudio(`Radio live fetch: OK, playing`);
+          if (mountedRef.current && isActive) playAudioBlob(result.url);
+        } else {
+          logAudio(`Radio live fetch: FAILED ${result.httpStatus} ${result.error}`);
+          if (mountedRef.current) {
+            setDone(true);
+            timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
+          }
+        }
       })
       .catch(() => {
         endTimer();
@@ -994,25 +989,38 @@ function App() {
     }
     logAudio(`Preload: ${jobs.length} audio blobs to fetch (sequential)...`);
     let ok = 0;
+    let fatal = false;
     for (let j = 0; j < jobs.length; j++) {
+      if (fatal) break;
       const { cacheKey, text, voiceId } = jobs[j];
-      let url: string | null = null;
-      for (let attempt = 0; attempt < 2; attempt++) {
-        url = await fetchAudioBlob(text, voiceId);
-        if (url) break;
-        logAudio(`Preload ${cacheKey}: attempt ${attempt+1} failed, retrying in 1.5s...`);
-        await new Promise(r => setTimeout(r, 1500));
+      let result: { url: string | null; httpStatus: number; error?: string } = { url: null, httpStatus: 0 };
+      for (let attempt = 0; attempt < 3; attempt++) {
+        result = await fetchAudioBlob(text, voiceId);
+        if (result.url) break;
+        if (result.httpStatus === 401 || result.httpStatus === 402 || result.httpStatus === 403) {
+          logAudio(`Preload: FATAL ${result.httpStatus} ${result.error} — stopping all preloads`);
+          fatal = true;
+          break;
+        }
+        if (result.httpStatus === 429) {
+          const wait = Math.min(2000 * (attempt + 1), 6000);
+          logAudio(`Preload ${cacheKey}: rate limited, waiting ${wait}ms (attempt ${attempt+1})...`);
+          await new Promise(r => setTimeout(r, wait));
+        } else {
+          logAudio(`Preload ${cacheKey}: attempt ${attempt+1} failed (${result.error}), retrying in 1.5s...`);
+          await new Promise(r => setTimeout(r, 1500));
+        }
       }
-      if (url) {
-        audioBlobCache.set(cacheKey, url);
+      if (result.url) {
+        audioBlobCache.set(cacheKey, result.url);
         ok++;
         logAudio(`Preload [${j+1}/${jobs.length}] ${cacheKey}: OK`);
-      } else {
-        logAudio(`Preload [${j+1}/${jobs.length}] ${cacheKey}: FAILED`);
+      } else if (!fatal) {
+        logAudio(`Preload [${j+1}/${jobs.length}] ${cacheKey}: FAILED (${result.error})`);
       }
-      if (j < jobs.length - 1) await new Promise(r => setTimeout(r, 300));
+      if (j < jobs.length - 1 && !fatal) await new Promise(r => setTimeout(r, 250));
     }
-    logAudio(`Preload: Done. ${ok}/${jobs.length} cached. Cache size=${audioBlobCache.size}`);
+    logAudio(`Preload: Done. ${ok}/${jobs.length} cached. Cache size=${audioBlobCache.size}${fatal ? " [AUTH/QUOTA FATAL]" : ""}`);
   }, []);
 
   const resetJourney = useCallback(() => {

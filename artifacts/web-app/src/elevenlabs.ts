@@ -1,11 +1,39 @@
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY as string | undefined;
 
+const EL_ERROR_CODES: Record<number, string> = {
+  400: "invalid_request",
+  401: "authentication_error",
+  402: "payment_required",
+  403: "authorization_error",
+  404: "not_found",
+  409: "conflict",
+  429: "rate_limit_error",
+  500: "internal_error",
+  503: "service_unavailable",
+};
+
 const _log = (msg: string) => {
   const ts = new Date().toLocaleTimeString();
   const entry = `[${ts}] EL: ${msg}`;
   console.log(entry);
   const arr = (window as any).__audioLog;
   if (arr) { arr.push(entry); if (arr.length > 40) arr.shift(); }
+};
+
+const _parseApiError = async (res: Response): Promise<string> => {
+  const label = EL_ERROR_CODES[res.status] || `http_${res.status}`;
+  let detail = "";
+  try {
+    const body = await res.json();
+    const d = body?.detail;
+    if (typeof d === "string") detail = d;
+    else if (d?.message) detail = `${d.status || ""}: ${d.message}`;
+    else if (body?.message) detail = body.message;
+    else detail = JSON.stringify(body).substring(0, 100);
+  } catch {
+    detail = res.statusText;
+  }
+  return `${res.status} ${label} - ${detail}`;
 };
 
 const VOICE_MAP = {
@@ -64,11 +92,17 @@ let currentAudio: HTMLAudioElement | null = null;
 
 export const isElevenLabsAvailable = (): boolean => !!ELEVENLABS_API_KEY;
 
+export type FetchBlobResult = {
+  url: string | null;
+  httpStatus: number;
+  error?: string;
+};
+
 export const fetchAudioBlob = async (
   text: string,
   voiceId: string,
-): Promise<string | null> => {
-  if (!ELEVENLABS_API_KEY) { _log("fetchBlob: NO KEY"); return null; }
+): Promise<FetchBlobResult> => {
+  if (!ELEVENLABS_API_KEY) { _log("fetchBlob: NO KEY"); return { url: null, httpStatus: 0, error: "no_key" }; }
   try {
     _log(`fetchBlob: voice=${voiceId.substring(0,8)}, "${text.substring(0, 25)}..."`);
     const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
@@ -81,17 +115,17 @@ export const fetchAudioBlob = async (
       }),
     });
     if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      _log(`fetchBlob: HTTP ${res.status} - ${body.substring(0, 80)}`);
-      return null;
+      const errMsg = await _parseApiError(res);
+      _log(`fetchBlob: ${errMsg}`);
+      return { url: null, httpStatus: res.status, error: EL_ERROR_CODES[res.status] || `http_${res.status}` };
     }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     _log(`fetchBlob: OK size=${blob.size} type=${blob.type}`);
-    return url;
+    return { url, httpStatus: 200 };
   } catch (e: any) {
-    _log(`fetchBlob: ERROR ${e?.message?.substring(0, 60)}`);
-    return null;
+    _log(`fetchBlob: NETWORK ERROR ${e?.message?.substring(0, 60)}`);
+    return { url: null, httpStatus: 0, error: "network_error" };
   }
 };
 
@@ -175,7 +209,8 @@ export const speakPodcastLine = (
       endPodTimer();
 
       if (!response.ok) {
-        console.error(`[ElevenLabs] Podcast TTS failed: ${response.status} ${response.statusText}`);
+        const errMsg = await _parseApiError(response);
+        _log(`podcastLine: ${errMsg}`);
         settle("error");
         return;
       }
@@ -263,7 +298,8 @@ async function _speak(
     endTimer();
 
     if (!response.ok) {
-      console.error(`[ElevenLabs] TTS failed: ${response.status} ${response.statusText}`);
+      const errMsg = await _parseApiError(response);
+      _log(`_speak: ${errMsg}`);
       opts?.onError?.();
       return false;
     }
