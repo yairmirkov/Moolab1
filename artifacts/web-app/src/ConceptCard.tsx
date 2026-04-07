@@ -1,7 +1,22 @@
 import type { Lang } from "./translations";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
-const NAVY = "#001F5B";
+
+const CONCEPT_VIDEOS = [
+  "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/3195394/3195394-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2795167/2795167-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2516159/2516159-hd_1920_1080_24fps.mp4",
+  "https://videos.pexels.com/video-files/3214435/3214435-hd_1920_1080_25fps.mp4",
+];
+
+function getConceptVideo(id: string | number): string {
+  let hash = 0;
+  const s = String(id);
+  for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0;
+  return CONCEPT_VIDEOS[Math.abs(hash) % CONCEPT_VIDEOS.length];
+}
 
 interface ConceptCardProps {
   card: {
@@ -26,12 +41,7 @@ export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps
         position: "relative",
         scrollSnapAlign: "start",
         scrollSnapStop: "always",
-        background: "#FFFFFF",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "60px 24px 80px",
+        background: "#000",
         fontFamily: FONT,
         overflow: "hidden",
       }}
@@ -41,95 +51,120 @@ export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps
         @keyframes conceptPulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
       `}</style>
 
-      <div style={{
-        display: "inline-flex", alignItems: "center", gap: 6,
-        padding: "6px 14px", borderRadius: 6,
-        background: NAVY, marginBottom: 28,
-        animation: "conceptFadeUp 0.5s ease-out both",
-      }}>
-        <span style={{
-          fontSize: "0.5rem", fontWeight: 800, letterSpacing: "0.2em",
-          color: "#fff", textTransform: "uppercase",
-        }}>
-          {lang === "es" ? "CONCEPTO LAB" : "LAB CONCEPT"}
-        </span>
-      </div>
-
-      <h1 style={{
-        fontSize: "clamp(2.4rem, 10vw, 3.8rem)",
-        fontWeight: 900,
-        color: NAVY,
-        letterSpacing: "-0.04em",
-        lineHeight: 1,
-        textAlign: "center",
-        margin: "0 0 22px",
-        maxWidth: 420,
-        animation: "conceptFadeUp 0.6s ease-out 0.1s both",
-      }}>
-        {term}
-      </h1>
-
-      <p style={{
-        fontSize: "clamp(1rem, 4.5vw, 1.25rem)",
-        fontWeight: 700,
-        color: "rgba(0,31,91,0.8)",
-        lineHeight: 1.45,
-        textAlign: "center",
-        margin: "0 0 28px",
-        maxWidth: 380,
-        animation: "conceptFadeUp 0.6s ease-out 0.2s both",
-      }}>
-        {definition}
-      </p>
-
-      <div style={{
-        width: "100%",
-        maxWidth: 380,
-        padding: "18px 22px",
-        borderRadius: 16,
-        background: "rgba(0,31,91,0.04)",
-        border: "1px solid rgba(0,31,91,0.08)",
-        animation: "conceptFadeUp 0.6s ease-out 0.3s both",
-      }}>
-        <div style={{
-          fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.15em",
-          color: "rgba(0,31,91,0.35)", textTransform: "uppercase", marginBottom: 8,
-        }}>
-          {lang === "es" ? "ANALOGÍA" : "ANALOGY"}
-        </div>
-        <p style={{
-          fontSize: "clamp(0.9rem, 3.5vw, 1.05rem)",
-          fontWeight: 600,
-          fontStyle: "italic",
-          color: "rgba(0,31,91,0.6)",
-          lineHeight: 1.5,
-          margin: 0,
-        }}>
-          "{analogy}"
-        </p>
-      </div>
-
-      <button
-        onClick={onContinue}
+      <video
+        autoPlay muted loop playsInline preload="auto"
+        onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
         style={{
-          position: "absolute",
-          bottom: 60,
-          padding: "14px 32px",
-          borderRadius: 12,
-          background: NAVY,
-          border: "none",
-          color: "#fff",
-          fontSize: "0.8rem",
-          fontWeight: 800,
-          letterSpacing: "0.06em",
-          cursor: "pointer",
-          fontFamily: FONT,
-          animation: "conceptPulse 2.5s ease-in-out infinite",
-          boxShadow: "0 2px 12px rgba(0,31,91,0.2)",
+          position: "absolute", inset: 0, width: "100%", height: "100%",
+          objectFit: "cover", zIndex: 0,
         }}
       >
-        {lang === "es" ? "Continuar ⚡" : "Tap to Continue ⚡"}
-      </button>
+        <source src={getConceptVideo(card.id)} type="video/mp4" />
+      </video>
+
+      <div style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+        zIndex: 1,
+      }}>
+        <div style={{
+          maxHeight: "45vh",
+          background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
+          padding: "50px 24px 50px",
+          display: "flex", flexDirection: "column", alignItems: "center",
+          gap: 12, overflowY: "auto", scrollbarWidth: "none",
+        }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "5px 12px", borderRadius: 6,
+            background: "rgba(46,139,192,0.25)",
+            border: "1px solid rgba(46,139,192,0.4)",
+            animation: "conceptFadeUp 0.5s ease-out both",
+          }}>
+            <span style={{
+              fontSize: "0.5rem", fontWeight: 800, letterSpacing: "0.2em",
+              color: "#b1d4e0", textTransform: "uppercase",
+            }}>
+              {lang === "es" ? "CONCEPTO LAB" : "LAB CONCEPT"}
+            </span>
+          </div>
+
+          <h1 style={{
+            fontSize: "clamp(2rem, 8vw, 3rem)",
+            fontWeight: 900,
+            color: "#fff",
+            letterSpacing: "-0.04em",
+            lineHeight: 1.05,
+            textAlign: "center",
+            margin: 0,
+            maxWidth: 380,
+            textShadow: "0 2px 12px rgba(0,0,0,0.6)",
+            animation: "conceptFadeUp 0.6s ease-out 0.1s both",
+          }}>
+            {term}
+          </h1>
+
+          <p style={{
+            fontSize: "clamp(0.9rem, 3.5vw, 1.1rem)",
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.9)",
+            lineHeight: 1.45,
+            textAlign: "center",
+            margin: 0,
+            maxWidth: 360,
+            animation: "conceptFadeUp 0.6s ease-out 0.2s both",
+          }}>
+            {definition}
+          </p>
+
+          <div style={{
+            width: "100%",
+            maxWidth: 360,
+            padding: "14px 18px",
+            borderRadius: 14,
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            animation: "conceptFadeUp 0.6s ease-out 0.3s both",
+          }}>
+            <div style={{
+              fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.15em",
+              color: "rgba(177,212,224,0.5)", textTransform: "uppercase", marginBottom: 6,
+            }}>
+              {lang === "es" ? "ANALOGÍA" : "ANALOGY"}
+            </div>
+            <p style={{
+              fontSize: "clamp(0.85rem, 3vw, 0.95rem)",
+              fontWeight: 600,
+              fontStyle: "italic",
+              color: "rgba(255,255,255,0.7)",
+              lineHeight: 1.45,
+              margin: 0,
+            }}>
+              "{analogy}"
+            </p>
+          </div>
+
+          <button
+            onClick={onContinue}
+            style={{
+              padding: "12px 28px",
+              borderRadius: 12,
+              background: "linear-gradient(135deg, rgba(46,139,192,0.3), rgba(20,83,116,0.4))",
+              border: "1px solid rgba(46,139,192,0.5)",
+              color: "#fff",
+              fontSize: "0.8rem",
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              cursor: "pointer",
+              fontFamily: FONT,
+              animation: "conceptPulse 2.5s ease-in-out infinite",
+              boxShadow: "0 0 20px rgba(46,139,192,0.2)",
+            }}
+          >
+            {lang === "es" ? "Continuar ⚡" : "Tap to Continue ⚡"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

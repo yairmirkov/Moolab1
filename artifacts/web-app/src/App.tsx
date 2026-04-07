@@ -340,15 +340,14 @@ function RadioHighlightSlide({
     <div style={{
       height: "100dvh", width: "100%", position: "relative",
       scrollSnapAlign: "start", scrollSnapStop: "always",
-      background: "#050508", overflow: "hidden",
+      background: "#000", overflow: "hidden",
     }}>
-      <div style={{ position: "absolute", width: "100%", height: "100%", background: bgGradient }} />
       <video
         autoPlay muted loop playsInline preload="auto"
         onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
         style={{
-          position: "absolute", width: "100%", height: "60%", top: 0,
-          objectFit: "cover", opacity: 0.3, filter: "blur(2px)",
+          position: "absolute", inset: 0, width: "100%", height: "100%",
+          objectFit: "cover", zIndex: 0,
           animation: "vidFade 0.8s ease-out both",
         }}
       >
@@ -356,118 +355,106 @@ function RadioHighlightSlide({
       </video>
 
       <div style={{
-        position: "absolute", top: 0, left: 0, width: "100%", height: "60%",
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        zIndex: 2, padding: "40px 24px 0",
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+        zIndex: 1,
       }}>
         <div style={{
-          display: "flex", alignItems: "center", gap: 8, marginBottom: 24,
-          animation: "radioTextFade 0.6s ease-out both",
+          maxHeight: "45vh",
+          background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
+          padding: "60px 24px 50px",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end",
+          gap: 14, overflowY: "auto", scrollbarWidth: "none",
         }}>
-          <span style={{ fontSize: "1.3rem" }}>🎙️</span>
-          <span style={{
-            fontSize: "0.65rem", fontWeight: 900, letterSpacing: "0.25em",
-            color: "#2e8bc0", textTransform: "uppercase",
-          }}>MOOLAB RADIO</span>
-          {speaking && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8,
+            animation: "radioTextFade 0.6s ease-out both",
+          }}>
+            <span style={{ fontSize: "1.3rem" }}>🎙️</span>
             <span style={{
-              display: "inline-flex", alignItems: "center", gap: 4,
-              padding: "2px 8px", borderRadius: 20,
-              background: "rgba(46,139,192,0.15)", marginLeft: 4,
-            }}>
+              fontSize: "0.65rem", fontWeight: 900, letterSpacing: "0.25em",
+              color: "#2e8bc0", textTransform: "uppercase",
+            }}>MOOLAB RADIO</span>
+            {speaking && (
               <span style={{
-                width: 6, height: 6, borderRadius: "50%", background: "#2e8bc0",
-                animation: "contextPulse 1s ease-in-out infinite",
-              }} />
-              <span style={{ fontSize: "0.55rem", fontWeight: 800, color: "#2e8bc0", letterSpacing: "0.15em" }}>LIVE</span>
-            </span>
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "2px 8px", borderRadius: 20,
+                background: "rgba(46,139,192,0.15)", marginLeft: 4,
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: "50%", background: "#2e8bc0",
+                  animation: "contextPulse 1s ease-in-out infinite",
+                }} />
+                <span style={{ fontSize: "0.55rem", fontWeight: 800, color: "#2e8bc0", letterSpacing: "0.15em" }}>LIVE</span>
+              </span>
+            )}
+          </div>
+
+          <div style={{
+            display: "flex", alignItems: "end", justifyContent: "center", gap: 3,
+            height: 56, width: "70%", maxWidth: 300,
+            padding: "0 8px",
+          }}>
+            {RADIO_VIZ_BARS.map((bar, idx) => (
+              <div
+                key={idx}
+                style={{
+                  flex: 1, borderRadius: 2,
+                  height: `${bar.height * 100}%`,
+                  background: speaking
+                    ? "linear-gradient(to top, #2e8bc0, #b1d4e0)"
+                    : done ? "rgba(46,139,192,0.15)" : "rgba(46,139,192,0.08)",
+                  animation: speaking ? `vizBar ${0.4 + bar.delay * 0.6}s ease-in-out ${bar.delay}s infinite` : "none",
+                  transition: "background 0.5s ease, height 0.3s ease",
+                  transformOrigin: "bottom",
+                  boxShadow: speaking ? "0 0 6px rgba(46,139,192,0.2)" : "none",
+                }}
+              />
+            ))}
+          </div>
+
+          {showPlayBtn && (
+            <button
+              onClick={handlePlay}
+              style={{
+                padding: "16px 32px", borderRadius: 50,
+                border: "2px solid rgba(46,139,192,0.5)",
+                background: "linear-gradient(135deg, rgba(46,139,192,0.25), rgba(20,83,116,0.35))",
+                backdropFilter: "blur(12px)",
+                color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+                animation: "enterPulse 2.5s ease-in-out infinite",
+                boxShadow: "0 0 40px rgba(46,139,192,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
+              }}
+            >
+              <span style={{ fontSize: "1.4rem" }}>▶️</span>
+              <span style={{ textAlign: "left", lineHeight: 1.3 }}>
+                {getPlayButtonCopy("radio_highlight", lang)}
+              </span>
+            </button>
+          )}
+
+          {(hasPlayed || !audioAvailable) && card.audioText && (
+            <p style={{
+              color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 2.5vw, 1.15rem)",
+              fontWeight: 700, lineHeight: 1.5, textAlign: "center", margin: 0,
+              maxWidth: 380, fontFamily: FONT,
+              animation: "radioTextFade 0.5s ease-out both",
+            }}>
+              {card.audioText}
+            </p>
+          )}
+
+          {done && (
+            <p style={{
+              color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 700,
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              animation: "contextPulse 2s ease-in-out infinite", margin: 0,
+            }}>
+              {translations.auth.swipeToContinue[lang]}
+            </p>
           )}
         </div>
-
-        <div style={{
-          display: "flex", alignItems: "end", justifyContent: "center", gap: 3,
-          height: 100, width: "80%", maxWidth: 360,
-          animation: "vizGlow 3s ease-in-out infinite",
-          padding: "0 12px", borderRadius: 16,
-        }}>
-          {RADIO_VIZ_BARS.map((bar, idx) => (
-            <div
-              key={idx}
-              style={{
-                flex: 1, borderRadius: 2,
-                height: `${bar.height * 100}%`,
-                background: speaking
-                  ? "linear-gradient(to top, #2e8bc0, #b1d4e0)"
-                  : done ? "rgba(46,139,192,0.15)" : "rgba(46,139,192,0.08)",
-                animation: speaking ? `vizBar ${0.4 + bar.delay * 0.6}s ease-in-out ${bar.delay}s infinite` : "none",
-                transition: "background 0.5s ease, height 0.3s ease",
-                transformOrigin: "bottom",
-                boxShadow: speaking ? "0 0 6px rgba(46,139,192,0.2)" : "none",
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, width: "100%", height: "45%",
-        background: "linear-gradient(to top, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0.7) 85%, transparent 100%)",
-        zIndex: 3,
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        padding: "0 28px 60px",
-      }}>
-        {showPlayBtn && (
-          <button
-            onClick={handlePlay}
-            style={{
-              padding: "16px 32px", borderRadius: 50,
-              border: "2px solid rgba(46,139,192,0.5)",
-              background: "linear-gradient(135deg, rgba(46,139,192,0.25), rgba(20,83,116,0.35))",
-              backdropFilter: "blur(12px)",
-              color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
-              cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
-              animation: "enterPulse 2.5s ease-in-out infinite",
-              boxShadow: "0 0 40px rgba(46,139,192,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
-              marginBottom: 20,
-            }}
-          >
-            <span style={{ fontSize: "1.4rem" }}>▶️</span>
-            <span style={{ textAlign: "left", lineHeight: 1.3 }}>
-              {getPlayButtonCopy("radio_highlight", lang)}
-            </span>
-          </button>
-        )}
-
-        {hasPlayed && card.audioText && (
-          <p style={{
-            color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 2.5vw, 1.15rem)",
-            fontWeight: 700, lineHeight: 1.5, textAlign: "center", margin: 0,
-            maxWidth: 380, fontFamily: FONT,
-            animation: "radioTextFade 0.5s ease-out both",
-          }}>
-            {card.audioText}
-          </p>
-        )}
-
-        {!audioAvailable && !hasPlayed && card.audioText && (
-          <p style={{
-            color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 2.5vw, 1.15rem)",
-            fontWeight: 700, lineHeight: 1.5, textAlign: "center", margin: 0,
-            maxWidth: 380, fontFamily: FONT,
-          }}>
-            {card.audioText}
-          </p>
-        )}
-
-        {done && (
-          <p style={{
-            color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 700,
-            letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 16,
-            animation: "contextPulse 2s ease-in-out infinite",
-          }}>
-            {translations.auth.swipeToContinue[lang]}
-          </p>
-        )}
       </div>
     </div>
   );
@@ -587,16 +574,15 @@ function PodcastClipSlide({
       style={{
         height: "100dvh", width: "100%", position: "relative",
         scrollSnapAlign: "start", scrollSnapStop: "always",
-        background: "#050508", overflow: "hidden",
+        background: "#000", overflow: "hidden",
       }}
     >
-      <div style={{ position: "absolute", width: "100%", height: "100%", background: bgGradient }} />
       <video
         autoPlay muted loop playsInline preload="auto"
         onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
         style={{
-          position: "absolute", width: "100%", height: "55%", top: 0,
-          objectFit: "cover", opacity: 0.2, filter: "blur(4px)",
+          position: "absolute", inset: 0, width: "100%", height: "100%",
+          objectFit: "cover", zIndex: 0,
           animation: "vidFade 0.8s ease-out both",
         }}
       >
@@ -604,164 +590,124 @@ function PodcastClipSlide({
       </video>
 
       <div style={{
-        position: "absolute", top: 0, left: 0, width: "100%", height: "55%",
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        zIndex: 2, padding: "40px 24px 0",
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+        zIndex: 1,
       }}>
         <div style={{
-          display: "flex", alignItems: "center", gap: 8, marginBottom: 10,
-          animation: "radioTextFade 0.6s ease-out both",
+          maxHeight: "45vh",
+          background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
+          padding: "50px 20px 50px",
+          display: "flex", flexDirection: "column", alignItems: "center",
+          gap: 10, overflowY: "auto", scrollbarWidth: "none",
         }}>
-          <span style={{ fontSize: "1.2rem" }}>🎧</span>
-          <span style={{
-            fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.25em",
-            color: "#2e8bc0", textTransform: "uppercase",
-          }}>MOOLAB PODCAST</span>
-          {isSpeaking && (
-            <span style={{
-              display: "inline-flex", alignItems: "center", gap: 4,
-              padding: "2px 8px", borderRadius: 20,
-              background: "rgba(46,139,192,0.15)", marginLeft: 4,
-            }}>
-              <span style={{
-                width: 6, height: 6, borderRadius: "50%", background: "#00ffd5",
-                animation: "contextPulse 1s ease-in-out infinite",
-              }} />
-              <span style={{ fontSize: "0.55rem", fontWeight: 800, color: "#00ffd5", letterSpacing: "0.15em" }}>LIVE</span>
-            </span>
-          )}
-        </div>
-
-        <h3 style={{
-          fontSize: "1.3rem", fontWeight: 900, color: "#fff", letterSpacing: "-0.02em",
-          marginBottom: 16, textAlign: "center",
-          animation: "radioTextFade 0.8s ease-out both",
-        }}>
-          {card.title || "Shark Talk"}
-        </h3>
-
-        <div style={{
-          display: "flex", alignItems: "end", justifyContent: "center", gap: 2,
-          height: 36, width: "60%", maxWidth: 240,
-          padding: "0 8px",
-        }}>
-          {Array.from({ length: 24 }, (_, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1, borderRadius: 1,
-                height: `${20 + Math.random() * 80}%`,
-                background: isSpeaking
-                  ? "linear-gradient(to top, rgba(0,255,213,0.6), rgba(46,139,192,0.5))"
-                  : visibleLines > 0 ? "rgba(46,139,192,0.2)" : "rgba(46,139,192,0.06)",
-                animation: isSpeaking
-                  ? `vizBar ${0.3 + Math.random() * 0.5}s ease-in-out ${Math.random() * 0.3}s infinite`
-                  : "none",
-                transition: "background 0.5s ease",
-                transformOrigin: "bottom",
-              }}
-            />
-          ))}
-        </div>
-
-        {showPlayBtn && (
-          <button
-            onClick={handlePlay}
-            style={{
-              marginTop: 20,
-              padding: "14px 28px", borderRadius: 50,
-              border: "2px solid rgba(0,255,213,0.4)",
-              background: "linear-gradient(135deg, rgba(0,255,213,0.15), rgba(46,139,192,0.2))",
-              backdropFilter: "blur(12px)",
-              color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
-              cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
-              animation: "enterPulse 2.5s ease-in-out infinite",
-              boxShadow: "0 0 40px rgba(0,255,213,0.15), inset 0 1px 0 rgba(255,255,255,0.1)",
-            }}
-          >
-            <span style={{ fontSize: "1.4rem" }}>▶️</span>
-            <span style={{ textAlign: "left", lineHeight: 1.3 }}>
-              {getPlayButtonCopy("podcast_clip", lang)}
-            </span>
-          </button>
-        )}
-      </div>
-
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, width: "100%", height: "48%",
-        background: "linear-gradient(to top, rgba(0,0,0,0.95) 55%, rgba(0,0,0,0.7) 80%, transparent 100%)",
-        zIndex: 3,
-        display: "flex", flexDirection: "column",
-        padding: "24px 20px 60px",
-        overflowY: "auto",
-        scrollbarWidth: "none",
-      }}>
-        <div style={{
-          display: "flex", flexDirection: "column", gap: 12,
-          width: "100%", maxWidth: 380, margin: "0 auto",
-        }}>
-          {(hasPlayed ? dialogue.slice(0, visibleLines) : dialogue).map((line, idx) => {
-            const isHost = line.speaker.toLowerCase() === "host" || line.speaker.toLowerCase() === "presentador" || line.speaker.toLowerCase() === "presentadora";
-            const isLineActive = hasPlayed && idx === speakingIdx;
-            const isRevealed = !hasPlayed || idx < visibleLines;
-            return (
-              <div
-                key={idx}
-                style={{
-                  display: "flex", flexDirection: "column", gap: 4,
-                  animation: isRevealed ? "radioTextFade 0.5s ease-out both" : "none",
-                  alignItems: isHost ? "flex-start" : "flex-end",
-                  opacity: !hasPlayed ? 0.4 : 1,
-                  transition: "opacity 0.4s ease",
-                }}
-              >
-                <span style={{
-                  fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  color: isHost ? "#00ffd5" : "#6cb4ee",
-                }}>
-                  {line.speaker}
-                </span>
-                <div style={{
-                  padding: "12px 16px", borderRadius: 16,
-                  background: isHost
-                    ? isLineActive ? "rgba(0,255,213,0.12)" : "rgba(0,255,213,0.06)"
-                    : isLineActive ? "rgba(108,180,238,0.12)" : "rgba(108,180,238,0.05)",
-                  border: `1px solid ${isHost
-                    ? isLineActive ? "rgba(0,255,213,0.4)" : "rgba(0,255,213,0.15)"
-                    : isLineActive ? "rgba(108,180,238,0.4)" : "rgba(108,180,238,0.12)"}`,
-                  maxWidth: "90%",
-                  borderTopLeftRadius: isHost ? 4 : 16,
-                  borderTopRightRadius: isHost ? 16 : 4,
-                  boxShadow: isLineActive ? `0 0 20px ${isHost ? "rgba(0,255,213,0.15)" : "rgba(108,180,238,0.15)"}` : "none",
-                  transition: "all 0.3s ease",
-                }}>
-                  <p style={{
-                    color: isLineActive ? "#fff" : "rgba(255,255,255,0.85)",
-                    fontSize: "0.85rem", fontWeight: isLineActive ? 700 : 600,
-                    lineHeight: 1.5, margin: 0, fontFamily: FONT,
-                  }}>
-                    {line.text}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {allRevealed && hasPlayed && !isSpeaking && (
           <div style={{
-            display: "flex", justifyContent: "center", marginTop: 16,
-            animation: "contextPulse 2s ease-in-out infinite",
+            display: "flex", alignItems: "center", gap: 8,
+            animation: "radioTextFade 0.6s ease-out both",
           }}>
+            <span style={{ fontSize: "1.2rem" }}>🎧</span>
+            <span style={{
+              fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.25em",
+              color: "#2e8bc0", textTransform: "uppercase",
+            }}>MOOLAB PODCAST</span>
+            {isSpeaking && (
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "2px 8px", borderRadius: 20,
+                background: "rgba(46,139,192,0.15)", marginLeft: 4,
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: "50%", background: "#00ffd5",
+                  animation: "contextPulse 1s ease-in-out infinite",
+                }} />
+                <span style={{ fontSize: "0.55rem", fontWeight: 800, color: "#00ffd5", letterSpacing: "0.15em" }}>LIVE</span>
+              </span>
+            )}
+          </div>
+
+          {showPlayBtn && (
+            <button
+              onClick={handlePlay}
+              style={{
+                padding: "14px 28px", borderRadius: 50,
+                border: "2px solid rgba(0,255,213,0.4)",
+                background: "linear-gradient(135deg, rgba(0,255,213,0.15), rgba(46,139,192,0.2))",
+                backdropFilter: "blur(12px)",
+                color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+                animation: "enterPulse 2.5s ease-in-out infinite",
+                boxShadow: "0 0 40px rgba(0,255,213,0.15), inset 0 1px 0 rgba(255,255,255,0.1)",
+              }}
+            >
+              <span style={{ fontSize: "1.4rem" }}>▶️</span>
+              <span style={{ textAlign: "left", lineHeight: 1.3 }}>
+                {getPlayButtonCopy("podcast_clip", lang)}
+              </span>
+            </button>
+          )}
+
+          <div style={{
+            display: "flex", flexDirection: "column", gap: 10,
+            width: "100%", maxWidth: 380,
+          }}>
+            {(hasPlayed ? dialogue.slice(0, visibleLines) : dialogue).map((line, idx) => {
+              const isHost = line.speaker.toLowerCase() === "host" || line.speaker.toLowerCase() === "presentador" || line.speaker.toLowerCase() === "presentadora";
+              const isLineActive = hasPlayed && idx === speakingIdx;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex", flexDirection: "column", gap: 3,
+                    animation: hasPlayed ? "radioTextFade 0.5s ease-out both" : "none",
+                    alignItems: isHost ? "flex-start" : "flex-end",
+                    opacity: !hasPlayed ? 0.35 : 1,
+                    transition: "opacity 0.4s ease",
+                  }}
+                >
+                  <span style={{
+                    fontSize: "0.5rem", fontWeight: 900, letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    color: isHost ? "#00ffd5" : "#6cb4ee",
+                  }}>
+                    {line.speaker}
+                  </span>
+                  <div style={{
+                    padding: "10px 14px", borderRadius: 14,
+                    background: isHost
+                      ? isLineActive ? "rgba(0,255,213,0.12)" : "rgba(0,255,213,0.06)"
+                      : isLineActive ? "rgba(108,180,238,0.12)" : "rgba(108,180,238,0.05)",
+                    border: `1px solid ${isHost
+                      ? isLineActive ? "rgba(0,255,213,0.4)" : "rgba(0,255,213,0.15)"
+                      : isLineActive ? "rgba(108,180,238,0.4)" : "rgba(108,180,238,0.12)"}`,
+                    maxWidth: "90%",
+                    borderTopLeftRadius: isHost ? 4 : 14,
+                    borderTopRightRadius: isHost ? 14 : 4,
+                    boxShadow: isLineActive ? `0 0 20px ${isHost ? "rgba(0,255,213,0.15)" : "rgba(108,180,238,0.15)"}` : "none",
+                    transition: "all 0.3s ease",
+                  }}>
+                    <p style={{
+                      color: isLineActive ? "#fff" : "rgba(255,255,255,0.85)",
+                      fontSize: "0.82rem", fontWeight: isLineActive ? 700 : 600,
+                      lineHeight: 1.45, margin: 0, fontFamily: FONT,
+                    }}>
+                      {line.text}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {allRevealed && hasPlayed && !isSpeaking && (
             <span style={{
               color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 700,
               letterSpacing: "0.12em", textTransform: "uppercase",
+              animation: "contextPulse 2s ease-in-out infinite",
             }}>
               {translations.auth.swipeToContinue[lang]}
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
@@ -2619,19 +2565,10 @@ function App() {
                 position: "relative",
                 scrollSnapAlign: "start",
                 scrollSnapStop: "always",
-                background: "#080808",
+                background: "#000",
                 overflow: "hidden",
               }}
             >
-              <div
-                key={`bg-${card.id}`}
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  background: bgGradients[i % bgGradients.length],
-                }}
-              />
               <video
                 key={`v-${card.id}`}
                 autoPlay
@@ -2641,35 +2578,35 @@ function App() {
                 preload="auto"
                 onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
                 style={{
-                  position: "absolute",
+                  position: "absolute", inset: 0,
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
-                  opacity: 0.35,
+                  zIndex: 0,
                   animation: "vidFade 0.8s ease-out both",
                 }}
               >
                 <source src={getVideoForCard(card.id)} type="video/mp4" />
               </video>
 
-              {/* Dark gradient overlay */}
-              <div style={{
-                position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
-                background: "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.8) 70%, rgba(0,0,0,0.95) 100%)",
-                zIndex: 1,
-              }} />
-
               <div
                 style={{
-                  position: "absolute",
-                  top: 0, left: 0, width: "100%", height: "100%",
+                  position: "absolute", inset: 0,
+                  width: "100%", height: "100%",
                   display: "flex", flexDirection: "column",
-                  alignItems: "center", justifyContent: "center",
-                  padding: "60px 24px",
-                  zIndex: 2,
+                  justifyContent: "flex-end",
+                  zIndex: 1,
                   animation: "fadeIn 0.5s ease-out both",
                 }}
               >
+              <div style={{
+                maxHeight: "45vh",
+                background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
+                padding: "50px 24px 50px",
+                display: "flex", flexDirection: "column",
+                alignItems: "center",
+                overflowY: "auto", scrollbarWidth: "none",
+              }}>
                 <h1
                   style={{
                     color: "#fff",
@@ -2891,6 +2828,7 @@ function App() {
                     </div>
                   )}
                 </div>
+              </div>
               </div>
             </div>
           );
