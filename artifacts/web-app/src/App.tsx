@@ -4,7 +4,7 @@ import LandingPageES from "./LandingPageES";
 import CommandCenter from "./CommandCenter";
 import ConceptCard from "./ConceptCard";
 import translations, { type Lang } from "./translations";
-import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob, type FetchBlobResult } from "./elevenlabs";
+import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob } from "./elevenlabs";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -261,35 +261,6 @@ const RADIO_VIZ_BARS = Array.from({ length: 48 }, (_, i) => ({
 
 const audioBlobCache = new Map<string, string>();
 
-const audioLog: string[] = (window as any).__audioLog || [];
-(window as any).__audioLog = audioLog;
-const logAudio = (msg: string) => {
-  const ts = new Date().toLocaleTimeString();
-  const entry = `[${ts}] ${msg}`;
-  console.log(`[Audio] ${entry}`);
-  audioLog.push(entry);
-  if (audioLog.length > 40) audioLog.shift();
-};
-
-function AudioDebugPanel({ activeSlideIndex, cardCount, types }: { activeSlideIndex: number; cardCount: number; types: string }) {
-  const [, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 500);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <div style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-      background: "rgba(0,0,0,0.85)", color: "#0f0", fontSize: "0.5rem",
-      fontFamily: "monospace", padding: "4px 8px", maxHeight: 180,
-      overflowY: "auto", pointerEvents: "none",
-      borderBottom: "1px solid #333",
-    }}>
-      <div>Cache: {audioBlobCache.size} | Slide: {activeSlideIndex} | Cards: {cardCount} | Types: {types} | EL: {isElevenLabsAvailable() ? "YES" : "NO"} | KEY: {import.meta.env.VITE_ELEVENLABS_API_KEY ? "SET(" + String(import.meta.env.VITE_ELEVENLABS_API_KEY).length + ")" : "MISSING"}</div>
-      {audioLog.slice(-10).map((l, i) => <div key={i} style={{ opacity: 0.8 }}>{l}</div>)}
-    </div>
-  );
-}
 
 function RadioHighlightSlide({
   card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, isActive,
@@ -320,8 +291,7 @@ function RadioHighlightSlide({
   }, []);
 
   const playAudioBlob = useCallback(async (blobUrl: string) => {
-    if (!mountedRef.current) { logAudio("Radio: playAudioBlob skipped (unmounted)"); return; }
-    logAudio(`Radio: playAudioBlob starting, url=${blobUrl.substring(0, 30)}`);
+    if (!mountedRef.current) return;
     const audio = new Audio(blobUrl);
     audio.playbackRate = speechSpeedRef.current || 1;
     audio.volume = 0.85;
@@ -334,16 +304,15 @@ function RadioHighlightSlide({
       timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 2000);
     };
 
-    audio.onended = () => { logAudio("Radio: audio.onended"); finish(); };
-    audio.onerror = (e) => { logAudio(`Radio: audio.onerror ${e}`); finish(); };
+    audio.onended = finish;
+    audio.onerror = finish;
 
     try {
       setSpeaking(true);
       setNeedsTap(false);
       await audio.play();
-      logAudio("Radio: audio.play() succeeded");
     } catch (e: any) {
-      logAudio(`Radio: audio.play() FAILED: ${e?.name} ${e?.message}`);
+      
       if (e?.name === "NotAllowedError") {
         setSpeaking(false);
         setNeedsTap(true);
@@ -365,17 +334,14 @@ function RadioHighlightSlide({
       return;
     }
 
-    logAudio(`Radio: isActive=true, muted=${isMutedRef.current}, speed=${speechSpeedRef.current}, audioText=${!!card.audioText}, elevenlabs=${isElevenLabsAvailable()}`);
 
     if (isMutedRef.current || speechSpeedRef.current === 0 || !card.audioText) {
-      logAudio("Radio: Skipping audio (muted/no speed/no audioText)");
       setDone(true);
       timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
       return;
     }
 
     if (!isElevenLabsAvailable()) {
-      logAudio("Radio: Skipping audio (ElevenLabs unavailable)");
       setDone(true);
       timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
       return;
@@ -383,12 +349,10 @@ function RadioHighlightSlide({
 
     const cacheKey = `radio_${card.id}_${lang}`;
     if (audioBlobCache.has(cacheKey)) {
-      logAudio(`Radio: Cache HIT for ${cacheKey}`);
       playAudioBlob(audioBlobCache.get(cacheKey)!);
       return;
     }
 
-    logAudio(`Radio: Cache MISS for ${cacheKey}, fetching live`);
     const timerLabel = `ElevenLabs API (radio, ${card.audioText?.substring(0, 25)}...)`;
     console.time(timerLabel);
     let timerEnded = false;
@@ -401,10 +365,8 @@ function RadioHighlightSlide({
         endTimer();
         if (result.url) {
           audioBlobCache.set(cacheKey, result.url);
-          logAudio(`Radio live fetch: OK, playing`);
           if (mountedRef.current && isActive) playAudioBlob(result.url);
         } else {
-          logAudio(`Radio live fetch: FAILED ${result.httpStatus} ${result.error}`);
           if (mountedRef.current) {
             setDone(true);
             timerRef.current = setTimeout(() => { if (mountedRef.current) autoAdvance(); }, 3000);
@@ -580,7 +542,6 @@ function PodcastClipSlide({
 
       const cacheKey = `podcast_${card.id}_${i}_${lang}`;
       const cachedUrl = audioBlobCache.get(cacheKey);
-      logAudio(`Podcast[${i}]: speaker=${dialogue[i].speaker}, cached=${!!cachedUrl}, cacheKey=${cacheKey}`);
 
       if (cachedUrl) {
         const result = await new Promise<"done" | "aborted" | "error">((resolve) => {
@@ -591,12 +552,9 @@ function PodcastClipSlide({
           const onAbort = () => { audio.pause(); audio.src = ""; resolve("aborted"); };
           ac.signal.addEventListener("abort", onAbort, { once: true });
 
-          audio.onended = () => { logAudio(`Podcast[${i}]: cached audio ended`); ac.signal.removeEventListener("abort", onAbort); resolve("done"); };
-          audio.onerror = (e) => { logAudio(`Podcast[${i}]: cached audio error ${e}`); ac.signal.removeEventListener("abort", onAbort); resolve("error"); };
-          audio.play().then(() => {
-            logAudio(`Podcast[${i}]: cached audio playing`);
-          }).catch((err) => {
-            logAudio(`Podcast[${i}]: cached audio play FAILED: ${err?.name} ${err?.message}`);
+          audio.onended = () => { ac.signal.removeEventListener("abort", onAbort); resolve("done"); };
+          audio.onerror = () => { ac.signal.removeEventListener("abort", onAbort); resolve("error"); };
+          audio.play().catch((err) => {
             setNeedsTap(true);
             ac.signal.removeEventListener("abort", onAbort);
             resolve("error");
@@ -647,7 +605,6 @@ function PodcastClipSlide({
 
   useEffect(() => {
     if (isActive) {
-      logAudio(`Podcast: isActive=true, dialogue=${dialogue.length} lines, card.id=${card.id}`);
       setNeedsTap(false);
       runPlaybackQueue().catch(() => {});
     } else {
@@ -959,8 +916,7 @@ function App() {
   }, [xp, streak, level, bossWins, currentModuleIdx, moduleProgress]);
 
   const preloadAudioForCards = useCallback(async (cards: any[], currentLang: Lang) => {
-    logAudio(`Preload: ${cards.length} cards, types=[${cards.map(c => c.type).join(",")}], elAvail=${isElevenLabsAvailable()}`);
-    if (!isElevenLabsAvailable()) { logAudio("Preload: SKIPPED (ElevenLabs unavailable)"); return; }
+    if (!isElevenLabsAvailable()) return;
     const SPEAKER_TO_ROLE: Record<string, "Host" | "Expert" | "Guest1" | "Guest2" | "Narrator"> = {
       host: "Host", presentador: "Host", presentadora: "Host",
       expert: "Expert", experto: "Expert", experta: "Expert",
@@ -987,7 +943,6 @@ function App() {
         }
       }
     }
-    logAudio(`Preload: ${jobs.length} audio blobs to fetch (sequential)...`);
     let ok = 0;
     let fatal = false;
     for (let j = 0; j < jobs.length; j++) {
@@ -998,29 +953,23 @@ function App() {
         result = await fetchAudioBlob(text, voiceId);
         if (result.url) break;
         if (result.httpStatus === 401 || result.httpStatus === 402 || result.httpStatus === 403) {
-          logAudio(`Preload: FATAL ${result.httpStatus} ${result.error} — stopping all preloads`);
           fatal = true;
           break;
         }
         if (result.httpStatus === 429) {
           const wait = Math.min(2000 * (attempt + 1), 6000);
-          logAudio(`Preload ${cacheKey}: rate limited, waiting ${wait}ms (attempt ${attempt+1})...`);
           await new Promise(r => setTimeout(r, wait));
         } else {
-          logAudio(`Preload ${cacheKey}: attempt ${attempt+1} failed (${result.error}), retrying in 1.5s...`);
           await new Promise(r => setTimeout(r, 1500));
         }
       }
       if (result.url) {
         audioBlobCache.set(cacheKey, result.url);
         ok++;
-        logAudio(`Preload [${j+1}/${jobs.length}] ${cacheKey}: OK`);
       } else if (!fatal) {
-        logAudio(`Preload [${j+1}/${jobs.length}] ${cacheKey}: FAILED (${result.error})`);
       }
       if (j < jobs.length - 1 && !fatal) await new Promise(r => setTimeout(r, 250));
     }
-    logAudio(`Preload: Done. ${ok}/${jobs.length} cached. Cache size=${audioBlobCache.size}${fatal ? " [AUTH/QUOTA FATAL]" : ""}`);
   }, []);
 
   const resetJourney = useCallback(() => {
@@ -2291,10 +2240,9 @@ function App() {
             </p>
             <button
               onClick={() => {
-                logAudio(`ENTER clicked. Cache size=${audioBlobCache.size}`);
                 const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
                 silentAudio.volume = 0;
-                silentAudio.play().then(() => logAudio("Silent audio unlocked OK")).catch((e) => logAudio(`Silent audio FAILED: ${e}`));
+                silentAudio.play().catch(() => {});
                 setAudioUnlocked(true);
                 setLoading(false);
                 setPreloadReady(false);
@@ -2641,9 +2589,6 @@ function App() {
           </div>
         </div>
       )}
-
-      {/* AUDIO DEBUG PANEL */}
-      <AudioDebugPanel activeSlideIndex={activeSlideIndex} cardCount={currentData.lessons.length} types={currentData.lessons.map((c: any) => c.type?.charAt(0)).join("")} />
 
       {/* FEED */}
       <div

@@ -13,11 +13,7 @@ const EL_ERROR_CODES: Record<number, string> = {
 };
 
 const _log = (msg: string) => {
-  const ts = new Date().toLocaleTimeString();
-  const entry = `[${ts}] EL: ${msg}`;
-  console.log(entry);
-  const arr = (window as any).__audioLog;
-  if (arr) { arr.push(entry); if (arr.length > 40) arr.shift(); }
+  console.log(`[ElevenLabs] ${msg}`);
 };
 
 const _parseApiError = async (res: Response): Promise<string> => {
