@@ -1,0 +1,44 @@
+SYSTEM ROLE: Lead Full-Stack Architect & React Engineer.
+OBJECTIVE: Transform the single-page app into a fully routed SaaS platform. Implement React Router, establish the Parent/Child database schema, and build the onboarding flow + demo testing route.
+
+STEP 1: IMPLEMENT REACT ROUTER
+
+Install and configure react-router-dom.
+
+Move the current landing page to the / route.
+
+Create placeholder components and routes for: /register, /login, /dashboard (Parent), /app-login (Child), and /demo.
+
+STEP 2: DATABASE SCHEMA SETUP
+
+Create the database structure (Supabase/Firebase/Local Mock based on current setup).
+
+Parents Table: id, email, password, subscription_status.
+
+Children Table: id, parent_id (foreign key), username (unique string), pin (4-digit string), age_group (dropdown: '8-12', '13-15', '16-18').
+
+STEP 3: THE PARENT ONBOARDING FLOW
+
+Build /register: A simple email/password form that creates a Parent record. Upon success, redirect to /dashboard.
+
+Build /dashboard: A control panel for the parent. Include a prominent "Add Child Profile" button.
+
+"Add Child" Modal: Asks for the child's display name and age group. Auto-generates a unique username (e.g., Alex99) and a 4-digit pin, saving it to the Children table linked to the Parent.
+
+STEP 4: THE CHILD APP LOGIN
+
+Build /app-login: A kid-friendly, playful login screen. Do NOT ask for email.
+
+Form fields: Username and 4-Digit PIN.
+
+Upon successful authentication, fetch the child's age_group, store it in the global app state/context, and render the main Feed component.
+
+STEP 5: THE /demo TESTING ROUTE
+
+Build the /demo route strictly for testing. This route completely bypasses authentication.
+
+UI: A simple top bar with a dropdown menu: "Select Age Group: [8-12, 13-15, 16-18]".
+
+Below the top bar, render the main Feed component. When the dropdown changes, update the ageGroup state being passed to the Gemini API so the tester can instantly verify how the AI adapts the text complexity.
+
+OUTPUT: Wire up React Router, configure the basic database schemas (or mock state if DB isn't connected yet), and build the 5 distinct URL flows listed above.

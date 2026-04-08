@@ -2411,20 +2411,20 @@ function App() {
                 background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
                 padding: "50px 28px 50px",
                 display: "flex", flexDirection: "column",
-                alignItems: "center",
+                alignItems: "flex-start",
                 overflowY: "auto", scrollbarWidth: "none",
               }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                   <h1
                     style={{
                       color: "#fff",
-                      fontSize: "clamp(1.8rem, 7vw, 2.6rem)",
+                      fontSize: "clamp(1.6rem, 6.3vw, 2.34rem)",
                       fontWeight: 900,
                       margin: 0,
                       letterSpacing: "-0.03em",
                       lineHeight: 1.1,
                       textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)",
-                      textAlign: "center",
+                      textAlign: "left",
                     }}
                   >
                     {card.title}
@@ -2447,11 +2447,11 @@ function App() {
                   style={{
                     color: "rgba(255,255,255,0.95)",
                     marginBottom: 18,
-                    fontSize: "clamp(0.85rem, 3.5vw, 1.05rem)",
+                    fontSize: "clamp(0.77rem, 3.15vw, 0.95rem)",
                     lineHeight: 1.45,
                     fontWeight: 700,
                     textShadow: "0 1px 8px rgba(0,0,0,0.9)",
-                    textAlign: "center",
+                    textAlign: "left",
                     letterSpacing: "0.01em",
                     maxWidth: 340,
                   }}
@@ -2478,10 +2478,10 @@ function App() {
                         letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 14,
                       }}>{t.slide.part1[lang]}</div>
                       <p style={{
-                        color: "#fff", fontSize: "clamp(1rem, 4vw, 1.2rem)", fontWeight: 800,
+                        color: "#fff", fontSize: "clamp(0.85rem, 3.4vw, 1.02rem)", fontWeight: 800,
                         lineHeight: 1.4, marginBottom: 24,
                         textShadow: "0 1px 4px rgba(0,0,0,0.5)",
-                        textAlign: "center",
+                        textAlign: "left",
                       }}>
                         {card.miniGame.contextSetup || card.miniGame.question}
                       </p>
@@ -2510,12 +2510,12 @@ function App() {
                       <p
                         style={{
                           color: "#fff",
-                          fontSize: "clamp(0.95rem, 3.8vw, 1.15rem)",
+                          fontSize: "clamp(0.81rem, 3.23vw, 0.98rem)",
                           fontWeight: 800,
                           marginBottom: 16,
                           lineHeight: 1.35,
                           textShadow: "0 1px 4px rgba(0,0,0,0.5)",
-                          textAlign: "center",
+                          textAlign: "left",
                         }}
                       >
                         {card.miniGame.actionQuestion || card.miniGame.question}
@@ -2894,7 +2894,7 @@ function App() {
             left: 0,
             width: "100%",
             height: "100%",
-            backgroundColor: "#050505",
+            backgroundColor: "#0c2d48",
             zIndex: 100,
           }}
         >
@@ -2908,8 +2908,10 @@ function App() {
                 ? "arenaPulseLose 1.5s ease-in-out infinite"
                 : undefined,
             background: quizResult === true
-              ? "radial-gradient(ellipse at center, rgba(46,139,192,0.04) 0%, #050505 50%, #020202 100%)"
-              : "transparent",
+              ? "radial-gradient(ellipse at center, rgba(46,139,192,0.15) 0%, #0c2d48 50%, #091e30 100%)"
+              : quizResult === false
+                ? "radial-gradient(ellipse at center, rgba(255,107,107,0.06) 0%, #0c2d48 50%, #091e30 100%)"
+                : "radial-gradient(ellipse at center, rgba(46,139,192,0.08) 0%, #0c2d48 60%, #091e30 100%)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -2920,7 +2922,7 @@ function App() {
         >
           {quizResult === null ? (
             <div style={{ animation: "fadeIn 0.5s ease-out" }}>
-              <h1 style={{ fontSize: "5rem", marginBottom: 10, filter: "drop-shadow(0 0 30px rgba(255,217,61,0.4))" }}>👑</h1>
+              <h1 style={{ fontSize: "5rem", marginBottom: 10, filter: "drop-shadow(0 0 30px rgba(46,139,192,0.4))" }}>👑</h1>
               <h2
                 style={{
                   color: "#fff",
@@ -2928,7 +2930,7 @@ function App() {
                   fontWeight: 900,
                   marginBottom: 6,
                   letterSpacing: "-0.03em",
-                  background: "linear-gradient(135deg, #FFD93D, #FF6B6B)",
+                  background: "linear-gradient(135deg, #b1d4e0, #2e8bc0)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -2949,10 +2951,11 @@ function App() {
                     padding: "20px 60px",
                     borderRadius: 20,
                     border: "none",
-                    background: "linear-gradient(135deg, #FFD93D, #FF6B6B)",
+                    background: "linear-gradient(135deg, #2e8bc0, #145374)",
                     fontWeight: 900,
                     fontSize: "1.1rem",
-                    boxShadow: "0 0 40px rgba(255,217,61,0.25), 0 8px 24px rgba(0,0,0,0.4)",
+                    color: "#fff",
+                    boxShadow: "0 0 40px rgba(46,139,192,0.3), 0 8px 24px rgba(0,0,0,0.4)",
                     cursor: "pointer",
                     fontFamily: FONT,
                     letterSpacing: "0.06em",
@@ -3042,17 +3045,26 @@ function App() {
                     boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
                   }}
                 >
+                  {currentData.bossQuiz.contextSetup && (
+                    <p style={{
+                      color: "rgba(255,255,255,0.5)", fontSize: "0.78rem", fontWeight: 600,
+                      lineHeight: 1.5, marginBottom: 14, textAlign: "left",
+                    }}>
+                      {currentData.bossQuiz.contextSetup}
+                    </p>
+                  )}
                   <h3
                     style={{
                       color: "#fff",
-                      fontSize: "1.3rem",
+                      fontSize: "1.1rem",
                       fontWeight: 800,
-                      marginBottom: 24,
+                      marginBottom: 20,
                       lineHeight: 1.35,
                       letterSpacing: "-0.02em",
+                      textAlign: "left",
                     }}
                   >
-                    {currentData.bossQuiz.question}
+                    {currentData.bossQuiz.actionQuestion || currentData.bossQuiz.question}
                   </h3>
                   <div
                     style={{
@@ -3140,23 +3152,23 @@ function App() {
               <h1 style={{
                 fontSize: "5.5rem",
                 filter: quizResult
-                  ? "drop-shadow(0 0 40px rgba(255,217,61,0.5))"
-                  : "drop-shadow(0 0 40px rgba(255,107,107,0.5))",
+                  ? "drop-shadow(0 0 40px rgba(46,139,192,0.4))"
+                  : "drop-shadow(0 0 40px rgba(255,107,107,0.3))",
               }}>{pick.emoji}</h1>
               <h2 style={{
                 color: "#fff", fontSize: "2.6rem", fontWeight: 900,
                 letterSpacing: "-0.03em", margin: "0 0 6px 0",
                 background: quizResult
-                  ? "linear-gradient(135deg, #FFD93D, #FFFFFF, #FFD93D)"
+                  ? "linear-gradient(135deg, #b1d4e0, #FFFFFF, #2e8bc0)"
                   : "linear-gradient(135deg, #FF6B6B, #FF8E53)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               }}>
                 {pick.title}
               </h2>
               <p style={{
-                color: quizResult ? "rgba(255,255,255,0.75)" : "rgba(255,107,107,0.7)",
+                color: quizResult ? "rgba(177,212,224,0.8)" : "rgba(255,107,107,0.7)",
                 margin: "8px 0 20px 0", fontWeight: 700, fontSize: "0.85rem",
-                textShadow: "0 1px 6px rgba(0,0,0,0.5)",
+                textShadow: "0 1px 6px rgba(0,0,0,0.3)",
               }}>
                 {quizResult ? `${pick.sub} ${t.quiz.xpAwarded[lang]}` : pick.sub}
               </p>

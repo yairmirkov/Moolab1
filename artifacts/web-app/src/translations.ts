@@ -103,10 +103,10 @@ const translations = {
     part2: { en: "YOUR MOVE", es: "TU JUGADA" },
   },
   quiz: {
-    bossFight: { en: "BOSS FIGHT", es: "PELEA DE JEFE" },
+    bossFight: { en: "BOSS CHALLENGE", es: "DESAF\u00cdO FINAL" },
     demonstrateMastery: { en: "DEMONSTRATE MASTERY", es: "DEMUESTRA TU DOMINIO" },
     win: { en: "WIN", es: "VICTORIA" },
-    beginChallenge: { en: "BEGIN CHALLENGE", es: "INICIAR DESAF\u00cdO" },
+    beginChallenge: { en: "BEGIN", es: "INICIAR" },
     holdUp: { en: "HOLD UP", es: "UN MOMENTO" },
     letsBreakDown: { en: "LET'S BREAK THIS DOWN", es: "ANALICEMOS ESTO" },
     gotIt: { en: "Got it! Let's keep scrolling", es: "\u00a1Entendido! Sigamos deslizando" },
