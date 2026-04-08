@@ -850,7 +850,7 @@ function App() {
       setTimeout(() => setFadeIn(false), 700);
     };
     const landingLang = new URLSearchParams(window.location.search).get("lang");
-    if (landingLang === "es" || lang === "es") {
+    if (landingLang === "es") {
       return <LandingPageES onParentLogin={() => { setLang("es"); langRef.current = "es"; saveStr("lang", "es"); loginHandler(); }} onTestApp={() => { setLang("es"); langRef.current = "es"; saveStr("lang", "es"); signUpHandler(); }} />;
     }
     return <LandingPage onParentLogin={() => { setLang("en"); langRef.current = "en"; saveStr("lang", "en"); loginHandler(); }} onTestApp={() => { setLang("en"); langRef.current = "en"; saveStr("lang", "en"); signUpHandler(); }} />;
