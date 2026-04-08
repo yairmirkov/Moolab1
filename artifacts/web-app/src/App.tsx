@@ -70,8 +70,8 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
       : " MANDATORY RULE: The VERY FIRST lesson in this batch MUST be type podcast_clip with engaging dialogue. NEVER start a batch with a text-heavy concept_breakdown. Hook the user immediately with conversational audio.")
     : "";
   const tiktokTextRule = lang === "es"
-    ? " REGLA CRÍTICA DE UI: NUNCA generes párrafos largos. El texto en cualquier tarjeta DEBE ser 1 o 2 oraciones cortas máximo (menos de 120 caracteres en total). Piensa en subtítulos rápidos y contundentes estilo TikTok. Si generas un muro de texto, la app se romperá."
-    : " CRITICAL UI RULE: NEVER generate long paragraphs. Text on any card MUST be 1 or 2 short sentences maximum (under 120 characters total). Think fast, punchy, TikTok-style captions. If you generate a wall of text, the app will break.";
+    ? " REGLA CRÍTICA DE SALIDA: EL TEXTO PARA CUALQUIER PANTALLA DEBE SER MÁXIMO 1 O 2 ORACIONES CONTUNDENTES (MENOS DE 120 CARACTERES). NO IMPORTA QUÉ, NO DEBES ESCRIBIR PÁRRAFOS LARGOS. PIENSA COMO UN SUBTÍTULO RÁPIDO DE TIKTOK. SI GENERAS UN MURO DE TEXTO, LA APP SE ROMPERÁ."
+    : " CRITICAL OUTPUT RULE: TEXT FOR ANY SCREEN MUST BE A MAXIMUM OF 1 OR 2 PUNCHY SENTENCES (UNDER 120 CHARACTERS). NO MATTER WHAT, YOU MUST NOT WRITE LONG PARAGRAPHS. THINK LIKE A FAST-PACED TIKTOK CAPTION. IF YOU GENERATE A WALL OF TEXT, THE APP WILL BREAK.";
   const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}${conceptOnlyLine}${mediaFirstRule}${tiktokTextRule}`;
   try {
     const response = await fetch(
@@ -277,12 +277,12 @@ function getPlayButtonCopy(type: string, lang: "en" | "es"): string {
 }
 
 function RadioHighlightSlide({
-  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, isActive,
+  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, isActive, onTooltip,
 }: {
   card: any; videoSrc: string; bgGradient: string; lang: Lang;
   isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
   feedRef: React.MutableRefObject<HTMLDivElement | null>;
-  slideIndex: number; isActive: boolean;
+  slideIndex: number; isActive: boolean; onTooltip?: (text: string) => void;
 }) {
   const [speaking, setSpeaking] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
@@ -375,6 +375,19 @@ function RadioHighlightSlide({
               fontSize: "0.65rem", fontWeight: 900, letterSpacing: "0.25em",
               color: "#2e8bc0", textTransform: "uppercase",
             }}>MOOLAB RADIO</span>
+            {card.tooltip_explanation && onTooltip && (
+              <button
+                className="ws-btn"
+                onClick={() => onTooltip(card.tooltip_explanation)}
+                style={{
+                  width: 22, height: 22, borderRadius: "50%", border: "1.5px solid rgba(177,212,224,0.4)",
+                  background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
+                  color: "#b1d4e0", fontSize: "0.65rem", fontWeight: 800,
+                  cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >?</button>
+            )}
             {speaking && (
               <span style={{
                 display: "inline-flex", alignItems: "center", gap: 4,
@@ -461,11 +474,11 @@ function RadioHighlightSlide({
 }
 
 function PodcastClipSlide({
-  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, isActive,
+  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, isActive, onTooltip,
 }: {
   card: any; videoSrc: string; bgGradient: string; lang: Lang;
   isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
-  isActive: boolean;
+  isActive: boolean; onTooltip?: (text: string) => void;
 }) {
   const [visibleLines, setVisibleLines] = useState(0);
   const [speakingIdx, setSpeakingIdx] = useState(-1);
@@ -610,6 +623,19 @@ function PodcastClipSlide({
               fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.25em",
               color: "#2e8bc0", textTransform: "uppercase",
             }}>MOOLAB PODCAST</span>
+            {card.tooltip_explanation && onTooltip && (
+              <button
+                className="ws-btn"
+                onClick={() => onTooltip(card.tooltip_explanation)}
+                style={{
+                  width: 22, height: 22, borderRadius: "50%", border: "1.5px solid rgba(0,255,213,0.4)",
+                  background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
+                  color: "#00ffd5", fontSize: "0.65rem", fontWeight: 800,
+                  cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >?</button>
+            )}
             {isSpeaking && (
               <span style={{
                 display: "inline-flex", alignItems: "center", gap: 4,
@@ -771,6 +797,7 @@ function App() {
   const [revealedExplanations, setRevealedExplanations] = useState<Record<string, boolean>>({});
   const [bossExplanation, setBossExplanation] = useState<string | null>(null);
   const [revealedSlides, setRevealedSlides] = useState<Record<string, boolean>>({});
+  const [tooltipText, setTooltipText] = useState<string | null>(null);
   const [radioPlayedSlides, setRadioPlayedSlides] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -2518,6 +2545,7 @@ function App() {
                 feedRef={feedRef}
                 slideIndex={i}
                 isActive={activeSlideIndex === i}
+                onTooltip={setTooltipText}
               />
             );
           }
@@ -2533,6 +2561,7 @@ function App() {
                 isMutedRef={isMutedRef}
                 speechSpeedRef={speechSpeedRef}
                 isActive={activeSlideIndex === i}
+                onTooltip={setTooltipText}
               />
             );
           }
@@ -2543,6 +2572,7 @@ function App() {
                 key={card.id}
                 card={card}
                 lang={lang}
+                onTooltip={setTooltipText}
                 onContinue={() => {
                   if (feedRef.current) {
                     const next = feedRef.current.children[i + 1] as HTMLElement | undefined;
@@ -2607,21 +2637,35 @@ function App() {
                 alignItems: "center",
                 overflowY: "auto", scrollbarWidth: "none",
               }}>
-                <h1
-                  style={{
-                    color: "#fff",
-                    fontSize: "clamp(1.8rem, 7vw, 2.6rem)",
-                    fontWeight: 900,
-                    margin: 0,
-                    marginBottom: 10,
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1.1,
-                    textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)",
-                    textAlign: "center",
-                  }}
-                >
-                  {card.title}
-                </h1>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 10 }}>
+                  <h1
+                    style={{
+                      color: "#fff",
+                      fontSize: "clamp(1.8rem, 7vw, 2.6rem)",
+                      fontWeight: 900,
+                      margin: 0,
+                      letterSpacing: "-0.03em",
+                      lineHeight: 1.1,
+                      textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)",
+                      textAlign: "center",
+                    }}
+                  >
+                    {card.title}
+                  </h1>
+                  {card.tooltip_explanation && (
+                    <button
+                      className="ws-btn"
+                      onClick={() => setTooltipText(card.tooltip_explanation)}
+                      style={{
+                        width: 28, height: 28, borderRadius: "50%", border: "1.5px solid rgba(177,212,224,0.4)",
+                        background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
+                        color: "#b1d4e0", fontSize: "0.8rem", fontWeight: 800,
+                        cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >?</button>
+                  )}
+                </div>
                 <p
                   style={{
                     color: "rgba(255,255,255,0.95)",
@@ -2853,6 +2897,64 @@ function App() {
           </div>
         )}
       </div>
+
+      {tooltipText && (
+        <div
+          onClick={() => setTooltipText(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 500,
+            background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+            animation: "fadeIn 0.2s ease-out both",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%", maxWidth: 420,
+              background: "linear-gradient(135deg, rgba(12,45,72,0.98), rgba(20,83,116,0.95))",
+              borderRadius: "24px 24px 0 0",
+              padding: "28px 28px 40px",
+              border: "1px solid rgba(177,212,224,0.15)",
+              borderBottom: "none",
+              boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
+              animation: "popIn 0.3s ease-out both",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{
+                  width: 28, height: 28, borderRadius: "50%",
+                  background: "rgba(46,139,192,0.2)", border: "1.5px solid rgba(46,139,192,0.4)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "#2e8bc0", fontSize: "0.85rem", fontWeight: 800,
+                }}>?</span>
+                <span style={{
+                  fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.2em",
+                  color: "rgba(177,212,224,0.6)", textTransform: "uppercase",
+                }}>{lang === "es" ? "QUÉ SIGNIFICA" : "WHAT THIS MEANS"}</span>
+              </div>
+              <button
+                className="ws-btn"
+                onClick={() => setTooltipText(null)}
+                style={{
+                  width: 32, height: 32, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                  color: "#fff", fontSize: "1rem", cursor: "pointer", fontFamily: FONT,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >✕</button>
+            </div>
+            <p style={{
+              color: "#fff", fontSize: "clamp(1rem, 4vw, 1.15rem)",
+              fontWeight: 700, lineHeight: 1.5, margin: 0, fontFamily: FONT,
+            }}>
+              {tooltipText}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* THE DASHBOARD */}
       {showProfile && (

@@ -24,12 +24,14 @@ interface ConceptCardProps {
     term: string;
     definition: string;
     analogy: string;
+    tooltip_explanation?: string;
   };
   lang: Lang;
   onContinue: () => void;
+  onTooltip?: (text: string) => void;
 }
 
-export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps) {
+export default function ConceptCard({ card, lang, onContinue, onTooltip }: ConceptCardProps) {
   const term = card.term || (lang === "es" ? "Concepto Financiero" : "Financial Concept");
   const definition = card.definition || (lang === "es" ? "Definición no disponible." : "Definition not available.");
   const analogy = card.analogy || (lang === "es" ? "Piénsalo de esta manera..." : "Think of it this way...");
@@ -89,20 +91,34 @@ export default function ConceptCard({ card, lang, onContinue }: ConceptCardProps
             </span>
           </div>
 
-          <h1 style={{
-            fontSize: "clamp(2rem, 8vw, 3rem)",
-            fontWeight: 900,
-            color: "#fff",
-            letterSpacing: "-0.04em",
-            lineHeight: 1.05,
-            textAlign: "center",
-            margin: 0,
-            maxWidth: 380,
-            textShadow: "0 2px 12px rgba(0,0,0,0.6)",
-            animation: "conceptFadeUp 0.6s ease-out 0.1s both",
-          }}>
-            {term}
-          </h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+            <h1 style={{
+              fontSize: "clamp(2rem, 8vw, 3rem)",
+              fontWeight: 900,
+              color: "#fff",
+              letterSpacing: "-0.04em",
+              lineHeight: 1.05,
+              textAlign: "center",
+              margin: 0,
+              maxWidth: 380,
+              textShadow: "0 2px 12px rgba(0,0,0,0.6)",
+              animation: "conceptFadeUp 0.6s ease-out 0.1s both",
+            }}>
+              {term}
+            </h1>
+            {card.tooltip_explanation && onTooltip && (
+              <button
+                onClick={() => onTooltip(card.tooltip_explanation!)}
+                style={{
+                  width: 26, height: 26, borderRadius: "50%", border: "1.5px solid rgba(177,212,224,0.4)",
+                  background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
+                  color: "#b1d4e0", fontSize: "0.75rem", fontWeight: 800,
+                  cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0, animation: "conceptFadeUp 0.6s ease-out 0.1s both",
+                }}
+              >?</button>
+            )}
+          </div>
 
           <p style={{
             fontSize: "clamp(0.9rem, 3.5vw, 1.1rem)",

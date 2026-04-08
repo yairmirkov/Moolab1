@@ -1,0 +1,38 @@
+SYSTEM ROLE: Lead Prompt Engineer & React UX Expert.
+OBJECTIVE: Overhaul the Gemini AI system prompt to implement dynamic Age-Banding, enforce a specific investment philosophy, enforce extreme text limits, and add a dynamic "?" tooltip UI for subject clarity.
+
+STEP 1: THE "?" TOOLTIP UI & JSON SCHEMA
+
+Update the Gemini API response schema. Every generated card must now include a new field: tooltip_explanation (max 1 sentence, extremely simple definition of the subject).
+
+In Card.tsx (or the relevant feed UI), add a sleek, semi-transparent ? icon button directly next to the slide's Subject/Title.
+
+When clicked, open a small, elegant modal or bottom-sheet that displays the tooltip_explanation so the user can easily understand complex terms.
+
+STEP 2: DYNAMIC AGE ROUTING
+
+Ensure the backend API receives the user's ageGroup. Inject this persona into the prompt:
+
+If 8-12: "Talk to an 8-year-old. 3rd-grade reading level. Use extreme simplicity and analogies (video games, trading cards, allowance). NEVER use financial jargon without defining it in the tooltip. Sentences must be incredibly short."
+
+If 13-15: "Talk to a young teen. 7th-grade reading level. Use analogies involving sneakers, gaming economies, and first jobs."
+
+If 16-18: "Talk to an older teen. Explain adult concepts cleanly: car loans, part-time jobs, tech stocks, and early independence."
+
+STEP 3: THE "TITANS & TACTICS" DOCTRINE
+
+Hardcode this exact philosophy into the core system prompt:
+
+"CORE DOCTRINE: The curriculum must blend the long-term fundamentals of Warren Buffett and Charlie Munger with modern, active market strategies.
+
+Foundations (All Ages): Teach patience, the magic of compound interest, avoiding bad debt, and identifying 'wonderful businesses with moats' (explain moats as castles for younger users).
+
+Advanced Tactics (Older/Progressing Users): Introduce active market mechanics, daily trading concepts, how to utilize leveraged ETFs, real estate valuation, and the cash-flow realities of running a physical brick-and-mortar business."
+
+STEP 4: RUTHLESS LENGTH CONSTRAINTS
+
+Add this to the absolute bottom of the prompt in ALL CAPS:
+
+"CRITICAL OUTPUT RULE: Text for ANY screen must be a maximum of 1 or 2 punchy sentences (under 120 characters). No matter what, you MUST NOT write long paragraphs. Think like a fast-paced TikTok caption."
+
+OUTPUT: Update the backend API to enforce the new Doctrine and JSON schema (tooltip_explanation), and update the frontend UI to include the interactive ? icon.
