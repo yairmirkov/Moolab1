@@ -417,7 +417,7 @@ function PodcastClipSlide({
         <div style={{
           maxHeight: "80vh",
           background: "linear-gradient(to top, rgba(0,20,40,0.92) 0%, rgba(0,20,40,0.75) 70%, rgba(0,20,40,0.4) 100%)",
-          padding: "30px 28px 40px",
+          padding: "30px 28px 70px",
           display: "flex", flexDirection: "column", alignItems: "center",
           gap: 10, overflowY: "auto", scrollbarWidth: "none",
         }}>
@@ -2414,7 +2414,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
               <div style={{
                 maxHeight: "45vh",
                 background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
-                padding: "50px 28px 50px",
+                padding: "50px 28px 80px",
                 display: "flex", flexDirection: "column",
                 alignItems: "flex-start",
                 overflowY: "auto", scrollbarWidth: "none",
