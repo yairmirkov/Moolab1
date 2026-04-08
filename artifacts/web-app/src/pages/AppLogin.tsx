@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import { useLang, useLangSuffix, t, translations } from "../useLang";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
 export default function AppLogin() {
   const { loginChild } = useAuth();
   const navigate = useNavigate();
+  const lang = useLang();
+  const langSuffix = useLangSuffix();
+  const tx = translations.pages.appLogin;
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
@@ -22,9 +26,10 @@ export default function AppLogin() {
       const ageMap: Record<string, string> = { "8-12": "Kids", "13-15": "Teens", "16-18": "Adults" };
       localStorage.setItem("ws_name", child.displayName);
       localStorage.setItem("ws_ageGroup", ageMap[child.ageGroup] || "Teens");
-      navigate("/feed");
+      localStorage.setItem("ws_lang", lang);
+      navigate(`/feed${langSuffix}`);
     } catch (err: any) {
-      setError(err.message || "Wrong username or PIN");
+      setError(err.message || t(tx.wrongCredentials, lang));
       setShake(true);
       setTimeout(() => setShake(false), 500);
     } finally {
@@ -51,20 +56,20 @@ export default function AppLogin() {
           margin: "0 0 6px", letterSpacing: "-0.03em",
           textShadow: "0 2px 20px rgba(0,0,0,0.3)",
         }}>
-          Welcome Back!
+          {t(tx.title, lang)}
         </h1>
         <p style={{ color: "rgba(177,212,224,0.7)", fontSize: "0.85rem", fontWeight: 600, marginBottom: 36 }}>
-          Enter your username and PIN to start learning
+          {t(tx.subtitle, lang)}
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
             <label style={{ display: "block", color: "rgba(177,212,224,0.5)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4, textAlign: "left" }}>
-              USERNAME
+              {t(tx.username, lang)}
             </label>
             <input
               type="text"
-              placeholder="e.g. alex42"
+              placeholder={t(tx.usernamePlaceholder, lang)}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoCapitalize="none"
@@ -81,7 +86,7 @@ export default function AppLogin() {
 
           <div>
             <label style={{ display: "block", color: "rgba(177,212,224,0.5)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4, textAlign: "left" }}>
-              4-DIGIT PIN
+              {t(tx.pin, lang)}
             </label>
             <input
               type="tel"
@@ -122,17 +127,17 @@ export default function AppLogin() {
               transition: "all 0.3s ease", marginTop: 8,
             }}
           >
-            {loading ? "🔑 Opening..." : "🚀 Enter the Lab"}
+            {loading ? t(tx.opening, lang) : t(tx.enterLab, lang)}
           </button>
         </form>
 
-        <Link to="/login" style={{
+        <Link to={`/login${langSuffix}`} style={{
           display: "block", marginTop: 28,
           color: "rgba(177,212,224,0.4)", fontSize: "0.75rem",
           fontWeight: 700, textDecoration: "underline",
           textUnderlineOffset: 3,
         }}>
-          Parent Sign In →
+          {t(tx.parentSignIn, lang)}
         </Link>
       </div>
 

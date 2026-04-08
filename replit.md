@@ -35,7 +35,8 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
     -   **Boss Quizzes**: Integrated quizzes that advance modules and track streaks.
 -   **Localization**:
     -   **IP Geolocation**: Auto-detects user's country via `ipapi.co` for localized content.
-    -   **Bilingual System**: Full support for English and Latin American Spanish (UI, Gemini prompts, voice synthesis, radio tips, landing pages). Content is 70% global, 30% localized based on detected country.
+    -   **Bilingual System**: Full support for English and Latin American Spanish (UI, Gemini prompts, voice synthesis, radio tips, landing pages, all auth/admin pages). Language is determined by `?lang=es` URL param (propagated across all route transitions) with `ws_lang` localStorage fallback. Content is 70% global, 30% localized based on detected country.
+    -   **Translation Architecture**: `translations.ts` contains all UI strings keyed by `{en, es}`. `useLang()` hook reads from URL param first, then localStorage. `useLangSuffix()` provides `?lang=es` suffix for route transitions. All page components (Register, Login, Dashboard, AppLogin, Demo, Feed) use the `t()` helper function.
 -   **Routing**: React Router (`react-router-dom`) with BrowserRouter. Routes:
     -   `/` — Home/landing page with Get Started, Parent Sign In, Student PIN Access, Demo Mode links
     -   `/register` — Parent email/password registration (creates DB record, redirects to `/dashboard`)

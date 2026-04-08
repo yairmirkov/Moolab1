@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import { useLang, useLangSuffix, t, translations } from "../useLang";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
 export default function Login() {
   const { loginParent } = useAuth();
   const navigate = useNavigate();
+  const lang = useLang();
+  const langSuffix = useLangSuffix();
+  const tx = translations.pages.login;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,9 +22,9 @@ export default function Login() {
     setLoading(true);
     try {
       await loginParent(email, password);
-      navigate("/dashboard");
+      navigate(`/dashboard${langSuffix}`);
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      setError(err.message || t(tx.loginFailed, lang));
     } finally {
       setLoading(false);
     }
@@ -43,21 +47,21 @@ export default function Login() {
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <img src={`${import.meta.env.BASE_URL}moolab-logo-trimmed.png`} alt="Moolab" style={{ height: 60, marginBottom: 12 }} />
           <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#0c2d48", margin: "0 0 6px", letterSpacing: "-0.02em" }}>
-            Parent Sign In
+            {t(tx.title, lang)}
           </h1>
           <p style={{ color: "rgba(12,45,72,0.45)", fontSize: "0.8rem", fontWeight: 600, margin: 0 }}>
-            Access your dashboard to manage child profiles
+            {t(tx.subtitle, lang)}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
             <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
-              EMAIL
+              {t(tx.email, lang)}
             </label>
             <input
               type="email"
-              placeholder="parent@email.com"
+              placeholder={t(tx.emailPlaceholder, lang)}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={{
@@ -71,11 +75,11 @@ export default function Login() {
 
           <div>
             <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
-              PASSWORD
+              {t(tx.password, lang)}
             </label>
             <input
               type="password"
-              placeholder="Enter password"
+              placeholder={t(tx.passwordPlaceholder, lang)}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{
@@ -106,23 +110,23 @@ export default function Login() {
               transition: "all 0.3s ease", marginTop: 4,
             }}
           >
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? t(tx.signingIn, lang) : t(tx.submit, lang)}
           </button>
         </form>
 
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.8rem", fontWeight: 600 }}>
-            Don't have an account?{" "}
-            <Link to="/register" style={{ color: "#2e8bc0", fontWeight: 800, textDecoration: "none" }}>
-              Create Account
+            {t(tx.noAccount, lang)}{" "}
+            <Link to={`/register${langSuffix}`} style={{ color: "#2e8bc0", fontWeight: 800, textDecoration: "none" }}>
+              {t(tx.createAccount, lang)}
             </Link>
           </p>
-          <Link to="/app-login" style={{
+          <Link to={`/app-login${langSuffix}`} style={{
             display: "block", marginTop: 12, color: "rgba(12,45,72,0.35)",
             fontSize: "0.75rem", fontWeight: 700, textDecoration: "underline",
             textUnderlineOffset: 3,
           }}>
-            🎓 Student PIN Access
+            {t(tx.studentPinAccess, lang)}
           </Link>
         </div>
       </div>

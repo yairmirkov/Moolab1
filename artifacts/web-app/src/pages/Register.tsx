@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import { useLang, useLangSuffix, t, translations } from "../useLang";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
 export default function Register() {
   const { registerParent } = useAuth();
   const navigate = useNavigate();
+  const lang = useLang();
+  const langSuffix = useLangSuffix();
+  const tx = translations.pages.register;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -17,19 +21,19 @@ export default function Register() {
     e.preventDefault();
     setError("");
     if (password !== confirm) {
-      setError("Passwords do not match");
+      setError(t(tx.passwordMismatch, lang));
       return;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError(t(tx.passwordTooShort, lang));
       return;
     }
     setLoading(true);
     try {
       await registerParent(email, password);
-      navigate("/dashboard");
+      navigate(`/dashboard${langSuffix}`);
     } catch (err: any) {
-      setError(err.message || "Registration failed");
+      setError(err.message || t(tx.registrationFailed, lang));
     } finally {
       setLoading(false);
     }
@@ -52,21 +56,21 @@ export default function Register() {
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <img src={`${import.meta.env.BASE_URL}moolab-logo-trimmed.png`} alt="Moolab" style={{ height: 60, marginBottom: 12 }} />
           <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#0c2d48", margin: "0 0 6px", letterSpacing: "-0.02em" }}>
-            Create Account
+            {t(tx.title, lang)}
           </h1>
           <p style={{ color: "rgba(12,45,72,0.45)", fontSize: "0.8rem", fontWeight: 600, margin: 0 }}>
-            Set up your parent account to manage your children's learning
+            {t(tx.subtitle, lang)}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
             <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
-              EMAIL
+              {t(tx.email, lang)}
             </label>
             <input
               type="email"
-              placeholder="parent@email.com"
+              placeholder={t(tx.emailPlaceholder, lang)}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={{
@@ -80,11 +84,11 @@ export default function Register() {
 
           <div>
             <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
-              PASSWORD
+              {t(tx.password, lang)}
             </label>
             <input
               type="password"
-              placeholder="Min 6 characters"
+              placeholder={t(tx.passwordPlaceholder, lang)}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{
@@ -98,11 +102,11 @@ export default function Register() {
 
           <div>
             <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
-              CONFIRM PASSWORD
+              {t(tx.confirmPassword, lang)}
             </label>
             <input
               type="password"
-              placeholder="Re-enter password"
+              placeholder={t(tx.confirmPlaceholder, lang)}
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               style={{
@@ -133,15 +137,15 @@ export default function Register() {
               transition: "all 0.3s ease", marginTop: 4,
             }}
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading ? t(tx.creating, lang) : t(tx.submit, lang)}
           </button>
         </form>
 
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.8rem", fontWeight: 600 }}>
-            Already have an account?{" "}
-            <Link to="/login" style={{ color: "#2e8bc0", fontWeight: 800, textDecoration: "none" }}>
-              Sign In
+            {t(tx.alreadyHaveAccount, lang)}{" "}
+            <Link to={`/login${lang === "es" ? "?lang=es" : ""}`} style={{ color: "#2e8bc0", fontWeight: 800, textDecoration: "none" }}>
+              {t(tx.signIn, lang)}
             </Link>
           </p>
         </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { api } from "../api";
+import { useLang, useLangSuffix, t, translations } from "../useLang";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
@@ -16,6 +17,9 @@ interface ChildProfile {
 export default function Dashboard() {
   const { parent, logout } = useAuth();
   const navigate = useNavigate();
+  const lang = useLang();
+  const langSuffix = useLangSuffix();
+  const tx = translations.pages.dashboard;
   const [children, setChildren] = useState<ChildProfile[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
@@ -25,7 +29,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!parent) {
-      navigate("/login");
+      navigate(`/login${langSuffix}`);
       return;
     }
     api.getChildren()
@@ -44,14 +48,14 @@ export default function Dashboard() {
       setNewName("");
       setNewAge("8-12");
     } catch (err: any) {
-      alert(err.message || "Failed to create profile");
+      alert(err.message || t(tx.failedCreate, lang));
     } finally {
       setCreating(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Remove this child profile?")) return;
+    if (!confirm(t(tx.removeProfile, lang))) return;
     try {
       await api.deleteChild(id);
       setChildren((prev) => prev.filter((c) => c.id !== id));
@@ -60,10 +64,17 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/");
+    navigate(`/${langSuffix}`);
   };
 
   if (!parent) return null;
+
+  const steps = [
+    t(tx.step1, lang),
+    t(tx.step2, lang),
+    t(tx.step3, lang),
+    t(tx.step4, lang),
+  ];
 
   return (
     <div style={{
@@ -80,7 +91,7 @@ export default function Dashboard() {
           <img src={`${import.meta.env.BASE_URL}moolab-logo-trimmed.png`} alt="Moolab" style={{ height: 36 }} />
           <div>
             <div style={{ fontWeight: 900, fontSize: "1rem", color: "#0c2d48", letterSpacing: "-0.02em" }}>
-              Parent Dashboard
+              {t(tx.title, lang)}
             </div>
             <div style={{ fontSize: "0.7rem", color: "rgba(12,45,72,0.4)", fontWeight: 600 }}>
               {parent.email}
@@ -96,7 +107,7 @@ export default function Dashboard() {
             cursor: "pointer",
           }}
         >
-          Sign Out
+          {t(tx.signOut, lang)}
         </button>
       </div>
 
@@ -107,15 +118,15 @@ export default function Dashboard() {
           color: "#fff",
         }}>
           <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: "rgba(177,212,224,0.6)", marginBottom: 8 }}>
-            SUBSCRIPTION
+            {t(tx.subscription, lang)}
           </div>
           <div style={{ fontSize: "1.3rem", fontWeight: 900, marginBottom: 4 }}>
-            Moolab {parent.subscriptionStatus === "free" ? "Free" : "Apex"} Plan
+            Moolab {parent.subscriptionStatus === "free" ? t(tx.freePlan, lang) : t(tx.apexPlan, lang)} {t(tx.plan, lang)}
           </div>
           <div style={{ fontSize: "0.8rem", color: "rgba(177,212,224,0.7)", fontWeight: 600 }}>
             {parent.subscriptionStatus === "free"
-              ? "Upgrade to unlock unlimited lessons and AI features"
-              : "$19.99/mo — Unlimited access for all children"}
+              ? t(tx.upgradeMsg, lang)
+              : t(tx.paidMsg, lang)}
           </div>
         </div>
 
@@ -124,7 +135,7 @@ export default function Dashboard() {
           marginBottom: 20,
         }}>
           <h2 style={{ fontSize: "1.2rem", fontWeight: 900, color: "#0c2d48", margin: 0 }}>
-            Child Profiles
+            {t(tx.childProfiles, lang)}
           </h2>
           <button
             onClick={() => setShowModal(true)}
@@ -136,13 +147,13 @@ export default function Dashboard() {
               boxShadow: "0 4px 16px rgba(46,139,192,0.2)",
             }}
           >
-            + Add Child Profile
+            {t(tx.addChild, lang)}
           </button>
         </div>
 
         {loadingChildren ? (
           <div style={{ textAlign: "center", color: "rgba(12,45,72,0.3)", padding: 40, fontWeight: 600 }}>
-            Loading profiles...
+            {t(tx.loadingProfiles, lang)}
           </div>
         ) : children.length === 0 ? (
           <div style={{
@@ -152,7 +163,7 @@ export default function Dashboard() {
           }}>
             <div style={{ fontSize: "3rem", marginBottom: 12 }}>👨‍👧‍👦</div>
             <p style={{ color: "rgba(12,45,72,0.4)", fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>
-              No child profiles yet. Click "Add Child Profile" to get started!
+              {t(tx.noProfiles, lang)}
             </p>
           </div>
         ) : (
@@ -177,14 +188,14 @@ export default function Dashboard() {
                       {child.displayName}
                     </div>
                     <div style={{ fontSize: "0.7rem", color: "rgba(12,45,72,0.4)", fontWeight: 600, marginTop: 2 }}>
-                      @{child.username} — Age Group: {child.ageGroup}
+                      @{child.username} — {t(tx.ageGroupLabel, lang)} {child.ageGroup}
                     </div>
                     <div style={{
                       fontSize: "0.7rem", fontWeight: 800, color: "#2e8bc0", marginTop: 4,
                       background: "rgba(46,139,192,0.08)", display: "inline-block",
                       padding: "3px 10px", borderRadius: 8,
                     }}>
-                      PIN: {child.pin}
+                      {t(tx.pinLabel, lang)} {child.pin}
                     </div>
                   </div>
                 </div>
@@ -195,7 +206,7 @@ export default function Dashboard() {
                     color: "rgba(12,45,72,0.2)", cursor: "pointer",
                     fontSize: "1.2rem", padding: 8,
                   }}
-                  title="Remove profile"
+                  title={t(tx.removeTitle, lang)}
                 >
                   ✕
                 </button>
@@ -209,26 +220,21 @@ export default function Dashboard() {
           padding: "24px", boxShadow: "0 4px 16px rgba(12,45,72,0.04)",
         }}>
           <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", color: "rgba(12,45,72,0.35)", marginBottom: 12 }}>
-            HOW IT WORKS
+            {t(tx.howItWorks, lang)}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {[
-              { step: "1", text: "Add a child profile above" },
-              { step: "2", text: "Share their username & PIN with them" },
-              { step: "3", text: "They log in at the Student PIN Access page" },
-              { step: "4", text: "Content adapts to their age group automatically" },
-            ].map((item) => (
-              <div key={item.step} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {steps.map((text, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{
                   width: 28, height: 28, borderRadius: 8,
                   background: "rgba(46,139,192,0.08)", display: "flex",
                   alignItems: "center", justifyContent: "center",
                   fontWeight: 900, fontSize: "0.75rem", color: "#2e8bc0", flexShrink: 0,
                 }}>
-                  {item.step}
+                  {i + 1}
                 </div>
                 <span style={{ fontSize: "0.85rem", color: "rgba(12,45,72,0.6)", fontWeight: 600 }}>
-                  {item.text}
+                  {text}
                 </span>
               </div>
             ))}
@@ -251,20 +257,20 @@ export default function Dashboard() {
             }}
           >
             <h3 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#0c2d48", margin: "0 0 4px" }}>
-              Add Child Profile
+              {t(tx.addChildTitle, lang)}
             </h3>
             <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.8rem", fontWeight: 600, marginBottom: 24 }}>
-              A unique username and PIN will be auto-generated
+              {t(tx.addChildSubtitle, lang)}
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
-                  DISPLAY NAME
+                  {t(tx.displayName, lang)}
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Alex"
+                  placeholder={t(tx.displayNamePlaceholder, lang)}
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   style={{
@@ -278,7 +284,7 @@ export default function Dashboard() {
 
               <div>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
-                  AGE GROUP
+                  {t(tx.ageGroup, lang)}
                 </label>
                 <select
                   value={newAge}
@@ -290,9 +296,9 @@ export default function Dashboard() {
                     outline: "none", boxSizing: "border-box", cursor: "pointer",
                   }}
                 >
-                  <option value="8-12">8–12 (Explorer)</option>
-                  <option value="13-15">13–15 (Builder)</option>
-                  <option value="16-18">16–18 (Strategist)</option>
+                  <option value="8-12">{t(tx.ageExplorer, lang)}</option>
+                  <option value="13-15">{t(tx.ageBuilder, lang)}</option>
+                  <option value="16-18">{t(tx.ageStrategist, lang)}</option>
                 </select>
               </div>
             </div>
@@ -307,7 +313,7 @@ export default function Dashboard() {
                   fontWeight: 800, fontSize: "0.85rem", cursor: "pointer",
                 }}
               >
-                Cancel
+                {t(tx.cancel, lang)}
               </button>
               <button
                 onClick={handleCreate}
@@ -320,7 +326,7 @@ export default function Dashboard() {
                   cursor: newName.trim() ? "pointer" : "default",
                 }}
               >
-                {creating ? "Creating..." : "Create Profile"}
+                {creating ? t(tx.creating, lang) : t(tx.createProfile, lang)}
               </button>
             </div>
           </div>

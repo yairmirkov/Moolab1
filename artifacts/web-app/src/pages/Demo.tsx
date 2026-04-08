@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import App from "../App";
+import { useLang, t, translations } from "../useLang";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
 export default function Demo() {
+  const lang = useLang();
+  const tx = translations.pages.demo;
+
   const [ageGroup, setAgeGroup] = useState(() => {
     return localStorage.getItem("ws_demo_age") || "Teens";
   });
@@ -12,7 +16,8 @@ export default function Demo() {
     localStorage.setItem("ws_demo_age", ageGroup);
     localStorage.setItem("ws_name", "Demo Tester");
     localStorage.setItem("ws_acctType", "learner");
-  }, [ageGroup]);
+    localStorage.setItem("ws_lang", lang);
+  }, [ageGroup, lang]);
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
@@ -28,16 +33,16 @@ export default function Demo() {
             padding: "3px 10px", borderRadius: 8, fontSize: "0.6rem",
             fontWeight: 900, letterSpacing: "0.08em",
           }}>
-            DEMO MODE
+            {t(tx.demoMode, lang)}
           </span>
           <span style={{ color: "rgba(177,212,224,0.5)", fontSize: "0.7rem", fontWeight: 600 }}>
-            Testing — no auth required
+            {t(tx.noAuth, lang)}
           </span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <label style={{ color: "rgba(177,212,224,0.6)", fontSize: "0.65rem", fontWeight: 700 }}>
-            Age Group:
+            {t(tx.ageGroup, lang)}
           </label>
           <select
             value={ageGroup}
@@ -52,9 +57,9 @@ export default function Demo() {
               outline: "none",
             }}
           >
-            <option value="Kids" style={{ color: "#0c2d48" }}>8–12 (Kids)</option>
-            <option value="Teens" style={{ color: "#0c2d48" }}>13–15 (Teens)</option>
-            <option value="Adults" style={{ color: "#0c2d48" }}>16–18 (Adults)</option>
+            <option value="Kids" style={{ color: "#0c2d48" }}>{t(tx.kids, lang)}</option>
+            <option value="Teens" style={{ color: "#0c2d48" }}>{t(tx.teens, lang)}</option>
+            <option value="Adults" style={{ color: "#0c2d48" }}>{t(tx.adults, lang)}</option>
           </select>
         </div>
       </div>
