@@ -193,7 +193,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-sky-100">
         <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MoolabLogo height={34} glow />
+            <MoolabLogo height={37} glow />
           </div>
           <div className="flex items-center gap-2.5">
             <a
@@ -219,7 +219,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
       </nav>
 
       {/* STEP 1: MICRO-LEARNING HERO */}
-      <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-20 px-6 overflow-hidden">
+      <section className="relative pt-28 sm:pt-36 pb-20 sm:pb-28 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-sky-50/60 via-white to-white" />
         <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-sky-200/20 blur-3xl" />
         <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-sky-300/15 blur-3xl" />
@@ -230,17 +230,17 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
               Educación Financiera con IA
             </span>
           </div>
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08] mb-5">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08] mb-6 sm:mb-8">
             Cría un experto financiero
             <br />
             <span className="bg-gradient-to-r from-[#0c2d48] via-[#145374] to-[#2e8bc0] bg-clip-text text-transparent">
               en solo 5 minutos al día.
             </span>
           </h1>
-          <p className="text-base sm:text-lg text-[#0c2d48]/45 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
+          <p className="text-base sm:text-lg text-[#0c2d48]/45 font-medium max-w-xl mx-auto mb-10 sm:mb-12 leading-relaxed">
             Pon la IA a trabajar para tu familia. Un plan de estudios diario y breve que hace a tu hijo fluido en términos financieros modernos, tácticas y la sabiduría necesaria para construir riqueza.
           </p>
-          <div className="mb-6">
+          <div className="mb-10 sm:mb-14">
             <button
               onClick={onTestApp}
               className="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm sm:text-base tracking-wide shadow-xl shadow-sky-300/30 hover:shadow-sky-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
@@ -250,7 +250,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
             <p className="text-xs text-[#0c2d48]/25 font-medium mt-4">Gratis · Sin anuncios · Seguro para niños</p>
           </div>
 
-          <div className="flex justify-center gap-10 sm:gap-14 mt-10">
+          <div className="flex justify-center gap-12 sm:gap-16">
             {[
               { value: "5 min", label: "Al Día" },
               { value: "8", label: "Módulos" },
@@ -529,7 +529,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
 
       <footer className="py-8 px-6 border-t border-sky-100">
         <div className="max-w-5xl mx-auto flex flex-col items-center gap-3">
-          <MoolabLogo height={32} glow />
+          <MoolabLogo height={35} glow />
           <p className="text-[10px] text-[#0c2d48]/20 font-medium">
             Construyendo la próxima generación de líderes financieramente educados.
           </p>
