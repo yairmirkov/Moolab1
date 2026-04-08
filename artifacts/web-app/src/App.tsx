@@ -3156,12 +3156,10 @@ function App() {
                   : "drop-shadow(0 0 40px rgba(255,107,107,0.3))",
               }}>{pick.emoji}</h1>
               <h2 style={{
-                color: "#fff", fontSize: "2.6rem", fontWeight: 900,
+                fontSize: "2.6rem", fontWeight: 900,
                 letterSpacing: "-0.03em", margin: "0 0 6px 0",
-                background: quizResult
-                  ? "linear-gradient(135deg, #b1d4e0, #FFFFFF, #2e8bc0)"
-                  : "linear-gradient(135deg, #FF6B6B, #FF8E53)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                color: quizResult ? "#fff" : "#FF6B6B",
+                textShadow: quizResult ? "0 2px 20px rgba(46,139,192,0.5)" : "0 2px 20px rgba(255,107,107,0.3)",
               }}>
                 {pick.title}
               </h2>
