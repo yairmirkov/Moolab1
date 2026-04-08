@@ -548,14 +548,19 @@ function PodcastClipSlide({
   );
 }
 
-function App() {
+interface AppProps {
+  demoMode?: boolean;
+  demoAgeGroup?: string;
+}
+
+function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [lang, setLang] = useState<Lang>(() => (loadStr("lang", "en") as Lang));
   const langRef = useRef<Lang>(loadStr("lang", "en") as Lang);
   const MODULES = getModules(lang);
   const t = translations;
 
-  const [appStarted, setAppStarted] = useState(false);
-  const [ageGroup, setAgeGroup] = useState("");
+  const [appStarted, setAppStarted] = useState(demoMode);
+  const [ageGroup, setAgeGroup] = useState(demoMode ? demoAgeGroup : "");
   const [currentData, setCurrentData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -571,9 +576,9 @@ function App() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [preloadReady, setPreloadReady] = useState(false);
   const [preloadProgress, setPreloadProgress] = useState("");
-  const [userName, setUserName] = useState(() => loadStr("name", ""));
+  const [userName, setUserName] = useState(() => demoMode ? (loadStr("name", "") || "Demo") : loadStr("name", ""));
   const [birthYear, setBirthYear] = useState(() => loadStr("birth", ""));
-  const [accountType, setAccountType] = useState(() => loadStr("acctType", ""));
+  const [accountType, setAccountType] = useState(() => demoMode ? "learner" : loadStr("acctType", ""));
   const [parentName, setParentName] = useState(() => loadStr("parentName", ""));
   const [userCountry, setUserCountry] = useState(() => loadStr("country", ""));
   const [countryLoading, setCountryLoading] = useState(false);
@@ -591,7 +596,7 @@ function App() {
   });
   const [showModuleMap, setShowModuleMap] = useState(false);
   const [showParentDash, setShowParentDash] = useState(false);
-  const [showLanding, setShowLanding] = useState(true);
+  const [showLanding, setShowLanding] = useState(!demoMode);
   const [fadeIn, setFadeIn] = useState(false);
 
   const [xp, setXp] = useState(() => load("xp", 0));

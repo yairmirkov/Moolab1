@@ -36,17 +36,25 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
 -   **Localization**:
     -   **IP Geolocation**: Auto-detects user's country via `ipapi.co` for localized content.
     -   **Bilingual System**: Full support for English and Latin American Spanish (UI, Gemini prompts, voice synthesis, radio tips, landing pages). Content is 70% global, 30% localized based on detected country.
--   **Authentication Architecture (Parent-First OAuth)**:
-    -   **Step 0 (OAuth Gateway)**: Premium splash with "Continue with Apple" and "Continue with Google" buttons (mock OAuth, black/white design) + "Student PIN Access" secondary button. Divider with "OR" separator.
-    -   **Step 1 (Command Center)**: Parent enters their name, views existing student profiles (nickname + PIN + country), and can click "Create Student Profile" to add new students.
-    -   **Step 4 (Create Student)**: Parent enters student nickname, birth year, country; system auto-generates a random 4-digit PIN. Saves to `ws_family` localStorage as `{parent, students: [{nickname, pin, birthYear, country}]}`.
-    -   **Step 3 (Student PIN Login)**: Students enter nickname + 4-digit PIN, matched against `ws_family` state. On match, loads their profile (name, birthYear, country) and routes directly into the feed.
-    -   **Step 2 (Legacy Fallback)**: Original form-based onboarding kept for backward compatibility.
--   **Parent Command Center** (`CommandCenter.tsx`): Premium white (#F8F9FB) + navy (#001F5B) dashboard with 4 tabs:
-    -   **Overview**: Financial Competency Summary, current module progress bar, Active Streak / M-XP / Mastery Level metrics, and full module list with status badges.
-    -   **Lab Progress**: Mock quiz results data table (Date, Subject, Score, Status badges), competency breakdown with progress circles (Risk Appetite, Market Mechanics, Asset Management).
-    -   **Family Users**: Sub-accounts management listing student nicknames, age brackets, and 4-digit Lab PINs. "Provision New Student Account" button routes to Step 4.
-    -   **Billing**: Moolab Apex Plan ($19.99/mo) display, plan features checklist, mock VISA payment method, Update/View Invoices buttons.
+-   **Routing**: React Router (`react-router-dom`) with BrowserRouter. Routes:
+    -   `/` — Home/landing page with Get Started, Parent Sign In, Student PIN Access, Demo Mode links
+    -   `/register` — Parent email/password registration (creates DB record, redirects to `/dashboard`)
+    -   `/login` — Parent sign in (authenticates via API, redirects to `/dashboard`)
+    -   `/dashboard` — Parent dashboard: subscription status, child profile management (add/remove children with auto-generated usernames + PINs)
+    -   `/app-login` — Kid-friendly PIN login (username + 4-digit PIN, dark Ocean Breeze theme with shark branding)
+    -   `/demo` — Testing route: bypasses auth, age group dropdown (8-12, 13-15, 16-18) in top bar, renders Feed directly
+    -   `/feed` — Post-child-login feed (loads from `ws_ageGroup` localStorage)
+    -   `/legacy` — Original single-page app with built-in onboarding
+-   **Authentication Architecture (Database-backed)**:
+    -   **Parent Auth**: Email/password registration & login via API (`/api/auth/register`, `/api/auth/login`). Passwords bcrypt-hashed (12 rounds). Express sessions with cookies.
+    -   **Child Auth**: Username + 4-digit PIN login via `/api/auth/child-login`. Returns child profile with `ageGroup` for feed personalization.
+    -   **AuthContext**: React context provider wrapping all routes. Provides `parent`, `child`, `loginParent`, `registerParent`, `loginChild`, `logout` methods.
+    -   **API Client**: `src/api.ts` — fetch wrapper with credentials for session cookies, targeting `/api-server/api` base path.
+-   **Database Schema** (`lib/db/src/schema/index.ts`):
+    -   **parents**: id (serial PK), email (unique), password_hash, subscription_status (default "free"), created_at
+    -   **children**: id (serial PK), parent_id (FK → parents, cascade delete), username (unique, auto-generated), pin (4-digit), display_name, age_group ("8-12"/"13-15"/"16-18"), created_at
+-   **Parent Dashboard** (`src/pages/Dashboard.tsx`): Ocean Breeze themed. Subscription card, child profile list with username/PIN display, "Add Child Profile" modal (name + age group dropdown → auto-generates username + PIN). How-it-works guide.
+-   **Legacy Command Center** (`CommandCenter.tsx`): Premium white (#F8F9FB) + navy (#001F5B) dashboard with 4 tabs (Overview, Lab Progress, Family Users, Billing). Still available at `/legacy` route.
 -   **Concept Breakdown Slides** (`ConceptCard.tsx`): `concept_breakdown` card type with white background + navy (#001F5B) typography. Shows "LAB CONCEPT" badge, large bold term, clear definition, and italicized analogy in a shaded block. Pulsing "Tap to Continue" button auto-scrolls to next slide. AI generates 1-2 per batch to teach Finance 101 terms before testing.
 -   **Radio Show Intermissions**: Integrates "radio_highlight" cards with audio content (fun facts, hype) that auto-play when scrolled into view.
 
