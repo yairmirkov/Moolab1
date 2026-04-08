@@ -54,7 +54,7 @@ export default function Register() {
         boxShadow: "0 20px 60px rgba(12,45,72,0.08)",
       }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <img src={`${import.meta.env.BASE_URL}moolab-logo-trimmed.png`} alt="Moolab" style={{ height: 60, marginBottom: 12 }} />
+          <img src={`${import.meta.env.BASE_URL}moolab-logo-trimmed.png`} alt="Moolab" style={{ height: 60, marginBottom: 12, display: "block", marginLeft: "auto", marginRight: "auto" }} />
           <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#0c2d48", margin: "0 0 6px", letterSpacing: "-0.02em" }}>
             {t(tx.title, lang)}
           </h1>
