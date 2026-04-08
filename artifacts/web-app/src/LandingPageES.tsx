@@ -191,10 +191,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
       style={{ overflowX: "hidden" }}
     >
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-sky-100">
-        <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MoolabLogo height={37} glow />
-          </div>
+        <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between relative">
           <div className="flex items-center gap-2.5">
             <a
               href="?"
@@ -202,6 +199,11 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
             >
               EN
             </a>
+          </div>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <MoolabLogo height={37} glow />
+          </div>
+          <div className="flex items-center gap-2.5">
             <button
               onClick={onParentLogin}
               className="px-4 py-2 rounded-full border border-sky-200 text-[#145374] font-bold text-xs sm:text-sm tracking-wide hover:bg-sky-50 active:scale-95 transition-all duration-200 cursor-pointer"
