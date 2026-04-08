@@ -193,7 +193,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-sky-100">
         <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MoolabLogo height={37} glow />
+            <MoolabLogo height={37} />
           </div>
           <div className="flex items-center gap-2.5">
             <a
@@ -529,7 +529,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
 
       <footer className="py-8 px-6 border-t border-sky-100">
         <div className="max-w-5xl mx-auto flex flex-col items-center gap-3">
-          <MoolabLogo height={35} glow />
+          <MoolabLogo height={35} />
           <p className="text-[10px] text-[#0c2d48]/20 font-medium">
             Construyendo la próxima generación de líderes financieramente educados.
           </p>
