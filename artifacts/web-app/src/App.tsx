@@ -1910,9 +1910,67 @@ function App() {
           @keyframes ldBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
           @keyframes enterPulse { 0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(46,139,192,0.3),0 8px 32px rgba(0,0,0,0.5)} 50%{transform:scale(1.04);box-shadow:0 0 80px rgba(46,139,192,0.5),0 12px 48px rgba(0,0,0,0.6)} }
           @keyframes enterFadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes sharkOrbit { 0%{transform:rotate(0deg) translateX(120px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)} }
+          @keyframes sharkOrbit2 { 0%{transform:rotate(180deg) translateX(160px) rotate(-180deg)} 100%{transform:rotate(540deg) translateX(160px) rotate(-540deg)} }
+          @keyframes sharkBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+          @keyframes finWake { 0%{opacity:0.6;width:0} 50%{opacity:0.3;width:40px} 100%{opacity:0;width:60px} }
+          @keyframes oceanWave { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+          @keyframes bubble { 0%{opacity:0.5;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-80px) scale(0.3)} }
         `}</style>
+
+        {preloadReady && (
+          <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+            <div style={{
+              position: "absolute", top: "50%", left: "50%",
+              width: 0, height: 0, marginTop: -20,
+              animation: "sharkOrbit 6s linear infinite",
+            }}>
+              <div style={{ animation: "sharkBob 2s ease-in-out infinite" }}>
+                <svg width="38" height="32" viewBox="0 0 38 32" fill="none" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }}>
+                  <path d="M19 0 C19 0 22 8 28 14 C22 13 16 14 12 16 C14 12 17 6 19 0Z" fill="rgba(46,139,192,0.7)" />
+                  <path d="M12 16 C8 18 4 22 2 28 C4 24 10 20 18 18 C14 17 12 16 12 16Z" fill="rgba(20,83,116,0.5)" />
+                  <ellipse cx="19" cy="18" rx="14" ry="2" fill="rgba(46,139,192,0.08)" />
+                </svg>
+              </div>
+            </div>
+
+            <div style={{
+              position: "absolute", top: "50%", left: "50%",
+              width: 0, height: 0, marginTop: 10,
+              animation: "sharkOrbit2 9s linear infinite",
+            }}>
+              <div style={{ animation: "sharkBob 2.5s ease-in-out infinite", animationDelay: "0.5s" }}>
+                <svg width="26" height="22" viewBox="0 0 38 32" fill="none" style={{ opacity: 0.5, filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.3))" }}>
+                  <path d="M19 0 C19 0 22 8 28 14 C22 13 16 14 12 16 C14 12 17 6 19 0Z" fill="rgba(46,139,192,0.5)" />
+                  <path d="M12 16 C8 18 4 22 2 28 C4 24 10 20 18 18 C14 17 12 16 12 16Z" fill="rgba(20,83,116,0.35)" />
+                </svg>
+              </div>
+            </div>
+
+            {[...Array(6)].map((_, i) => (
+              <div key={i} style={{
+                position: "absolute",
+                left: `${15 + i * 14}%`,
+                bottom: `${10 + (i % 3) * 20}%`,
+                width: 4 + (i % 3) * 2,
+                height: 4 + (i % 3) * 2,
+                borderRadius: "50%",
+                background: "rgba(177,212,224,0.15)",
+                animation: `bubble ${3 + i * 0.7}s ease-out ${i * 0.8}s infinite`,
+              }} />
+            ))}
+
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "30%",
+              background: "linear-gradient(to top, rgba(12,45,72,0.4) 0%, transparent 100%)",
+              backgroundSize: "200% 200%",
+              animation: "oceanWave 8s ease-in-out infinite",
+            }} />
+          </div>
+        )}
+
         {preloadReady ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", animation: "enterFadeIn 0.6s ease-out both" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", animation: "enterFadeIn 0.6s ease-out both", position: "relative", zIndex: 1 }}>
             <div style={{ fontSize: "4rem", marginBottom: 24 }}>🧪</div>
             <p style={{
               fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.3em",
