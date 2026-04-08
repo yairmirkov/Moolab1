@@ -31,9 +31,7 @@ export default function SharkGame({
   const sizeRef = useRef(SHARK_BASE);
   const coinsRef = useRef<Coin[]>([]);
   const coinIdRef = useRef(0);
-  const scoreRef = useRef(0);
   const sharkElRef = useRef<HTMLImageElement>(null);
-  const scoreElRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef(0);
   const lastSpawnRef = useRef(0);
   const angleRef = useRef(-Math.PI / 2);
@@ -127,10 +125,6 @@ export default function SharkGame({
 
         if (cdist < eatRadius && coin.opacity > 0.5) {
           sizeRef.current = Math.min(sizeRef.current + GROW_PER_COIN, SHARK_MAX);
-          scoreRef.current++;
-          if (scoreElRef.current) {
-            scoreElRef.current.textContent = `🪙 ${scoreRef.current}`;
-          }
           const coinEl = container?.querySelector(`[data-coin-id="${coin.id}"]`) as HTMLElement;
           if (coinEl) {
             coinEl.style.transform = "scale(1.5)";
@@ -252,18 +246,6 @@ export default function SharkGame({
           pointerEvents: "none",
         }}
       >
-        <div
-          ref={scoreElRef}
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: 900,
-            color: "#145374",
-            marginBottom: 8,
-            letterSpacing: "0.02em",
-          }}
-        >
-          🪙 0
-        </div>
         <div
           style={{
             width: 32,
