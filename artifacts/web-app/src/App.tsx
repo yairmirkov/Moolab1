@@ -3,6 +3,7 @@ import LandingPage from "./LandingPage";
 import LandingPageES from "./LandingPageES";
 import CommandCenter from "./CommandCenter";
 import ConceptCard from "./ConceptCard";
+import SharkGame from "./SharkGame";
 import translations, { type Lang } from "./translations";
 import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob } from "./elevenlabs";
 
@@ -1899,10 +1900,11 @@ function App() {
           alignItems: "center",
           background: preloadReady
             ? "radial-gradient(ellipse at center, #0c2d48 0%, #020a14 100%)"
-            : "linear-gradient(160deg, #eef6fb 0%, #e0f0f8 30%, #d0e8f2 60%, #f2f8fb 100%)",
+            : "transparent",
           color: preloadReady ? "#fff" : "#0c2d48",
           fontFamily: FONT,
           transition: "background 0.8s ease, color 0.8s ease",
+          overflow: "hidden",
         }}
       >
         <style>{`
@@ -2002,13 +2004,7 @@ function App() {
             </button>
           </div>
         ) : (
-          <>
-            <div style={{ fontSize: "3rem", marginBottom: 16, animation: "ldBounce 2s ease-in-out infinite" }}>🧠</div>
-            <div style={{ width:40,height:40,margin:"0 auto 16px",borderRadius:"50%",border:"3px solid rgba(46,139,192,0.12)",borderTopColor:"#145374",animation:"ldSpin 0.7s linear infinite" }} />
-            <p style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: "-0.01em", background:"linear-gradient(90deg,#145374,#2e8bc0)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
-              {preloadProgress || t.loading.curating[lang]}
-            </p>
-          </>
+          <SharkGame progress={preloadProgress} lang={lang} />
         )}
       </div>
     );
