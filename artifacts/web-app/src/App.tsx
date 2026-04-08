@@ -374,13 +374,17 @@ function PodcastClipSlide({
   }, [isActive]);
 
   const handlePlay = () => {
-    if (hasPlayed) return;
+    if (abortRef.current) abortRef.current.abort();
+    stopElevenLabsAudio();
     setHasPlayed(true);
-    runPlaybackQueue().catch(() => {});
+    setVisibleLines(0);
+    setSpeakingIdx(-1);
+    setTimeout(() => runPlaybackQueue().catch(() => {}), 50);
   };
 
   const audioAvailable = !!(isElevenLabsAvailable() && !isMutedRef.current);
-  const showPlayBtn = isActive && !hasPlayed && audioAvailable && dialogue.length > 0;
+  const isPlaying = speakingIdx >= 0;
+  const showPlayBtn = isActive && !isPlaying && audioAvailable && dialogue.length > 0;
   const allRevealed = visibleLines >= dialogue.length;
   const isSpeaking = speakingIdx >= 0;
 
@@ -407,13 +411,13 @@ function PodcastClipSlide({
 
       <div style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
-        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+        display: "flex", flexDirection: "column", justifyContent: "center",
         zIndex: 1,
       }}>
         <div style={{
-          maxHeight: "45vh",
-          background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
-          padding: "50px 20px 50px",
+          maxHeight: "80vh",
+          background: "linear-gradient(to top, rgba(0,20,40,0.92) 0%, rgba(0,20,40,0.75) 70%, rgba(0,20,40,0.4) 100%)",
+          padding: "30px 28px 40px",
           display: "flex", flexDirection: "column", alignItems: "center",
           gap: 10, overflowY: "auto", scrollbarWidth: "none",
         }}>
@@ -468,9 +472,11 @@ function PodcastClipSlide({
                 boxShadow: "0 0 40px rgba(0,255,213,0.15), inset 0 1px 0 rgba(255,255,255,0.1)",
               }}
             >
-              <span style={{ fontSize: "1.4rem" }}>▶️</span>
+              <span style={{ fontSize: "1.4rem" }}>{hasPlayed ? "🔄" : "▶️"}</span>
               <span style={{ textAlign: "left", lineHeight: 1.3 }}>
-                {getPlayButtonCopy("podcast", lang)}
+                {hasPlayed
+                  ? (lang === "es" ? "Reproducir de nuevo" : "Play again")
+                  : getPlayButtonCopy("podcast", lang)}
               </span>
             </button>
           )}
@@ -479,7 +485,7 @@ function PodcastClipSlide({
             display: "flex", flexDirection: "column", gap: 10,
             width: "100%", maxWidth: 380,
           }}>
-            {(hasPlayed ? dialogue.slice(0, visibleLines) : dialogue).map((line, idx) => {
+            {(hasPlayed ? dialogue.slice(0, visibleLines) : dialogue.slice(0, 2)).map((line, idx) => {
               const isHost = line.speaker.toLowerCase() === "host" || line.speaker.toLowerCase() === "presentador" || line.speaker.toLowerCase() === "presentadora";
               const isLineActive = hasPlayed && idx === speakingIdx;
               return (
@@ -2195,7 +2201,7 @@ function App() {
           position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
           backgroundColor: "rgba(5,5,10,0.97)", zIndex: 200,
           display: "flex", flexDirection: "column", alignItems: "center",
-          padding: "50px 24px 30px", overflowY: "auto",
+          padding: "50px 28px 30px", overflowY: "auto",
           backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)",
           animation: "popIn 0.35s ease-out both",
         }}>
@@ -2403,7 +2409,7 @@ function App() {
               <div style={{
                 maxHeight: "45vh",
                 background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
-                padding: "50px 24px 50px",
+                padding: "50px 28px 50px",
                 display: "flex", flexDirection: "column",
                 alignItems: "center",
                 overflowY: "auto", scrollbarWidth: "none",

@@ -70,7 +70,7 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
         <div style={{
           maxHeight: "45vh",
           background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
-          padding: "50px 24px 50px",
+          padding: "50px 28px 50px",
           display: "flex", flexDirection: "column", alignItems: "center",
           gap: 12, overflowY: "auto", scrollbarWidth: "none",
         }}>
