@@ -27,11 +27,10 @@ interface ConceptCardProps {
     tooltip_explanation?: string;
   };
   lang: Lang;
-  onContinue: () => void;
   onTooltip?: (text: string) => void;
 }
 
-export default function ConceptCard({ card, lang, onContinue, onTooltip }: ConceptCardProps) {
+export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps) {
   const term = card.term || (lang === "es" ? "Concepto Financiero" : "Financial Concept");
   const definition = card.definition || (lang === "es" ? "Definición no disponible." : "Definition not available.");
   const analogy = card.analogy || (lang === "es" ? "Piénsalo de esta manera..." : "Think of it this way...");
@@ -50,7 +49,6 @@ export default function ConceptCard({ card, lang, onContinue, onTooltip }: Conce
     >
       <style>{`
         @keyframes conceptFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes conceptPulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
       `}</style>
 
       <video
@@ -160,25 +158,6 @@ export default function ConceptCard({ card, lang, onContinue, onTooltip }: Conce
             </p>
           </div>
 
-          <button
-            onClick={onContinue}
-            style={{
-              padding: "12px 28px",
-              borderRadius: 12,
-              background: "linear-gradient(135deg, rgba(46,139,192,0.3), rgba(20,83,116,0.4))",
-              border: "1px solid rgba(46,139,192,0.5)",
-              color: "#fff",
-              fontSize: "0.8rem",
-              fontWeight: 800,
-              letterSpacing: "0.06em",
-              cursor: "pointer",
-              fontFamily: FONT,
-              animation: "conceptPulse 2.5s ease-in-out infinite",
-              boxShadow: "0 0 20px rgba(46,139,192,0.2)",
-            }}
-          >
-            {lang === "es" ? "Continuar ⚡" : "Tap to Continue ⚡"}
-          </button>
         </div>
       </div>
     </div>

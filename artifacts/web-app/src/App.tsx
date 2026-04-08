@@ -2354,12 +2354,6 @@ function App() {
                 card={card}
                 lang={lang}
                 onTooltip={setTooltipText}
-                onContinue={() => {
-                  if (feedRef.current) {
-                    const next = feedRef.current.children[i + 1] as HTMLElement | undefined;
-                    if (next) next.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
               />
             );
           }
@@ -2493,14 +2487,13 @@ function App() {
                         className="ws-btn"
                         onClick={() => setRevealedSlides(p => ({ ...p, [card.id]: true }))}
                         style={{
-                          padding: "14px 32px", borderRadius: 18,
-                          background: "linear-gradient(135deg, rgba(46,139,192,0.15), rgba(177,212,224,0.1))",
-                          border: "1px solid rgba(46,139,192,0.3)",
-                          color: "#b1d4e0", fontWeight: 800, fontSize: "0.85rem",
+                          padding: "8px 20px", borderRadius: 10,
+                          background: "rgba(46,139,192,0.15)",
+                          border: "none",
+                          color: "rgba(177,212,224,0.7)", fontWeight: 700, fontSize: "0.72rem",
                           cursor: "pointer", fontFamily: FONT,
                           letterSpacing: "0.04em",
                           animation: "contextPulse 2s ease-in-out infinite",
-                          boxShadow: "0 0 20px rgba(46,139,192,0.15)",
                         }}
                       >
                         {t.slide.tapToContinue[lang]}
