@@ -30,8 +30,29 @@ const shuffleOptions = (options: string[], correctIndex: number) => {
   return { options: shuffled, correctIndex: shuffled.indexOf(correctAnswer) };
 };
 
-const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en", country?: string, batchSize: number = 10, opts?: { conceptOnly?: boolean }) => {
-  const timerLabel = `Gemini API (batch=${batchSize}${opts?.conceptOnly ? ', conceptOnly' : ''})`;
+const FEED_SEQUENCE: Array<"concept" | "journey" | "podcast"> = [
+  "concept",
+  "journey",
+  "podcast",
+  "journey",
+  "journey",
+  "journey",
+  "journey",
+  "concept",
+  "journey",
+  "journey",
+];
+
+function getRequestedTypes(startIndex: number, count: number): string[] {
+  const types: string[] = [];
+  for (let i = 0; i < count; i++) {
+    types.push(FEED_SEQUENCE[(startIndex + i) % FEED_SEQUENCE.length]);
+  }
+  return types;
+}
+
+const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en", country?: string, batchSize: number = 10, opts?: { requestedTypes?: string[] }) => {
+  const timerLabel = `Gemini API (batch=${batchSize})`;
   console.time(timerLabel);
   let timerEnded = false;
   const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
@@ -40,39 +61,23 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
   const persona = translations.gemini.persona[personaKey][lang];
   const doctrine = translations.gemini.coreDoctrine[lang];
   const ageShark = translations.gemini.sharkByAge[personaKey][lang];
-  const baseSuffix = translations.gemini.promptSuffix[lang];
-  const suffix = baseSuffix
-    .replace(/Generate 10 unique/i, `Generate exactly ${batchSize} unique`)
-    .replace(/Genera 10 lecciones/i, `Genera exactamente ${batchSize} lecciones`)
-    .replace(/Among the 10 lessons/gi, `Among the ${batchSize} lessons`)
-    .replace(/Entre las 10 lecciones/gi, `Entre las ${batchSize} lecciones`)
-    .replace(/among the 10 lessons/gi, `among the ${batchSize} lessons`)
-    .replace(/entre las 10 lecciones/gi, `entre las ${batchSize} lecciones`);
+  const suffix = translations.gemini.promptSuffix[lang];
   const topicLine = topic ? (lang === "es" ? ` Todas las lecciones DEBEN enfocarse en el tema de: ${topic}.` : ` All lessons MUST focus on the topic of: ${topic}.`) : "";
   const countryLine = country ? (lang === "es"
-    ? ` El usuario se encuentra en: ${country}. Debes usar una división de localización 30/70. El 70% de tus conceptos financieros, ejemplos y mecánicas de mercado deben ser Globales (Wall Street, Crypto, clases de activos amplias). El 30% de tus ejemplos DEBEN estar hiperlocalizados al país del usuario. Por ejemplo, si están en Estados Unidos, usa Bank of America o conceptos fiscales locales. Si están en República Dominicana, menciona específicamente instituciones locales como Banco Popular o BHD, y matices económicos locales. Haz que las referencias locales se sientan naturales y fluidas.`
-    : ` The user is based in: ${country}. You must use a 30/70 localization split. 70% of your financial concepts, examples, and market mechanics should be Global (Wall Street, Crypto, broad asset classes). 30% of your examples MUST be hyper-localized to the user's country. For example, if they are in the US, use Bank of America or local tax concepts. If they are in the Dominican Republic, specifically mention local institutions like Banco Popular or BHD, and local economic nuances. Make the local references feel seamless and natural.`
+    ? ` El usuario se encuentra en: ${country}. Debes usar una división de localización 30/70. El 70% de tus conceptos financieros, ejemplos y mecánicas de mercado deben ser Globales (Wall Street, Crypto, clases de activos amplias). El 30% de tus ejemplos DEBEN estar hiperlocalizados al país del usuario.`
+    : ` The user is based in: ${country}. You must use a 30/70 localization split. 70% of your financial concepts, examples, and market mechanics should be Global (Wall Street, Crypto, broad asset classes). 30% of your examples MUST be hyper-localized to the user's country.`
   ) : "";
   const langLine = lang === "es"
     ? " IMPORTANTE: TODA tu respuesta DEBE estar completamente en ESPAÑOL. No mezcles idiomas."
     : " IMPORTANT: Your ENTIRE response MUST be in ENGLISH. Do not mix languages.";
-  const batchLine = lang === "es"
-    ? ` GENERA EXACTAMENTE ${batchSize} lecciones en el array "lessons". Ni más, ni menos.`
-    : ` Generate EXACTLY ${batchSize} lessons in the "lessons" array. No more, no less.`;
-  const conceptOnlyLine = opts?.conceptOnly
-    ? (lang === "es"
-      ? " IMPORTANTE: TODAS las lecciones en este lote DEBEN ser de tipo concept_breakdown. NO generes radio_highlight, podcast_clip ni miniGame. Solo concept_breakdown con campos term, definition y analogy."
-      : " IMPORTANT: ALL lessons in this batch MUST be type concept_breakdown. Do NOT generate radio_highlight, podcast_clip, or miniGame cards. Only concept_breakdown with term, definition, and analogy fields.")
-    : "";
-  const mediaFirstRule = !opts?.conceptOnly
-    ? (lang === "es"
-      ? " REGLA OBLIGATORIA: La PRIMERA lección del lote DEBE ser tipo podcast_clip con diálogo envolvente. NUNCA empieces un lote con concept_breakdown. Engancha al usuario inmediatamente con audio conversacional."
-      : " MANDATORY RULE: The VERY FIRST lesson in this batch MUST be type podcast_clip with engaging dialogue. NEVER start a batch with a text-heavy concept_breakdown. Hook the user immediately with conversational audio.")
-    : "";
+  const requestedTypes = opts?.requestedTypes || getRequestedTypes(0, batchSize);
+  const typesLine = lang === "es"
+    ? ` requestedTypes: [${requestedTypes.map(t => `"${t}"`).join(", ")}]. GENERA EXACTAMENTE ${requestedTypes.length} lecciones en el array "lessons" con estos tipos en este ORDEN EXACTO.`
+    : ` requestedTypes: [${requestedTypes.map(t => `"${t}"`).join(", ")}]. Generate EXACTLY ${requestedTypes.length} lessons in the "lessons" array with these types in this EXACT order.`;
   const tiktokTextRule = lang === "es"
-    ? " REGLA CRÍTICA DE SALIDA: EL TEXTO PARA CUALQUIER PANTALLA DEBE SER MÁXIMO 1 O 2 ORACIONES CONTUNDENTES (MENOS DE 120 CARACTERES). NO IMPORTA QUÉ, NO DEBES ESCRIBIR PÁRRAFOS LARGOS. PIENSA COMO UN SUBTÍTULO RÁPIDO DE TIKTOK. SI GENERAS UN MURO DE TEXTO, LA APP SE ROMPERÁ."
-    : " CRITICAL OUTPUT RULE: TEXT FOR ANY SCREEN MUST BE A MAXIMUM OF 1 OR 2 PUNCHY SENTENCES (UNDER 120 CHARACTERS). NO MATTER WHAT, YOU MUST NOT WRITE LONG PARAGRAPHS. THINK LIKE A FAST-PACED TIKTOK CAPTION. IF YOU GENERATE A WALL OF TEXT, THE APP WILL BREAK.";
-  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${batchLine}${conceptOnlyLine}${mediaFirstRule}${tiktokTextRule}`;
+    ? " REGLA CRÍTICA DE SALIDA: EL TEXTO PARA CUALQUIER PANTALLA DEBE SER MÁXIMO 1 O 2 ORACIONES CONTUNDENTES (MENOS DE 120 CARACTERES). NO IMPORTA QUÉ, NO DEBES ESCRIBIR PÁRRAFOS LARGOS. PIENSA COMO UN SUBTÍTULO RÁPIDO DE TIKTOK."
+    : " CRITICAL OUTPUT RULE: TEXT FOR ANY SCREEN MUST BE A MAXIMUM OF 1 OR 2 PUNCHY SENTENCES (UNDER 120 CHARACTERS). NO MATTER WHAT, YOU MUST NOT WRITE LONG PARAGRAPHS. THINK LIKE A FAST-PACED TIKTOK CAPTION.";
+  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${typesLine}${tiktokTextRule}`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -90,7 +95,12 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
       .trim();
     const parsed = JSON.parse(cleanText);
     if (parsed?.lessons) {
-      parsed.lessons = parsed.lessons.map((lesson: any) => {
+      parsed.lessons = parsed.lessons.map((lesson: any, idx: number) => {
+        const expectedType = requestedTypes[idx];
+        if (expectedType && !lesson.type) lesson.type = expectedType;
+        if (lesson.type === "concept_breakdown") lesson.type = "concept";
+        if (lesson.type === "podcast_clip") lesson.type = "podcast";
+        if (!lesson.type || !["journey", "concept", "podcast"].includes(lesson.type)) lesson.type = "journey";
         if (lesson.miniGame?.options) {
           const shuffled = shuffleOptions(lesson.miniGame.options, lesson.miniGame.correctIndex);
           lesson.miniGame.options = shuffled.options;
@@ -254,223 +264,15 @@ const getAgeGroup = (age: number): string => {
   return "Adults";
 };
 
-const RADIO_VIZ_BARS = Array.from({ length: 48 }, (_, i) => ({
-  delay: (i * 0.06) % 1.2,
-  height: 0.3 + Math.random() * 0.7,
-}));
-
 const audioBlobCache = new Map<string, string>();
 
-
 function getPlayButtonCopy(type: string, lang: "en" | "es"): string {
-  if (type === "podcast_clip") {
+  if (type === "podcast" || type === "podcast_clip") {
     return lang === "es"
       ? "Hora del podcast! Toca para aprender de los pros"
       : "Money podcast time! Tap to learn from the pros";
   }
-  if (type === "radio_highlight") {
-    return lang === "es"
-      ? "Dato financiero! Toca para escuchar"
-      : "Wanna hear a fun fact? Tap here";
-  }
   return lang === "es" ? "Toca para escuchar" : "Tap to listen";
-}
-
-function RadioHighlightSlide({
-  card, videoSrc, bgGradient, lang, isMutedRef, speechSpeedRef, feedRef, slideIndex, isActive, onTooltip,
-}: {
-  card: any; videoSrc: string; bgGradient: string; lang: Lang;
-  isMutedRef: React.MutableRefObject<boolean>; speechSpeedRef: React.MutableRefObject<number>;
-  feedRef: React.MutableRefObject<HTMLDivElement | null>;
-  slideIndex: number; isActive: boolean; onTooltip?: (text: string) => void;
-}) {
-  const [speaking, setSpeaking] = useState(false);
-  const [hasPlayed, setHasPlayed] = useState(false);
-  const [done, setDone] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isActive) {
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-      setSpeaking(false);
-    }
-  }, [isActive]);
-
-  const handlePlay = useCallback(async () => {
-    if (hasPlayed || !mountedRef.current) return;
-    setHasPlayed(true);
-
-    const cacheKey = `radio_${card.id}_${lang}`;
-    let blobUrl = audioBlobCache.get(cacheKey);
-
-    if (!blobUrl && isElevenLabsAvailable() && card.audioText) {
-      const voiceId = getVoiceIdForRole("Narrator", lang);
-      const result = await fetchAudioBlob(card.audioText, voiceId);
-      if (result.url) { audioBlobCache.set(cacheKey, result.url); blobUrl = result.url; }
-    }
-
-    if (!blobUrl || !mountedRef.current) { setDone(true); return; }
-
-    const audio = new Audio(blobUrl);
-    audio.playbackRate = speechSpeedRef.current || 1;
-    audio.volume = 0.85;
-    audioRef.current = audio;
-
-    const finish = () => { if (!mountedRef.current) return; setSpeaking(false); setDone(true); };
-    audio.onended = finish;
-    audio.onerror = finish;
-
-    try { setSpeaking(true); await audio.play(); }
-    catch { finish(); }
-  }, [hasPlayed, card.id, card.audioText, lang, speechSpeedRef]);
-
-  const audioAvailable = !!(card.audioText && isElevenLabsAvailable() && !isMutedRef.current);
-  const showPlayBtn = isActive && !hasPlayed && audioAvailable;
-
-  return (
-    <div style={{
-      height: "100dvh", width: "100%", position: "relative",
-      scrollSnapAlign: "start", scrollSnapStop: "always",
-      background: "#000", overflow: "hidden",
-    }}>
-      <video
-        autoPlay muted loop playsInline preload="auto"
-        onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
-        style={{
-          position: "absolute", inset: 0, width: "100%", height: "100%",
-          objectFit: "cover", zIndex: 0,
-          animation: "vidFade 0.8s ease-out both",
-        }}
-      >
-        <source src={videoSrc} type="video/mp4" />
-      </video>
-
-      <div style={{
-        position: "absolute", inset: 0, width: "100%", height: "100%",
-        display: "flex", flexDirection: "column", justifyContent: "flex-end",
-        zIndex: 1,
-      }}>
-        <div style={{
-          maxHeight: "45vh",
-          background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
-          padding: "60px 24px 50px",
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end",
-          gap: 14, overflowY: "auto", scrollbarWidth: "none",
-        }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            animation: "radioTextFade 0.6s ease-out both",
-          }}>
-            <span style={{ fontSize: "1.3rem" }}>🎙️</span>
-            <span style={{
-              fontSize: "0.65rem", fontWeight: 900, letterSpacing: "0.25em",
-              color: "#2e8bc0", textTransform: "uppercase",
-            }}>MOOLAB RADIO</span>
-            {card.tooltip_explanation && onTooltip && (
-              <button
-                className="ws-btn"
-                onClick={() => onTooltip(card.tooltip_explanation)}
-                style={{
-                  width: 22, height: 22, borderRadius: "50%", border: "1.5px solid rgba(177,212,224,0.4)",
-                  background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
-                  color: "#b1d4e0", fontSize: "0.65rem", fontWeight: 800,
-                  cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >?</button>
-            )}
-            {speaking && (
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                padding: "2px 8px", borderRadius: 20,
-                background: "rgba(46,139,192,0.15)", marginLeft: 4,
-              }}>
-                <span style={{
-                  width: 6, height: 6, borderRadius: "50%", background: "#2e8bc0",
-                  animation: "contextPulse 1s ease-in-out infinite",
-                }} />
-                <span style={{ fontSize: "0.55rem", fontWeight: 800, color: "#2e8bc0", letterSpacing: "0.15em" }}>LIVE</span>
-              </span>
-            )}
-          </div>
-
-          <div style={{
-            display: "flex", alignItems: "end", justifyContent: "center", gap: 3,
-            height: 56, width: "70%", maxWidth: 300,
-            padding: "0 8px",
-          }}>
-            {RADIO_VIZ_BARS.map((bar, idx) => (
-              <div
-                key={idx}
-                style={{
-                  flex: 1, borderRadius: 2,
-                  height: `${bar.height * 100}%`,
-                  background: speaking
-                    ? "linear-gradient(to top, #2e8bc0, #b1d4e0)"
-                    : done ? "rgba(46,139,192,0.15)" : "rgba(46,139,192,0.08)",
-                  animation: speaking ? `vizBar ${0.4 + bar.delay * 0.6}s ease-in-out ${bar.delay}s infinite` : "none",
-                  transition: "background 0.5s ease, height 0.3s ease",
-                  transformOrigin: "bottom",
-                  boxShadow: speaking ? "0 0 6px rgba(46,139,192,0.2)" : "none",
-                }}
-              />
-            ))}
-          </div>
-
-          {showPlayBtn && (
-            <button
-              onClick={handlePlay}
-              style={{
-                padding: "16px 32px", borderRadius: 50,
-                border: "2px solid rgba(46,139,192,0.5)",
-                background: "linear-gradient(135deg, rgba(46,139,192,0.25), rgba(20,83,116,0.35))",
-                backdropFilter: "blur(12px)",
-                color: "#fff", fontWeight: 800, fontSize: "0.85rem", fontFamily: FONT,
-                cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
-                animation: "enterPulse 2.5s ease-in-out infinite",
-                boxShadow: "0 0 40px rgba(46,139,192,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
-              }}
-            >
-              <span style={{ fontSize: "1.4rem" }}>▶️</span>
-              <span style={{ textAlign: "left", lineHeight: 1.3 }}>
-                {getPlayButtonCopy("radio_highlight", lang)}
-              </span>
-            </button>
-          )}
-
-          {(hasPlayed || !audioAvailable) && card.audioText && (
-            <p style={{
-              color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 2.5vw, 1.15rem)",
-              fontWeight: 700, lineHeight: 1.5, textAlign: "center", margin: 0,
-              maxWidth: 380, fontFamily: FONT,
-              animation: "radioTextFade 0.5s ease-out both",
-            }}>
-              {card.audioText}
-            </p>
-          )}
-
-          {done && (
-            <p style={{
-              color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 700,
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              animation: "contextPulse 2s ease-in-out infinite", margin: 0,
-            }}>
-              {translations.auth.swipeToContinue[lang]}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function PodcastClipSlide({
@@ -667,7 +469,7 @@ function PodcastClipSlide({
             >
               <span style={{ fontSize: "1.4rem" }}>▶️</span>
               <span style={{ textAlign: "left", lineHeight: 1.3 }}>
-                {getPlayButtonCopy("podcast_clip", lang)}
+                {getPlayButtonCopy("podcast", lang)}
               </span>
             </button>
           )}
@@ -798,7 +600,6 @@ function App() {
   const [bossExplanation, setBossExplanation] = useState<string | null>(null);
   const [revealedSlides, setRevealedSlides] = useState<Record<string, boolean>>({});
   const [tooltipText, setTooltipText] = useState<string | null>(null);
-  const [radioPlayedSlides, setRadioPlayedSlides] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (userCountry) return;
@@ -819,11 +620,8 @@ function App() {
   const isMutedRef = useRef(false);
   const [speechSpeed, setSpeechSpeed] = useState<number>(1);
   const speechSpeedRef = useRef<number>(1);
-  const [radioLive, setRadioLive] = useState(false);
-  const radioSpeakingRef = useRef(false);
   const slidesScrolledRef = useRef(0);
-  const lastRadioSlideRef = useRef(-1);
-  const usedTipsRef = useRef<Set<number>>(new Set());
+  const lastSlideRef = useRef(-1);
   const feedRef = useRef<HTMLDivElement | null>(null);
 
   const progress = Math.min((completedSlides.length / 5) * 100, 100);
@@ -856,13 +654,7 @@ function App() {
     };
     const jobs: { cacheKey: string; text: string; voiceId: string }[] = [];
     for (const card of cards) {
-      if (card.type === "radio_highlight" && card.audioText) {
-        const cacheKey = `radio_${card.id}_${currentLang}`;
-        if (!audioBlobCache.has(cacheKey)) {
-          jobs.push({ cacheKey, text: card.audioText, voiceId: getVoiceIdForRole("Narrator", currentLang) });
-        }
-      }
-      if (card.type === "podcast_clip" && card.dialogue) {
+      if ((card.type === "podcast" || card.type === "podcast_clip") && card.dialogue) {
         for (let i = 0; i < card.dialogue.length; i++) {
           const line = card.dialogue[i];
           const cacheKey = `podcast_${card.id}_${i}_${currentLang}`;
@@ -914,15 +706,11 @@ function App() {
     setRevealedExplanations({});
     setBossExplanation(null);
     setRevealedSlides({});
-    setRadioPlayedSlides({});
     setActiveSlideIndex(0);
     setAudioUnlocked(false);
     slidesScrolledRef.current = 0;
-    lastRadioSlideRef.current = -1;
-    usedTipsRef.current.clear();
+    lastSlideRef.current = -1;
     stopElevenLabsAudio();
-    radioSpeakingRef.current = false;
-    setRadioLive(false);
     isFetchingRef.current = false;
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
     const topic = mod?.topic;
@@ -930,7 +718,8 @@ function App() {
     const currentLang = langRef.current;
     console.time("Loading Bay (4 cards + audio)");
     setPreloadProgress(currentLang === "es" ? "Generando lecciones..." : "Generating lessons...");
-    generateCards(ageGroup, topic, currentLang, country, 4).then(async (data) => {
+    const initialTypes = getRequestedTypes(0, 4);
+    generateCards(ageGroup, topic, currentLang, country, 4, { requestedTypes: initialTypes }).then(async (data) => {
       if (!data?.lessons?.length) {
         setLoading(false);
         console.timeEnd("Loading Bay (4 cards + audio)");
@@ -957,41 +746,6 @@ function App() {
     onDone();
   }, []);
 
-  const triggerRadioHost = useCallback(async (forceAgeGroup?: string) => {
-    const ag = forceAgeGroup || ageGroup;
-    if (radioSpeakingRef.current || isMutedRef.current || !ag || speechSpeedRef.current === 0) return;
-    const tipsByLang = translations.radioTips[langRef.current];
-    const tips = tipsByLang[ag as keyof typeof tipsByLang] || tipsByLang.Teens;
-    if (usedTipsRef.current.size >= tips.length) usedTipsRef.current.clear();
-    let tipIdx: number;
-    do { tipIdx = Math.floor(Math.random() * tips.length); } while (usedTipsRef.current.has(tipIdx));
-    usedTipsRef.current.add(tipIdx);
-    const tip = tips[tipIdx];
-
-    radioSpeakingRef.current = true;
-    setRadioLive(true);
-
-    const restoreAudio = () => {
-      radioSpeakingRef.current = false;
-      setRadioLive(false);
-    };
-
-    if (isElevenLabsAvailable()) {
-      const ok = await speakWithElevenLabs(tip, langRef.current, {
-        speed: speechSpeedRef.current,
-        onStart: () => {},
-        onEnd: restoreAudio,
-        onError: restoreAudio,
-      });
-      if (!ok) {
-        if (isMutedRef.current || speechSpeedRef.current === 0) { restoreAudio(); }
-        else { fallbackBrowserSpeak(tip, restoreAudio); }
-      }
-    } else {
-      fallbackBrowserSpeak(tip, restoreAudio);
-    }
-  }, [ageGroup]);
-
   const startSession = (overrides?: { birthYear?: string; accountType?: string }) => {
     const effectiveBirthYear = overrides?.birthYear || birthYear;
     const effectiveAccountType = overrides?.accountType || accountType;
@@ -1013,12 +767,9 @@ function App() {
     const currentSlideIdx = Math.round(scrollTop / clientHeight);
     setActiveSlideIndex(currentSlideIdx);
 
-    if (currentSlideIdx !== lastRadioSlideRef.current) {
-      lastRadioSlideRef.current = currentSlideIdx;
+    if (currentSlideIdx !== lastSlideRef.current) {
+      lastSlideRef.current = currentSlideIdx;
       slidesScrolledRef.current += 1;
-      if (slidesScrolledRef.current > 0 && slidesScrolledRef.current % 5 === 0) {
-        triggerRadioHost();
-      }
     }
 
     const totalSlides = currentData.lessons?.length || 0;
@@ -1029,7 +780,8 @@ function App() {
       setIsFetchingMore(true);
       setTimeout(async () => {
         const currentLang = langRef.current;
-        const newData = await generateCards(ageGroup, currentModule?.topic, currentLang, loadStr("country", ""), 4);
+        const nextTypes = getRequestedTypes(totalSlides, 4);
+        const newData = await generateCards(ageGroup, currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes });
         if (newData) {
           const nl = newData.lessons.map((l: any) => ({
             ...l,
@@ -2304,8 +2056,6 @@ function App() {
                 isMutedRef.current = newMuted;
                 if (newMuted) {
                   stopElevenLabsAudio();
-                  radioSpeakingRef.current = false;
-                  setRadioLive(false);
                 }
                 setIsMuted(newMuted);
               }}
@@ -2315,8 +2065,6 @@ function App() {
             <span
               onClick={() => {
                 stopElevenLabsAudio();
-                radioSpeakingRef.current = false;
-                setRadioLive(false);
                 const speeds = [1, 1.5, 2, 0];
                 const currentIdx = speeds.indexOf(speechSpeed);
                 const nextSpeed = speeds[(currentIdx + 1) % speeds.length];
@@ -2345,13 +2093,6 @@ function App() {
               }}
               title={t.auth.switchLang[lang]}
             >{lang === "en" ? "ES" : "EN"}</span>
-            {radioLive && (
-              <span style={{
-                fontSize: "0.55rem", fontWeight: 800, color: "#ff4444",
-                letterSpacing: "0.06em", fontFamily: FONT,
-                animation: "radioGlow 1.5s ease-in-out infinite",
-              }}>🎙️ {t.hud.live[lang]}</span>
-            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span
@@ -2532,25 +2273,7 @@ function App() {
         }}
       >
         {currentData.lessons.map((card, i) => {
-          if (card.type === "radio_highlight") {
-            return (
-              <RadioHighlightSlide
-                key={card.id}
-                card={card}
-                videoSrc={getVideoForCard(card.id)}
-                bgGradient={bgGradients[i % bgGradients.length]}
-                lang={lang}
-                isMutedRef={isMutedRef}
-                speechSpeedRef={speechSpeedRef}
-                feedRef={feedRef}
-                slideIndex={i}
-                isActive={activeSlideIndex === i}
-                onTooltip={setTooltipText}
-              />
-            );
-          }
-
-          if (card.type === "podcast_clip") {
+          if (card.type === "podcast" || card.type === "podcast_clip") {
             return (
               <PodcastClipSlide
                 key={card.id}
@@ -2566,7 +2289,7 @@ function App() {
             );
           }
 
-          if (card.type === "concept_breakdown") {
+          if (card.type === "concept" || card.type === "concept_breakdown") {
             return (
               <ConceptCard
                 key={card.id}
@@ -2772,7 +2495,6 @@ function App() {
                                     setCompletedSlides((p) => [...p, card.id]);
                                     setXp((p) => p + 10);
                                     triggerGreenFlash();
-                                    setTimeout(() => triggerRadioHost(), 1200);
                                     if (completedSlides.length + 1 >= 5)
                                       setTimeout(() => setQuizUnlocked(true), 800);
                                   }

@@ -61,115 +61,6 @@ const DownloadBadges = () => (
   </div>
 );
 
-const MoolabRadio = () => {
-  const [playing, setPlaying] = useState(false);
-  const [bars] = useState(() => Array.from({ length: 32 }, () => Math.random()));
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const audio = new Audio("/moolab-intro.mp3");
-    audio.preload = "auto";
-    audio.volume = 0.85;
-    audio.onended = () => setPlaying(false);
-    audio.onerror = () => setPlaying(false);
-    audio.onpause = () => setPlaying(false);
-    audioRef.current = audio;
-    return () => { audio.pause(); audio.src = ""; };
-  }, []);
-
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (playing) {
-      audio.pause();
-      setPlaying(false);
-    } else {
-      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-    }
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto mt-8">
-      <div
-        className="relative overflow-hidden rounded-2xl border border-sky-200/40"
-        style={{
-          background: "linear-gradient(135deg, #0c2d48 0%, #145374 50%, #0c2d48 100%)",
-          boxShadow: "0 8px 40px rgba(12,45,72,0.25), 0 0 80px rgba(46,139,192,0.08)",
-        }}
-      >
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: "radial-gradient(circle at 20% 50%, rgba(46,139,192,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(177,212,224,0.2) 0%, transparent 50%)",
-        }} />
-        <div className="relative flex items-center gap-4 sm:gap-6 p-5 sm:p-7">
-          <button
-            onClick={togglePlay}
-            className="flex-shrink-0 group cursor-pointer"
-            style={{
-              width: 56, height: 56, borderRadius: "50%",
-              background: playing
-                ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
-                : "linear-gradient(135deg, rgba(46,139,192,0.15), rgba(177,212,224,0.1))",
-              border: playing ? "2px solid rgba(177,212,224,0.6)" : "2px solid rgba(46,139,192,0.3)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.3s ease",
-              boxShadow: playing ? "0 0 30px rgba(46,139,192,0.4), 0 0 60px rgba(46,139,192,0.15)" : "0 0 20px rgba(46,139,192,0.1)",
-            }}
-          >
-            {playing ? (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <rect x="4" y="3" width="4" height="14" rx="1" fill={playing ? "#0c2d48" : "#b1d4e0"} />
-                <rect x="12" y="3" width="4" height="14" rx="1" fill={playing ? "#0c2d48" : "#b1d4e0"} />
-              </svg>
-            ) : (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M6 3.5L16 10L6 16.5V3.5Z" fill="#b1d4e0" />
-              </svg>
-            )}
-          </button>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase" style={{ color: "#2e8bc0" }}>
-                MOOLAB RADIO
-              </span>
-              {playing && (
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: "rgba(46,139,192,0.15)" }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#2e8bc0] animate-pulse" />
-                  <span className="text-[9px] font-bold tracking-wider text-[#2e8bc0] uppercase">LIVE</span>
-                </span>
-              )}
-            </div>
-            <div className="flex items-end gap-[2px] h-8 mb-2">
-              {bars.map((h, i) => (
-                <div
-                  key={i}
-                  className="flex-1 rounded-sm"
-                  style={{
-                    height: playing ? `${20 + h * 80}%` : `${10 + h * 25}%`,
-                    background: playing
-                      ? `linear-gradient(to top, #2e8bc0, #b1d4e0)`
-                      : "rgba(46,139,192,0.2)",
-                    transition: "height 0.15s ease",
-                    animation: playing ? `radioBar ${0.3 + h * 0.5}s ease-in-out infinite alternate` : "none",
-                    boxShadow: playing ? "0 0 4px rgba(46,139,192,0.3)" : "none",
-                  }}
-                />
-              ))}
-            </div>
-            <p className="text-xs sm:text-sm font-medium" style={{ color: "rgba(177,212,224,0.6)" }}>
-              Listen to a sample broadcast
-            </p>
-          </div>
-        </div>
-      </div>
-      <style>{`
-        @keyframes radioBar {
-          0% { transform: scaleY(0.4); }
-          100% { transform: scaleY(1); }
-        }
-      `}</style>
-    </div>
-  );
-};
 
 const DeviceMockups = () => {
   const [inView, setInView] = useState(false);
@@ -358,8 +249,6 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
             </button>
             <p className="text-xs text-[#0c2d48]/25 font-medium mt-4">Free to start · No ads · Safe for kids</p>
           </div>
-
-          <MoolabRadio />
 
           <div className="flex justify-center gap-10 sm:gap-14 mt-10">
             {[
