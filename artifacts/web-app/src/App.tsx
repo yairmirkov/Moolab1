@@ -606,8 +606,19 @@ interface AppProps {
 }
 
 function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
-  const [lang, setLang] = useState<Lang>(() => (loadStr("lang", "en") as Lang));
-  const langRef = useRef<Lang>(loadStr("lang", "en") as Lang);
+  const [lang, setLang] = useState<Lang>(() => {
+    const urlLang = new URLSearchParams(window.location.search).get("lang");
+    if (urlLang === "es" || urlLang === "en") {
+      saveStr("lang", urlLang);
+      return urlLang as Lang;
+    }
+    return loadStr("lang", "en") as Lang;
+  });
+  const langRef = useRef<Lang>((() => {
+    const urlLang = new URLSearchParams(window.location.search).get("lang");
+    if (urlLang === "es" || urlLang === "en") return urlLang as Lang;
+    return loadStr("lang", "en") as Lang;
+  })());
   const MODULES = getModules(lang);
   const t = translations;
 
@@ -3149,9 +3160,46 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             ))}
           </div>
 
-          {/* Module Switcher (Testing) */}
+          {/* Language Selector */}
           <div style={{
             width: "100%", maxWidth: 300, marginTop: 24,
+            padding: "16px 18px", borderRadius: 18,
+            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+          }}>
+            <div style={{
+              color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", fontWeight: 700,
+              letterSpacing: "0.12em", marginBottom: 10, textAlign: "center",
+            }}>{lang === "es" ? "IDIOMA" : "LANGUAGE"}</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {([["en", "🇺🇸", "English"], ["es", "🇲🇽", "Español"]] as const).map(([code, flag, label]) => (
+                <button
+                  className="ws-btn"
+                  key={code}
+                  onClick={() => {
+                    setLang(code);
+                    langRef.current = code;
+                    saveStr("lang", code);
+                    setShowProfile(false);
+                  }}
+                  style={{
+                    flex: 1, padding: "12px 10px", borderRadius: 14, fontFamily: FONT,
+                    background: lang === code ? "rgba(46,139,192,0.12)" : "rgba(255,255,255,0.02)",
+                    border: lang === code ? "1px solid rgba(46,139,192,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                    color: lang === code ? "#2e8bc0" : "rgba(255,255,255,0.5)",
+                    fontWeight: 700, fontSize: "0.75rem", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  }}
+                >
+                  <span style={{ fontSize: "1rem" }}>{flag}</span>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Module Switcher (Testing) */}
+          <div style={{
+            width: "100%", maxWidth: 300, marginTop: 12,
             padding: "16px 18px", borderRadius: 18,
             background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
           }}>
