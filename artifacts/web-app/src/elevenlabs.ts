@@ -97,17 +97,19 @@ export type FetchBlobResult = {
 export const fetchAudioBlob = async (
   text: string,
   voiceId: string,
+  voiceSettings?: { stability?: number; similarity_boost?: number; style?: number; use_speaker_boost?: boolean },
 ): Promise<FetchBlobResult> => {
   if (!ELEVENLABS_API_KEY) { _log("fetchBlob: NO KEY"); return { url: null, httpStatus: 0, error: "no_key" }; }
   try {
     _log(`fetchBlob: voice=${voiceId.substring(0,8)}, "${text.substring(0, 25)}..."`);
+    const settings = voiceSettings ?? { stability: 0.5, similarity_boost: 0.75, style: 0.4, use_speaker_boost: true };
     const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "xi-api-key": ELEVENLABS_API_KEY },
       body: JSON.stringify({
         text,
         model_id: "eleven_multilingual_v2",
-        voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.4, use_speaker_boost: true },
+        voice_settings: settings,
       }),
     });
     if (!res.ok) {
@@ -131,6 +133,16 @@ export const stopElevenLabsAudio = () => {
     currentAudio.src = "";
     currentAudio = null;
   }
+};
+
+export const playBlobAudio = (blobUrl: string, speed?: number): HTMLAudioElement => {
+  stopElevenLabsAudio();
+  const audio = new Audio(blobUrl);
+  audio.playbackRate = speed ?? 1;
+  currentAudio = audio;
+  audio.onended = () => { if (currentAudio === audio) currentAudio = null; };
+  audio.play().catch(() => {});
+  return audio;
 };
 
 export const speakWithElevenLabs = async (

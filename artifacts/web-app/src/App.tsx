@@ -5,7 +5,7 @@ import CommandCenter from "./CommandCenter";
 import ConceptCard from "./ConceptCard";
 import SharkGame from "./SharkGame";
 import translations, { type Lang } from "./translations";
-import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob } from "./elevenlabs";
+import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob, playBlobAudio } from "./elevenlabs";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -130,6 +130,10 @@ const SUBJECT_OPTIONS = {
     { key: "debt_traps", label: "Debt Traps", icon: "⚠️" },
     { key: "crypto_defi", label: "Crypto & DeFi", icon: "🪙" },
     { key: "side_hustles", label: "Side Hustles", icon: "💡" },
+    { key: "credit_scores", label: "Credit Scores", icon: "📊" },
+    { key: "taxes", label: "Taxes & Filing", icon: "🧾" },
+    { key: "entrepreneurship", label: "Entrepreneurship", icon: "🚀" },
+    { key: "insurance", label: "Insurance", icon: "🛡️" },
   ],
   es: [
     { key: "compound_interest", label: "Interés Compuesto", icon: "📈" },
@@ -138,6 +142,10 @@ const SUBJECT_OPTIONS = {
     { key: "debt_traps", label: "Trampas de Deuda", icon: "⚠️" },
     { key: "crypto_defi", label: "Crypto y DeFi", icon: "🪙" },
     { key: "side_hustles", label: "Emprendimiento", icon: "💡" },
+    { key: "credit_scores", label: "Puntaje Crediticio", icon: "📊" },
+    { key: "taxes", label: "Impuestos", icon: "🧾" },
+    { key: "entrepreneurship", label: "Emprendimiento Propio", icon: "🚀" },
+    { key: "insurance", label: "Seguros", icon: "🛡️" },
   ],
 };
 
@@ -309,6 +317,7 @@ const getAgeGroup = (age: number): string => {
 };
 
 const audioBlobCache = new Map<string, string>();
+const bufferCardAudioPlayed = new Set<string>();
 
 function getPlayButtonCopy(type: string, lang: "en" | "es"): string {
   if (type === "podcast" || type === "podcast_clip") {
@@ -769,6 +778,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     slidesScrolledRef.current = 0;
     lastSlideRef.current = -1;
     stopElevenLabsAudio();
+    bufferCardAudioPlayed.clear();
     isFetchingRef.current = false;
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
     const topic = subjectOverride || selectedSubjectRef.current || mod?.topic;
@@ -809,7 +819,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       setPreloadProgress(currentLang === "es" ? "Preparando audio..." : "Preparing audio...");
 
       const introAudioPromise = isElevenLabsAvailable()
-        ? fetchAudioBlob(introText, getVoiceIdForRole("Host", currentLang)).then((r) => {
+        ? fetchAudioBlob(introText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true }).then((r) => {
             if (r.url) audioBlobCache.set(`buffercard_${introId}`, r.url);
           })
         : Promise.resolve();
@@ -901,7 +911,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         desc: summaryText,
       };
       if (isElevenLabsAvailable()) {
-        const r = await fetchAudioBlob(summaryText, getVoiceIdForRole("Host", currentLang));
+        const r = await fetchAudioBlob(summaryText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true });
         if (r.url) audioBlobCache.set(`buffercard_${summaryId}`, r.url);
       }
       setCurrentData((p: any) => p ? { ...p, lessons: [...p.lessons, summaryCard] } : p);
@@ -2516,17 +2526,13 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                 key={card.id}
                 ref={(el) => {
                   if (!el) return;
-                  let audioPlayed = false;
                   const observer = new IntersectionObserver(([entry]) => {
                     if (entry.isIntersecting) {
-                      if (!audioPlayed && !isMutedRef.current && speechSpeedRef.current > 0) {
-                        audioPlayed = true;
+                      if (!bufferCardAudioPlayed.has(card.id) && !isMutedRef.current && speechSpeedRef.current > 0) {
+                        bufferCardAudioPlayed.add(card.id);
                         const cachedUrl = audioBlobCache.get(`buffercard_${card.id}`);
                         if (cachedUrl) {
-                          stopElevenLabsAudio();
-                          const audio = new Audio(cachedUrl);
-                          audio.playbackRate = speechSpeedRef.current;
-                          audio.play().catch(() => {});
+                          playBlobAudio(cachedUrl, speechSpeedRef.current);
                         }
                       }
                       if (!isFetchingRef.current && currentData.lessons.length > 1) {
