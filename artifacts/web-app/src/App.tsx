@@ -622,6 +622,10 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [quizUnlocked, setQuizUnlocked] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizResult, setQuizResult] = useState(null);
+  const [showQuizSummary, setShowQuizSummary] = useState(false);
+  const [quizSummaryText, setQuizSummaryText] = useState<string | null>(null);
+  const [quizSummaryAudioUrl, setQuizSummaryAudioUrl] = useState<string | null>(null);
+  const [quizResultPick, setQuizResultPick] = useState<{ emoji: string; title: string; sub: string } | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [muted, setMuted] = useState(false);
@@ -897,48 +901,33 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   useEffect(() => {
     if (quizResult !== true) return;
     const currentLang = langRef.current;
+
+    const winTitles = translations.winTitles[currentLang];
+    const picked = winTitles[Math.floor(Math.random() * winTitles.length)];
+    setQuizResultPick(picked);
+
+    setShowQuizSummary(true);
+    setQuizSummaryText(null);
+    setQuizSummaryAudioUrl(null);
+
     generateShortText("summary", {
       name: userName || "Explorer",
       ageGroup,
       subject: selectedSubjectRef.current || currentModule?.topic || "finance",
       lang: currentLang,
     }).then(async (summaryText) => {
-      const summaryId = "summary_" + Math.random().toString(36).substr(2, 9);
-      const summaryCard = {
-        id: summaryId,
-        type: "summary" as const,
-        title: currentLang === "es" ? "Resumen" : "Summary",
-        desc: summaryText,
-      };
+      setQuizSummaryText(summaryText);
       if (isElevenLabsAvailable()) {
         const r = await fetchAudioBlob(summaryText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true });
-        if (r.url) audioBlobCache.set(`buffercard_${summaryId}`, r.url);
-      }
-      setCurrentData((p: any) => p ? { ...p, lessons: [...p.lessons, summaryCard] } : p);
-    });
-    const t = setInterval(
-      () =>
-        setCountdown((p) => {
-          if (p <= 1) {
-            clearInterval(t);
-            setQuizResult(null);
-            setQuizUnlocked(false);
-            setQuizStarted(false);
-            if (feedRef.current) {
-              feedRef.current.scrollTo({ top: feedRef.current.scrollHeight, behavior: "smooth" });
-            }
-            setTimeout(() => {
-              setShowSubjectPicker(true);
-              setCurrentData(null);
-              setLoading(false);
-            }, 4000);
-            return 10;
+        if (r.url) {
+          setQuizSummaryAudioUrl(r.url);
+          if (!isMutedRef.current && speechSpeedRef.current > 0) {
+            playBlobAudio(r.url, speechSpeedRef.current);
           }
-          return p - 1;
-        }),
-      1000,
-    );
-    return () => clearInterval(t);
+        }
+      }
+    });
+    return () => {};
   }, [quizResult, userName, ageGroup, currentModule]);
 
   const triggerGreenFlash = () => {
@@ -3457,11 +3446,101 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                 </div>
               )}
             </div>
+          ) : showQuizSummary && quizResult ? (
+            <div style={{
+              animation: "fadeIn 0.8s ease-out both",
+              display: "flex", flexDirection: "column", alignItems: "center",
+              justifyContent: "center", textAlign: "center", padding: 32, maxWidth: 380,
+            }}>
+              <div style={{ fontSize: "3rem", marginBottom: 20 }}>🏆</div>
+              <p style={{
+                fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.25em",
+                color: "rgba(177,212,224,0.5)", textTransform: "uppercase", marginBottom: 16,
+              }}>
+                {lang === "es" ? "SESIÓN COMPLETADA" : "SESSION COMPLETE"}
+              </p>
+              {quizSummaryText ? (
+                <>
+                  <div style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "4px 12px", borderRadius: 14,
+                    background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.2)",
+                    marginBottom: 16,
+                  }}>
+                    <span style={{ fontSize: "0.7rem" }}>🎙️</span>
+                    <span style={{
+                      fontSize: "0.55rem", fontWeight: 700, color: "rgba(177,212,224,0.6)",
+                      letterSpacing: "0.06em",
+                    }}>
+                      {lang === "es" ? "Mensaje de voz" : "Voice message"}
+                    </span>
+                  </div>
+                  <p style={{
+                    color: "#fff", fontSize: "1.15rem", fontWeight: 800,
+                    lineHeight: 1.4, letterSpacing: "-0.02em",
+                    textShadow: "0 2px 12px rgba(0,0,0,0.5)", marginBottom: 32,
+                  }}>
+                    "{quizSummaryText}"
+                  </p>
+                </>
+              ) : (
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 8, marginBottom: 32,
+                }}>
+                  <div style={{
+                    width: 14, height: 14, borderRadius: "50%",
+                    border: "2px solid rgba(46,139,192,0.25)",
+                    borderTopColor: "#2e8bc0",
+                    animation: "ldSpin 0.8s linear infinite",
+                  }} />
+                  <span style={{ color: "rgba(177,212,224,0.4)", fontSize: "0.65rem", fontWeight: 700 }}>
+                    {lang === "es" ? "Preparando resumen..." : "Preparing summary..."}
+                  </span>
+                </div>
+              )}
+              {selectedSubject && (
+                <div style={{
+                  display: "inline-flex", alignItems: "center",
+                  gap: 6, padding: "6px 14px", borderRadius: 20,
+                  background: "rgba(177,212,224,0.1)", border: "1px solid rgba(177,212,224,0.2)",
+                  marginBottom: 28,
+                }}>
+                  <span style={{
+                    fontSize: "0.6rem", fontWeight: 700, color: "rgba(177,212,224,0.6)",
+                    letterSpacing: "0.06em",
+                  }}>
+                    {selectedSubject}
+                  </span>
+                </div>
+              )}
+              {quizSummaryText && (
+                <button
+                  className="ws-btn"
+                  onClick={() => {
+                    stopElevenLabsAudio();
+                    setShowQuizSummary(false);
+                    setCountdown(10);
+                    const ct = setInterval(() => setCountdown((p) => {
+                      if (p <= 1) { clearInterval(ct); return 0; }
+                      return p - 1;
+                    }), 1000);
+                  }}
+                  style={{
+                    padding: "16px 48px", borderRadius: 18, border: "none",
+                    background: "linear-gradient(135deg, #2e8bc0, #145374)",
+                    fontWeight: 900, fontSize: "0.95rem", color: "#fff",
+                    fontFamily: FONT, letterSpacing: "0.04em", cursor: "pointer",
+                    boxShadow: "0 0 30px rgba(46,139,192,0.25), 0 6px 20px rgba(0,0,0,0.4)",
+                  }}
+                >
+                  {lang === "es" ? "Continuar →" : "Continue →"}
+                </button>
+              )}
+            </div>
           ) : (() => {
-            const winTitles = t.winTitles[lang];
             const loseTitles = t.loseTitles[lang];
-            const pick = quizResult
-              ? winTitles[Math.floor(Math.random() * winTitles.length)]
+            const pick = quizResult && quizResultPick
+              ? quizResultPick
               : loseTitles[Math.floor(Math.random() * loseTitles.length)];
             const shareText = quizResult
               ? translations.share.winText[lang](currentModule?.name || "", level, xp, bossWins, pick.emoji)
@@ -3514,7 +3593,18 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
 
               <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", minWidth: 300 }}>
                 {quizResult ? (
-                  <button className="ws-btn" onClick={resetJourney} style={{
+                  <button className="ws-btn" onClick={() => {
+                    setQuizResult(null);
+                    setQuizUnlocked(false);
+                    setQuizStarted(false);
+                    setShowQuizSummary(false);
+                    setQuizSummaryText(null);
+                    setQuizSummaryAudioUrl(null);
+                    setQuizResultPick(null);
+                    setShowSubjectPicker(true);
+                    setCurrentData(null);
+                    setLoading(false);
+                  }} style={{
                     padding: 20, borderRadius: 18, border: "none",
                     background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
                     fontWeight: 900, color: "#000", fontSize: "1rem", fontFamily: FONT,
