@@ -2968,29 +2968,26 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         {/* loading toast is rendered as fixed overlay below */}
       </div>
 
-      {isFetchingMore && (
+      {isFetchingMore && activeSlideIndex >= 3 && (
         <div style={{
-          position: "fixed", bottom: 32, left: "50%", transform: "translateX(-50%)",
+          position: "fixed", bottom: 0, left: 0, right: 0,
           zIndex: 400, pointerEvents: "none",
-          animation: "enterFadeIn 0.3s ease-out both",
+          display: "flex", justifyContent: "center", alignItems: "center",
+          padding: "6px 0",
+          background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)",
         }}>
           <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "8px 20px", borderRadius: 50,
-            background: "rgba(12,45,72,0.85)",
-            backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(46,139,192,0.25)",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            display: "flex", alignItems: "center", gap: 6,
           }}>
             <div style={{
-              width: 12, height: 12, borderRadius: "50%",
-              border: "2px solid rgba(46,139,192,0.25)",
+              width: 8, height: 8, borderRadius: "50%",
+              border: "1.5px solid rgba(46,139,192,0.3)",
               borderTopColor: "#2e8bc0",
               animation: "ldSpin 0.8s linear infinite",
             }} />
             <span style={{
-              color: "rgba(177,212,224,0.8)", fontSize: "0.6rem",
-              fontWeight: 700, letterSpacing: "0.08em", fontFamily: FONT,
+              color: "rgba(177,212,224,0.45)", fontSize: "0.5rem",
+              fontWeight: 600, letterSpacing: "0.06em", fontFamily: FONT,
             }}>
               {lang === "es" ? "Preparando más..." : "Loading more..."}
             </span>
