@@ -793,8 +793,9 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       }
 
       const introText = await introPromise;
+      const introId = "intro_" + Math.random().toString(36).substr(2, 9);
       const introCard = {
-        id: "intro_" + Math.random().toString(36).substr(2, 9),
+        id: introId,
         type: "intro" as const,
         title: currentLang === "es" ? "¡Bienvenido!" : "Welcome!",
         desc: introText,
@@ -806,7 +807,17 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       }))];
       setCurrentData(data);
       setPreloadProgress(currentLang === "es" ? "Preparando audio..." : "Preparing audio...");
-      await preloadAudioForCards(data.lessons.filter((l: any) => l.type !== "intro"), currentLang);
+
+      const introAudioPromise = isElevenLabsAvailable()
+        ? fetchAudioBlob(introText, getVoiceIdForRole("Host", currentLang)).then((r) => {
+            if (r.url) audioBlobCache.set(`buffercard_${introId}`, r.url);
+          })
+        : Promise.resolve();
+
+      await Promise.all([
+        preloadAudioForCards(data.lessons.filter((l: any) => l.type !== "intro" && l.type !== "summary"), currentLang),
+        introAudioPromise,
+      ]);
       console.timeEnd("Loading Bay (4 cards + audio)");
       setPreloadReady(true);
     });
@@ -881,13 +892,18 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       ageGroup,
       subject: selectedSubjectRef.current || currentModule?.topic || "finance",
       lang: currentLang,
-    }).then((summaryText) => {
+    }).then(async (summaryText) => {
+      const summaryId = "summary_" + Math.random().toString(36).substr(2, 9);
       const summaryCard = {
-        id: "summary_" + Math.random().toString(36).substr(2, 9),
+        id: summaryId,
         type: "summary" as const,
         title: currentLang === "es" ? "Resumen" : "Summary",
         desc: summaryText,
       };
+      if (isElevenLabsAvailable()) {
+        const r = await fetchAudioBlob(summaryText, getVoiceIdForRole("Host", currentLang));
+        if (r.url) audioBlobCache.set(`buffercard_${summaryId}`, r.url);
+      }
       setCurrentData((p: any) => p ? { ...p, lessons: [...p.lessons, summaryCard] } : p);
     });
     const t = setInterval(
@@ -2500,14 +2516,26 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                 key={card.id}
                 ref={(el) => {
                   if (!el) return;
+                  let audioPlayed = false;
                   const observer = new IntersectionObserver(([entry]) => {
-                    if (entry.isIntersecting && !isFetchingRef.current && currentData.lessons.length > 1) {
-                      const totalSlides = currentData.lessons.length;
-                      const triggerIdx = totalSlides - 3;
-                      if (i >= triggerIdx || isIntro) {
-                        isFetchingRef.current = true;
-                        setIsFetchingMore(true);
-                        const currentLang = langRef.current;
+                    if (entry.isIntersecting) {
+                      if (!audioPlayed && !isMutedRef.current && speechSpeedRef.current > 0) {
+                        audioPlayed = true;
+                        const cachedUrl = audioBlobCache.get(`buffercard_${card.id}`);
+                        if (cachedUrl) {
+                          stopElevenLabsAudio();
+                          const audio = new Audio(cachedUrl);
+                          audio.playbackRate = speechSpeedRef.current;
+                          audio.play().catch(() => {});
+                        }
+                      }
+                      if (!isFetchingRef.current && currentData.lessons.length > 1) {
+                        const totalSlides = currentData.lessons.length;
+                        const triggerIdx = totalSlides - 3;
+                        if (i >= triggerIdx || isIntro) {
+                          isFetchingRef.current = true;
+                          setIsFetchingMore(true);
+                          const currentLang = langRef.current;
                         const nextTypes = getRequestedTypes(totalSlides, 4);
                         generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes }).then(async (newData) => {
                           if (newData?.lessons) {
@@ -2519,6 +2547,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                           isFetchingRef.current = false;
                         });
                       }
+                    }
                     }
                   }, { threshold: 0.5 });
                   observer.observe(el);
@@ -2564,12 +2593,27 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                       ? (lang === "es" ? "TU SESIÓN DE HOY" : "TODAY'S SESSION")
                       : (lang === "es" ? "SESIÓN COMPLETADA" : "SESSION COMPLETE")}
                   </p>
+
+                  <div style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "4px 12px", borderRadius: 14,
+                    background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.2)",
+                    marginBottom: 16,
+                  }}>
+                    <span style={{ fontSize: "0.7rem" }}>🎙️</span>
+                    <span style={{
+                      fontSize: "0.55rem", fontWeight: 700, color: "rgba(177,212,224,0.6)",
+                      letterSpacing: "0.06em",
+                    }}>
+                      {lang === "es" ? "Mensaje de voz" : "Voice message"}
+                    </span>
+                  </div>
                   <p style={{
                     color: "#fff", fontSize: "1.2rem", fontWeight: 800,
                     lineHeight: 1.4, letterSpacing: "-0.02em",
                     textShadow: "0 2px 12px rgba(0,0,0,0.5)",
                   }}>
-                    {card.desc}
+                    "{card.desc}"
                   </p>
                   {selectedSubject && (
                     <div style={{
