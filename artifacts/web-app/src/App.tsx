@@ -2366,7 +2366,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           }
 
           const answered = slideAnswers[card.id];
-          const isCorrect = answered !== undefined && answered === card.miniGame.correctIndex;
+          const isCorrect = answered !== undefined && answered === card.miniGame?.correctIndex;
 
           return (
             <div
@@ -2488,7 +2488,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                         textShadow: "0 1px 4px rgba(0,0,0,0.5)",
                         textAlign: "left",
                       }}>
-                        {card.miniGame.contextSetup || card.miniGame.question}
+                        {card.miniGame?.contextSetup || card.miniGame?.question}
                       </p>
                       <button
                         className="ws-btn"
@@ -2523,15 +2523,15 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                           textAlign: "left",
                         }}
                       >
-                        {card.miniGame.actionQuestion || card.miniGame.question}
+                        {card.miniGame?.actionQuestion || card.miniGame?.question}
                       </p>
                       <div
                         style={{ display: "flex", flexDirection: "column", gap: 10 }}
                       >
-                        {card.miniGame.options.map((opt, idx) => {
+                        {(card.miniGame?.options || []).map((opt, idx) => {
                           const isAnswered = answered !== undefined;
                           const isSelected = answered === idx;
-                          const isRight = idx === card.miniGame.correctIndex;
+                          const isRight = idx === (card.miniGame?.correctIndex ?? -1);
 
                           let bg = "rgba(255,255,255,0.07)";
                           let border = "1px solid rgba(255,255,255,0.08)";
@@ -2549,7 +2549,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                               onClick={() => {
                                 if (slideAnswers[card.id] === undefined) {
                                   setSlideAnswers((p) => ({ ...p, [card.id]: idx }));
-                                  if (idx === card.miniGame.correctIndex) {
+                                  if (idx === (card.miniGame?.correctIndex ?? -1)) {
                                     setCompletedSlides((p) => [...p, card.id]);
                                     setXp((p) => p + 10);
                                     triggerGreenFlash();
@@ -2630,11 +2630,11 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                                 color: "rgba(255,255,255,0.85)", fontSize: "0.82rem",
                                 lineHeight: 1.55, fontWeight: 500, margin: "0 0 10px 0",
                               }}>
-                                {card.miniGame.explanation || t.quiz.defaultExplanation[lang]}
+                                {card.miniGame?.explanation || t.quiz.defaultExplanation[lang]}
                               </p>
                               <button
                                 className="ws-btn"
-                                onClick={() => speakExplanation(card.miniGame.explanation || t.quiz.defaultExplanation[lang])}
+                                onClick={() => speakExplanation(card.miniGame?.explanation || t.quiz.defaultExplanation[lang])}
                                 style={{
                                   padding: "6px 14px", borderRadius: 10,
                                   background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.2)",
@@ -3050,7 +3050,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                     boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
                   }}
                 >
-                  {currentData.bossQuiz.contextSetup && (
+                  {currentData.bossQuiz?.contextSetup && (
                     <p style={{
                       color: "rgba(255,255,255,0.5)", fontSize: "0.78rem", fontWeight: 600,
                       lineHeight: 1.5, marginBottom: 14, textAlign: "left",
@@ -3069,7 +3069,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                       textAlign: "left",
                     }}
                   >
-                    {currentData.bossQuiz.actionQuestion || currentData.bossQuiz.question}
+                    {currentData.bossQuiz?.actionQuestion || currentData.bossQuiz?.question || "Boss Challenge"}
                   </h3>
                   <div
                     style={{
@@ -3078,14 +3078,14 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                       gap: 10,
                     }}
                   >
-                    {currentData.bossQuiz.options.map((opt, i) => {
+                    {(currentData.bossQuiz?.options || []).map((opt, i) => {
                       const colors = ["#FF6B6B", "#FFD93D", "#b1d4e0"];
                       return (
                         <button
                           className="ws-btn"
                           key={i}
                           onClick={() => {
-                            const win = i === currentData.bossQuiz.correctIndex;
+                            const win = i === (currentData.bossQuiz?.correctIndex ?? -1);
                             if (win) {
                               setQuizResult(true);
                               setXp((p) => p + 50);
@@ -3106,7 +3106,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                               });
                             } else {
                               setStreak(0);
-                              setBossExplanation(currentData.bossQuiz.explanation || t.quiz.defaultBossExplanation[lang]);
+                              setBossExplanation(currentData.bossQuiz?.explanation || t.quiz.defaultBossExplanation[lang]);
                             }
                           }}
                           style={{
