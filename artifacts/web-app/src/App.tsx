@@ -122,6 +122,49 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
   }
 };
 
+const SUBJECT_OPTIONS = {
+  en: [
+    { key: "compound_interest", label: "Compound Interest", icon: "📈" },
+    { key: "market_basics", label: "Market Basics", icon: "🏛️" },
+    { key: "real_estate", label: "Real Estate", icon: "🏠" },
+    { key: "debt_traps", label: "Debt Traps", icon: "⚠️" },
+    { key: "crypto_defi", label: "Crypto & DeFi", icon: "🪙" },
+    { key: "side_hustles", label: "Side Hustles", icon: "💡" },
+  ],
+  es: [
+    { key: "compound_interest", label: "Interés Compuesto", icon: "📈" },
+    { key: "market_basics", label: "Fundamentos del Mercado", icon: "🏛️" },
+    { key: "real_estate", label: "Bienes Raíces", icon: "🏠" },
+    { key: "debt_traps", label: "Trampas de Deuda", icon: "⚠️" },
+    { key: "crypto_defi", label: "Crypto y DeFi", icon: "🪙" },
+    { key: "side_hustles", label: "Emprendimiento", icon: "💡" },
+  ],
+};
+
+const generateShortText = async (type: "intro" | "summary", opts: { name: string; ageGroup: string; subject: string; lang: Lang }): Promise<string> => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) return type === "intro"
+    ? (opts.lang === "es" ? `¡Hola ${opts.name}! Hoy conquistamos ${opts.subject}. ¡Vamos!` : `Hey ${opts.name}! Today we're mastering ${opts.subject}. Let's go!`)
+    : (opts.lang === "es" ? `¡Increíble, ${opts.name}! Dominaste ${opts.subject}. ¡Sigue así!` : `Amazing work, ${opts.name}! You crushed ${opts.subject}. Keep going!`);
+  const instruction = type === "intro"
+    ? (opts.lang === "es"
+      ? `Genera un saludo ÚNICO, carismático y personalizado para ${opts.name} (${opts.ageGroup}). El tema de hoy es: ${opts.subject}. MÁXIMO 25 palabras. Sé creativo, varía tu energía y vocabulario cada vez. NUNCA uses la misma frase dos veces. Solo responde con el texto, sin comillas ni formato.`
+      : `Generate a UNIQUE, charismatic personalized greeting for ${opts.name} (${opts.ageGroup}). Today's subject: ${opts.subject}. MAX 25 words. Be creative, vary your energy and vocabulary every time. NEVER use the same phrasing twice. Respond with ONLY the text, no quotes or formatting.`)
+    : (opts.lang === "es"
+      ? `Genera una felicitación ÚNICA y alentadora para ${opts.name} que acaba de completar una lección sobre ${opts.subject}. MÁXIMO 25 palabras. Varía el tono cada vez. Solo texto, sin comillas.`
+      : `Generate a UNIQUE encouraging congratulations for ${opts.name} who just completed a lesson on ${opts.subject}. MAX 25 words. Vary the tone every time. Respond with ONLY the text, no quotes.`);
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text: instruction }] }] }) },
+    );
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || (type === "intro" ? `Hey ${opts.name}! Let's dive in!` : `Great job, ${opts.name}!`);
+  } catch {
+    return type === "intro" ? `Hey ${opts.name}! Let's dive in!` : `Great job, ${opts.name}!`;
+  }
+};
+
 const sharkVideos = [
   "https://videos.pexels.com/video-files/5968033/5968033-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/7997336/7997336-hd_1920_1080_30fps.mp4",
@@ -598,6 +641,9 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [showParentDash, setShowParentDash] = useState(false);
   const [showLanding, setShowLanding] = useState(!demoMode);
   const [fadeIn, setFadeIn] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const selectedSubjectRef = useRef<string | null>(null);
+  const [showSubjectPicker, setShowSubjectPicker] = useState(false);
 
   const [xp, setXp] = useState(() => load("xp", 0));
   const [streak, setStreak] = useState(() => load("streak", 0));
@@ -706,7 +752,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     }
   }, []);
 
-  const resetJourney = useCallback(() => {
+  const resetJourney = useCallback((subjectOverride?: string) => {
     setLoading(true);
     setPreloadReady(false);
     setPreloadProgress("");
@@ -725,33 +771,52 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     stopElevenLabsAudio();
     isFetchingRef.current = false;
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
-    const topic = mod?.topic;
+    const topic = subjectOverride || selectedSubjectRef.current || mod?.topic;
     const country = loadStr("country", "");
     const currentLang = langRef.current;
     console.time("Loading Bay (4 cards + audio)");
     setPreloadProgress(currentLang === "es" ? "Generando lecciones..." : "Generating lessons...");
     const initialTypes = getRequestedTypes(0, 4);
+
+    const introPromise = generateShortText("intro", {
+      name: userName || "Explorer",
+      ageGroup,
+      subject: subjectOverride || selectedSubjectRef.current || mod?.topic || "finance",
+      lang: currentLang,
+    });
+
     generateCards(ageGroup, topic, currentLang, country, 4, { requestedTypes: initialTypes }).then(async (data) => {
       if (!data?.lessons?.length) {
         setLoading(false);
         console.timeEnd("Loading Bay (4 cards + audio)");
         return;
       }
-      data.lessons = data.lessons.map((l: any) => ({
+
+      const introText = await introPromise;
+      const introCard = {
+        id: "intro_" + Math.random().toString(36).substr(2, 9),
+        type: "intro" as const,
+        title: currentLang === "es" ? "¡Bienvenido!" : "Welcome!",
+        desc: introText,
+      };
+
+      data.lessons = [introCard, ...data.lessons.map((l: any) => ({
         ...l,
         id: Math.random().toString(36).substr(2, 9),
-      }));
+      }))];
       setCurrentData(data);
       setPreloadProgress(currentLang === "es" ? "Preparando audio..." : "Preparing audio...");
-      await preloadAudioForCards(data.lessons, currentLang);
+      await preloadAudioForCards(data.lessons.filter((l: any) => l.type !== "intro"), currentLang);
       console.timeEnd("Loading Bay (4 cards + audio)");
       setPreloadReady(true);
     });
-  }, [ageGroup, currentModuleIdx, preloadAudioForCards]);
+  }, [ageGroup, currentModuleIdx, preloadAudioForCards, userName]);
 
   useEffect(() => {
-    if (appStarted && ageGroup && accountType !== "parent") resetJourney();
-  }, [appStarted, ageGroup, accountType, resetJourney]);
+    if (appStarted && ageGroup && accountType !== "parent") {
+      setShowSubjectPicker(true);
+    }
+  }, [appStarted, ageGroup, accountType]);
 
   const fallbackBrowserSpeak = useCallback((_text: string, onDone: () => void) => {
     console.error("[Moolab] ElevenLabs TTS unavailable, skipping speech");
@@ -793,7 +858,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       setTimeout(async () => {
         const currentLang = langRef.current;
         const nextTypes = getRequestedTypes(totalSlides, 4);
-        const newData = await generateCards(ageGroup, currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes });
+        const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes });
         if (newData) {
           const nl = newData.lessons.map((l: any) => ({
             ...l,
@@ -810,12 +875,37 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
 
   useEffect(() => {
     if (quizResult !== true) return;
+    const currentLang = langRef.current;
+    generateShortText("summary", {
+      name: userName || "Explorer",
+      ageGroup,
+      subject: selectedSubjectRef.current || currentModule?.topic || "finance",
+      lang: currentLang,
+    }).then((summaryText) => {
+      const summaryCard = {
+        id: "summary_" + Math.random().toString(36).substr(2, 9),
+        type: "summary" as const,
+        title: currentLang === "es" ? "Resumen" : "Summary",
+        desc: summaryText,
+      };
+      setCurrentData((p: any) => p ? { ...p, lessons: [...p.lessons, summaryCard] } : p);
+    });
     const t = setInterval(
       () =>
         setCountdown((p) => {
           if (p <= 1) {
             clearInterval(t);
-            resetJourney();
+            setQuizResult(null);
+            setQuizUnlocked(false);
+            setQuizStarted(false);
+            if (feedRef.current) {
+              feedRef.current.scrollTo({ top: feedRef.current.scrollHeight, behavior: "smooth" });
+            }
+            setTimeout(() => {
+              setShowSubjectPicker(true);
+              setCurrentData(null);
+              setLoading(false);
+            }, 4000);
             return 10;
           }
           return p - 1;
@@ -823,7 +913,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       1000,
     );
     return () => clearInterval(t);
-  }, [quizResult, resetJourney]);
+  }, [quizResult, userName, ageGroup, currentModule]);
 
   const triggerGreenFlash = () => {
     setFlashBlue(true);
@@ -1900,6 +1990,71 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     return parentDashContent;
   }
 
+  if (showSubjectPicker && !loading && !currentData)
+    return (
+      <div style={{
+        height: "100dvh", display: "flex", flexDirection: "column",
+        justifyContent: "center", alignItems: "center",
+        background: "linear-gradient(160deg, #eef6fb 0%, #e0f0f8 30%, #d0e8f2 60%, #f2f8fb 100%)",
+        fontFamily: FONT, padding: 24,
+      }}>
+        <style>{`
+          @keyframes subjectFadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes subjectPulse { 0%,100% { box-shadow: 0 4px 20px rgba(46,139,192,0.08); } 50% { box-shadow: 0 8px 30px rgba(46,139,192,0.18); } }
+        `}</style>
+        <div style={{ animation: "subjectFadeIn 0.6s ease-out both", textAlign: "center", maxWidth: 400, width: "100%" }}>
+          <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>🧪</div>
+          <h2 style={{
+            fontSize: "1.35rem", fontWeight: 900, color: "#0c2d48",
+            letterSpacing: "-0.03em", marginBottom: 6,
+          }}>
+            {lang === "es" ? "¿Qué dominamos hoy?" : "What are we mastering today?"}
+          </h2>
+          <p style={{
+            fontSize: "0.75rem", fontWeight: 600, color: "rgba(12,45,72,0.4)",
+            marginBottom: 28, letterSpacing: "0.01em",
+          }}>
+            {lang === "es" ? "Elige un tema para tu sesión" : "Pick a subject for your session"}
+          </p>
+          <div style={{
+            display: "grid", gridTemplateColumns: "1fr 1fr",
+            gap: 12, width: "100%",
+          }}>
+            {SUBJECT_OPTIONS[lang].map((subj, i) => (
+              <button
+                key={subj.key}
+                className="ws-btn"
+                onClick={() => {
+                  const label = subj.label;
+                  setSelectedSubject(label);
+                  selectedSubjectRef.current = label;
+                  setShowSubjectPicker(false);
+                  resetJourney(label);
+                }}
+                style={{
+                  padding: "18px 14px", borderRadius: 20,
+                  background: "#fff", border: "1.5px solid rgba(46,139,192,0.12)",
+                  cursor: "pointer", fontFamily: FONT,
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                  animation: `subjectFadeIn 0.5s ease-out ${0.1 + i * 0.07}s both, subjectPulse 3s ease-in-out ${i * 0.4}s infinite`,
+                  transition: "transform 0.15s, border-color 0.2s",
+                }}
+                onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.96)"; }}
+                onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+                onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+              >
+                <span style={{ fontSize: "1.6rem" }}>{subj.icon}</span>
+                <span style={{
+                  fontSize: "0.78rem", fontWeight: 800, color: "#0c2d48",
+                  letterSpacing: "-0.01em", lineHeight: 1.2,
+                }}>{subj.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
   if (loading || !currentData)
     return (
       <div
@@ -2338,6 +2493,109 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         }}
       >
         {currentData.lessons.map((card, i) => {
+          if (card.type === "intro" || card.type === "summary") {
+            const isIntro = card.type === "intro";
+            return (
+              <div
+                key={card.id}
+                ref={(el) => {
+                  if (!el) return;
+                  const observer = new IntersectionObserver(([entry]) => {
+                    if (entry.isIntersecting && !isFetchingRef.current && currentData.lessons.length > 1) {
+                      const totalSlides = currentData.lessons.length;
+                      const triggerIdx = totalSlides - 3;
+                      if (i >= triggerIdx || isIntro) {
+                        isFetchingRef.current = true;
+                        setIsFetchingMore(true);
+                        const currentLang = langRef.current;
+                        const nextTypes = getRequestedTypes(totalSlides, 4);
+                        generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes }).then(async (newData) => {
+                          if (newData?.lessons) {
+                            const nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
+                            await preloadAudioForCards(nl, currentLang);
+                            setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
+                          }
+                          setIsFetchingMore(false);
+                          isFetchingRef.current = false;
+                        });
+                      }
+                    }
+                  }, { threshold: 0.5 });
+                  observer.observe(el);
+                  setTimeout(() => observer.disconnect(), 10000);
+                }}
+                style={{
+                  height: "100dvh", width: "100%", position: "relative",
+                  scrollSnapAlign: "start", scrollSnapStop: "always",
+                  background: isIntro
+                    ? "linear-gradient(160deg, #0c2d48 0%, #145374 40%, #2e8bc0 100%)"
+                    : "linear-gradient(160deg, #145374 0%, #0c2d48 50%, #020a14 100%)",
+                  display: "flex", flexDirection: "column",
+                  justifyContent: "center", alignItems: "center",
+                  padding: 32, overflow: "hidden",
+                }}
+              >
+                <div style={{
+                  position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none",
+                }}>
+                  {[...Array(4)].map((_, j) => (
+                    <div key={j} style={{
+                      position: "absolute",
+                      width: 120 + j * 40, height: 120 + j * 40,
+                      borderRadius: "50%",
+                      background: `radial-gradient(circle, rgba(177,212,224,${0.04 + j * 0.02}) 0%, transparent 70%)`,
+                      left: `${10 + j * 20}%`, top: `${20 + j * 15}%`,
+                      filter: "blur(40px)",
+                    }} />
+                  ))}
+                </div>
+                <div style={{
+                  position: "relative", zIndex: 1, textAlign: "center",
+                  animation: "enterFadeIn 0.8s ease-out both", maxWidth: 340,
+                }}>
+                  <div style={{ fontSize: "3rem", marginBottom: 20 }}>
+                    {isIntro ? "🧪" : "🏆"}
+                  </div>
+                  <p style={{
+                    fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.25em",
+                    color: "rgba(177,212,224,0.5)", textTransform: "uppercase", marginBottom: 16,
+                  }}>
+                    {isIntro
+                      ? (lang === "es" ? "TU SESIÓN DE HOY" : "TODAY'S SESSION")
+                      : (lang === "es" ? "SESIÓN COMPLETADA" : "SESSION COMPLETE")}
+                  </p>
+                  <p style={{
+                    color: "#fff", fontSize: "1.2rem", fontWeight: 800,
+                    lineHeight: 1.4, letterSpacing: "-0.02em",
+                    textShadow: "0 2px 12px rgba(0,0,0,0.5)",
+                  }}>
+                    {card.desc}
+                  </p>
+                  {selectedSubject && (
+                    <div style={{
+                      marginTop: 24, display: "inline-flex", alignItems: "center",
+                      gap: 6, padding: "6px 14px", borderRadius: 20,
+                      background: "rgba(177,212,224,0.1)", border: "1px solid rgba(177,212,224,0.2)",
+                    }}>
+                      <span style={{
+                        fontSize: "0.6rem", fontWeight: 700, color: "rgba(177,212,224,0.6)",
+                        letterSpacing: "0.06em",
+                      }}>
+                        {selectedSubject}
+                      </span>
+                    </div>
+                  )}
+                  <p style={{
+                    marginTop: 28, fontSize: "0.6rem", fontWeight: 600,
+                    color: "rgba(177,212,224,0.3)", letterSpacing: "0.04em",
+                  }}>
+                    {lang === "es" ? "Desliza para continuar ↓" : "Swipe to continue ↓"}
+                  </p>
+                </div>
+              </div>
+            );
+          }
+
           if (card.type === "podcast" || card.type === "podcast_clip") {
             return (
               <PodcastClipSlide
@@ -2657,26 +2915,38 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             </div>
           );
         })}
-        {isFetchingMore && (
+        {/* loading toast is rendered as fixed overlay below */}
+      </div>
+
+      {isFetchingMore && (
+        <div style={{
+          position: "fixed", bottom: 32, left: "50%", transform: "translateX(-50%)",
+          zIndex: 400, pointerEvents: "none",
+          animation: "enterFadeIn 0.3s ease-out both",
+        }}>
           <div style={{
-            display: "flex", justifyContent: "center", alignItems: "center",
-            padding: "16px 0", gap: 8,
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "8px 20px", borderRadius: 50,
+            background: "rgba(12,45,72,0.85)",
+            backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(46,139,192,0.25)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
           }}>
             <div style={{
-              width: 14, height: 14, borderRadius: "50%",
-              border: "2px solid rgba(46,139,192,0.2)",
+              width: 12, height: 12, borderRadius: "50%",
+              border: "2px solid rgba(46,139,192,0.25)",
               borderTopColor: "#2e8bc0",
-              animation: "spin 0.8s linear infinite",
+              animation: "ldSpin 0.8s linear infinite",
             }} />
             <span style={{
-              color: "rgba(255,255,255,0.3)", fontSize: "0.55rem",
-              fontWeight: 700, letterSpacing: "0.1em", fontFamily: FONT,
+              color: "rgba(177,212,224,0.8)", fontSize: "0.6rem",
+              fontWeight: 700, letterSpacing: "0.08em", fontFamily: FONT,
             }}>
-              {lang === "en" ? "LOADING MORE..." : "CARGANDO MÁS..."}
+              {lang === "es" ? "Preparando más..." : "Loading more..."}
             </span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {tooltipText && (
         <div
