@@ -1,23 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import App from "../App";
 import { useLang, t, translations } from "../useLang";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
+
+function syncLangToStorage() {
+  const urlLang = new URLSearchParams(window.location.search).get("lang");
+  if (urlLang === "es" || urlLang === "en") {
+    localStorage.setItem("ws_lang", urlLang);
+  }
+}
+syncLangToStorage();
 
 export default function Demo() {
   const lang = useLang();
   const tx = translations.pages.demo;
 
   const [ageGroup, setAgeGroup] = useState(() => {
-    return localStorage.getItem("ws_demo_age") || "Teens";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("ws_demo_age", ageGroup);
+    const saved = localStorage.getItem("ws_demo_age") || "Teens";
+    localStorage.setItem("ws_demo_age", saved);
     localStorage.setItem("ws_name", "Demo Tester");
     localStorage.setItem("ws_acctType", "learner");
-    localStorage.setItem("ws_lang", lang);
-  }, [ageGroup, lang]);
+    return saved;
+  });
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>

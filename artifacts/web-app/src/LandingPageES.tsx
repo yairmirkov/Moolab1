@@ -198,6 +198,7 @@ export default function LandingPageES({ onParentLogin, onTestApp }: LandingPageE
           <div className="flex items-center gap-2.5">
             <a
               href="?"
+              onClick={() => { localStorage.setItem("ws_lang", "en"); }}
               className="px-3 py-2 rounded-full text-[#0c2d48]/40 font-bold text-xs tracking-wide hover:text-[#145374] hover:bg-sky-50 transition-all duration-200"
             >
               EN

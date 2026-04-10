@@ -607,18 +607,15 @@ interface AppProps {
 
 function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [lang, setLang] = useState<Lang>(() => {
-    const urlLang = new URLSearchParams(window.location.search).get("lang");
-    if (urlLang === "es" || urlLang === "en") {
-      saveStr("lang", urlLang);
-      return urlLang as Lang;
-    }
     return loadStr("lang", "en") as Lang;
   });
-  const langRef = useRef<Lang>((() => {
-    const urlLang = new URLSearchParams(window.location.search).get("lang");
-    if (urlLang === "es" || urlLang === "en") return urlLang as Lang;
-    return loadStr("lang", "en") as Lang;
-  })());
+  const langRef = useRef<Lang>(loadStr("lang", "en") as Lang);
+
+  useEffect(() => {
+    langRef.current = lang;
+    saveStr("lang", lang);
+  }, [lang]);
+
   const MODULES = getModules(lang);
   const t = translations;
 
@@ -977,11 +974,10 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       setFadeIn(true);
       setTimeout(() => setFadeIn(false), 700);
     };
-    const landingLang = new URLSearchParams(window.location.search).get("lang");
-    if (landingLang === "es") {
-      return <LandingPageES onParentLogin={() => { setLang("es"); langRef.current = "es"; saveStr("lang", "es"); loginHandler(); }} onTestApp={() => { setLang("es"); langRef.current = "es"; saveStr("lang", "es"); signUpHandler(); }} />;
+    if (lang === "es") {
+      return <LandingPageES onParentLogin={() => { loginHandler(); }} onTestApp={() => { signUpHandler(); }} />;
     }
-    return <LandingPage onParentLogin={() => { setLang("en"); langRef.current = "en"; saveStr("lang", "en"); loginHandler(); }} onTestApp={() => { setLang("en"); langRef.current = "en"; saveStr("lang", "en"); signUpHandler(); }} />;
+    return <LandingPage onParentLogin={() => { loginHandler(); }} onTestApp={() => { signUpHandler(); }} />;
   }
 
   if (!appStarted) {
@@ -3176,10 +3172,15 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                   className="ws-btn"
                   key={code}
                   onClick={() => {
-                    setLang(code);
-                    langRef.current = code;
-                    saveStr("lang", code);
-                    setShowProfile(false);
+                    if (code !== lang) {
+                      setLang(code);
+                      langRef.current = code;
+                      saveStr("lang", code);
+                      setShowProfile(false);
+                      resetJourney();
+                    } else {
+                      setShowProfile(false);
+                    }
                   }}
                   style={{
                     flex: 1, padding: "12px 10px", borderRadius: 14, fontFamily: FONT,
