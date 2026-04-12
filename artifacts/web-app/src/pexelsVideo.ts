@@ -4,10 +4,10 @@ const FALLBACK_VIDEOS = [
   "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/3195394/3195394-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/2795167/2795167-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4",
+  "https://videos.pexels.com/video-files/2516159/2516159-hd_1920_1080_24fps.mp4",
+  "https://videos.pexels.com/video-files/3214435/3214435-hd_1920_1080_25fps.mp4",
 ];
-
-const cache = new Map<string, string>();
-const pending = new Map<string, Promise<string>>();
 
 function getFallback(keyword: string): string {
   let hash = 0;
@@ -15,37 +15,46 @@ function getFallback(keyword: string): string {
   return FALLBACK_VIDEOS[Math.abs(hash) % FALLBACK_VIDEOS.length];
 }
 
-export async function fetchPexelsVideo(keyword: string): Promise<string> {
-  if (!keyword) return FALLBACK_VIDEOS[0];
-
-  const key = keyword.toLowerCase().trim();
-
-  if (cache.has(key)) return cache.get(key)!;
-
-  if (pending.has(key)) return pending.get(key)!;
-
-  const promise = (async () => {
-    try {
-      const resp = await fetch(`${API_BASE}/pexels-video?q=${encodeURIComponent(key)}`);
-      if (!resp.ok) throw new Error("API error");
-      const data = await resp.json();
-      const url = data.url || getFallback(key);
-      cache.set(key, url);
-      return url;
-    } catch {
-      const fb = getFallback(key);
-      cache.set(key, fb);
-      return fb;
-    } finally {
-      pending.delete(key);
-    }
-  })();
-
-  pending.set(key, promise);
-  return promise;
+export function getFallbackVideo(id: string | number): string {
+  return getFallback(String(id));
 }
 
-export function getCachedPexelsVideo(keyword: string): string | null {
-  if (!keyword) return null;
-  return cache.get(keyword.toLowerCase().trim()) || null;
+export async function resolveVideoUrls(lessons: any[]): Promise<any[]> {
+  const keywords = lessons
+    .filter((l) => l?.video_search_keyword)
+    .map((l) => l.video_search_keyword as string);
+
+  if (keywords.length === 0) {
+    return lessons.map((l) => ({
+      ...l,
+      video_url: l.video_url || getFallback(String(l.id || "default")),
+    }));
+  }
+
+  const unique = [...new Set(keywords.map((k) => k.toLowerCase().trim()))];
+
+  let videoMap: Record<string, string> = {};
+
+  try {
+    const resp = await fetch(`${API_BASE}/pexels-videos-batch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keywords: unique }),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      videoMap = data.videos || {};
+    }
+  } catch (err) {
+    console.error("[Pexels] Batch fetch failed:", err);
+  }
+
+  return lessons.map((l) => {
+    if (l.video_url) return l;
+    const kw = l.video_search_keyword?.toLowerCase().trim();
+    return {
+      ...l,
+      video_url: (kw && videoMap[kw]) || getFallback(String(l.id || l.video_search_keyword || "default")),
+    };
+  });
 }

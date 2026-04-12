@@ -1,24 +1,7 @@
-import { useState, useEffect } from "react";
 import type { Lang } from "./translations";
-import { fetchPexelsVideo, getCachedPexelsVideo } from "./pexelsVideo";
+import { getFallbackVideo } from "./pexelsVideo";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
-
-const FALLBACK_VIDEOS = [
-  "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
-  "https://videos.pexels.com/video-files/3195394/3195394-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/2795167/2795167-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/2516159/2516159-hd_1920_1080_24fps.mp4",
-  "https://videos.pexels.com/video-files/3214435/3214435-hd_1920_1080_25fps.mp4",
-];
-
-function getFallbackVideo(id: string | number): string {
-  let hash = 0;
-  const s = String(id);
-  for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0;
-  return FALLBACK_VIDEOS[Math.abs(hash) % FALLBACK_VIDEOS.length];
-}
 
 interface ConceptCardProps {
   card: {
@@ -28,6 +11,7 @@ interface ConceptCardProps {
     analogy: string;
     tooltip_explanation?: string;
     video_search_keyword?: string;
+    video_url?: string;
   };
   lang: Lang;
   onTooltip?: (text: string) => void;
@@ -38,18 +22,7 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
   const definition = card.definition || (lang === "es" ? "Definición no disponible." : "Definition not available.");
   const analogy = card.analogy || (lang === "es" ? "Piénsalo de esta manera..." : "Think of it this way...");
 
-  const keyword = card.video_search_keyword;
-  const cachedUrl = keyword ? getCachedPexelsVideo(keyword) : null;
-  const [videoUrl, setVideoUrl] = useState<string>(cachedUrl || getFallbackVideo(card.id));
-
-  useEffect(() => {
-    if (!keyword) return;
-    let cancelled = false;
-    fetchPexelsVideo(keyword).then((url) => {
-      if (!cancelled) setVideoUrl(url);
-    });
-    return () => { cancelled = true; };
-  }, [keyword]);
+  const videoUrl = card.video_url || getFallbackVideo(card.id);
 
   return (
     <div
@@ -81,102 +54,92 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
       </video>
 
       <div style={{
-        position: "absolute", inset: 0, width: "100%", height: "100%",
-        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+        position: "absolute", inset: 0,
+        background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)",
         zIndex: 1,
+      }} />
+
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        padding: "0 24px 60px", zIndex: 2,
+        display: "flex", flexDirection: "column", gap: 14,
       }}>
         <div style={{
-          maxHeight: "45vh",
-          background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
-          padding: "50px 28px 80px",
-          display: "flex", flexDirection: "column", alignItems: "center",
-          gap: 12, overflowY: "auto", scrollbarWidth: "none",
+          display: "inline-flex", alignItems: "center", gap: 6,
+          padding: "3px 10px", borderRadius: 8,
+          background: "rgba(46,139,192,0.15)", border: "1px solid rgba(46,139,192,0.25)",
+          alignSelf: "flex-start",
+          animation: "conceptFadeUp 0.6s ease-out both",
+        }}>
+          <span style={{ fontSize: "0.5rem" }}>📘</span>
+          <span style={{
+            fontSize: "0.5rem", fontWeight: 700, color: "#2e8bc0",
+            letterSpacing: "0.1em", textTransform: "uppercase",
+          }}>
+            {lang === "es" ? "Concepto" : "Concept"}
+          </span>
+        </div>
+
+        <h2 style={{
+          color: "#fff", fontSize: "1.5rem", fontWeight: 900,
+          lineHeight: 1.2, letterSpacing: "-0.02em", margin: 0,
+          textShadow: "0 2px 10px rgba(0,0,0,0.6)",
+          animation: "conceptFadeUp 0.6s ease-out 0.1s both",
+        }}>
+          {term}
+        </h2>
+
+        <p style={{
+          color: "rgba(255,255,255,0.85)", fontSize: "0.9rem",
+          fontWeight: 500, lineHeight: 1.5, margin: 0,
+          textShadow: "0 1px 6px rgba(0,0,0,0.5)",
+          animation: "conceptFadeUp 0.6s ease-out 0.2s both",
+        }}>
+          {definition}
+        </p>
+
+        <div style={{
+          padding: "12px 14px", borderRadius: 14,
+          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          animation: "conceptFadeUp 0.6s ease-out 0.3s both",
         }}>
           <div style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "5px 12px", borderRadius: 6,
-            background: "rgba(46,139,192,0.25)",
-            border: "1px solid rgba(46,139,192,0.4)",
-            animation: "conceptFadeUp 0.5s ease-out both",
+            display: "flex", alignItems: "center", gap: 6, marginBottom: 6,
           }}>
+            <span style={{ fontSize: "0.7rem" }}>💡</span>
             <span style={{
-              fontSize: "0.5rem", fontWeight: 800, letterSpacing: "0.2em",
-              color: "#b1d4e0", textTransform: "uppercase",
+              fontSize: "0.5rem", fontWeight: 700, color: "rgba(255,255,255,0.4)",
+              letterSpacing: "0.1em", textTransform: "uppercase",
             }}>
-              {lang === "es" ? "CONCEPTO LAB" : "LAB CONCEPT"}
+              {lang === "es" ? "Piénsalo así" : "Think of it like"}
             </span>
           </div>
-
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-            <h1 style={{
-              fontSize: "clamp(2rem, 8vw, 3rem)",
-              fontWeight: 900,
-              color: "#fff",
-              letterSpacing: "-0.04em",
-              lineHeight: 1.05,
-              textAlign: "center",
-              margin: 0,
-              maxWidth: 380,
-              textShadow: "0 2px 12px rgba(0,0,0,0.6)",
-              animation: "conceptFadeUp 0.6s ease-out 0.1s both",
-            }}>
-              {term}
-            </h1>
-            {card.tooltip_explanation && onTooltip && (
-              <button
-                onClick={() => onTooltip(card.tooltip_explanation!)}
-                style={{
-                  width: 26, height: 26, borderRadius: "50%", border: "1.5px solid rgba(177,212,224,0.4)",
-                  background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
-                  color: "#b1d4e0", fontSize: "0.75rem", fontWeight: 800,
-                  cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0, animation: "conceptFadeUp 0.6s ease-out 0.1s both",
-                }}
-              >?</button>
-            )}
-          </div>
-
           <p style={{
-            fontSize: "clamp(0.9rem, 3.5vw, 1.1rem)",
-            fontWeight: 700,
-            color: "rgba(255,255,255,0.9)",
-            lineHeight: 1.45,
-            textAlign: "center",
-            margin: 0,
-            maxWidth: 360,
-            animation: "conceptFadeUp 0.6s ease-out 0.2s both",
+            color: "rgba(255,255,255,0.75)", fontSize: "0.8rem",
+            fontWeight: 500, lineHeight: 1.45, margin: 0, fontStyle: "italic",
           }}>
-            {definition}
+            {analogy}
           </p>
-
-          <div style={{
-            width: "100%",
-            maxWidth: 360,
-            padding: "14px 18px",
-            borderRadius: 14,
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            animation: "conceptFadeUp 0.6s ease-out 0.3s both",
-          }}>
-            <div style={{
-              fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.15em",
-              color: "rgba(177,212,224,0.5)", textTransform: "uppercase", marginBottom: 6,
-            }}>
-              {lang === "es" ? "ANALOGÍA" : "ANALOGY"}
-            </div>
-            <p style={{
-              fontSize: "clamp(0.85rem, 3vw, 0.95rem)",
-              fontWeight: 600,
-              fontStyle: "italic",
-              color: "rgba(255,255,255,0.7)",
-              lineHeight: 1.45,
-              margin: 0,
-            }}>
-              "{analogy}"
-            </p>
-          </div>
-
         </div>
+
+        {card.tooltip_explanation && onTooltip && (
+          <button
+            onClick={() => onTooltip(card.tooltip_explanation!)}
+            style={{
+              alignSelf: "flex-start",
+              padding: "6px 14px", borderRadius: 20,
+              background: "rgba(177,212,224,0.1)",
+              border: "1px solid rgba(177,212,224,0.2)",
+              color: "rgba(177,212,224,0.7)", fontSize: "0.6rem",
+              fontWeight: 700, cursor: "pointer", fontFamily: FONT,
+              animation: "conceptFadeUp 0.6s ease-out 0.4s both",
+              letterSpacing: "0.04em",
+            }}
+          >
+            {lang === "es" ? "💬 Más info" : "💬 Learn more"}
+          </button>
+        )}
       </div>
     </div>
   );

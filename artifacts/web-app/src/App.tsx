@@ -6,7 +6,7 @@ import ConceptCard from "./ConceptCard";
 import SharkGame from "./SharkGame";
 import translations, { type Lang } from "./translations";
 import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob, playBlobAudio } from "./elevenlabs";
-import { fetchPexelsVideo, getCachedPexelsVideo } from "./pexelsVideo";
+import { resolveVideoUrls } from "./pexelsVideo";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -256,29 +256,12 @@ const getNextVideo = (): string => {
 };
 
 const cardVideoMap = new Map<string, string>();
-const cardPexelsKeyword = new Map<string, string>();
 
-const getVideoForCard = (cardId: string): string => {
-  const keyword = cardPexelsKeyword.get(cardId);
-  if (keyword) {
-    const pexelsUrl = getCachedPexelsVideo(keyword);
-    if (pexelsUrl) return pexelsUrl;
-  }
+const getVideoForCard = (cardId: string, card?: any): string => {
+  if (card?.video_url) return card.video_url;
   if (!cardVideoMap.has(cardId)) cardVideoMap.set(cardId, getNextVideo());
   return cardVideoMap.get(cardId)!;
 };
-
-function preloadPexelsVideos(lessons: any[]) {
-  for (const lesson of lessons) {
-    if (lesson?.video_search_keyword && lesson?.id) {
-      const id = String(lesson.id);
-      cardPexelsKeyword.set(id, lesson.video_search_keyword);
-      fetchPexelsVideo(lesson.video_search_keyword).then((url) => {
-        if (url) cardVideoMap.set(id, url);
-      });
-    }
-  }
-}
 
 const bgGradients = [
   "radial-gradient(ellipse at 20% 50%, #0c2d48 0%, #0f172a 60%, #020617 100%)",
@@ -863,7 +846,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         ...l,
         id: Math.random().toString(36).substr(2, 9),
       }))];
-      preloadPexelsVideos(data.lessons);
+      data.lessons = await resolveVideoUrls(data.lessons);
       setCurrentData(data);
       setPreloadProgress(currentLang === "es" ? "Preparando audio..." : "Preparing audio...");
 
@@ -933,11 +916,11 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         const nextTypes = getRequestedTypes(totalSlides, 4);
         const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes });
         if (newData) {
-          const nl = newData.lessons.map((l: any) => ({
+          let nl = newData.lessons.map((l: any) => ({
             ...l,
             id: Math.random().toString(36).substr(2, 9),
           }));
-          preloadPexelsVideos(nl);
+          nl = await resolveVideoUrls(nl);
           await preloadAudioForCards(nl, currentLang);
           setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
         }
@@ -2539,8 +2522,8 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                           const nextTypes = getRequestedTypes(totalSlides, 4);
                           generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes }).then(async (newData) => {
                             if (newData?.lessons) {
-                              const nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
-                              preloadPexelsVideos(nl);
+                              let nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
+                              nl = await resolveVideoUrls(nl);
                               await preloadAudioForCards(nl, currentLang);
                               setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
                             }
@@ -2645,7 +2628,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
               <PodcastClipSlide
                 key={card.id}
                 card={card}
-                videoSrc={getVideoForCard(card.id)}
+                videoSrc={getVideoForCard(card.id, card)}
                 bgGradient={bgGradients[i % bgGradients.length]}
                 lang={lang}
                 isMutedRef={isMutedRef}
@@ -2700,7 +2683,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                   animation: "vidFade 0.8s ease-out both",
                 }}
               >
-                <source src={getVideoForCard(card.id)} type="video/mp4" />
+                <source src={getVideoForCard(card.id, card)} type="video/mp4" />
               </video>
 
               <div
