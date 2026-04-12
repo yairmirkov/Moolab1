@@ -1,0 +1,48 @@
+SYSTEM ROLE: Lead FinTech UI Designer & React Developer.
+OBJECTIVE: Build "The Sandbox" (a Portfolio tab) where users can invest their earned 'Moolies' into a simplified, real-world asset simulator. It must feel real but completely unintimidating. NO complex trading terminals, NO candlestick charts, and strictly NO crypto assets.
+
+STEP 1: THE SANDBOX UI
+
+Create a new main view called Sandbox.tsx.
+
+Header: Display "My Portfolio" with their Available Moolies balance at the top.
+
+Layout: Display a clean grid of "Asset Cards." Each card should show the asset's logo/icon, name, a friendly badge (e.g., "Low Risk", "Mid Risk", "Growth"), and today's simplified price trend (e.g., a green arrow and "+1.2%").
+
+STEP 2: THE ASSET ROSTER (STRICT LIST)
+
+Hardcode this specific list of allowed assets. DO NOT add any cryptocurrencies.
+
+The Stocks (Mixed Risk/Gain): Coca-Cola (KO), Apple (AAPL), Microsoft (MSFT), Amazon (AMZN), Wendy's (WEN), Nvidia (NVDA).
+
+Real Estate (Mid Risk): "City Apartment" (Simulate a steady, low-volatility daily growth based on a 6% annual yield).
+
+Savings Certificate (Low Risk): "Moolab 5% CD" (Simulate a guaranteed, flat upward line).
+
+STEP 3: REAL-TIME DATA INTEGRATION
+
+For the 6 stocks, write a simple backend fetch function using a free tier API (like Finnhub, Alpha Vantage, or Yahoo Finance API) to pull the Daily Closing Price only.
+
+Convert that real-world price proportionally into "Moolies" (e.g., if AAPL is $170, it costs 170 Moolies to buy a share).
+
+STEP 4: THE "BUY" MECHANICS (FRIENDLY UX)
+
+When a user clicks an asset, open a clean, friendly modal.
+
+Show a simple, smooth sparkline chart (just a curving line, no candlesticks) showing the 7-day trend.
+
+Provide a simple slider or plus/minus buttons to "Buy Shares" with their available Moolies.
+
+Deduct the Moolies and add the asset to their portfolioAssets state array in the database.
+
+STEP 5: THE WEEKEND & HOLIDAY FREEZE (MARKET REALITY)
+
+Create an array of strings representing major US Stock Market Holidays (e.g., "01-01", "07-04", "12-25", etc.).
+
+Implement a strict date-check mechanism. If the current day is Saturday, Sunday, OR matches a date in the holiday array, the 6 real-world stock assets MUST freeze and strictly display their last available closing prices.
+
+During these times, render a subtle UI badge on the stock assets that says "Market Closed" to teach users the actual schedule of the stock market.
+
+The Real Estate and Savings Certificate assets can continue their slow, simulated algorithmic growth regardless of weekends or holidays.
+
+OUTPUT: Construct the Sandbox.tsx UI, implement the restricted asset list, wire up the basic backend API fetch for the 6 stock tickers, build the friendly purchasing modal, and enforce the weekend/holiday market freeze.

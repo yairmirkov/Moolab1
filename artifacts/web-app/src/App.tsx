@@ -8,6 +8,7 @@ import translations, { type Lang } from "./translations";
 import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob, playBlobAudio } from "./elevenlabs";
 import { resolveVideoUrls } from "./pexelsVideo";
 import TheVault from "./TheVault";
+import Sandbox from "./Sandbox";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -683,6 +684,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     try { return JSON.parse(localStorage.getItem("ws_equippedItems") || "[]"); } catch { return []; }
   });
   const [showVault, setShowVault] = useState(false);
+  const [showSandbox, setShowSandbox] = useState(false);
   const [currentModuleIdx, setCurrentModuleIdx] = useState(() => load("modIdx", 0));
   const [moduleProgress, setModuleProgress] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
@@ -3163,31 +3165,50 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             ))}
           </div>
 
-          <button
-            className="ws-btn"
-            onClick={() => { setShowProfile(false); setShowVault(true); }}
-            style={{
-              width: "100%", maxWidth: 300, marginTop: 20, padding: "16px 20px",
-              borderRadius: 18, border: "1px solid rgba(255,215,0,0.25)",
-              background: "linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.05))",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-              cursor: "pointer", fontFamily: FONT, transition: "all 0.3s ease",
-            }}
-          >
-            <img src="/moolie-coin.png" alt="" style={{ width: 26, height: 26 }} />
-            <span style={{
-              fontSize: "0.8rem", fontWeight: 900, letterSpacing: "0.1em",
-              background: "linear-gradient(135deg, #FFD700, #FFA500)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            }}>
-              {t.profile.openVault[lang]}
-            </span>
-            <span style={{
-              marginLeft: "auto", fontSize: "0.75rem", fontWeight: 800, color: "#FFD700",
-            }}>
-              {moolies}
-            </span>
-          </button>
+          <div style={{
+            display: "flex", gap: 8, width: "100%", maxWidth: 300, marginTop: 20,
+          }}>
+            <button
+              className="ws-btn"
+              onClick={() => { setShowProfile(false); setShowVault(true); }}
+              style={{
+                flex: 1, padding: "14px 12px",
+                borderRadius: 18, border: "1px solid rgba(255,215,0,0.25)",
+                background: "linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.05))",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                cursor: "pointer", fontFamily: FONT, transition: "all 0.3s ease",
+              }}
+            >
+              <img src="/moolie-coin.png" alt="" style={{ width: 24, height: 24 }} />
+              <span style={{
+                fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.08em",
+                background: "linear-gradient(135deg, #FFD700, #FFA500)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              }}>
+                {t.profile.openVault[lang]}
+              </span>
+            </button>
+            <button
+              className="ws-btn"
+              onClick={() => { setShowProfile(false); setShowSandbox(true); }}
+              style={{
+                flex: 1, padding: "14px 12px",
+                borderRadius: 18, border: "1px solid rgba(46,139,192,0.25)",
+                background: "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(20,83,116,0.05))",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                cursor: "pointer", fontFamily: FONT, transition: "all 0.3s ease",
+              }}
+            >
+              <span style={{ fontSize: "1.3rem" }}>📊</span>
+              <span style={{
+                fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.08em",
+                background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              }}>
+                {t.sandbox.openSandbox[lang]}
+              </span>
+            </button>
+          </div>
 
           {/* Settings Controls */}
           <div style={{
@@ -3355,6 +3376,16 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             );
           }}
           onClose={() => setShowVault(false)}
+        />
+      )}
+
+      {showSandbox && (
+        <Sandbox
+          lang={lang}
+          moolies={moolies}
+          onSpend={(amount) => setMoolies((p) => Math.round((p - amount) * 100) / 100)}
+          onEarn={(amount) => setMoolies((p) => Math.round((p + amount) * 100) / 100)}
+          onClose={() => setShowSandbox(false)}
         />
       )}
 
