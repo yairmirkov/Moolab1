@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || "/api-server/api";
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 const FALLBACK_VIDEOS = [
   "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
@@ -34,6 +34,7 @@ export async function resolveVideoUrls(lessons: any[]): Promise<any[]> {
   const unique = [...new Set(keywords.map((k) => k.toLowerCase().trim()))];
 
   let videoMap: Record<string, string> = {};
+  console.log(`[Pexels] Resolving ${unique.length} keywords:`, unique);
 
   try {
     const resp = await fetch(`${API_BASE}/pexels-videos-batch`, {
@@ -44,6 +45,9 @@ export async function resolveVideoUrls(lessons: any[]): Promise<any[]> {
     if (resp.ok) {
       const data = await resp.json();
       videoMap = data.videos || {};
+      console.log(`[Pexels] Resolved ${Object.keys(videoMap).length} videos`);
+    } else {
+      console.error(`[Pexels] Batch response error: ${resp.status}`);
     }
   } catch (err) {
     console.error("[Pexels] Batch fetch failed:", err);
