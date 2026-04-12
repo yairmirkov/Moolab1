@@ -936,7 +936,13 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           }));
           nl = await resolveVideoUrls(nl);
           await preloadAudioForCards(nl, currentLang);
-          setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
+          setCurrentData((p: any) => {
+            const updated = { ...p, lessons: [...p.lessons, ...nl] };
+            if (!p.bossQuiz?.actionQuestion && newData.bossQuiz?.actionQuestion && Array.isArray(newData.bossQuiz?.options) && newData.bossQuiz.options.length >= 2) {
+              updated.bossQuiz = newData.bossQuiz;
+            }
+            return updated;
+          });
         }
         setIsFetchingMore(false);
         isFetchingRef.current = false;
@@ -2553,7 +2559,13 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                               let nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
                               nl = await resolveVideoUrls(nl);
                               await preloadAudioForCards(nl, currentLang);
-                              setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
+                              setCurrentData((p: any) => {
+                                const updated = { ...p, lessons: [...p.lessons, ...nl] };
+                                if (!p.bossQuiz?.actionQuestion && newData.bossQuiz?.actionQuestion && Array.isArray(newData.bossQuiz?.options) && newData.bossQuiz.options.length >= 2) {
+                                  updated.bossQuiz = newData.bossQuiz;
+                                }
+                                return updated;
+                              });
                             }
                             setIsFetchingMore(false);
                             isFetchingRef.current = false;
@@ -2866,8 +2878,12 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                                     setCompletedSlides((p) => [...p, card.id]);
                                     setXp((p) => p + 10);
                                     triggerGreenFlash();
-                                    if (completedSlides.length + 1 >= 5)
-                                      setTimeout(() => setQuizUnlocked(true), 800);
+                                    if (completedSlides.length + 1 >= 5) {
+                                      const bq = currentData?.bossQuiz;
+                                      if (bq?.actionQuestion && Array.isArray(bq.options) && bq.options.length >= 2) {
+                                        setTimeout(() => setQuizUnlocked(true), 800);
+                                      }
+                                    }
                                   }
                                 }
                               }}
@@ -3535,6 +3551,17 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                     {t.quiz.gotIt[lang]}
                   </button>
                 </div>
+              ) : !currentData.bossQuiz?.actionQuestion || !Array.isArray(currentData.bossQuiz?.options) || currentData.bossQuiz.options.length < 2 ? (
+                <div style={{ textAlign: "center", padding: "30px 20px" }}>
+                  <div style={{
+                    width: 28, height: 28, margin: "0 auto 14px", borderRadius: "50%",
+                    border: "2px solid rgba(46,139,192,0.2)", borderTopColor: "#2e8bc0",
+                    animation: "ldSpin 0.7s linear infinite",
+                  }} />
+                  <p style={{ color: "rgba(177,212,224,0.4)", fontSize: "0.7rem", fontWeight: 700 }}>
+                    {t.quiz.bossFight[lang]}...
+                  </p>
+                </div>
               ) : (
                 <div
                   style={{
@@ -3568,7 +3595,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                       textAlign: "left",
                     }}
                   >
-                    {currentData.bossQuiz?.actionQuestion || currentData.bossQuiz?.question || "Boss Challenge"}
+                    {currentData.bossQuiz.actionQuestion}
                   </h3>
                   <div
                     style={{
