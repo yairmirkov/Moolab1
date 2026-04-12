@@ -128,7 +128,7 @@ export default function TheVault({
         alignItems: "center",
         overflow: "auto",
         fontFamily: FONT,
-        paddingBottom: 68,
+        paddingBottom: 24,
       }}
     >
       <style>{`
@@ -157,9 +157,26 @@ export default function TheVault({
         }
       `}</style>
 
+      <div style={{
+        padding: "12px 20px 0",
+        width: "100%",
+        maxWidth: 400,
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "0.9rem", color: "#b1d4e0", cursor: "pointer",
+            fontFamily: FONT,
+          }}
+        >←</button>
+      </div>
+
       <div
         style={{
-          marginTop: 20,
+          marginTop: 8,
           marginBottom: 10,
           textAlign: "center",
           animation: "vaultSlideUp 0.6s ease-out both",

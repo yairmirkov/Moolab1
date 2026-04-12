@@ -228,7 +228,7 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
       position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 50,
       background: "linear-gradient(180deg, #091e30 0%, #0c2d48 40%, #091e30 100%)",
       display: "flex", flexDirection: "column", fontFamily: FONT, overflow: "hidden",
-      paddingBottom: 68,
+      paddingBottom: 24,
     }}>
       <style>{`
         @keyframes sandboxSlideUp {
@@ -247,6 +247,16 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
         padding: "16px 20px 12px", display: "flex", alignItems: "center", gap: 12,
         borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}>
+        <button
+          onClick={onClose}
+          style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "0.9rem", color: "#b1d4e0", cursor: "pointer", flexShrink: 0,
+            fontFamily: FONT,
+          }}
+        >←</button>
         <div style={{
           width: 36, height: 36, borderRadius: 12,
           background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.15)",

@@ -10,8 +10,10 @@ import { resolveVideoUrls } from "./pexelsVideo";
 import TheVault from "./TheVault";
 import Sandbox from "./Sandbox";
 import AppLayout from "./AppLayout";
-import { type TabId } from "./BottomNav";
+import Hub from "./Hub";
 import { useFeed } from "./FeedContext";
+
+type TabId = "hub" | "lab" | "tank" | "vault";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -694,7 +696,11 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [equippedItems, setEquippedItems] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem("ws_equippedItems") || "[]"); } catch { return []; }
   });
-  const [activeTab, setActiveTab] = useState<TabId>("lab");
+  const [activeTab, setActiveTab] = useState<TabId>("hub");
+  const navigateTo = useCallback((tab: TabId) => {
+    if (tab !== "lab") stopElevenLabsAudio();
+    setActiveTab(tab);
+  }, []);
   const [currentModuleIdx, setCurrentModuleIdx] = useState(() => load("modIdx", 0));
   const [moduleProgress, setModuleProgress] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
@@ -882,7 +888,10 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   }, [ageGroup, currentModuleIdx, preloadAudioForCards, userName]);
 
   useEffect(() => {
-    if (appStarted && ageGroup && accountType !== "parent") {
+    if (appStarted && ageGroup && accountType !== "parent" && !demoMode) {
+      navigateTo("hub");
+    }
+    if (appStarted && ageGroup && accountType !== "parent" && demoMode && !currentData) {
       setShowSubjectPicker(true);
     }
   }, [appStarted, ageGroup, accountType]);
@@ -2141,6 +2150,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                   setSelectedSubject(label);
                   selectedSubjectRef.current = label;
                   setShowSubjectPicker(false);
+                  navigateTo("lab");
                   resetJourney(label);
                 }}
                 style={{
@@ -2386,11 +2396,11 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             userSelect: "none",
           }}
         >
-          {userName ? `${lang === "es" ? "Hola" : "Hey"}, ${userName}` : (lang === "es" ? "Hola" : "Hey")} 👋
+          {userName || (lang === "es" ? "Explorador" : "Explorer")}
         </span>
         <button
           className="ws-btn"
-          onClick={() => setActiveTab("vault")}
+          onClick={() => navigateTo("vault")}
           style={{
             display: "flex", alignItems: "center", gap: 5,
             padding: "6px 12px", borderRadius: 20,
@@ -3134,6 +3144,42 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             ✕
           </button>
 
+          <button
+            className="ws-btn"
+            onClick={() => {
+              setShowProfile(false);
+              stopElevenLabsAudio();
+              navigateTo("hub");
+            }}
+            style={{
+              width: "100%",
+              maxWidth: 300,
+              padding: "14px 20px",
+              borderRadius: 16,
+              background: "linear-gradient(135deg, rgba(46,139,192,0.1), rgba(20,83,116,0.08))",
+              border: "1px solid rgba(46,139,192,0.2)",
+              cursor: "pointer",
+              fontFamily: FONT,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              marginBottom: 24,
+              transition: "all 0.3s ease",
+            }}
+          >
+            <span style={{ fontSize: "1rem" }}>🏠</span>
+            <span style={{
+              fontSize: "0.7rem",
+              fontWeight: 800,
+              letterSpacing: "0.08em",
+              color: "#b1d4e0",
+              textTransform: "uppercase",
+            }}>
+              {lang === "es" ? "Volver al Hub" : "Back to Hub"}
+            </span>
+          </button>
+
           {/* Progress Ring */}
           <div style={{ position: "relative", width: 120, height: 120, marginBottom: 20 }}>
             <svg width="120" height="120" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
@@ -3204,7 +3250,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           }}>
             <button
               className="ws-btn"
-              onClick={() => { setShowProfile(false); setActiveTab("vault"); }}
+              onClick={() => { setShowProfile(false); navigateTo("vault"); }}
               style={{
                 flex: 1, padding: "14px 12px",
                 borderRadius: 18, border: "1px solid rgba(255,215,0,0.25)",
@@ -3226,7 +3272,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             </button>
             <button
               className="ws-btn"
-              onClick={() => { setShowProfile(false); setActiveTab("tank"); }}
+              onClick={() => { setShowProfile(false); navigateTo("tank"); }}
               style={{
                 flex: 1, padding: "14px 12px",
                 borderRadius: 18, border: "1px solid rgba(46,139,192,0.25)",
@@ -3413,7 +3459,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
               prev.includes(itemId) ? prev.filter((x) => x !== itemId) : [...prev, itemId]
             );
           }}
-          onClose={() => setActiveTab("lab")}
+          onClose={() => navigateTo("hub")}
         />
       )}
 
@@ -3423,8 +3469,31 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           moolies={moolies}
           onSpend={(amount) => setMoolies((p) => Math.round((p - amount) * 100) / 100)}
           onEarn={(amount) => setMoolies((p) => Math.round((p + amount) * 100) / 100)}
-          onClose={() => setActiveTab("lab")}
+          onClose={() => navigateTo("hub")}
         />
+      )}
+
+      {activeTab === "hub" && appStarted && !showLanding && (
+        <div style={{
+          position: "absolute",
+          top: 0, left: 0, width: "100%", height: "100%",
+          zIndex: 50,
+        }}>
+          <Hub
+            lang={lang}
+            userName={userName}
+            moolies={moolies}
+            onNavigate={(view) => {
+              if (view === "lab") {
+                if (!currentData) {
+                  setShowSubjectPicker(true);
+                  return;
+                }
+              }
+              navigateTo(view);
+            }}
+          />
+        </div>
       )}
 
       {/* ARENA QUIZ */}
@@ -3969,20 +4038,8 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     </div>
   );
 
-  const showNav = appStarted && !showLanding && !quizUnlocked && !showQuizSummary && !showModuleMap && !showParentDash && !showProfile && !!currentData;
-
   return (
-    <AppLayout
-      activeTab={activeTab}
-      onTabChange={(tab) => {
-        setShowProfile(false);
-        if (tab !== "lab") stopElevenLabsAudio();
-        setActiveTab(tab);
-      }}
-      lang={lang}
-      moolies={moolies}
-      showNav={showNav}
-    >
+    <AppLayout>
       {content}
     </AppLayout>
   );
