@@ -338,6 +338,7 @@ const getAgeGroup = (age: number): string => {
 
 const audioBlobCache = new Map<string, string>();
 const bufferCardAudioPlayed = new Set<string>();
+const bufferCardObserved = new Set<string>();
 
 function getPlayButtonCopy(type: string, lang: "en" | "es"): string {
   if (type === "podcast" || type === "podcast_clip") {
@@ -811,6 +812,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     lastSlideRef.current = -1;
     stopElevenLabsAudio();
     bufferCardAudioPlayed.clear();
+    bufferCardObserved.clear();
     isFetchingRef.current = false;
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
     const topic = subjectOverride || selectedSubjectRef.current || mod?.topic;
@@ -928,9 +930,15 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     }
   };
 
+  const summaryFetchedForQuiz = useRef<string | null>(null);
   useEffect(() => {
-    if (quizResult !== true) return;
+    if (quizResult !== true) { summaryFetchedForQuiz.current = null; return; }
+    const quizKey = `${userName}_${ageGroup}_${currentModuleIdx}`;
+    if (summaryFetchedForQuiz.current === quizKey) return;
+    summaryFetchedForQuiz.current = quizKey;
+
     const currentLang = langRef.current;
+    let cancelled = false;
 
     const winTitles = translations.winTitles[currentLang];
     const picked = winTitles[Math.floor(Math.random() * winTitles.length)];
@@ -946,9 +954,11 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       subject: selectedSubjectRef.current || currentModule?.topic || "finance",
       lang: currentLang,
     }).then(async (summaryText) => {
+      if (cancelled) return;
       setQuizSummaryText(summaryText);
       if (isElevenLabsAvailable()) {
         const r = await fetchAudioBlob(summaryText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true });
+        if (cancelled) return;
         if (r.url) {
           setQuizSummaryAudioUrl(r.url);
           if (!isMutedRef.current && speechSpeedRef.current > 0) {
@@ -957,7 +967,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         }
       }
     });
-    return () => {};
+    return () => { cancelled = true; };
   }, [quizResult, userName, ageGroup, currentModule]);
 
   const triggerGreenFlash = () => {
@@ -2465,9 +2475,11 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
               <div
                 key={card.id}
                 ref={(el) => {
-                  if (!el) return;
+                  if (!el || bufferCardObserved.has(card.id)) return;
+                  bufferCardObserved.add(card.id);
                   const observer = new IntersectionObserver(([entry]) => {
                     if (entry.isIntersecting) {
+                      observer.disconnect();
                       if (!bufferCardAudioPlayed.has(card.id) && !isMutedRef.current && speechSpeedRef.current > 0) {
                         bufferCardAudioPlayed.add(card.id);
                         const cachedUrl = audioBlobCache.get(`buffercard_${card.id}`);
@@ -2482,23 +2494,22 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                           isFetchingRef.current = true;
                           setIsFetchingMore(true);
                           const currentLang = langRef.current;
-                        const nextTypes = getRequestedTypes(totalSlides, 4);
-                        generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes }).then(async (newData) => {
-                          if (newData?.lessons) {
-                            const nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
-                            preloadPexelsVideos(nl);
-                            await preloadAudioForCards(nl, currentLang);
-                            setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
-                          }
-                          setIsFetchingMore(false);
-                          isFetchingRef.current = false;
-                        });
+                          const nextTypes = getRequestedTypes(totalSlides, 4);
+                          generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes }).then(async (newData) => {
+                            if (newData?.lessons) {
+                              const nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
+                              preloadPexelsVideos(nl);
+                              await preloadAudioForCards(nl, currentLang);
+                              setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
+                            }
+                            setIsFetchingMore(false);
+                            isFetchingRef.current = false;
+                          });
+                        }
                       }
-                    }
                     }
                   }, { threshold: 0.5 });
                   observer.observe(el);
-                  setTimeout(() => observer.disconnect(), 10000);
                 }}
                 style={{
                   height: "100dvh", width: "100%", position: "relative",
