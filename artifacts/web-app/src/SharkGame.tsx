@@ -160,8 +160,13 @@ export default function SharkGame({
           if (!container.querySelector(`[data-coin-id="${coin.id}"]`)) {
             const div = document.createElement("div");
             div.dataset.coinId = String(coin.id);
-            div.style.cssText = `position:absolute;width:${COIN_SIZE}px;height:${COIN_SIZE}px;display:flex;align-items:center;justify-content:center;font-size:20px;pointer-events:none;transition:transform 0.15s,opacity 0.15s;will-change:transform,opacity,left,top;`;
-            div.textContent = "🪙";
+            div.style.cssText = `position:absolute;width:${COIN_SIZE}px;height:${COIN_SIZE}px;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:transform 0.15s,opacity 0.15s;will-change:transform,opacity,left,top;`;
+            const img = document.createElement("img");
+            img.src = `${import.meta.env.BASE_URL}moolie-coin.png`;
+            img.alt = "";
+            img.draggable = false;
+            img.style.cssText = `width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(255,215,0,0.4));`;
+            div.appendChild(img);
             container.appendChild(div);
           }
         }
