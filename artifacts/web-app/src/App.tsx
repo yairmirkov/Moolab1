@@ -2288,115 +2288,37 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         }} />
       </div>
 
-      {/* HEADER HUD */}
+      {/* MINIMAL HEADER — clickable name only */}
       <div
         style={{
           position: "absolute",
           top: 0,
           width: "100%",
-          padding: "10px 14px 6px",
+          padding: "14px 18px",
           zIndex: 10,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 80%, transparent 100%)",
+          background: "transparent",
           pointerEvents: "none",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        <div
+        <span
+          onClick={() => setShowProfile(true)}
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
             pointerEvents: "auto",
+            cursor: "pointer",
+            fontSize: "1.1rem",
+            fontWeight: 800,
+            fontFamily: FONT,
+            color: "#fff",
+            textShadow: "0 2px 12px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.5)",
+            letterSpacing: "-0.01em",
+            userSelect: "none",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span
-              onClick={() => setShowProfile(true)}
-              style={{ cursor: "pointer", fontSize: "0.95rem", lineHeight: 1 }}
-              title={userName || t.hud.profile[lang]}
-            >👤</span>
-            <span
-              onClick={() => {
-                const newMuted = !isMuted;
-                isMutedRef.current = newMuted;
-                if (newMuted) {
-                  stopElevenLabsAudio();
-                }
-                setIsMuted(newMuted);
-              }}
-              style={{ cursor: "pointer", fontSize: "0.95rem", lineHeight: 1 }}
-              title={isMuted ? t.auth.unmute[lang] : t.auth.mute[lang]}
-            >{isMuted ? "🔇" : "🔊"}</span>
-            <span
-              onClick={() => {
-                stopElevenLabsAudio();
-                const speeds = [1, 1.5, 2, 0];
-                const currentIdx = speeds.indexOf(speechSpeed);
-                const nextSpeed = speeds[(currentIdx + 1) % speeds.length];
-                speechSpeedRef.current = nextSpeed;
-                setSpeechSpeed(nextSpeed);
-              }}
-              style={{
-                cursor: "pointer", fontSize: "0.6rem", fontWeight: 800,
-                fontFamily: FONT, lineHeight: 1,
-                color: speechSpeed === 0 ? "#e76f51" : "rgba(255,255,255,0.7)",
-              }}
-              title={speechSpeed === 0 ? "Speech stopped — tap for 1x" : `Speech speed: ${speechSpeed}x`}
-            >{speechSpeed === 0 ? "⏹" : `${speechSpeed}x`}</span>
-            <span
-              onClick={() => {
-                const newLang = lang === "en" ? "es" : "en";
-                setLang(newLang as Lang);
-                langRef.current = newLang as Lang;
-                saveStr("lang", newLang);
-                resetJourney();
-              }}
-              style={{
-                cursor: "pointer", fontSize: "0.6rem", fontWeight: 800,
-                fontFamily: FONT, lineHeight: 1,
-                color: "rgba(255,255,255,0.7)",
-              }}
-              title={t.auth.switchLang[lang]}
-            >{lang === "en" ? "ES" : "EN"}</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span
-              onClick={(e) => { e.stopPropagation(); setShowModuleMap(true); }}
-              style={{ cursor: "pointer", fontSize: "0.85rem", lineHeight: 1 }}
-              title={`${t.hud.module[lang]} ${currentModuleIdx + 1}`}
-            >{currentModule?.icon}</span>
-            <span style={{
-              color: "#FFD93D", fontWeight: 900, fontSize: "0.6rem",
-              fontFamily: FONT, letterSpacing: "0.04em",
-            }}>{t.hud.lvl[lang]}{level}</span>
-            <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", fontWeight: 400 }}>|</span>
-            <span style={{
-              color: "#2e8bc0", fontWeight: 900, fontSize: "0.6rem",
-              fontFamily: FONT, letterSpacing: "0.02em",
-            }}>{xp}XP</span>
-          </div>
-        </div>
-        <div
-          style={{
-            width: "100%",
-            height: 2,
-            background: "rgba(255,255,255,0.06)",
-            borderRadius: 1,
-            marginTop: 6,
-          }}
-        >
-          <div
-            style={{
-              width: `${progress}%`,
-              height: "100%",
-              background: progress >= 100
-                ? "linear-gradient(90deg, #FFD93D, #FF6B6B, #E040FB)"
-                : "linear-gradient(90deg, #2e8bc0, #b1d4e0)",
-              borderRadius: 1,
-              transition: "width 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
-              boxShadow: progress > 0 ? "0 0 6px rgba(46,139,192,0.3)" : "none",
-            }}
-          />
-        </div>
+          {userName ? `${lang === "es" ? "Hola" : "Hey"}, ${userName}` : (lang === "es" ? "Hola" : "Hey")} 👋
+        </span>
       </div>
 
       {/* MODULE MAP */}
@@ -3179,45 +3101,105 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             ))}
           </div>
 
-          {/* Language Selector */}
+          {/* Settings Controls */}
           <div style={{
             width: "100%", maxWidth: 300, marginTop: 24,
-            padding: "16px 18px", borderRadius: 18,
+            padding: "18px", borderRadius: 18,
             background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+            display: "flex", flexDirection: "column", gap: 16,
           }}>
             <div style={{
               color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", fontWeight: 700,
-              letterSpacing: "0.12em", marginBottom: 10, textAlign: "center",
-            }}>{lang === "es" ? "IDIOMA" : "LANGUAGE"}</div>
-            <div style={{ display: "flex", gap: 8 }}>
-              {([["en", "🇺🇸", "English"], ["es", "🇲🇽", "Español"]] as const).map(([code, flag, label]) => (
-                <button
-                  className="ws-btn"
-                  key={code}
-                  onClick={() => {
-                    if (code !== lang) {
-                      setLang(code);
-                      langRef.current = code;
-                      saveStr("lang", code);
-                      setShowProfile(false);
-                      resetJourney();
-                    } else {
-                      setShowProfile(false);
-                    }
-                  }}
-                  style={{
-                    flex: 1, padding: "12px 10px", borderRadius: 14, fontFamily: FONT,
-                    background: lang === code ? "rgba(46,139,192,0.12)" : "rgba(255,255,255,0.02)",
-                    border: lang === code ? "1px solid rgba(46,139,192,0.3)" : "1px solid rgba(255,255,255,0.05)",
-                    color: lang === code ? "#2e8bc0" : "rgba(255,255,255,0.5)",
-                    fontWeight: 700, fontSize: "0.75rem", cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  }}
-                >
-                  <span style={{ fontSize: "1rem" }}>{flag}</span>
-                  {label}
-                </button>
-              ))}
+              letterSpacing: "0.12em", textAlign: "center",
+            }}>{lang === "es" ? "AJUSTES" : "SETTINGS"}</div>
+
+            {/* Volume Toggle */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", fontWeight: 600, fontFamily: FONT }}>
+                {lang === "es" ? "Sonido" : "Sound"}
+              </span>
+              <button
+                className="ws-btn"
+                onClick={() => {
+                  const newMuted = !isMuted;
+                  isMutedRef.current = newMuted;
+                  if (newMuted) stopElevenLabsAudio();
+                  setIsMuted(newMuted);
+                }}
+                style={{
+                  padding: "8px 16px", borderRadius: 12, fontFamily: FONT,
+                  background: isMuted ? "rgba(231,111,81,0.12)" : "rgba(46,139,192,0.12)",
+                  border: isMuted ? "1px solid rgba(231,111,81,0.3)" : "1px solid rgba(46,139,192,0.3)",
+                  color: isMuted ? "#e76f51" : "#2e8bc0",
+                  fontWeight: 700, fontSize: "0.75rem", cursor: "pointer",
+                  minWidth: 60, textAlign: "center",
+                }}
+              >
+                {isMuted ? (lang === "es" ? "🔇 Off" : "🔇 Off") : (lang === "es" ? "🔊 On" : "🔊 On")}
+              </button>
+            </div>
+
+            {/* Playback Speed */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", fontWeight: 600, fontFamily: FONT }}>
+                {lang === "es" ? "Velocidad" : "Speed"}
+              </span>
+              <div style={{ display: "flex", gap: 6 }}>
+                {[1, 1.5, 2].map((spd) => (
+                  <button
+                    className="ws-btn"
+                    key={spd}
+                    onClick={() => {
+                      stopElevenLabsAudio();
+                      speechSpeedRef.current = spd;
+                      setSpeechSpeed(spd);
+                    }}
+                    style={{
+                      padding: "8px 12px", borderRadius: 10, fontFamily: FONT,
+                      background: speechSpeed === spd ? "rgba(46,139,192,0.12)" : "rgba(255,255,255,0.02)",
+                      border: speechSpeed === spd ? "1px solid rgba(46,139,192,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                      color: speechSpeed === spd ? "#2e8bc0" : "rgba(255,255,255,0.5)",
+                      fontWeight: 700, fontSize: "0.7rem", cursor: "pointer",
+                    }}
+                  >
+                    {spd}x
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Language */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", fontWeight: 600, fontFamily: FONT }}>
+                {lang === "es" ? "Idioma" : "Language"}
+              </span>
+              <div style={{ display: "flex", gap: 6 }}>
+                {([["en", "🇺🇸", "EN"], ["es", "🇲🇽", "ES"]] as const).map(([code, flag, label]) => (
+                  <button
+                    className="ws-btn"
+                    key={code}
+                    onClick={() => {
+                      if (code !== lang) {
+                        setLang(code);
+                        langRef.current = code;
+                        saveStr("lang", code);
+                        setShowProfile(false);
+                        resetJourney();
+                      }
+                    }}
+                    style={{
+                      padding: "8px 14px", borderRadius: 10, fontFamily: FONT,
+                      background: lang === code ? "rgba(46,139,192,0.12)" : "rgba(255,255,255,0.02)",
+                      border: lang === code ? "1px solid rgba(46,139,192,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                      color: lang === code ? "#2e8bc0" : "rgba(255,255,255,0.5)",
+                      fontWeight: 700, fontSize: "0.7rem", cursor: "pointer",
+                      display: "flex", alignItems: "center", gap: 4,
+                    }}
+                  >
+                    <span style={{ fontSize: "0.85rem" }}>{flag}</span> {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
