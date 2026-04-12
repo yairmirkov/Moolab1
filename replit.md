@@ -25,7 +25,7 @@ Moolab is built as a pnpm workspace monorepo using TypeScript (v5.9). It utilize
 -   **UI/UX**:
     -   **Branding**: Custom shark-fin wordmark logo, using the Inter font (font-black), with a pulsing glow animation.
     -   **Color Scheme**: Ocean Breeze blue palette (`#0c2d48`, `#145374`, `#2e8bc0`, `#b1d4e0`).
-    -   **Gamification**: XP, streak, level, and boss win tracking persisted via `localStorage`. SVG progress rings for profile dashboard.
+    -   **Gamification**: XP, streak, level, boss wins, and **Moolies** (in-app currency) tracking persisted via `localStorage`. SVG progress rings for profile dashboard. Moolies earned (+50) on Boss Quiz wins. **The Vault** (`TheVault.tsx`) is a rewards center where users spend Moolies on UI customizations (themes, titles, avatar borders, effects). 6 purchasable items with equip/unequip toggle. Accessible via header pill and profile modal button.
     -   **Visuals**: Video backgrounds from Pexels, glassmorphism effects for cards, animated blob shapes, and per-slide color accents.
     -   **Two-Part Slides**: Mini-game cards render in two phases: context setup and action question.
     -   **Multimedia**: ElevenLabs TTS integration for explanations, radio shows, and podcast dialogue (no background music). Landing page intro MP3s are kept (`/moolab-intro.mp3`, `/moolab-intro-es.mp3`).

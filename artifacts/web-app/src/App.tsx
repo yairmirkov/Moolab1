@@ -7,6 +7,7 @@ import SharkGame from "./SharkGame";
 import translations, { type Lang } from "./translations";
 import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob, playBlobAudio } from "./elevenlabs";
 import { resolveVideoUrls } from "./pexelsVideo";
+import TheVault from "./TheVault";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -674,6 +675,14 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [streak, setStreak] = useState(() => load("streak", 0));
   const [level, setLevel] = useState(() => load("level", 1));
   const [bossWins, setBossWins] = useState(() => load("bossWins", 0));
+  const [moolies, setMoolies] = useState(() => load("moolies", 0));
+  const [unlockedItems, setUnlockedItems] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem("ws_unlockedItems") || "[]"); } catch { return []; }
+  });
+  const [equippedItems, setEquippedItems] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem("ws_equippedItems") || "[]"); } catch { return []; }
+  });
+  const [showVault, setShowVault] = useState(false);
   const [currentModuleIdx, setCurrentModuleIdx] = useState(() => load("modIdx", 0));
   const [moduleProgress, setModuleProgress] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
@@ -722,9 +731,12 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     save("streak", streak);
     save("level", level);
     save("bossWins", bossWins);
+    save("moolies", moolies);
     save("modIdx", currentModuleIdx);
     localStorage.setItem("ws_modProg", JSON.stringify(moduleProgress));
-  }, [xp, streak, level, bossWins, currentModuleIdx, moduleProgress]);
+    localStorage.setItem("ws_unlockedItems", JSON.stringify(unlockedItems));
+    localStorage.setItem("ws_equippedItems", JSON.stringify(equippedItems));
+  }, [xp, streak, level, bossWins, moolies, unlockedItems, equippedItems, currentModuleIdx, moduleProgress]);
 
   const preloadAudioForCards = useCallback(async (cards: any[], currentLang: Lang) => {
     if (!isElevenLabsAvailable()) return;
@@ -2354,6 +2366,20 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         >
           {userName ? `${lang === "es" ? "Hola" : "Hey"}, ${userName}` : (lang === "es" ? "Hola" : "Hey")} 👋
         </span>
+        <button
+          className="ws-btn"
+          onClick={() => setShowVault(true)}
+          style={{
+            display: "flex", alignItems: "center", gap: 5,
+            padding: "6px 12px", borderRadius: 20,
+            background: "linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,165,0,0.08))",
+            border: "1px solid rgba(255,215,0,0.2)",
+            cursor: "pointer", fontFamily: FONT, marginLeft: "auto",
+          }}
+        >
+          <img src="/moolie-coin.png" alt="" style={{ width: 18, height: 18 }} />
+          <span style={{ fontSize: "0.7rem", fontWeight: 900, color: "#FFD700" }}>{moolies}</span>
+        </button>
       </div>
 
       {/* MODULE MAP */}
@@ -3120,9 +3146,9 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           >
             {[
               { label: t.profile.totalXp[lang], val: xp, color: "#2e8bc0" },
+              { label: t.profile.moolies[lang], val: moolies, color: "#FFD700" },
               { label: t.profile.bossWins[lang], val: bossWins, color: "#FFD93D" },
               { label: t.profile.streak[lang], val: `${streak}🔥`, color: "#FF6B6B" },
-              { label: t.profile.module[lang], val: Math.floor(bossWins / 3) + 1, color: "#E040FB" },
             ].map((s) => (
               <div key={s.label} style={{
                 background: "rgba(255,255,255,0.03)",
@@ -3136,6 +3162,32 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
               </div>
             ))}
           </div>
+
+          <button
+            className="ws-btn"
+            onClick={() => { setShowProfile(false); setShowVault(true); }}
+            style={{
+              width: "100%", maxWidth: 300, marginTop: 20, padding: "16px 20px",
+              borderRadius: 18, border: "1px solid rgba(255,215,0,0.25)",
+              background: "linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.05))",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              cursor: "pointer", fontFamily: FONT, transition: "all 0.3s ease",
+            }}
+          >
+            <img src="/moolie-coin.png" alt="" style={{ width: 26, height: 26 }} />
+            <span style={{
+              fontSize: "0.8rem", fontWeight: 900, letterSpacing: "0.1em",
+              background: "linear-gradient(135deg, #FFD700, #FFA500)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>
+              {t.profile.openVault[lang]}
+            </span>
+            <span style={{
+              marginLeft: "auto", fontSize: "0.75rem", fontWeight: 800, color: "#FFD700",
+            }}>
+              {moolies}
+            </span>
+          </button>
 
           {/* Settings Controls */}
           <div style={{
@@ -3284,6 +3336,26 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 250 }}>
           {parentDashContent}
         </div>
+      )}
+
+      {showVault && (
+        <TheVault
+          lang={lang}
+          moolies={moolies}
+          unlockedItems={unlockedItems}
+          equippedItems={equippedItems}
+          onPurchase={(itemId, cost) => {
+            setMoolies((p) => p - cost);
+            setUnlockedItems((prev) => [...prev, itemId]);
+            setEquippedItems((prev) => [...prev, itemId]);
+          }}
+          onEquip={(itemId) => {
+            setEquippedItems((prev) =>
+              prev.includes(itemId) ? prev.filter((x) => x !== itemId) : [...prev, itemId]
+            );
+          }}
+          onClose={() => setShowVault(false)}
+        />
       )}
 
       {/* ARENA QUIZ */}
@@ -3485,6 +3557,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                             if (win) {
                               setQuizResult(true);
                               setXp((p) => p + 50);
+                              setMoolies((p) => p + 50);
                               setStreak((p) => p + 1);
                               setBossWins((p) => p + 1);
                               setModuleProgress((prev) => {
@@ -3542,7 +3615,40 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
               display: "flex", flexDirection: "column", alignItems: "center",
               justifyContent: "center", textAlign: "center", padding: 32, maxWidth: 380,
             }}>
-              <div style={{ fontSize: "3rem", marginBottom: 20 }}>🏆</div>
+              <style>{`
+                @keyframes moolieBounce {
+                  0%, 100% { transform: translateY(0) scale(1); }
+                  30% { transform: translateY(-18px) scale(1.1); }
+                  50% { transform: translateY(-6px) scale(1.05); }
+                  70% { transform: translateY(-10px) scale(1.08); }
+                }
+                @keyframes moolieGlow {
+                  0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); }
+                  50% { box-shadow: 0 0 35px rgba(255,215,0,0.5), 0 0 60px rgba(255,165,0,0.25); }
+                }
+                @keyframes moolieTextPop {
+                  0% { opacity: 0; transform: scale(0.5) translateY(10px); }
+                  60% { opacity: 1; transform: scale(1.15) translateY(-2px); }
+                  100% { opacity: 1; transform: scale(1) translateY(0); }
+                }
+              `}</style>
+              <div style={{
+                width: 80, height: 80, borderRadius: "50%",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                marginBottom: 12,
+                animation: "moolieBounce 1.2s ease-out, moolieGlow 2s ease-in-out infinite",
+              }}>
+                <img src="/moolie-coin.png" alt="Moolies" style={{ width: 72, height: 72, objectFit: "contain" }} />
+              </div>
+              <p style={{
+                fontSize: "1rem", fontWeight: 900, letterSpacing: "0.04em",
+                background: "linear-gradient(135deg, #FFD700, #FFA500)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                margin: "0 0 6px 0",
+                animation: "moolieTextPop 0.8s ease-out 0.3s both",
+              }}>
+                {t.quiz.mooliesEarned[lang]}
+              </p>
               <p style={{
                 fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.25em",
                 color: "rgba(177,212,224,0.5)", textTransform: "uppercase", marginBottom: 16,

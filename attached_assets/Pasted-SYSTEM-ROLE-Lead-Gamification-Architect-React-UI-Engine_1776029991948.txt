@@ -1,0 +1,36 @@
+SYSTEM ROLE: Lead Gamification Architect & React UI Engineer.
+OBJECTIVE: Implement a closed-loop digital economy. Users will earn "Moolies" (the in-app currency) for completing lessons and spend them in a new rewards screen called "The Vault" to unlock UI customizations.
+
+STEP 1: THE MOOLIES STATE & EARNING LOGIC
+
+Update the database schema and global state (e.g., children table / user context) to include a mooliesBalance integer (defaulting to 0).
+
+Also add an unlockedItems array to track what they own.
+
+Open SummaryCard.tsx (the screen shown after completing a sequence). When this screen mounts, dispatch an action to add +50 Moolies to the user's balance.
+
+STEP 2: THE SUMMARY SCREEN REWARD ANIMATION
+
+On the SummaryCard, replace the generic trophy emoji with a custom image element pointing to /moolie-coin.png.
+
+Add a highly satisfying CSS animation (like a bounce or a subtle coin flip) to this image.
+
+Display text below it: "+50 Moolies Earned!" in a bold, gamified font.
+
+STEP 3: THE VAULT UI (THE REWARD CENTER)
+
+Create a new component called TheVault.tsx. This should be accessible via a sleek button in the ProfileDashboard or a subtle floating pill on the main feed.
+
+The Header: Display the user's total mooliesBalance prominently at the top with the moolie-coin.png icon next to the number.
+
+The Items: Build a sleek CSS grid displaying digital items they can "buy."
+
+Item 1: "Neon Hacker Theme" (App UI color toggle) - Cost: 500 Moolies.
+
+Item 2: "Value Investor Title" (Displays next to their name) - Cost: 1000 Moolies.
+
+Item 3: "Shark Border" (Avatar ring) - Cost: 250 Moolies.
+
+The Purchase Logic: When an item is clicked, check if mooliesBalance >= item.cost. If yes, deduct the cost, add the item to unlockedItems, and change the button to "Equipped." If no, show a brief "Not enough Moolies!" toast.
+
+OUTPUT: Build the earning logic in the Summary card, integrate the moolie-coin.png asset, and construct the fully functional TheVault.tsx component to close the gamification loop.

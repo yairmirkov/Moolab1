@@ -64,6 +64,8 @@ const translations = {
     streak: { en: "STREAK", es: "RACHA" },
     module: { en: "MODULE", es: "M\u00d3DULO" },
     switchModule: { en: "SWITCH MODULE (DEV)", es: "CAMBIAR M\u00d3DULO (DEV)" },
+    moolies: { en: "MOOLIES", es: "MOOLIES" },
+    openVault: { en: "THE VAULT", es: "LA BÓVEDA" },
   },
   parentDash: {
     dashboard: { en: "PARENT DASHBOARD", es: "PANEL DE PADRES" },
@@ -115,6 +117,7 @@ const translations = {
     tryAgain: { en: "TRY AGAIN \ud83d\udcaa", es: "INT\u00c9NTALO DE NUEVO \ud83d\udcaa" },
     shareProgress: { en: "Share your progress", es: "Comparte tu progreso" },
     xpAwarded: { en: "+50 XP awarded.", es: "+50 XP otorgados." },
+    mooliesEarned: { en: "+50 Moolies Earned!", es: "+50 Moolies Ganados!" },
     defaultExplanation: {
       en: "The correct answer builds on a key principle. Review the lesson to see the full picture.",
       es: "La respuesta correcta se basa en un principio clave. Revisa la lecci\u00f3n para ver el panorama completo.",
@@ -137,6 +140,26 @@ const translations = {
       es: (mod: string, lvl: number, xp: number) =>
         `Perfeccionando mis habilidades financieras en Moolab. ${mod} \u2014 desafiante pero vale la pena dominar. Nivel ${lvl} | ${xp} XP.`,
     },
+  },
+  vault: {
+    title: { en: "THE VAULT", es: "LA BÓVEDA" },
+    subtitle: { en: "Spend your Moolies on epic rewards", es: "Gasta tus Moolies en recompensas épicas" },
+    equipped: { en: "EQUIPPED", es: "EQUIPADO" },
+    owned: { en: "OWNED", es: "ADQUIRIDO" },
+    equip: { en: "EQUIP", es: "EQUIPAR" },
+    notEnough: { en: "Not enough Moolies!", es: "¡No tienes suficientes Moolies!" },
+    neonHacker: { en: "Neon Hacker Theme", es: "Tema Neon Hacker" },
+    neonHackerDesc: { en: "Dark UI with electric neon accents", es: "UI oscura con acentos neón eléctricos" },
+    valueInvestor: { en: "Value Investor Title", es: "Título Inversionista de Valor" },
+    valueInvestorDesc: { en: "Exclusive title next to your name", es: "Título exclusivo junto a tu nombre" },
+    sharkBorder: { en: "Shark Border", es: "Borde Tiburón" },
+    sharkBorderDesc: { en: "Golden avatar ring of power", es: "Anillo dorado de poder para tu avatar" },
+    diamondTrail: { en: "Diamond Trail Effect", es: "Efecto Rastro de Diamante" },
+    diamondTrailDesc: { en: "Sparkle particles follow your scrolls", es: "Partículas brillantes siguen tu scroll" },
+    fireEmoji: { en: "Fire Reaction Pack", es: "Pack de Reacciones de Fuego" },
+    fireEmojiDesc: { en: "Unlock animated fire reactions", es: "Desbloquea reacciones animadas de fuego" },
+    vaultMaster: { en: "Vault Master Badge", es: "Insignia Maestro de la Bóveda" },
+    vaultMasterDesc: { en: "Show everyone you conquered The Vault", es: "Muestra a todos que conquistaste la Bóveda" },
   },
   modules: {
     names: {
