@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import type { Lang } from "./translations";
+import { fetchPexelsVideo, getCachedPexelsVideo } from "./pexelsVideo";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
-const CONCEPT_VIDEOS = [
+const FALLBACK_VIDEOS = [
   "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
   "https://videos.pexels.com/video-files/3195394/3195394-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/2795167/2795167-hd_1920_1080_25fps.mp4",
@@ -11,11 +13,11 @@ const CONCEPT_VIDEOS = [
   "https://videos.pexels.com/video-files/3214435/3214435-hd_1920_1080_25fps.mp4",
 ];
 
-function getConceptVideo(id: string | number): string {
+function getFallbackVideo(id: string | number): string {
   let hash = 0;
   const s = String(id);
   for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0;
-  return CONCEPT_VIDEOS[Math.abs(hash) % CONCEPT_VIDEOS.length];
+  return FALLBACK_VIDEOS[Math.abs(hash) % FALLBACK_VIDEOS.length];
 }
 
 interface ConceptCardProps {
@@ -25,6 +27,7 @@ interface ConceptCardProps {
     definition: string;
     analogy: string;
     tooltip_explanation?: string;
+    video_search_keyword?: string;
   };
   lang: Lang;
   onTooltip?: (text: string) => void;
@@ -34,6 +37,20 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
   const term = card.term || (lang === "es" ? "Concepto Financiero" : "Financial Concept");
   const definition = card.definition || (lang === "es" ? "Definición no disponible." : "Definition not available.");
   const analogy = card.analogy || (lang === "es" ? "Piénsalo de esta manera..." : "Think of it this way...");
+
+  const keyword = card.video_search_keyword;
+  const cachedUrl = keyword ? getCachedPexelsVideo(keyword) : null;
+  const [videoUrl, setVideoUrl] = useState<string>(cachedUrl || getFallbackVideo(card.id));
+
+  useEffect(() => {
+    if (!keyword) return;
+    let cancelled = false;
+    fetchPexelsVideo(keyword).then((url) => {
+      if (!cancelled) setVideoUrl(url);
+    });
+    return () => { cancelled = true; };
+  }, [keyword]);
+
   return (
     <div
       style={{
@@ -52,6 +69,7 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
       `}</style>
 
       <video
+        key={videoUrl}
         autoPlay muted loop playsInline preload="auto"
         onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
         style={{
@@ -59,7 +77,7 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
           objectFit: "cover", zIndex: 0,
         }}
       >
-        <source src={getConceptVideo(card.id)} type="video/mp4" />
+        <source src={videoUrl} type="video/mp4" />
       </video>
 
       <div style={{

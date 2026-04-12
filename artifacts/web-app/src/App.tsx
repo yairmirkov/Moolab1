@@ -6,6 +6,7 @@ import ConceptCard from "./ConceptCard";
 import SharkGame from "./SharkGame";
 import translations, { type Lang } from "./translations";
 import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob, playBlobAudio } from "./elevenlabs";
+import { fetchPexelsVideo, getCachedPexelsVideo } from "./pexelsVideo";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -76,8 +77,8 @@ const generateCards = async (ageGroup: string, topic?: string, lang: Lang = "en"
     ? ` requestedTypes: [${requestedTypes.map(t => `"${t}"`).join(", ")}]. GENERA EXACTAMENTE ${requestedTypes.length} lecciones en el array "lessons" con estos tipos en este ORDEN EXACTO.`
     : ` requestedTypes: [${requestedTypes.map(t => `"${t}"`).join(", ")}]. Generate EXACTLY ${requestedTypes.length} lessons in the "lessons" array with these types in this EXACT order.`;
   const tiktokTextRule = lang === "es"
-    ? " REGLA CRÍTICA DE SALIDA: EL TEXTO PARA CUALQUIER PANTALLA DEBE SER MÁXIMO 1 O 2 ORACIONES CONTUNDENTES (MENOS DE 120 CARACTERES). NO IMPORTA QUÉ, NO DEBES ESCRIBIR PÁRRAFOS LARGOS. PIENSA COMO UN SUBTÍTULO RÁPIDO DE TIKTOK."
-    : " CRITICAL OUTPUT RULE: TEXT FOR ANY SCREEN MUST BE A MAXIMUM OF 1 OR 2 PUNCHY SENTENCES (UNDER 120 CHARACTERS). NO MATTER WHAT, YOU MUST NOT WRITE LONG PARAGRAPHS. THINK LIKE A FAST-PACED TIKTOK CAPTION.";
+    ? " REGLA CRÍTICA DE SALIDA: EL TEXTO VISIBLE EN PANTALLA (title, desc, opciones de juego, diálogo de podcast) DEBE SER MÁXIMO 1 O 2 ORACIONES CONTUNDENTES (MENOS DE 120 CARACTERES). EXCEPCIÓN: tooltip_explanation DEBE ser 2-3 oraciones (30-45 palabras) porque aparece en un modal aparte. PIENSA COMO UN SUBTÍTULO RÁPIDO DE TIKTOK para todo lo demás."
+    : " CRITICAL OUTPUT RULE: ON-SCREEN TEXT (title, desc, game options, podcast dialogue) MUST BE A MAXIMUM OF 1 OR 2 PUNCHY SENTENCES (UNDER 120 CHARACTERS). EXCEPTION: tooltip_explanation MUST be 2-3 sentences (30-45 words) because it appears in a separate modal. THINK LIKE A FAST-PACED TIKTOK CAPTION for everything else.";
   const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${topicLine}${countryLine}${langLine}${typesLine}${tiktokTextRule}`;
   try {
     const response = await fetch(
@@ -255,10 +256,29 @@ const getNextVideo = (): string => {
 };
 
 const cardVideoMap = new Map<string, string>();
+const cardPexelsKeyword = new Map<string, string>();
+
 const getVideoForCard = (cardId: string): string => {
+  const keyword = cardPexelsKeyword.get(cardId);
+  if (keyword) {
+    const pexelsUrl = getCachedPexelsVideo(keyword);
+    if (pexelsUrl) return pexelsUrl;
+  }
   if (!cardVideoMap.has(cardId)) cardVideoMap.set(cardId, getNextVideo());
   return cardVideoMap.get(cardId)!;
 };
+
+function preloadPexelsVideos(lessons: any[]) {
+  for (const lesson of lessons) {
+    if (lesson?.video_search_keyword && lesson?.id) {
+      const id = String(lesson.id);
+      cardPexelsKeyword.set(id, lesson.video_search_keyword);
+      fetchPexelsVideo(lesson.video_search_keyword).then((url) => {
+        if (url) cardVideoMap.set(id, url);
+      });
+    }
+  }
+}
 
 const bgGradients = [
   "radial-gradient(ellipse at 20% 50%, #0c2d48 0%, #0f172a 60%, #020617 100%)",
@@ -827,6 +847,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         ...l,
         id: Math.random().toString(36).substr(2, 9),
       }))];
+      preloadPexelsVideos(data.lessons);
       setCurrentData(data);
       setPreloadProgress(currentLang === "es" ? "Preparando audio..." : "Preparing audio...");
 
@@ -897,6 +918,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             ...l,
             id: Math.random().toString(36).substr(2, 9),
           }));
+          preloadPexelsVideos(nl);
           await preloadAudioForCards(nl, currentLang);
           setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
         }
@@ -2542,6 +2564,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                         generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes }).then(async (newData) => {
                           if (newData?.lessons) {
                             const nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
+                            preloadPexelsVideos(nl);
                             await preloadAudioForCards(nl, currentLang);
                             setCurrentData((p: any) => ({ ...p, lessons: [...p.lessons, ...nl] }));
                           }
