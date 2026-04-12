@@ -829,6 +829,10 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       lang: currentLang,
     });
 
+    const introFallback = currentLang === "es"
+      ? `¡Hola${userName ? `, ${userName}` : ""}! Prepárate para una sesión increíble de aprendizaje financiero.`
+      : `Hey${userName ? `, ${userName}` : ""}! Get ready for an awesome financial learning session.`;
+
     generateCards(ageGroup, topic, currentLang, country, 4, { requestedTypes: initialTypes }).then(async (data) => {
       if (!data?.lessons?.length) {
         setLoading(false);
@@ -836,7 +840,17 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         return;
       }
 
-      const introText = await introPromise;
+      let introText: string;
+      try {
+        introText = await Promise.race([
+          introPromise,
+          new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Intro text timeout")), 8000)),
+        ]) || introFallback;
+      } catch (err) {
+        console.error("Intro generation failed:", err);
+        introText = introFallback;
+      }
+
       const introId = "intro_" + Math.random().toString(36).substr(2, 9);
       const introCard = {
         id: introId,
@@ -856,7 +870,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       const introAudioPromise = isElevenLabsAvailable()
         ? fetchAudioBlob(introText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true }).then((r) => {
             if (r.url) audioBlobCache.set(`buffercard_${introId}`, r.url);
-          })
+          }).catch((err) => { console.error("Intro audio fetch failed:", err); })
         : Promise.resolve();
 
       await Promise.all([
@@ -865,6 +879,9 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       ]);
       console.timeEnd("Loading Bay (4 cards + audio)");
       setPreloadReady(true);
+    }).catch((err) => {
+      console.error("Card generation failed:", err);
+      setLoading(false);
     });
   }, [ageGroup, currentModuleIdx, preloadAudioForCards, userName]);
 
@@ -948,26 +965,51 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
     setQuizSummaryText(null);
     setQuizSummaryAudioUrl(null);
 
-    generateShortText("summary", {
-      name: userName || "Explorer",
-      ageGroup,
-      subject: selectedSubjectRef.current || currentModule?.topic || "finance",
-      lang: currentLang,
-    }).then(async (summaryText) => {
-      if (cancelled) return;
-      setQuizSummaryText(summaryText);
-      if (isElevenLabsAvailable()) {
-        const r = await fetchAudioBlob(summaryText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true });
+    const fallbackText = currentLang === "es"
+      ? "¡Gran trabajo en esta sección! Estás progresando increíblemente."
+      : "Great job on this section! You're making awesome progress.";
+
+    const timeoutId = setTimeout(() => {
+      if (!cancelled && !quizSummaryText) {
+        console.warn("Summary generation timed out after 8s — using fallback");
+        setQuizSummaryText(fallbackText);
+      }
+    }, 8000);
+
+    (async () => {
+      try {
+        const summaryText = await generateShortText("summary", {
+          name: userName || "Explorer",
+          ageGroup,
+          subject: selectedSubjectRef.current || currentModule?.topic || "finance",
+          lang: currentLang,
+        });
         if (cancelled) return;
-        if (r.url) {
-          setQuizSummaryAudioUrl(r.url);
-          if (!isMutedRef.current && speechSpeedRef.current > 0) {
-            playBlobAudio(r.url, speechSpeedRef.current);
+        clearTimeout(timeoutId);
+        setQuizSummaryText(summaryText || fallbackText);
+        if (isElevenLabsAvailable()) {
+          try {
+            const r = await fetchAudioBlob(summaryText || fallbackText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true });
+            if (cancelled) return;
+            if (r.url) {
+              setQuizSummaryAudioUrl(r.url);
+              if (!isMutedRef.current && speechSpeedRef.current > 0) {
+                playBlobAudio(r.url, speechSpeedRef.current);
+              }
+            }
+          } catch (audioErr) {
+            console.error("Summary audio fetch failed:", audioErr);
           }
         }
+      } catch (err) {
+        console.error("Summary generation failed:", err);
+        if (!cancelled) {
+          clearTimeout(timeoutId);
+          setQuizSummaryText(fallbackText);
+        }
       }
-    });
-    return () => { cancelled = true; };
+    })();
+    return () => { cancelled = true; clearTimeout(timeoutId); };
   }, [quizResult, userName, ageGroup, currentModule]);
 
   const triggerGreenFlash = () => {
@@ -3578,29 +3620,34 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                   </span>
                 </div>
               )}
-              {quizSummaryText && (
-                <button
-                  className="ws-btn"
-                  onClick={() => {
-                    stopElevenLabsAudio();
-                    setShowQuizSummary(false);
-                    setCountdown(10);
-                    const ct = setInterval(() => setCountdown((p) => {
-                      if (p <= 1) { clearInterval(ct); return 0; }
-                      return p - 1;
-                    }), 1000);
-                  }}
-                  style={{
-                    padding: "16px 48px", borderRadius: 18, border: "none",
-                    background: "linear-gradient(135deg, #2e8bc0, #145374)",
-                    fontWeight: 900, fontSize: "0.95rem", color: "#fff",
-                    fontFamily: FONT, letterSpacing: "0.04em", cursor: "pointer",
-                    boxShadow: "0 0 30px rgba(46,139,192,0.25), 0 6px 20px rgba(0,0,0,0.4)",
-                  }}
-                >
-                  {lang === "es" ? "Continuar →" : "Continue →"}
-                </button>
-              )}
+              <button
+                className="ws-btn"
+                onClick={() => {
+                  stopElevenLabsAudio();
+                  setShowQuizSummary(false);
+                  setCountdown(10);
+                  const ct = setInterval(() => setCountdown((p) => {
+                    if (p <= 1) { clearInterval(ct); return 0; }
+                    return p - 1;
+                  }), 1000);
+                }}
+                style={{
+                  padding: "16px 48px", borderRadius: 18, border: "none",
+                  background: quizSummaryText
+                    ? "linear-gradient(135deg, #2e8bc0, #145374)"
+                    : "rgba(46,139,192,0.25)",
+                  fontWeight: 900, fontSize: "0.95rem", color: "#fff",
+                  fontFamily: FONT, letterSpacing: "0.04em", cursor: "pointer",
+                  boxShadow: quizSummaryText
+                    ? "0 0 30px rgba(46,139,192,0.25), 0 6px 20px rgba(0,0,0,0.4)"
+                    : "none",
+                  transition: "all 0.4s ease",
+                }}
+              >
+                {quizSummaryText
+                  ? (lang === "es" ? "Continuar →" : "Continue →")
+                  : (lang === "es" ? "Saltar →" : "Skip →")}
+              </button>
             </div>
           ) : (() => {
             const loseTitles = t.loseTitles[lang];
