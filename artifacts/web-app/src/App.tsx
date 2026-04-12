@@ -888,11 +888,8 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   }, [ageGroup, currentModuleIdx, preloadAudioForCards, userName]);
 
   useEffect(() => {
-    if (appStarted && ageGroup && accountType !== "parent" && !demoMode) {
+    if (appStarted && ageGroup && accountType !== "parent") {
       navigateTo("hub");
-    }
-    if (appStarted && ageGroup && accountType !== "parent" && demoMode && !currentData) {
-      setShowSubjectPicker(true);
     }
   }, [appStarted, ageGroup, accountType]);
 
@@ -2177,7 +2174,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       </div>
     );
 
-  if (loading || !currentData)
+  if (activeTab === "lab" && (loading || !currentData))
     return (
       <div
         style={{
@@ -2552,7 +2549,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           display: activeTab === "lab" ? "block" : "none",
         }}
       >
-        {currentData.lessons.map((card, i) => {
+        {(currentData?.lessons ?? []).map((card, i) => {
           if (card.type === "intro" || card.type === "summary") {
             const isIntro = card.type === "intro";
             return (
@@ -2571,7 +2568,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                           playBlobAudio(cachedUrl, speechSpeedRef.current);
                         }
                       }
-                      if (!isFetchingRef.current && currentData.lessons.length > 1) {
+                      if (!isFetchingRef.current && currentData && currentData.lessons.length > 1) {
                         const totalSlides = currentData.lessons.length;
                         const triggerIdx = totalSlides - 3;
                         if (i >= triggerIdx || isIntro) {
