@@ -225,9 +225,10 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
 
   return (
     <div style={{
-      position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 300,
+      position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 50,
       background: "linear-gradient(180deg, #091e30 0%, #0c2d48 40%, #091e30 100%)",
       display: "flex", flexDirection: "column", fontFamily: FONT, overflow: "hidden",
+      paddingBottom: 68,
     }}>
       <style>{`
         @keyframes sandboxSlideUp {
@@ -246,17 +247,22 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
         padding: "16px 20px 12px", display: "flex", alignItems: "center", gap: 12,
         borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}>
-        <button onClick={onClose} style={{
-          background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: "50%", width: 36, height: 36, color: "#fff", fontSize: "1rem",
-          cursor: "pointer", fontFamily: FONT, flexShrink: 0,
-        }}>✕</button>
+        <div style={{
+          width: 36, height: 36, borderRadius: 12,
+          background: "rgba(46,139,192,0.1)", border: "1px solid rgba(46,139,192,0.15)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: "1.2rem", flexShrink: 0,
+        }}>🦈</div>
         <div style={{ flex: 1 }}>
           <h1 style={{
             margin: 0, fontSize: "1.1rem", fontWeight: 900, letterSpacing: "0.08em",
             background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>{t.title[lang]}</h1>
+          }}>THE TANK</h1>
+          <p style={{
+            margin: 0, fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.08em",
+            color: "rgba(177,212,224,0.35)",
+          }}>{t.title[lang]}</p>
         </div>
         <div style={{
           display: "flex", alignItems: "center", gap: 6,

@@ -1,0 +1,40 @@
+SYSTEM ROLE: Lead UX Architect & React Routing Expert.
+OBJECTIVE: Pivot the application structure from a Linear Flow to a Hub Flow. Implement a persistent, sleek bottom navigation bar for authenticated users so they can freely switch between the Lab (Learning), the Tank (Investing), and the Vault (Rewards).
+
+STEP 1: THE APP SHELL (LAYOUT WRAPPER)
+
+Create a new component called AppLayout.tsx.
+
+This layout must take children as a prop and render a standard mobile-first view: the main content area fills the screen, and a BottomNav component is fixed to the absolute bottom.
+
+STEP 2: THE BOTTOM NAVIGATION COMPONENT
+
+Create BottomNav.tsx.
+
+Design it with a premium mobile aesthetic (dark glassmorphism, backdrop-blur, safe-area padding at the bottom).
+
+Include three equally spaced icon buttons with the following exact labels:
+
+🧪 Lab (Routes to the Learning Feed)
+
+🦈 Tank (Routes to the Portfolio/Investing Simulator)
+
+🏦 Vault (Routes to the Moolies Reward Store)
+
+Add an active state styling (e.g., a glowing icon or underlined accent) so the user knows exactly which tab they are currently on.
+
+STEP 3: ROUTER REFACTORING (App.tsx)
+
+Update the React Router configuration.
+
+Public Routes: Leave the / (Landing Page), /register, and /app-login alone. They do NOT get the bottom nav bar.
+
+Private/App Routes: Wrap the /lab (formerly the main learning feed), the new /tank (formerly sandbox), and the new /vault routes strictly inside the AppLayout wrapper.
+
+Ensure the /demo testing route also gets the AppLayout so we can easily test the new tabs.
+
+STEP 4: STATE PRESERVATION (CRITICAL)
+
+Ensure that navigating between these three hubs does not wipe out the user's mooliesBalance or portfolioAssets. These must live in a global React Context or state manager that wraps the entire routing tree, NOT inside the individual tab components.
+
+OUTPUT: Refactor the routing tree, build the glassmorphism BottomNav.tsx using the "Lab | Tank | Vault" nomenclature, and ensure global state (Moolies, Portfolio) remains stable when switching tabs.

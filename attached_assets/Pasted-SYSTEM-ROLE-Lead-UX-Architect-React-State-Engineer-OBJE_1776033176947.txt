@@ -1,0 +1,28 @@
+SYSTEM ROLE: Lead UX Architect & React State Engineer.
+OBJECTIVE: Pivot the application to a Hub Flow with persistent bottom navigation. Move the lesson data into Global State so progress is not lost when switching tabs. Implement a "Burn-After-Reading" mechanic for the Intro Card.
+
+STEP 1: THE APP SHELL & BOTTOM NAV
+
+Create AppLayout.tsx to wrap the main authenticated routes. The content area fills the screen, and a BottomNav is fixed to the absolute bottom.
+
+Build BottomNav.tsx with a premium glassmorphism aesthetic.
+
+Include 3 equal buttons: 🧪 Lab (/lab), 🦈 Tank (/tank), and 🏦 Vault (/vault). Add active-state styling for the current tab.
+
+Update App.tsx routing: Public routes (Login, Landing) stay outside. Wrap the Lab, Tank, and Vault routes strictly inside AppLayout.
+
+STEP 2: GLOBAL STATE PRESERVATION (THE MEMORY BANK)
+
+Move the cards array and currentIndex state variables OUT of the local Lab/Feed component and INTO your global React Context (alongside mooliesBalance and portfolioAssets).
+
+In the Lab component, update the useEffect that triggers the AI fetch: ONLY fetch new cards if the global cards array is empty. If data exists, bypass the fetch and render at the saved currentIndex.
+
+STEP 3: THE "BURN-AFTER-READING" INTRO CARD
+
+The Intro Card (Buffer 1) is useless after the user has seen it. We must drop it from memory to save RAM and clean up the UX.
+
+In the main Feed/Swiper logic, write a condition: When the user swipes forward past the Intro Card (moving from index 0 to index 1), automatically update the global state to remove the Intro Card from the cards array.
+
+Adjust the currentIndex state accordingly so the first actual lesson card becomes the new index 0. The user should not be able to swipe backward to the intro audio.
+
+OUTPUT: Build the App Shell with the "Lab | Tank | Vault" bottom navigation. Refactor the cards and currentIndex into global context so users can seamlessly switch tabs without losing their place. Implement the "Burn" logic to slice the Intro Card out of the array once swiped.

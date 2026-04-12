@@ -121,13 +121,14 @@ export default function TheVault({
         left: 0,
         width: "100%",
         height: "100%",
-        zIndex: 300,
+        zIndex: 50,
         background: "linear-gradient(180deg, #091e30 0%, #0c2d48 40%, #091e30 100%)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         overflow: "auto",
         fontFamily: FONT,
+        paddingBottom: 68,
       }}
     >
       <style>{`
@@ -156,30 +157,9 @@ export default function TheVault({
         }
       `}</style>
 
-      <button
-        onClick={onClose}
-        style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          zIndex: 310,
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: "50%",
-          width: 40,
-          height: 40,
-          color: "#fff",
-          fontSize: "1.2rem",
-          cursor: "pointer",
-          fontFamily: FONT,
-        }}
-      >
-        ✕
-      </button>
-
       <div
         style={{
-          marginTop: 50,
+          marginTop: 20,
           marginBottom: 10,
           textAlign: "center",
           animation: "vaultSlideUp 0.6s ease-out both",

@@ -9,6 +9,7 @@ import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakP
 import { resolveVideoUrls } from "./pexelsVideo";
 import TheVault from "./TheVault";
 import Sandbox from "./Sandbox";
+import BottomNav, { type TabId } from "./BottomNav";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -683,8 +684,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [equippedItems, setEquippedItems] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem("ws_equippedItems") || "[]"); } catch { return []; }
   });
-  const [showVault, setShowVault] = useState(false);
-  const [showSandbox, setShowSandbox] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>("lab");
   const [currentModuleIdx, setCurrentModuleIdx] = useState(() => load("modIdx", 0));
   const [moduleProgress, setModuleProgress] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
@@ -2331,6 +2331,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         position: "absolute", top: 0, left: 0, width: 3, height: "100%",
         zIndex: 15, pointerEvents: "none",
         background: "rgba(255,255,255,0.03)",
+        display: activeTab === "lab" ? "block" : "none",
       }}>
         <div style={{
           width: "100%",
@@ -2353,7 +2354,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           zIndex: 10,
           background: "transparent",
           pointerEvents: "none",
-          display: "flex",
+          display: activeTab === "lab" ? "flex" : "none",
           justifyContent: "space-between",
           alignItems: "center",
         }}
@@ -2376,7 +2377,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         </span>
         <button
           className="ws-btn"
-          onClick={() => setShowVault(true)}
+          onClick={() => setActiveTab("vault")}
           style={{
             display: "flex", alignItems: "center", gap: 5,
             padding: "6px 12px", borderRadius: 20,
@@ -2525,6 +2526,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           overflowY: "scroll",
           scrollSnapType: "y mandatory",
           scrollbarWidth: "none",
+          display: activeTab === "lab" ? "block" : "none",
         }}
       >
         {currentData.lessons.map((card, i) => {
@@ -3186,42 +3188,46 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           }}>
             <button
               className="ws-btn"
-              onClick={() => { setShowProfile(false); setShowVault(true); }}
+              onClick={() => { setShowProfile(false); setActiveTab("vault"); }}
               style={{
                 flex: 1, padding: "14px 12px",
                 borderRadius: 18, border: "1px solid rgba(255,215,0,0.25)",
-                background: "linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.05))",
+                background: activeTab === "vault"
+                  ? "linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1))"
+                  : "linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.05))",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
                 cursor: "pointer", fontFamily: FONT, transition: "all 0.3s ease",
               }}
             >
-              <img src="/moolie-coin.png" alt="" style={{ width: 24, height: 24 }} />
+              <span style={{ fontSize: "1.3rem" }}>🏦</span>
               <span style={{
                 fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.08em",
                 background: "linear-gradient(135deg, #FFD700, #FFA500)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               }}>
-                {t.profile.openVault[lang]}
+                VAULT
               </span>
             </button>
             <button
               className="ws-btn"
-              onClick={() => { setShowProfile(false); setShowSandbox(true); }}
+              onClick={() => { setShowProfile(false); setActiveTab("tank"); }}
               style={{
                 flex: 1, padding: "14px 12px",
                 borderRadius: 18, border: "1px solid rgba(46,139,192,0.25)",
-                background: "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(20,83,116,0.05))",
+                background: activeTab === "tank"
+                  ? "linear-gradient(135deg, rgba(46,139,192,0.15), rgba(20,83,116,0.1))"
+                  : "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(20,83,116,0.05))",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
                 cursor: "pointer", fontFamily: FONT, transition: "all 0.3s ease",
               }}
             >
-              <span style={{ fontSize: "1.3rem" }}>📊</span>
+              <span style={{ fontSize: "1.3rem" }}>🦈</span>
               <span style={{
                 fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.08em",
                 background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               }}>
-                {t.sandbox.openSandbox[lang]}
+                TANK
               </span>
             </button>
           </div>
@@ -3375,7 +3381,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         </div>
       )}
 
-      {showVault && (
+      {activeTab === "vault" && (
         <TheVault
           lang={lang}
           moolies={moolies}
@@ -3391,17 +3397,17 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
               prev.includes(itemId) ? prev.filter((x) => x !== itemId) : [...prev, itemId]
             );
           }}
-          onClose={() => setShowVault(false)}
+          onClose={() => setActiveTab("lab")}
         />
       )}
 
-      {showSandbox && (
+      {activeTab === "tank" && (
         <Sandbox
           lang={lang}
           moolies={moolies}
           onSpend={(amount) => setMoolies((p) => Math.round((p - amount) * 100) / 100)}
           onEarn={(amount) => setMoolies((p) => Math.round((p + amount) * 100) / 100)}
-          onClose={() => setShowSandbox(false)}
+          onClose={() => setActiveTab("lab")}
         />
       )}
 
@@ -3943,6 +3949,18 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           })()}
         </div>
         </div>
+      )}
+      {appStarted && !showLanding && !quizUnlocked && !showQuizSummary && !showModuleMap && !showParentDash && !showProfile && currentData && (
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setShowProfile(false);
+            if (tab !== "lab") stopElevenLabsAudio();
+            setActiveTab(tab);
+          }}
+          lang={lang}
+          moolies={moolies}
+        />
       )}
     </div>
   );
