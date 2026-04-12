@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./AuthContext";
+import { FeedProvider } from "./FeedContext";
 import App from "./App";
 import Home from "./pages/Home";
 import Register from "./pages/Register";
@@ -28,6 +29,7 @@ const basePath = import.meta.env.BASE_URL;
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter basename={basePath.endsWith("/") ? basePath.slice(0, -1) : basePath}>
     <AuthProvider>
+    <FeedProvider>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
@@ -38,6 +40,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/feed" element={<Feed />} />
         <Route path="/legacy" element={<LegacyApp />} />
       </Routes>
+    </FeedProvider>
     </AuthProvider>
   </BrowserRouter>
 );

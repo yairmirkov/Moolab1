@@ -9,7 +9,9 @@ import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakP
 import { resolveVideoUrls } from "./pexelsVideo";
 import TheVault from "./TheVault";
 import Sandbox from "./Sandbox";
-import BottomNav, { type TabId } from "./BottomNav";
+import AppLayout from "./AppLayout";
+import { type TabId } from "./BottomNav";
+import { useFeed } from "./FeedContext";
 
 const MODULE_DATA = [
   { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
@@ -613,6 +615,19 @@ interface AppProps {
 }
 
 function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
+  const {
+    currentData, setCurrentData,
+    activeSlideIndex, setActiveSlideIndex,
+    completedSlides, setCompletedSlides,
+    slideAnswers, setSlideAnswers,
+    isFetchingMore, setIsFetchingMore,
+    isFetchingRef,
+    introBurned, burnIntro, resetFeedSession,
+    scrollProgress, setScrollProgress,
+    feedRef,
+    slidesScrolledRef, lastSlideRef,
+  } = useFeed();
+
   const [lang, setLang] = useState<Lang>(() => {
     return loadStr("lang", "en") as Lang;
   });
@@ -628,12 +643,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
 
   const [appStarted, setAppStarted] = useState(demoMode);
   const [ageGroup, setAgeGroup] = useState(demoMode ? demoAgeGroup : "");
-  const [currentData, setCurrentData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const isFetchingRef = useRef(false);
-  const [completedSlides, setCompletedSlides] = useState([]);
-  const [slideAnswers, setSlideAnswers] = useState({});
   const [quizUnlocked, setQuizUnlocked] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizResult, setQuizResult] = useState(null);
@@ -714,14 +724,8 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const isMutedRef = useRef(false);
   const [speechSpeed, setSpeechSpeed] = useState<number>(1);
   const speechSpeedRef = useRef<number>(1);
-  const slidesScrolledRef = useRef(0);
-  const lastSlideRef = useRef(-1);
-  const feedRef = useRef<HTMLDivElement | null>(null);
-
   const progress = Math.min((completedSlides.length / 5) * 100, 100);
 
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [flashBlue, setFlashBlue] = useState(false);
 
   const currentModule = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
@@ -792,25 +796,20 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   }, []);
 
   const resetJourney = useCallback((subjectOverride?: string) => {
+    resetFeedSession();
     setLoading(true);
     setPreloadReady(false);
     setPreloadProgress("");
-    setCompletedSlides([]);
-    setSlideAnswers({});
     setQuizUnlocked(false);
     setQuizStarted(false);
     setQuizResult(null);
     setRevealedExplanations({});
     setBossExplanation(null);
     setRevealedSlides({});
-    setActiveSlideIndex(0);
     setAudioUnlocked(false);
-    slidesScrolledRef.current = 0;
-    lastSlideRef.current = -1;
     stopElevenLabsAudio();
     bufferCardAudioPlayed.clear();
     bufferCardObserved.clear();
-    isFetchingRef.current = false;
     const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
     const topic = subjectOverride || selectedSubjectRef.current || mod?.topic;
     const country = loadStr("country", "");
@@ -919,6 +918,15 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       slidesScrolledRef.current += 1;
     }
 
+    if (
+      !introBurned &&
+      currentSlideIdx >= 1 &&
+      currentData.lessons?.[0]?.type === "intro"
+    ) {
+      burnIntro();
+      return;
+    }
+
     const totalSlides = currentData.lessons?.length || 0;
     const triggerIndex = totalSlides - 3;
 
@@ -926,26 +934,31 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       isFetchingRef.current = true;
       setIsFetchingMore(true);
       setTimeout(async () => {
-        const currentLang = langRef.current;
-        const nextTypes = getRequestedTypes(totalSlides, 4);
-        const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes });
-        if (newData) {
-          let nl = newData.lessons.map((l: any) => ({
-            ...l,
-            id: Math.random().toString(36).substr(2, 9),
-          }));
-          nl = await resolveVideoUrls(nl);
-          await preloadAudioForCards(nl, currentLang);
-          setCurrentData((p: any) => {
-            const updated = { ...p, lessons: [...p.lessons, ...nl] };
-            if (!p.bossQuiz?.actionQuestion && newData.bossQuiz?.actionQuestion && Array.isArray(newData.bossQuiz?.options) && newData.bossQuiz.options.length >= 2) {
-              updated.bossQuiz = newData.bossQuiz;
-            }
-            return updated;
-          });
+        try {
+          const currentLang = langRef.current;
+          const nextTypes = getRequestedTypes(totalSlides, 4);
+          const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes });
+          if (newData) {
+            let nl = newData.lessons.map((l: any) => ({
+              ...l,
+              id: Math.random().toString(36).substr(2, 9),
+            }));
+            nl = await resolveVideoUrls(nl);
+            await preloadAudioForCards(nl, currentLang);
+            setCurrentData((p: any) => {
+              const updated = { ...p, lessons: [...p.lessons, ...nl] };
+              if (!p.bossQuiz?.actionQuestion && newData.bossQuiz?.actionQuestion && Array.isArray(newData.bossQuiz?.options) && newData.bossQuiz.options.length >= 2) {
+                updated.bossQuiz = newData.bossQuiz;
+              }
+              return updated;
+            });
+          }
+        } catch (err) {
+          console.error("Feed extension failed:", err);
+        } finally {
+          setIsFetchingMore(false);
+          isFetchingRef.current = false;
         }
-        setIsFetchingMore(false);
-        isFetchingRef.current = false;
       }, 300);
     }
   };
@@ -2274,7 +2287,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       </div>
     );
 
-  return (
+  const content = (
     <div
       style={{
         position: "relative",
@@ -2569,6 +2582,9 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                                 return updated;
                               });
                             }
+                          }).catch((err) => {
+                            console.error("Observer feed extension failed:", err);
+                          }).finally(() => {
                             setIsFetchingMore(false);
                             isFetchingRef.current = false;
                           });
@@ -3950,19 +3966,25 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
         </div>
         </div>
       )}
-      {appStarted && !showLanding && !quizUnlocked && !showQuizSummary && !showModuleMap && !showParentDash && !showProfile && currentData && (
-        <BottomNav
-          activeTab={activeTab}
-          onTabChange={(tab) => {
-            setShowProfile(false);
-            if (tab !== "lab") stopElevenLabsAudio();
-            setActiveTab(tab);
-          }}
-          lang={lang}
-          moolies={moolies}
-        />
-      )}
     </div>
+  );
+
+  const showNav = appStarted && !showLanding && !quizUnlocked && !showQuizSummary && !showModuleMap && !showParentDash && !showProfile && !!currentData;
+
+  return (
+    <AppLayout
+      activeTab={activeTab}
+      onTabChange={(tab) => {
+        setShowProfile(false);
+        if (tab !== "lab") stopElevenLabsAudio();
+        setActiveTab(tab);
+      }}
+      lang={lang}
+      moolies={moolies}
+      showNav={showNav}
+    >
+      {content}
+    </AppLayout>
   );
 }
 

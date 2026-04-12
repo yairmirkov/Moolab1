@@ -1,0 +1,40 @@
+SYSTEM ROLE: Lead UX/UI Architect & React Performance Engineer.
+OBJECTIVE: Revert the persistent bottom navigation flow. Implement a "Central Hub" (Main Menu) as the primary post-login screen. Restore full-screen immersion to all sub-routes and implement smart, deferred background loading to save API quotas.
+
+STEP 1: NUKE THE BOTTOM NAV
+
+Completely remove the BottomNav.tsx component and remove the bottom padding from AppLayout.tsx.
+
+The Lab, Tank, and Vault must return to being 100% full-screen, immersive experiences.
+
+STEP 2: THE CENTRAL HUB SCREEN (/hub)
+
+Create a new main view called Hub.tsx (or Dashboard.tsx).
+
+Routing: Make this the default route the user lands on immediately after logging in.
+
+UI Design: Design a premium, highly visual Main Menu. Display the user's mooliesBalance at the top. Below it, render three massive, sleek cards/buttons stacked vertically or in a clean grid:
+
+🧪 Enter The Lab (Routes to /lab)
+
+🦈 The Tank (Routes to /tank)
+
+🏦 The Vault (Routes to /vault)
+
+STEP 3: SMART PRE-LOADING & DEFERRED FETCHING
+
+In the Hub component: When this screen mounts, fire a background useEffect to silently fetch the real-time stock rates for the Tank.
+
+In the Lab/Feed component: Ensure the expensive Gemini API and ElevenLabs audio fetch ONLY triggers when the Lab component actually mounts (i.e., the user clicked "Enter The Lab"). Do NOT pre-fetch AI content on the Hub screen.
+
+STEP 4: HEADER CLEANUP & NAVIGATION TIE-IN
+
+Open the Header/TopBar component used in the Lab.
+
+Remove the hardcoded "Hey, " text. It should strictly display the user's firstName alongside the Moolies coin count.
+
+Ensure the user's name remains clickable, opening the ProfileDashboard drawer.
+
+CRITICAL: Inside the ProfileDashboard, add a prominent button at the top or bottom labeled "🏠 Back to Hub" that routes the user back to the /hub screen, allowing them to exit the Lab or Tank safely without losing global state.
+
+OUTPUT: Delete the bottom nav, build the Hub.tsx main menu with smart background pre-loading for stock rates, defer Lab API calls, clean up the header text, and add the "Back to Hub" escape hatch in the profile menu.
