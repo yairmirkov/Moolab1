@@ -3180,30 +3180,96 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             </span>
           </button>
 
-          {/* Progress Ring */}
-          <div style={{ position: "relative", width: 120, height: 120, marginBottom: 20 }}>
-            <svg width="120" height="120" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
-              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="6" />
-              <circle cx="60" cy="60" r="50" fill="none" stroke="url(#profGrad)" strokeWidth="6"
-                strokeLinecap="round" strokeDasharray="314"
-                strokeDashoffset={314 - (314 * Math.min((xp % (level * 50)) / (level * 50) * 100, 100) / 100)}
-                style={{ transition: "stroke-dashoffset 0.8s ease" }}
-              />
-              <defs>
-                <linearGradient id="profGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#2e8bc0" />
-                  <stop offset="100%" stopColor="#b1d4e0" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div style={{
-              position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: "2rem", fontWeight: 900, color: "#fff" }}>{level}</div>
-              <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em" }}>{t.profile.level[lang]}</div>
-            </div>
-          </div>
+          {(() => {
+            const hasSharkBorder = equippedItems.includes("shark_border");
+            const hasNeonHacker = equippedItems.includes("neon_hacker");
+            const hasDiamondTrail = equippedItems.includes("diamond_trail");
+            const borderGrad = hasSharkBorder
+              ? "linear-gradient(135deg, #FFD700, #FFA500, #FFD700)"
+              : hasNeonHacker
+              ? "linear-gradient(135deg, #00ff87, #60efff, #00ff87)"
+              : hasDiamondTrail
+              ? "linear-gradient(135deg, #a78bfa, #60a5fa, #a78bfa)"
+              : "linear-gradient(135deg, rgba(46,139,192,0.3), rgba(177,212,224,0.2))";
+            const borderWidth = hasSharkBorder || hasNeonHacker || hasDiamondTrail ? 3 : 2;
+            const glowShadow = hasSharkBorder
+              ? "0 0 20px rgba(255,215,0,0.4), 0 0 40px rgba(255,165,0,0.2)"
+              : hasNeonHacker
+              ? "0 0 20px rgba(0,255,135,0.4), 0 0 40px rgba(96,239,255,0.2)"
+              : hasDiamondTrail
+              ? "0 0 20px rgba(167,139,250,0.4), 0 0 40px rgba(96,165,250,0.2)"
+              : "none";
+            const initials = (userName || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+
+            return (
+              <>
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  gap: 24, marginBottom: 16, width: "100%", maxWidth: 300,
+                }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                    <div style={{
+                      width: 90, height: 90, borderRadius: "50%",
+                      background: borderGrad, padding: borderWidth,
+                      boxShadow: glowShadow,
+                      animation: (hasSharkBorder || hasNeonHacker || hasDiamondTrail) ? "avatarGlow 3s ease-in-out infinite" : "none",
+                    }}>
+                      <div style={{
+                        width: "100%", height: "100%", borderRadius: "50%",
+                        background: "linear-gradient(135deg, #0c2d48, #145374)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "1.8rem", fontWeight: 900, color: "#b1d4e0",
+                        letterSpacing: "0.05em",
+                      }}>
+                        {initials}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                      {lang === "es" ? "AVATAR" : "AVATAR"}
+                    </div>
+                  </div>
+
+                  <div style={{ width: 1, height: 70, background: "rgba(255,255,255,0.06)" }} />
+
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                    <div style={{ position: "relative", width: 90, height: 90 }}>
+                      <svg width="90" height="90" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
+                        <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="6" />
+                        <circle cx="60" cy="60" r="50" fill="none" stroke="url(#profGrad)" strokeWidth="6"
+                          strokeLinecap="round" strokeDasharray="314"
+                          strokeDashoffset={314 - (314 * Math.min((xp % (level * 50)) / (level * 50) * 100, 100) / 100)}
+                          style={{ transition: "stroke-dashoffset 0.8s ease" }}
+                        />
+                        <defs>
+                          <linearGradient id="profGrad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#2e8bc0" />
+                            <stop offset="100%" stopColor="#b1d4e0" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div style={{
+                        position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+                        textAlign: "center",
+                      }}>
+                        <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#fff" }}>{level}</div>
+                        <div style={{ fontSize: "0.4rem", fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em" }}>{t.profile.level[lang]}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em" }}>
+                      {xp % (level * 50)} / {level * 50} XP
+                    </div>
+                  </div>
+                </div>
+
+                <style>{`
+                  @keyframes avatarGlow {
+                    0%, 100% { filter: brightness(1); }
+                    50% { filter: brightness(1.2); }
+                  }
+                `}</style>
+              </>
+            );
+          })()}
 
           <h2 style={{
             color: "#fff", fontSize: "1.6rem", fontWeight: 900,
@@ -3228,7 +3294,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           >
             {[
               { label: t.profile.totalXp[lang], val: xp, color: "#2e8bc0" },
-              { label: t.profile.moolies[lang], val: moolies, color: "#FFD700" },
+              { label: t.profile.moolies[lang], val: Math.round(moolies * 100) / 100, color: "#FFD700" },
               { label: t.profile.bossWins[lang], val: bossWins, color: "#FFD93D" },
               { label: t.profile.streak[lang], val: `${streak}🔥`, color: "#FF6B6B" },
             ].map((s) => (
