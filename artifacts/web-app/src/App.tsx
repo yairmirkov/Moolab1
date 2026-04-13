@@ -3549,6 +3549,12 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
             lang={lang}
             userName={userName}
             moolies={moolies}
+            xp={xp}
+            level={level}
+            streak={streak}
+            bossWins={bossWins}
+            equippedItems={equippedItems}
+            onOpenProfile={() => setShowProfile(true)}
             onNavigate={(view) => {
               if (view === "lab") {
                 if (!currentData) {
