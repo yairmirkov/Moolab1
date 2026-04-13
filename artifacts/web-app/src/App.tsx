@@ -3450,7 +3450,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
           unlockedItems={unlockedItems}
           equippedItems={equippedItems}
           onPurchase={(itemId, cost) => {
-            setMoolies((p) => p - cost);
+            setMoolies((p) => Math.round((p - cost) * 100) / 100);
             setUnlockedItems((prev) => [...prev, itemId]);
             setEquippedItems((prev) => [...prev, itemId]);
           }}
@@ -3706,7 +3706,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
                             if (win) {
                               setQuizResult(true);
                               setXp((p) => p + 50);
-                              setMoolies((p) => p + 50);
+                              setMoolies((p) => Math.round(p + 50));
                               setStreak((p) => p + 1);
                               setBossWins((p) => p + 1);
                               setModuleProgress((prev) => {
