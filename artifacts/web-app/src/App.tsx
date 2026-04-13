@@ -689,7 +689,10 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [streak, setStreak] = useState(() => load("streak", 0));
   const [level, setLevel] = useState(() => load("level", 1));
   const [bossWins, setBossWins] = useState(() => load("bossWins", 0));
-  const [moolies, setMoolies] = useState(() => load("moolies", 0));
+  const [moolies, setMoolies] = useState(() => {
+    if (demoMode) { save("moolies", 1000); return 1000; }
+    return load("moolies", 0);
+  });
   const [unlockedItems, setUnlockedItems] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem("ws_unlockedItems") || "[]"); } catch { return []; }
   });
