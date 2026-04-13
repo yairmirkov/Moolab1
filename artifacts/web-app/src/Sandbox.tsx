@@ -221,6 +221,18 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
     return sum + (asset ? asset.price * h.shares : 0);
   }, 0);
 
+  const prevPortfolioValue = holdings.reduce((sum, h) => {
+    const asset = assets.find((a) => a.id === h.assetId);
+    if (!asset) return sum;
+    const prevPrice = asset.history.length > 1 ? asset.history[asset.history.length - 2] : asset.price;
+    return sum + prevPrice * h.shares;
+  }, 0);
+
+  const dailyChange = Math.round((portfolioValue - prevPortfolioValue) * 100) / 100;
+  const dailyChangePct = prevPortfolioValue > 0 ? Math.round(((portfolioValue - prevPortfolioValue) / prevPortfolioValue) * 100 * 100) / 100 : 0;
+  const changeColor = dailyChange >= 0 ? "#4CAF50" : "#f44336";
+  const changeSign = dailyChange >= 0 ? "+" : "";
+
   const maxBuyable = selectedAsset ? Math.floor(moolies / selectedAsset.price) : 0;
 
   return (
@@ -413,6 +425,24 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
                   WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
                 }}>{Math.round(portfolioValue).toLocaleString()}</span>
               </div>
+              {holdings.length > 0 && (
+                <div style={{
+                  marginTop: 6, fontSize: "0.75rem", fontWeight: 700, color: changeColor,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                }}>
+                  <span>{changeSign}{dailyChange.toLocaleString()} Moolies</span>
+                  <span style={{
+                    padding: "2px 7px", borderRadius: 8,
+                    background: dailyChange >= 0 ? "rgba(76,175,80,0.12)" : "rgba(244,67,54,0.12)",
+                    fontSize: "0.65rem",
+                  }}>
+                    {changeSign}{dailyChangePct}%
+                  </span>
+                  <span style={{ color: "rgba(177,212,224,0.35)", fontSize: "0.55rem", fontWeight: 600 }}>
+                    {lang === "es" ? "hoy" : "today"}
+                  </span>
+                </div>
+              )}
             </div>
 
             {holdings.length === 0 ? (
