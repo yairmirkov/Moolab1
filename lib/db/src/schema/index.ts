@@ -17,6 +17,13 @@ export const childrenTable = pgTable("children", {
   pin: varchar("pin", { length: 4 }).notNull(),
   displayName: varchar("display_name", { length: 100 }).notNull(),
   ageGroup: varchar("age_group", { length: 10 }).notNull(),
+  xp: integer("xp").notNull().default(0),
+  level: integer("level").notNull().default(1),
+  streak: integer("streak").notNull().default(0),
+  bossWins: integer("boss_wins").notNull().default(0),
+  moolies: integer("moolies").notNull().default(0),
+  lessonsCompleted: integer("lessons_completed").notNull().default(0),
+  lastActiveAt: timestamp("last_active_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

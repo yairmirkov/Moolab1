@@ -35,4 +35,7 @@ export const api = {
 
   deleteChild: (id: number) =>
     request(`/children/${id}`, { method: "DELETE" }),
+
+  syncChildProgress: (progress: { xp?: number; level?: number; streak?: number; bossWins?: number; moolies?: number; lessonsCompleted?: number }) =>
+    request("/children/me/progress", { method: "PUT", body: JSON.stringify(progress) }),
 };

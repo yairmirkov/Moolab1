@@ -12,6 +12,7 @@ import Sandbox from "./Sandbox";
 import AppLayout from "./AppLayout";
 import Hub from "./Hub";
 import { useFeed } from "./FeedContext";
+import { api } from "./api";
 
 type TabId = "hub" | "lab" | "tank" | "vault";
 
@@ -895,6 +896,21 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
       navigateTo("hub");
     }
   }, [appStarted, ageGroup, accountType]);
+
+  useEffect(() => {
+    if (demoMode || accountType !== "learner") return;
+    const handle = setTimeout(() => {
+      api.syncChildProgress({
+        xp: Math.floor(xp),
+        level: Math.floor(level),
+        streak: Math.floor(streak),
+        bossWins: Math.floor(bossWins),
+        moolies: Math.floor(moolies),
+        lessonsCompleted: Object.values(moduleProgress).reduce((s: number, v: any) => s + (Number(v) || 0), 0),
+      }).catch(() => {});
+    }, 1500);
+    return () => clearTimeout(handle);
+  }, [xp, level, streak, bossWins, moolies, moduleProgress, accountType, demoMode]);
 
   const fallbackBrowserSpeak = useCallback((_text: string, onDone: () => void) => {
     console.error("[Moolab] ElevenLabs TTS unavailable, skipping speech");

@@ -27,6 +27,13 @@ router.get("/children", async (req, res) => {
     displayName: childrenTable.displayName,
     pin: childrenTable.pin,
     ageGroup: childrenTable.ageGroup,
+    xp: childrenTable.xp,
+    level: childrenTable.level,
+    streak: childrenTable.streak,
+    bossWins: childrenTable.bossWins,
+    moolies: childrenTable.moolies,
+    lessonsCompleted: childrenTable.lessonsCompleted,
+    lastActiveAt: childrenTable.lastActiveAt,
     createdAt: childrenTable.createdAt,
   }).from(childrenTable).where(eq(childrenTable.parentId, parentId));
 
@@ -73,10 +80,39 @@ router.post("/children", async (req, res) => {
       displayName: child.displayName,
       pin: child.pin,
       ageGroup: child.ageGroup,
+      xp: child.xp,
+      level: child.level,
+      streak: child.streak,
+      bossWins: child.bossWins,
+      moolies: child.moolies,
+      lessonsCompleted: child.lessonsCompleted,
     });
   } catch (err: any) {
     console.error("Create child error:", err);
     return res.status(500).json({ error: "Failed to create child profile" });
+  }
+});
+
+router.put("/children/me/progress", async (req, res) => {
+  const childId = (req.session as any)?.childId;
+  if (!childId) {
+    return res.status(401).json({ error: "Not authenticated as child" });
+  }
+  try {
+    const { xp, level, streak, bossWins, moolies, lessonsCompleted } = req.body || {};
+    const updates: any = { lastActiveAt: new Date() };
+    if (typeof xp === "number") updates.xp = Math.max(0, Math.floor(xp));
+    if (typeof level === "number") updates.level = Math.max(1, Math.floor(level));
+    if (typeof streak === "number") updates.streak = Math.max(0, Math.floor(streak));
+    if (typeof bossWins === "number") updates.bossWins = Math.max(0, Math.floor(bossWins));
+    if (typeof moolies === "number") updates.moolies = Math.max(0, Math.floor(moolies));
+    if (typeof lessonsCompleted === "number") updates.lessonsCompleted = Math.max(0, Math.floor(lessonsCompleted));
+
+    await db.update(childrenTable).set(updates).where(eq(childrenTable.id, childId));
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error("Update progress error:", err);
+    return res.status(500).json({ error: "Failed to update progress" });
   }
 });
 
