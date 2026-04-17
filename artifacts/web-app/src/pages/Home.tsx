@@ -16,10 +16,11 @@ export default function Home() {
 
   const handleParentLogin = () => navigate(`/login${langSuffix}`);
   const handleTestApp = () => navigate(`/demo${langSuffix}`);
+  const handleSignUp = () => navigate(`/register${langSuffix}`);
 
   if (effectiveLang === "es") {
     return <LandingPageES onParentLogin={handleParentLogin} onTestApp={handleTestApp} />;
   }
 
-  return <LandingPage onParentLogin={handleParentLogin} onTestApp={handleTestApp} />;
+  return <LandingPage onParentLogin={handleParentLogin} onTestApp={handleTestApp} onSignUp={handleSignUp} />;
 }
