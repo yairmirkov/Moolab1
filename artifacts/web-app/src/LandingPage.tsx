@@ -153,7 +153,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
               onClick={onTestApp}
               className="px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-200/50 hover:shadow-sky-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              Sign Up / Join Beta
+              Sign Up
             </button>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200/60 mb-6 sm:mb-8">
             <span className="w-2 h-2 rounded-full bg-[#2e8bc0] animate-pulse" />
             <span className="text-[10px] sm:text-xs font-semibold text-[#145374] tracking-wide uppercase">
-              For Parents · Ages 8–16
+              For Parents · Kids and Teens
             </span>
           </div>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.08] mb-6 sm:mb-8">
@@ -178,23 +178,9 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
               Turn It Into Financial Literacy.
             </span>
           </h1>
-          <p className="text-base sm:text-lg text-[#0c2d48]/55 font-medium max-w-2xl mx-auto mb-10 sm:mb-12 leading-relaxed">
-            The gamified financial simulator for ages 8–16. They learn the rules of money in 5 minutes a day, trade in a risk-free simulator, and build habits that last a lifetime.
+          <p className="text-base sm:text-lg text-[#0c2d48]/55 font-medium max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
+            The gamified financial simulator for kids and teens. They learn the rules of money in 5 minutes a day, trade in a risk-free simulator, and build habits that last a lifetime.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8">
-            <button
-              onClick={onTestApp}
-              className="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm sm:text-base tracking-wide shadow-xl shadow-sky-300/30 hover:shadow-sky-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-            >
-              Sign Up / Join Beta &#x26A1;
-            </button>
-            <button
-              onClick={onParentLogin}
-              className="px-8 py-3.5 rounded-full border-2 border-sky-200 text-[#145374] font-bold text-sm sm:text-base tracking-wide bg-white hover:bg-sky-50 active:scale-95 transition-all duration-200 cursor-pointer"
-            >
-              Log In
-            </button>
-          </div>
           <p className="text-xs text-[#0c2d48]/30 font-medium">Free to start · No ads · Safe for kids</p>
         </div>
       </section>
@@ -299,7 +285,7 @@ export default function LandingPage({ onParentLogin, onTestApp }: LandingPagePro
                 boxShadow: "0 4px 30px rgba(46,139,192,0.35), 0 0 60px rgba(46,139,192,0.15)",
               }}
             >
-              Sign Up / Join Beta
+              Sign Up
             </button>
             <button
               onClick={onParentLogin}
