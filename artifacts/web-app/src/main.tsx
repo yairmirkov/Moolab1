@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import AppLogin from "./pages/AppLogin";
 import Demo from "./pages/Demo";
 import Feed from "./pages/Feed";
+import Privacy from "./pages/Privacy";
 import "./index.css";
 
 function syncUrlLangToStorage() {
@@ -38,6 +39,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/app-login" element={<AppLogin />} />
         <Route path="/demo" element={<Demo />} />
         <Route path="/feed" element={<Feed />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/legacy" element={<LegacyApp />} />
       </Routes>
     </FeedProvider>
