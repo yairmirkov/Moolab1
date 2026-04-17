@@ -615,9 +615,11 @@ function PodcastClipSlide({
 interface AppProps {
   demoMode?: boolean;
   demoAgeGroup?: string;
+  childAuthMode?: boolean;
 }
 
-function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
+function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: AppProps) {
+  const skipOnboarding = demoMode || childAuthMode;
   const {
     currentData, setCurrentData,
     activeSlideIndex, setActiveSlideIndex,
@@ -644,8 +646,8 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const MODULES = getModules(lang);
   const t = translations;
 
-  const [appStarted, setAppStarted] = useState(demoMode);
-  const [ageGroup, setAgeGroup] = useState(demoMode ? demoAgeGroup : "");
+  const [appStarted, setAppStarted] = useState(skipOnboarding);
+  const [ageGroup, setAgeGroup] = useState(skipOnboarding ? demoAgeGroup : "");
   const [loading, setLoading] = useState(false);
   const [quizUnlocked, setQuizUnlocked] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
@@ -660,9 +662,9 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [preloadReady, setPreloadReady] = useState(false);
   const [preloadProgress, setPreloadProgress] = useState("");
-  const [userName, setUserName] = useState(() => demoMode ? (loadStr("name", "") || "Demo") : loadStr("name", ""));
+  const [userName, setUserName] = useState(() => skipOnboarding ? (loadStr("name", "") || "Demo") : loadStr("name", ""));
   const [birthYear, setBirthYear] = useState(() => loadStr("birth", ""));
-  const [accountType, setAccountType] = useState(() => demoMode ? "learner" : loadStr("acctType", ""));
+  const [accountType, setAccountType] = useState(() => skipOnboarding ? "learner" : loadStr("acctType", ""));
   const [parentName, setParentName] = useState(() => loadStr("parentName", ""));
   const [userCountry, setUserCountry] = useState(() => loadStr("country", ""));
   const [countryLoading, setCountryLoading] = useState(false);
@@ -680,7 +682,7 @@ function App({ demoMode = false, demoAgeGroup = "" }: AppProps) {
   });
   const [showModuleMap, setShowModuleMap] = useState(false);
   const [showParentDash, setShowParentDash] = useState(false);
-  const [showLanding, setShowLanding] = useState(!demoMode);
+  const [showLanding, setShowLanding] = useState(!skipOnboarding);
   const [fadeIn, setFadeIn] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const selectedSubjectRef = useRef<string | null>(null);

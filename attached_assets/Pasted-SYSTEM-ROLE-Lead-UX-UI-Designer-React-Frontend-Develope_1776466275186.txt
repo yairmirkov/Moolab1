@@ -1,0 +1,53 @@
+SYSTEM ROLE: Lead UX/UI Designer & React Frontend Developer.
+OBJECTIVE: Perform a complete cosmetic redesign of the existing Landing Page (/ route) to target parents, maintaining ALL existing functionality and routing. Add a functional UI Contact section and a new Privacy Policy page.
+
+STEP 1: LANDING PAGE REDESIGN (Landing.tsx or Home.tsx)
+Replace the current visual layout with a modern, high-trust "Parent Pitch" flow. Use a premium color palette (Deep ocean blue backgrounds, clean white text, and gold accents).
+
+Hero Section: >     * Headline: "Stop Fighting Screen Time. Turn It Into Financial Literacy."
+
+Sub-headline: "The gamified financial simulator for ages 8-16. They learn the rules of money in 5 minutes a day, trade in a risk-free simulator, and build habits that last a lifetime."
+
+Keep the existing "Login" and "Sign Up / Join Beta" buttons exactly as they are routed, but style them beautifully.
+
+The Problem Section (Clean white background, dark text): >     * Headline: "Schools aren't teaching them how money works." Add a brief blurb about how piggy banks are outdated and real trading apps are dangerous.
+
+The Features Section (Three-column grid):
+
+🧪 The Lab: "Bite-sized, AI-driven lessons on credit, savings, and investing using a familiar swipe interface."
+
+🦈 The Tank: "A risk-free simulator using real-world stock market data."
+
+🏦 The Vault: "A closed economy where they earn Moolies for learning and spend them on app customization."
+
+Safety Guarantee Banner: "✓ Zero real money traded. ✓ Strictly NO crypto. ✓ Safe, closed environment."
+
+STEP 2: ADD CONTACT SECTION (Bottom of Landing Page)
+
+Create a clean, modern contact section above the footer.
+
+Include the email text visibly: contact@moolab.app
+
+Build a UI message box (Name, Email, Message) with a "Send" button. (For now, just make the button preventDefault and show a "Message Sent!" toast or alert—do not build a backend mailer yet).
+
+STEP 3: CREATE PRIVACY POLICY ROUTE (Privacy.tsx)
+
+Create a new file: Privacy.tsx.
+
+Add it to App.tsx routing as /privacy.
+
+Generate standard, clean Privacy Policy boilerplate text for a children's educational mobile app.
+
+CRITICAL: You must include this exact company entity and address at the top and bottom of the policy:
+
+Company: Mirkov Holding LLC
+
+Address: 2055 Limestone Rd STE 200-C, Wilmington, DE 19808, New Castle, US
+
+Add a simple "Back to Home" button at the top of the policy page.
+
+STEP 4: FOOTER UPDATE
+
+Ensure the footer of the Landing Page contains links to the Contact Section and the new /privacy route.
+
+OUTPUT: Do not change any backend logic, Firebase config, or Auth state. Strictly update the UI/UX of the landing page, build the contact form frontend, and wire up the new Privacy Policy page.

@@ -72,6 +72,7 @@ router.post("/children", async (req, res) => {
       pin,
       displayName,
       ageGroup,
+      moolies: 50,
     }).returning();
 
     return res.json({

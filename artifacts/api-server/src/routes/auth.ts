@@ -83,6 +83,12 @@ router.post("/auth/child-login", async (req, res) => {
       username: child.username,
       displayName: child.displayName,
       ageGroup: child.ageGroup,
+      xp: child.xp,
+      level: child.level,
+      streak: child.streak,
+      bossWins: child.bossWins,
+      moolies: child.moolies,
+      lessonsCompleted: child.lessonsCompleted,
     });
   } catch (err: any) {
     console.error("Child login error:", err);

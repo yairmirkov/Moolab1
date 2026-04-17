@@ -10,5 +10,5 @@ export default function Feed() {
     localStorage.setItem("ws_lang", langParam);
   }
 
-  return <App demoMode={true} demoAgeGroup={ageGroup} />;
+  return <App childAuthMode={true} demoAgeGroup={ageGroup} />;
 }

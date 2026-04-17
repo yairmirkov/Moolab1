@@ -22,11 +22,26 @@ export default function AppLogin() {
     setError("");
     setLoading(true);
     try {
-      const child = await loginChild(username, pin);
+      const child = await loginChild(username, pin) as any;
       const ageMap: Record<string, string> = { "8-12": "Kids", "13-15": "Teens", "16-18": "Adults" };
+
+      const keysToReset = [
+        "xp", "streak", "level", "bossWins", "moolies", "modIdx",
+        "modProg", "unlockedItems", "equippedItems",
+        "name", "birth", "country", "acctType", "parentName", "family",
+      ];
+      keysToReset.forEach((k) => localStorage.removeItem(`ws_${k}`));
+
       localStorage.setItem("ws_name", child.displayName);
       localStorage.setItem("ws_ageGroup", ageMap[child.ageGroup] || "Teens");
       localStorage.setItem("ws_lang", lang);
+      localStorage.setItem("ws_acctType", "learner");
+      localStorage.setItem("ws_xp", String(child.xp ?? 0));
+      localStorage.setItem("ws_level", String(child.level ?? 1));
+      localStorage.setItem("ws_streak", String(child.streak ?? 0));
+      localStorage.setItem("ws_bossWins", String(child.bossWins ?? 0));
+      localStorage.setItem("ws_moolies", String(child.moolies ?? 0));
+
       navigate(`/feed${langSuffix}`);
     } catch (err: any) {
       setError(err.message || t(tx.wrongCredentials, lang));
