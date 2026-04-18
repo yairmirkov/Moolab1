@@ -167,10 +167,13 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
         <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-sky-200/20 blur-3xl" />
         <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-sky-300/15 blur-3xl" />
         <div className="relative max-w-5xl mx-auto text-center">
-          <h1 className="text-[2rem] sm:text-5xl md:text-[3.5rem] font-black tracking-tight leading-[1.1] mb-6 sm:mb-8">
+          <h1
+            className="font-black tracking-tight leading-[1.1] mb-6 sm:mb-8"
+            style={{ fontSize: "clamp(1.875rem, 6vw, 3.5rem)" }}
+          >
             Stop Fighting Screen Time.
             <br />
-            <span className="bg-gradient-to-r from-[#0c2d48] via-[#145374] to-[#2e8bc0] bg-clip-text text-transparent whitespace-nowrap">
+            <span className="bg-gradient-to-r from-[#0c2d48] via-[#145374] to-[#2e8bc0] bg-clip-text text-transparent">
               Turn It Into Financial Literacy.
             </span>
           </h1>
@@ -215,7 +218,7 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
               Learning, practice, and reward — all in one safe, closed environment built for families.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             {[
               {
                 emoji: "🧪",
