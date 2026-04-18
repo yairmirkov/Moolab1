@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import vaultPhoneImg from "@assets/2Iehj_(1)_1776470240857.jpg";
+import heroVideoSrc from "@assets/grok-video-a87d9c6d-11cc-4b74-83c2-1d1d7284be5c_1776470240857.mp4";
 
 const MoolabLogo = ({ height = 32, glow = false }: { height?: number; glow?: boolean }) => (
   <img
@@ -184,6 +186,67 @@ export default function LandingPageES({ onParentLogin, onTestApp, onSignUp }: La
             Empezar Ahora &#x26A1;
           </button>
           <p className="text-xs text-[#0c2d48]/30 font-medium mt-5">Gratis para empezar · Sin anuncios · Seguro para niños</p>
+        </div>
+      </section>
+
+      {/* SHOWCASE: PHONE + VIDEO */}
+      <section className="relative py-16 sm:py-24 px-6 overflow-hidden bg-gradient-to-b from-white via-sky-50/40 to-white">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/3 left-[8%] w-72 h-72 rounded-full bg-sky-300/15 blur-3xl" />
+          <div className="absolute bottom-1/4 right-[10%] w-80 h-80 rounded-full bg-[#2e8bc0]/15 blur-3xl" />
+        </div>
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100/60 border border-sky-200/50 mb-4">
+              <span className="text-[10px] sm:text-xs font-bold text-[#145374] uppercase tracking-wider">Míralo en acción</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
+              Una experiencia de deslizar que los niños{" "}
+              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">ya aman.</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center">
+            {/* Video card */}
+            <div className="relative group">
+              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-[#2e8bc0]/25 via-sky-200/20 to-transparent blur-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+              <div
+                className="relative rounded-3xl overflow-hidden border border-sky-200/60 bg-[#0c2d48] shadow-2xl shadow-sky-300/30"
+                style={{ aspectRatio: "9 / 16", maxHeight: 560 }}
+              >
+                <video
+                  src={heroVideoSrc}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-3xl" />
+              </div>
+              <div className="mt-5 text-center">
+                <div className="text-[10px] font-black tracking-[0.2em] uppercase text-[#2e8bc0] mb-1">El Laboratorio</div>
+                <div className="text-sm font-bold text-[#0c2d48]/65">Lecciones cortas. Hechas para la generación del deslizar.</div>
+              </div>
+            </div>
+
+            {/* Phone image */}
+            <div className="relative group">
+              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-amber-200/20 via-sky-300/25 to-[#2e8bc0]/20 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative flex items-center justify-center" style={{ minHeight: 480 }}>
+                <img
+                  src={vaultPhoneImg}
+                  alt="La Bóveda — gasta Moolies en recompensas épicas"
+                  className="relative w-full max-w-[360px] h-auto object-contain drop-shadow-2xl transition-transform duration-500 group-hover:-translate-y-1 group-hover:rotate-1"
+                  style={{ filter: "drop-shadow(0 30px 50px rgba(20, 83, 116, 0.35))" }}
+                />
+              </div>
+              <div className="mt-5 text-center">
+                <div className="text-[10px] font-black tracking-[0.2em] uppercase text-[#2e8bc0] mb-1">La Bóveda</div>
+                <div className="text-sm font-bold text-[#0c2d48]/65">Gana Moolies. Desbloquea recompensas. Sin dinero real. Nunca.</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
