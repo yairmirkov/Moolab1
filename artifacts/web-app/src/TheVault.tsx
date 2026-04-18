@@ -160,7 +160,7 @@ export default function TheVault({
       <div style={{
         padding: "12px 20px 0",
         width: "100%",
-        maxWidth: 400,
+        maxWidth: "min(94vw, 1100px)",
       }}>
         <button
           onClick={onClose}
@@ -240,11 +240,11 @@ export default function TheVault({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
           gap: 12,
           padding: "16px 20px 40px",
           width: "100%",
-          maxWidth: 420,
+          maxWidth: "min(94vw, 1100px)",
           boxSizing: "border-box",
         }}
       >

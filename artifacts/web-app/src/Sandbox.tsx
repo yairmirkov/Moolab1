@@ -509,7 +509,7 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
           padding: 20, animation: "sandboxSlideUp 0.3s ease-out both",
         }} onClick={() => setSelectedAsset(null)}>
           <div onClick={(e) => e.stopPropagation()} style={{
-            width: "100%", maxWidth: 360, background: "#0f2a3f",
+            width: "100%", maxWidth: "min(94vw, 720px)", background: "#0f2a3f",
             borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.08)",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>

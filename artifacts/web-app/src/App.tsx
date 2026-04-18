@@ -2315,15 +2315,16 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       </div>
     );
 
+  const isPhoneShapedView = activeTab === "lab";
   const content = (
     <div
       style={{
         position: "relative",
-        width: "100vw",
-        maxWidth: 430,
+        width: "100%",
+        maxWidth: isPhoneShapedView ? 480 : "100%",
         margin: "0 auto",
         background: "#000",
-        height: "100dvh",
+        height: "100%",
         overflow: "hidden",
         fontFamily: FONT,
       }}
