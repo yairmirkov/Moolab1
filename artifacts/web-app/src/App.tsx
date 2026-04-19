@@ -707,6 +707,14 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     if (tab !== "lab") stopElevenLabsAudio();
     setActiveTab(tab);
   }, []);
+  const [isWideViewport, setIsWideViewport] = useState<boolean>(
+    () => typeof window !== "undefined" && window.innerWidth >= 768
+  );
+  useEffect(() => {
+    const onResize = () => setIsWideViewport(window.innerWidth >= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   const [currentModuleIdx, setCurrentModuleIdx] = useState(() => load("modIdx", 0));
   const [moduleProgress, setModuleProgress] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
@@ -2315,7 +2323,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       </div>
     );
 
-  const isPhoneShapedView = activeTab === "lab";
+  const isPhoneShapedView = activeTab === "lab" && !isWideViewport;
   const content = (
     <div
       style={{
@@ -2749,10 +2757,41 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 position: "relative",
                 scrollSnapAlign: "start",
                 scrollSnapStop: "always",
-                background: "#000",
+                background: isWideViewport
+                  ? "linear-gradient(160deg, #051528 0%, #020a14 100%)"
+                  : "#000",
                 overflow: "hidden",
+                display: isWideViewport ? "flex" : "block",
+                alignItems: isWideViewport ? "center" : undefined,
+                justifyContent: isWideViewport ? "center" : undefined,
+                padding: isWideViewport ? 24 : 0,
               }}
             >
+              <div style={isWideViewport ? {
+                position: "relative",
+                width: "min(95%, 1100px)",
+                height: "min(85dvh, 800px)",
+                maxHeight: 800,
+                borderRadius: 24,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "row",
+                boxShadow:
+                  "0 30px 80px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.06)",
+                background: "#000",
+              } : {
+                position: "absolute", inset: 0,
+              }}>
+              <div style={isWideViewport ? {
+                position: "relative",
+                width: "50%",
+                height: "100%",
+                flexShrink: 0,
+                background: "#000",
+                overflow: "hidden",
+              } : {
+                position: "absolute", inset: 0,
+              }}>
               <video
                 key={`v-${card.id}`}
                 autoPlay
@@ -2772,9 +2811,21 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               >
                 <source src={getVideoForCard(card.id, card)} type="video/mp4" />
               </video>
+              </div>
 
               <div
-                style={{
+                style={isWideViewport ? {
+                  position: "relative",
+                  width: "50%",
+                  height: "100%",
+                  flexShrink: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  background: "linear-gradient(135deg, #0c2d48 0%, #061522 100%)",
+                  zIndex: 1,
+                  animation: "fadeIn 0.5s ease-out both",
+                } : {
                   position: "absolute", inset: 0,
                   width: "100%", height: "100%",
                   display: "flex", flexDirection: "column",
@@ -2783,13 +2834,22 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   animation: "fadeIn 0.5s ease-out both",
                 }}
               >
-              <div style={{
-                maxHeight: "45vh",
-                background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
-                padding: "50px 28px 80px",
+              <div style={isWideViewport ? {
+                maxHeight: "100%",
+                padding: "40px 36px",
                 display: "flex", flexDirection: "column",
                 alignItems: "flex-start",
                 overflowY: "auto", scrollbarWidth: "none",
+                flexShrink: 0,
+                gap: 4,
+              } : {
+                maxHeight: "min(72vh, calc(100% - 16px))",
+                background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
+                padding: "32px 24px 56px",
+                display: "flex", flexDirection: "column",
+                alignItems: "flex-start",
+                overflowY: "auto", scrollbarWidth: "none",
+                flexShrink: 0,
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                   <h1
@@ -3028,6 +3088,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     </div>
                   )}
                 </div>
+              </div>
               </div>
               </div>
             </div>
