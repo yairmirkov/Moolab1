@@ -2818,6 +2818,15 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   >
                     <source src={getVideoForCard(card.id, card)} type="video/mp4" />
                   </video>
+                  {!isWideViewport && (
+                    <div style={{
+                      position: "absolute", left: 0, right: 0, bottom: 0,
+                      height: "45%",
+                      background: "linear-gradient(to bottom, rgba(12,45,72,0) 0%, rgba(12,45,72,0.5) 55%, #0c2d48 100%)",
+                      pointerEvents: "none",
+                      zIndex: 1,
+                    }} />
+                  )}
                 </div>
 
                 <div style={{
