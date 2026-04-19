@@ -708,10 +708,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     setActiveTab(tab);
   }, []);
   const [isWideViewport, setIsWideViewport] = useState<boolean>(
-    () => typeof window !== "undefined" && window.innerWidth >= 768
+    () => typeof window !== "undefined" && window.innerWidth >= 1024
   );
   useEffect(() => {
-    const onResize = () => setIsWideViewport(window.innerWidth >= 768);
+    const onResize = () => setIsWideViewport(window.innerWidth >= 1024);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -2752,105 +2752,79 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             <div
               key={card.id}
               style={{
-                height: "100dvh",
                 width: "100%",
+                height: "100dvh",
                 position: "relative",
                 scrollSnapAlign: "start",
                 scrollSnapStop: "always",
-                background: isWideViewport
-                  ? "linear-gradient(160deg, #051528 0%, #020a14 100%)"
-                  : "#000",
                 overflow: "hidden",
-                display: isWideViewport ? "flex" : "block",
-                alignItems: isWideViewport ? "center" : undefined,
-                justifyContent: isWideViewport ? "center" : undefined,
-                padding: isWideViewport ? 24 : 0,
+                background: "linear-gradient(160deg, #051528 0%, #020a14 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: isWideViewport ? 32 : 16,
               }}
             >
-              <div style={isWideViewport ? {
+              <div style={{
                 position: "relative",
-                width: "min(95%, 1100px)",
-                height: "min(85dvh, 800px)",
-                maxHeight: 800,
+                width: "100%",
+                maxWidth: isWideViewport ? 1024 : 384,
+                height: isWideViewport ? "75dvh" : "85dvh",
+                margin: "0 auto",
                 borderRadius: 24,
                 overflow: "hidden",
                 display: "flex",
-                flexDirection: "row",
+                flexDirection: isWideViewport ? "row" : "column",
                 boxShadow:
                   "0 30px 80px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.06)",
                 background: "#000",
-              } : {
-                position: "absolute", inset: 0,
               }}>
-              <div style={isWideViewport ? {
-                position: "relative",
-                width: "50%",
-                height: "100%",
-                flexShrink: 0,
-                background: "#000",
-                overflow: "hidden",
-              } : {
-                position: "absolute", inset: 0,
-              }}>
-              <video
-                key={`v-${card.id}`}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
-                style={{
-                  position: "absolute", inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  zIndex: 0,
-                  animation: "vidFade 0.8s ease-out both",
-                }}
-              >
-                <source src={getVideoForCard(card.id, card)} type="video/mp4" />
-              </video>
-              </div>
-
-              <div
-                style={isWideViewport ? {
+                <div style={{
                   position: "relative",
-                  width: "50%",
-                  height: "100%",
+                  width: isWideViewport ? "50%" : "100%",
+                  height: isWideViewport ? "100%" : "45%",
+                  flexShrink: 0,
+                  background: "#000",
+                  overflow: "hidden",
+                }}>
+                  <video
+                    key={`v-${card.id}`}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    onError={(e) => { (e.target as HTMLVideoElement).style.display = "none"; }}
+                    style={{
+                      position: "absolute", inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      zIndex: 0,
+                      animation: "vidFade 0.8s ease-out both",
+                    }}
+                  >
+                    <source src={getVideoForCard(card.id, card)} type="video/mp4" />
+                  </video>
+                </div>
+
+                <div style={{
+                  position: "relative",
+                  width: isWideViewport ? "50%" : "100%",
+                  height: isWideViewport ? "100%" : "55%",
                   flexShrink: 0,
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "center",
+                  justifyContent: isWideViewport ? "center" : "flex-start",
+                  alignItems: "flex-start",
+                  padding: isWideViewport ? 48 : 24,
+                  overflowY: "auto",
+                  scrollbarWidth: "none",
                   background: "linear-gradient(135deg, #0c2d48 0%, #061522 100%)",
                   zIndex: 1,
                   animation: "fadeIn 0.5s ease-out both",
-                } : {
-                  position: "absolute", inset: 0,
-                  width: "100%", height: "100%",
-                  display: "flex", flexDirection: "column",
-                  justifyContent: "flex-end",
-                  zIndex: 1,
-                  animation: "fadeIn 0.5s ease-out both",
-                }}
-              >
-              <div style={isWideViewport ? {
-                maxHeight: "100%",
-                padding: "40px 36px",
-                display: "flex", flexDirection: "column",
-                alignItems: "flex-start",
-                overflowY: "auto", scrollbarWidth: "none",
-                flexShrink: 0,
-                gap: 4,
-              } : {
-                maxHeight: "min(72vh, calc(100% - 16px))",
-                background: "linear-gradient(to top, rgba(0,20,40,0.95) 0%, rgba(0,20,40,0.8) 60%, transparent 100%)",
-                padding: "32px 24px 56px",
-                display: "flex", flexDirection: "column",
-                alignItems: "flex-start",
-                overflowY: "auto", scrollbarWidth: "none",
-                flexShrink: 0,
-              }}>
+                  gap: 4,
+                }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                   <h1
                     style={{
@@ -3088,7 +3062,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     </div>
                   )}
                 </div>
-              </div>
               </div>
               </div>
             </div>

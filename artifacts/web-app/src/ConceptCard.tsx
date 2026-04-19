@@ -20,10 +20,10 @@ interface ConceptCardProps {
 
 function useIsWide() {
   const [wide, setWide] = useState<boolean>(
-    () => typeof window !== "undefined" && window.innerWidth >= 768
+    () => typeof window !== "undefined" && window.innerWidth >= 1024
   );
   useEffect(() => {
-    const onResize = () => setWide(window.innerWidth >= 768);
+    const onResize = () => setWide(window.innerWidth >= 1024);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -35,50 +35,51 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
   const definition = card.definition || (lang === "es" ? "Definición no disponible." : "Definition not available.");
   const analogy = card.analogy || (lang === "es" ? "Piénsalo de esta manera..." : "Think of it this way...");
   const isWide = useIsWide();
-
   const videoUrl = card.video_url || getFallbackVideo(card.id);
 
   return (
     <div
       style={{
-        height: "100dvh",
         width: "100%",
+        height: "100dvh",
         position: "relative",
         scrollSnapAlign: "start",
         scrollSnapStop: "always",
-        background: isWide
-          ? "linear-gradient(160deg, #051528 0%, #020a14 100%)"
-          : "#000",
-        fontFamily: FONT,
         overflow: "hidden",
-        display: isWide ? "flex" : "block",
-        alignItems: isWide ? "center" : undefined,
-        justifyContent: isWide ? "center" : undefined,
-        padding: isWide ? 24 : 0,
+        background: "linear-gradient(160deg, #051528 0%, #020a14 100%)",
+        fontFamily: FONT,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: isWide ? 32 : 16,
       }}
     >
       <style>{`
         @keyframes conceptFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
-      <div style={isWide ? {
+      <div style={{
         position: "relative",
-        width: "min(95%, 1100px)",
-        height: "min(85dvh, 800px)",
-        maxHeight: 800,
+        width: "100%",
+        maxWidth: isWide ? 1024 : 384,
+        height: isWide ? "75dvh" : "85dvh",
+        margin: "0 auto",
         borderRadius: 24,
         overflow: "hidden",
         display: "flex",
-        flexDirection: "row",
+        flexDirection: isWide ? "row" : "column",
         boxShadow:
           "0 30px 80px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.06)",
         background: "#000",
-      } : { position: "absolute", inset: 0 }}>
-
-        <div style={isWide ? {
-          position: "relative", width: "50%", height: "100%",
-          flexShrink: 0, overflow: "hidden", background: "#000",
-        } : { position: "absolute", inset: 0 }}>
+      }}>
+        <div style={{
+          position: "relative",
+          width: isWide ? "50%" : "100%",
+          height: isWide ? "100%" : "45%",
+          flexShrink: 0,
+          background: "#000",
+          overflow: "hidden",
+        }}>
           <video
             key={videoUrl}
             autoPlay muted loop playsInline preload="auto"
@@ -90,31 +91,23 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
-          {!isWide && (
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)",
-              zIndex: 1,
-            }} />
-          )}
         </div>
 
-        <div style={isWide ? {
-          position: "relative", width: "50%", height: "100%",
+        <div style={{
+          position: "relative",
+          width: isWide ? "50%" : "100%",
+          height: isWide ? "100%" : "55%",
           flexShrink: 0,
-          display: "flex", flexDirection: "column", justifyContent: "center",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: isWide ? "center" : "flex-start",
+          alignItems: "flex-start",
           gap: 14,
-          padding: "40px 36px",
+          padding: isWide ? 48 : 24,
           background: "linear-gradient(135deg, #0c2d48 0%, #061522 100%)",
           overflowY: "auto",
+          scrollbarWidth: "none",
           zIndex: 2,
-        } : {
-          position: "absolute", bottom: 0, left: 0, right: 0,
-          padding: "0 24px 60px", zIndex: 2,
-          display: "flex", flexDirection: "column", gap: 14,
-          maxHeight: "min(72vh, calc(100% - 16px))",
-          overflowY: "auto", scrollbarWidth: "none",
-          flexShrink: 0,
         }}>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
@@ -135,7 +128,6 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
           <h2 style={{
             color: "#fff", fontSize: isWide ? "1.85rem" : "1.5rem", fontWeight: 900,
             lineHeight: 1.2, letterSpacing: "-0.02em", margin: 0,
-            textShadow: isWide ? "none" : "0 2px 10px rgba(0,0,0,0.6)",
             animation: "conceptFadeUp 0.6s ease-out 0.1s both",
           }}>
             {term}
@@ -144,7 +136,6 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
           <p style={{
             color: "rgba(255,255,255,0.85)", fontSize: isWide ? "1rem" : "0.9rem",
             fontWeight: 500, lineHeight: 1.5, margin: 0,
-            textShadow: isWide ? "none" : "0 1px 6px rgba(0,0,0,0.5)",
             animation: "conceptFadeUp 0.6s ease-out 0.2s both",
           }}>
             {definition}
@@ -155,6 +146,7 @@ export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps)
             background: "rgba(255,255,255,0.06)",
             border: "1px solid rgba(255,255,255,0.08)",
             animation: "conceptFadeUp 0.6s ease-out 0.3s both",
+            alignSelf: "stretch",
           }}>
             <div style={{
               display: "flex", alignItems: "center", gap: 6, marginBottom: 6,
