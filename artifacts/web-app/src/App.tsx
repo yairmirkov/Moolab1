@@ -69,6 +69,19 @@ function getRequestedTypes(startIndex: number, count: number): string[] {
   return types;
 }
 
+type UserLevel = "beginner" | "intermediate" | "expert";
+
+const computeUserLevel = (wins: number): UserLevel => {
+  if (wins >= 7) return "expert";
+  if (wins >= 3) return "intermediate";
+  return "beginner";
+};
+
+const userLevelLabel = (level: UserLevel, lang: Lang = "en"): string => {
+  if (lang === "es") return level === "beginner" ? "Principiante" : level === "intermediate" ? "Intermedio" : "Experto";
+  return level === "beginner" ? "Beginner" : level === "intermediate" ? "Intermediate" : "Expert";
+};
+
 const computeGradeLevel = (birthYear: string | undefined, ageGroup: string, lang: Lang = "en"): string => {
   const year = birthYear ? parseInt(birthYear, 10) : NaN;
   const now = new Date().getFullYear();
@@ -91,7 +104,7 @@ const generateCards = async (
   lang: Lang = "en",
   country?: string,
   batchSize: number = 10,
-  opts?: { requestedTypes?: string[]; subjectTitle?: string; birthYear?: string },
+  opts?: { requestedTypes?: string[]; subjectTitle?: string; birthYear?: string; userLevel?: UserLevel },
 ) => {
   const timerLabel = `Gemini API (batch=${batchSize})`;
   console.time(timerLabel);
@@ -104,11 +117,14 @@ const generateCards = async (
   const ageShark = translations.gemini.sharkByAge[personaKey][lang];
   const suffix = translations.gemini.promptSuffix[lang];
   const gradeLevel = computeGradeLevel(opts?.birthYear, ageGroup, lang);
+  const userLevel: UserLevel = opts?.userLevel || "beginner";
+  const userLevelLbl = userLevelLabel(userLevel, lang);
+  const levelRules = translations.gemini.userLevelRules[userLevel][lang];
   const subjectTitle = (opts?.subjectTitle || "").trim();
   const subjectDescription = (topic || "").trim();
   const inputDataBlock = lang === "es"
-    ? `\n\nDATOS DE ENTRADA (debes personalizar TODO el contenido en torno a esto):\n- Título de la Materia: ${subjectTitle || "(sin especificar)"}\n- Descripción de la Materia: ${subjectDescription || "(sin especificar)"}\n- Nivel Escolar Objetivo: ${gradeLevel}\n\nREGLAS ESTRICTAS DE HIPER-PERSONALIZACIÓN:\n1. MOTOR DE ANALOGÍAS: Cada analogía, escenario y miniGame DEBE encajar con el Nivel Escolar anterior. No inventes ejemplos fuera de su mundo.\n2. ENFOQUE EN MATERIA: Cada tarjeta DEBE conectarse explícitamente con el Título y Descripción de la Materia anteriores.\n3. TONO: Nunca patrocines. Trátalos como un futuro CEO. Oraciones contundentes, fáciles de leer en un móvil — sin muros de texto.`
-    : `\n\nINPUT DATA (you must personalize ALL content around this):\n- Subject Title: ${subjectTitle || "(unspecified)"}\n- Subject Description: ${subjectDescription || "(unspecified)"}\n- Target Grade Level: ${gradeLevel}\n\nSTRICT HYPER-PERSONALIZATION RULES:\n1. ANALOGY ENGINE: Every analogy, scenario, and miniGame MUST fit the Target Grade Level above. Do not invent examples outside their world.\n2. SUBJECT FOCUS: Every card MUST explicitly connect to the Subject Title and Subject Description above.\n3. TONE: Never patronize. Treat them like a future CEO. Punchy sentences, mobile-readable — no walls of text.`;
+    ? `\n\nDATOS DE ENTRADA (debes personalizar TODO el contenido en torno a esto):\n- Título de la Materia: ${subjectTitle || "(sin especificar)"}\n- Descripción de la Materia: ${subjectDescription || "(sin especificar)"}\n- Nivel Escolar Objetivo: ${gradeLevel}\n- Nivel de Habilidad del Usuario: ${userLevelLbl}\n\nREGLAS ESTRICTAS DE HIPER-PERSONALIZACIÓN:\n1. MOTOR DE ANALOGÍAS: Cada analogía, escenario y miniGame DEBE encajar con el Nivel Escolar anterior. No inventes ejemplos fuera de su mundo.\n2. ENFOQUE EN MATERIA: Cada tarjeta DEBE conectarse explícitamente con el Título y Descripción de la Materia anteriores.\n3. TONO: Nunca patrocines. Trátalos como un futuro CEO. Oraciones contundentes, fáciles de leer en un móvil — sin muros de texto.\n4. CALIBRACIÓN POR NIVEL DE HABILIDAD (${userLevelLbl}): ${levelRules}`
+    : `\n\nINPUT DATA (you must personalize ALL content around this):\n- Subject Title: ${subjectTitle || "(unspecified)"}\n- Subject Description: ${subjectDescription || "(unspecified)"}\n- Target Grade Level: ${gradeLevel}\n- User Skill Level: ${userLevelLbl}\n\nSTRICT HYPER-PERSONALIZATION RULES:\n1. ANALOGY ENGINE: Every analogy, scenario, and miniGame MUST fit the Target Grade Level above. Do not invent examples outside their world.\n2. SUBJECT FOCUS: Every card MUST explicitly connect to the Subject Title and Subject Description above.\n3. TONE: Never patronize. Treat them like a future CEO. Punchy sentences, mobile-readable — no walls of text.\n4. SKILL-LEVEL CALIBRATION (${userLevelLbl}): ${levelRules}`;
   const countryLine = country ? (lang === "es"
     ? ` El usuario se encuentra en: ${country}. Debes usar una división de localización 30/70. El 70% de tus conceptos financieros, ejemplos y mecánicas de mercado deben ser Globales (Wall Street, Crypto, clases de activos amplias). El 30% de tus ejemplos DEBEN estar hiperlocalizados al país del usuario.`
     : ` The user is based in: ${country}. You must use a 30/70 localization split. 70% of your financial concepts, examples, and market mechanics should be Global (Wall Street, Crypto, broad asset classes). 30% of your examples MUST be hyper-localized to the user's country.`
@@ -900,7 +916,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       ? `¡Hola${userName ? `, ${userName}` : ""}! Prepárate para una sesión increíble de aprendizaje financiero.`
       : `Hey${userName ? `, ${userName}` : ""}! Get ready for an awesome financial learning session.`;
 
-    generateCards(ageGroup, topic, currentLang, country, 4, { requestedTypes: initialTypes, subjectTitle: subjectOverride || selectedSubjectRef.current || mod?.name, birthYear }).then(async (data) => {
+    const demoLevelOverride = demoMode ? (loadStr("demo_level", "auto") as UserLevel | "auto") : "auto";
+    const autoLevel = computeUserLevel(moduleProgress[currentModuleIdx] || 0);
+    const userLevel: UserLevel = demoLevelOverride !== "auto" ? demoLevelOverride : autoLevel;
+    generateCards(ageGroup, topic, currentLang, country, 4, { requestedTypes: initialTypes, subjectTitle: subjectOverride || selectedSubjectRef.current || mod?.name, birthYear, userLevel }).then(async (data) => {
       if (!data?.lessons?.length) {
         setLoading(false);
         console.timeEnd("Loading Bay (4 cards + audio)");
@@ -1023,7 +1042,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         try {
           const currentLang = langRef.current;
           const nextTypes = getRequestedTypes(totalSlides, 4);
-          const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear });
+          const demoLevelOverride2 = demoMode ? (loadStr("demo_level", "auto") as UserLevel | "auto") : "auto";
+          const autoLevel2 = computeUserLevel(moduleProgress[currentModuleIdx] || 0);
+          const userLevel2: UserLevel = demoLevelOverride2 !== "auto" ? demoLevelOverride2 : autoLevel2;
+          const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear, userLevel: userLevel2 });
           if (newData) {
             let nl = newData.lessons.map((l: any) => ({
               ...l,
@@ -2658,7 +2680,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                           setIsFetchingMore(true);
                           const currentLang = langRef.current;
                           const nextTypes = getRequestedTypes(totalSlides, 4);
-                          generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear }).then(async (newData) => {
+                          const demoLevelOverride3 = demoMode ? (loadStr("demo_level", "auto") as UserLevel | "auto") : "auto";
+                          const autoLevel3 = computeUserLevel(moduleProgress[currentModuleIdx] || 0);
+                          const userLevel3: UserLevel = demoLevelOverride3 !== "auto" ? demoLevelOverride3 : autoLevel3;
+                          generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear, userLevel: userLevel3 }).then(async (newData) => {
                             if (newData?.lessons) {
                               let nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
                               nl = await resolveVideoUrls(nl);

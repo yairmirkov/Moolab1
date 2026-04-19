@@ -56,6 +56,12 @@ export default function Demo() {
   });
   const ageGroup = getGradeOption(gradeId).ageGroup;
 
+  const [skillLevel, setSkillLevel] = useState<string>(() => {
+    const saved = localStorage.getItem("ws_demo_level") || "auto";
+    localStorage.setItem("ws_demo_level", saved);
+    return saved;
+  });
+
   const [deviceId, setDeviceId] = useState<string>(
     () => localStorage.getItem("ws_demo_device") || "responsive"
   );
@@ -142,7 +148,9 @@ export default function Demo() {
               localStorage.setItem("ws_demo_grade", g.id);
               localStorage.setItem("ws_demo_age", g.ageGroup);
               localStorage.setItem("ws_birth", birthYearForGrade(g.id));
+              localStorage.setItem("ws_demo_level", "auto");
               setGradeId(v);
+              setSkillLevel("auto");
               window.location.reload();
             }}
             style={{
@@ -162,6 +170,30 @@ export default function Demo() {
                 <option key={g.id} value={g.id} style={{ color: "#0c2d48" }}>{gradeLabel(g.id, lang)}</option>
               ))}
             </optgroup>
+          </select>
+
+          <label style={{ color: "rgba(177,212,224,0.6)", fontSize: "0.65rem", fontWeight: 700 }}>
+            {t(tx.skillLevel, lang)}
+          </label>
+          <select
+            value={skillLevel}
+            onChange={(e) => {
+              const v = e.target.value;
+              localStorage.setItem("ws_demo_level", v);
+              setSkillLevel(v);
+              window.location.reload();
+            }}
+            style={{
+              background: "rgba(255,255,255,0.1)", border: "1px solid rgba(177,212,224,0.2)",
+              color: "#b1d4e0", fontFamily: FONT, fontWeight: 700, fontSize: "0.8rem",
+              padding: "6px 12px", borderRadius: 10, cursor: "pointer",
+              outline: "none",
+            }}
+          >
+            <option value="auto" style={{ color: "#0c2d48" }}>{t(tx.skillAuto, lang)}</option>
+            <option value="beginner" style={{ color: "#0c2d48" }}>{t(tx.skillBeginner, lang)}</option>
+            <option value="intermediate" style={{ color: "#0c2d48" }}>{t(tx.skillIntermediate, lang)}</option>
+            <option value="expert" style={{ color: "#0c2d48" }}>{t(tx.skillExpert, lang)}</option>
           </select>
         </div>
       </div>
