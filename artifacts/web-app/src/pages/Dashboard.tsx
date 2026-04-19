@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { api } from "../api";
 import { useLang, useLangSuffix, t, translations } from "../useLang";
+import { GRADE_OPTIONS, getGradeOption, gradeLabel, gradeFromApiBucket } from "../gradeMap";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 const NAVY = "#0c2d48";
@@ -65,7 +66,7 @@ export default function Dashboard() {
   const [children, setChildren] = useState<ChildProfile[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newAge, setNewAge] = useState("8-12");
+  const [newGrade, setNewGrade] = useState("3");
   const [creating, setCreating] = useState(false);
   const [loadingChildren, setLoadingChildren] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "progress" | "family" | "billing">("overview");
@@ -92,12 +93,12 @@ export default function Dashboard() {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const child = await api.createChild(newName.trim(), newAge);
+      const child = await api.createChild(newName.trim(), getGradeOption(newGrade).apiBucket);
       setChildren((prev) => [...prev, child]);
       if (selectedChildId == null) setSelectedChildId(child.id);
       setShowModal(false);
       setNewName("");
-      setNewAge("8-12");
+      setNewGrade("3");
     } catch (err: any) {
       alert(err.message || t(tx.failedCreate, lang));
     } finally {
@@ -378,7 +379,7 @@ export default function Dashboard() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 900, fontSize: "0.95rem", color: NAVY }}>{child.displayName}</div>
                   <div style={{ fontSize: "0.65rem", fontWeight: 600, color: NAVY_MUTED, marginTop: 2 }}>
-                    @{child.username} · {t(tx.ageGroupLabel, lang)} {child.ageGroup}
+                    @{child.username} · {t(tx.ageGroupLabel, lang)} {gradeLabel(gradeFromApiBucket(child.ageGroup), lang)}
                   </div>
                 </div>
                 <div style={{
@@ -589,15 +590,22 @@ export default function Dashboard() {
                 <label style={{ display: "block", color: NAVY_MUTED, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
                   {t(tx.ageGroup, lang)}
                 </label>
-                <select value={newAge} onChange={(e) => setNewAge(e.target.value)} style={{
+                <select value={newGrade} onChange={(e) => setNewGrade(e.target.value)} style={{
                   width: "100%", padding: "13px 16px", borderRadius: 12,
                   background: "rgba(177,212,224,0.12)", border: "1.5px solid rgba(46,139,192,0.15)",
                   color: NAVY, fontFamily: FONT, fontWeight: 700, fontSize: "0.9rem",
                   outline: "none", boxSizing: "border-box", cursor: "pointer",
                 }}>
-                  <option value="8-12">{t(tx.ageExplorer, lang)}</option>
-                  <option value="13-15">{t(tx.ageBuilder, lang)}</option>
-                  <option value="16-18">{t(tx.ageStrategist, lang)}</option>
+                  <optgroup label={t(tx.gradeGroupSchool, lang)}>
+                    {GRADE_OPTIONS.filter((g) => g.id !== "college" && g.id !== "adult").map((g) => (
+                      <option key={g.id} value={g.id}>{gradeLabel(g.id, lang)}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label={t(tx.gradeGroupHigherEd, lang)}>
+                    {GRADE_OPTIONS.filter((g) => g.id === "college" || g.id === "adult").map((g) => (
+                      <option key={g.id} value={g.id}>{gradeLabel(g.id, lang)}</option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
             </div>

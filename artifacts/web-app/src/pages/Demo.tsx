@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import App from "../App";
 import { useLang, t, translations } from "../useLang";
+import { GRADE_OPTIONS, getGradeOption, birthYearForGrade, gradeLabel } from "../gradeMap";
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
 
@@ -43,13 +44,17 @@ export default function Demo() {
   const lang = useLang();
   const tx = translations.pages.demo;
 
-  const [ageGroup, setAgeGroup] = useState(() => {
-    const saved = localStorage.getItem("ws_demo_age") || "Teens";
-    localStorage.setItem("ws_demo_age", saved);
+  const [gradeId, setGradeId] = useState<string>(() => {
+    const saved = localStorage.getItem("ws_demo_grade") || "8";
+    const g = getGradeOption(saved);
+    localStorage.setItem("ws_demo_grade", g.id);
+    localStorage.setItem("ws_demo_age", g.ageGroup);
+    localStorage.setItem("ws_birth", birthYearForGrade(g.id));
     localStorage.setItem("ws_name", "Demo Tester");
     localStorage.setItem("ws_acctType", "learner");
-    return saved;
+    return g.id;
   });
+  const ageGroup = getGradeOption(gradeId).ageGroup;
 
   const [deviceId, setDeviceId] = useState<string>(
     () => localStorage.getItem("ws_demo_device") || "responsive"
@@ -127,12 +132,17 @@ export default function Demo() {
           </select>
 
           <label style={{ color: "rgba(177,212,224,0.6)", fontSize: "0.65rem", fontWeight: 700 }}>
-            {t(tx.ageGroup, lang)}
+            {t(tx.gradeLevel, lang)}
           </label>
           <select
-            value={ageGroup}
+            value={gradeId}
             onChange={(e) => {
-              setAgeGroup(e.target.value);
+              const v = e.target.value;
+              const g = getGradeOption(v);
+              localStorage.setItem("ws_demo_grade", g.id);
+              localStorage.setItem("ws_demo_age", g.ageGroup);
+              localStorage.setItem("ws_birth", birthYearForGrade(g.id));
+              setGradeId(v);
               window.location.reload();
             }}
             style={{
@@ -142,9 +152,16 @@ export default function Demo() {
               outline: "none",
             }}
           >
-            <option value="Kids" style={{ color: "#0c2d48" }}>{t(tx.kids, lang)}</option>
-            <option value="Teens" style={{ color: "#0c2d48" }}>{t(tx.teens, lang)}</option>
-            <option value="Adults" style={{ color: "#0c2d48" }}>{t(tx.adults, lang)}</option>
+            <optgroup label={t(tx.gradeGroupSchool, lang)} style={{ color: "#0c2d48" }}>
+              {GRADE_OPTIONS.filter((g) => g.id !== "college" && g.id !== "adult").map((g) => (
+                <option key={g.id} value={g.id} style={{ color: "#0c2d48" }}>{gradeLabel(g.id, lang)}</option>
+              ))}
+            </optgroup>
+            <optgroup label={t(tx.gradeGroupHigherEd, lang)} style={{ color: "#0c2d48" }}>
+              {GRADE_OPTIONS.filter((g) => g.id === "college" || g.id === "adult").map((g) => (
+                <option key={g.id} value={g.id} style={{ color: "#0c2d48" }}>{gradeLabel(g.id, lang)}</option>
+              ))}
+            </optgroup>
           </select>
         </div>
       </div>
