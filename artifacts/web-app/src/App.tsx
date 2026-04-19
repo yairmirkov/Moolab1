@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import LandingPage from "./LandingPage";
 import LandingPageES from "./LandingPageES";
 import CommandCenter from "./CommandCenter";
@@ -16,19 +16,27 @@ import { api } from "./api";
 
 type TabId = "hub" | "lab" | "tank" | "vault";
 
-const MODULE_DATA = [
-  { id: 0, icon: "🐷", topic: "saving money, piggy banks, emergency funds, saving strategies", winsNeeded: 10 },
-  { id: 1, icon: "📊", topic: "budgeting, tracking expenses, needs vs wants, spending plans", winsNeeded: 10 },
-  { id: 2, icon: "💰", topic: "earning income, allowance, side hustles, entrepreneurship", winsNeeded: 10 },
-  { id: 3, icon: "📈", topic: "investing basics, stocks, compound interest, index funds", winsNeeded: 10 },
-  { id: 4, icon: "💳", topic: "credit scores, debt management, loans, interest rates", winsNeeded: 10 },
-  { id: 5, icon: "🏛️", topic: "taxes, government spending, tax filing, deductions", winsNeeded: 10 },
-  { id: 6, icon: "🏠", topic: "real estate, renting vs buying, mortgages, property value", winsNeeded: 10 },
-  { id: 7, icon: "🪙", topic: "cryptocurrency, digital assets, blockchain, DeFi basics", winsNeeded: 10 },
-];
+const MODULE_ICONS = ["🐷", "📊", "💰", "📈", "💳", "🏛️", "🏠", "🪙"];
+const MODULE_WINS_NEEDED = 10;
 
-const getModules = (lang: Lang) =>
-  MODULE_DATA.map((m, i) => ({ ...m, name: translations.modules.names[lang][i] }));
+type AgeBand = "Kids" | "Teens" | "Adults";
+const toBand = (ageGroup: string): AgeBand =>
+  ageGroup === "Kids" || ageGroup === "Teens" || ageGroup === "Adults"
+    ? (ageGroup as AgeBand)
+    : "Teens";
+
+const getModules = (lang: Lang, ageGroup: string) => {
+  const band = toBand(ageGroup);
+  const names = translations.modules.names[lang][band];
+  const topics = translations.modules.topics[band];
+  return MODULE_ICONS.map((icon, i) => ({
+    id: i,
+    icon,
+    name: names[i],
+    topic: topics[i],
+    winsNeeded: MODULE_WINS_NEEDED,
+  }));
+};
 
 const shuffleOptions = (options: string[], correctIndex: number) => {
   const correctAnswer = options[correctIndex];
@@ -90,7 +98,7 @@ const generateCards = async (
   let timerEnded = false;
   const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  const personaKey = ageGroup === "Kids" ? "Kids" : ageGroup === "Teens" ? "Teens" : "Adults";
+  const personaKey = toBand(ageGroup);
   const persona = translations.gemini.persona[personaKey][lang];
   const doctrine = translations.gemini.coreDoctrine[lang];
   const ageShark = translations.gemini.sharkByAge[personaKey][lang];
@@ -676,11 +684,11 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     saveStr("lang", lang);
   }, [lang]);
 
-  const MODULES = getModules(lang);
   const t = translations;
 
   const [appStarted, setAppStarted] = useState(skipOnboarding);
   const [ageGroup, setAgeGroup] = useState(skipOnboarding ? demoAgeGroup : "");
+  const MODULES = useMemo(() => getModules(lang, ageGroup || "Teens"), [lang, ageGroup]);
   const [loading, setLoading] = useState(false);
   const [quizUnlocked, setQuizUnlocked] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
