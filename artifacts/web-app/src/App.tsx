@@ -710,10 +710,20 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   const [isWideViewport, setIsWideViewport] = useState<boolean>(
     () => typeof window !== "undefined" && window.innerWidth >= 1024
   );
+  const appContainerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const onResize = () => setIsWideViewport(window.innerWidth >= 1024);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const el = appContainerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") {
+      const onResize = () => setIsWideViewport(window.innerWidth >= 1024);
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+    }
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width ?? 0;
+      setIsWideViewport(w >= 1024);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
   const [currentModuleIdx, setCurrentModuleIdx] = useState(() => load("modIdx", 0));
   const [moduleProgress, setModuleProgress] = useState<Record<number, number>>(() => {
@@ -2326,6 +2336,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   const isPhoneShapedView = activeTab === "lab" && !isWideViewport;
   const content = (
     <div
+      ref={appContainerRef}
       style={{
         position: "relative",
         width: "100%",
@@ -2741,6 +2752,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 card={card}
                 lang={lang}
                 onTooltip={setTooltipText}
+                isWide={isWideViewport}
               />
             );
           }

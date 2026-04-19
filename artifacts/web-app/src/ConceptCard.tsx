@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import type { Lang } from "./translations";
 import { getFallbackVideo } from "./pexelsVideo";
 
@@ -16,25 +15,13 @@ interface ConceptCardProps {
   };
   lang: Lang;
   onTooltip?: (text: string) => void;
+  isWide?: boolean;
 }
 
-function useIsWide() {
-  const [wide, setWide] = useState<boolean>(
-    () => typeof window !== "undefined" && window.innerWidth >= 1024
-  );
-  useEffect(() => {
-    const onResize = () => setWide(window.innerWidth >= 1024);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-  return wide;
-}
-
-export default function ConceptCard({ card, lang, onTooltip }: ConceptCardProps) {
+export default function ConceptCard({ card, lang, onTooltip, isWide = false }: ConceptCardProps) {
   const term = card.term || (lang === "es" ? "Concepto Financiero" : "Financial Concept");
   const definition = card.definition || (lang === "es" ? "Definición no disponible." : "Definition not available.");
   const analogy = card.analogy || (lang === "es" ? "Piénsalo de esta manera..." : "Think of it this way...");
-  const isWide = useIsWide();
   const videoUrl = card.video_url || getFallbackVideo(card.id);
 
   return (
