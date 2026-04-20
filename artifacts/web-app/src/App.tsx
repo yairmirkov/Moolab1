@@ -1298,12 +1298,14 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       ? "¡Gran trabajo en esta sección! Estás progresando increíblemente."
       : "Great job on this section! You're making awesome progress.";
 
+    let resolved = false;
     const timeoutId = setTimeout(() => {
-      if (!cancelled && !quizSummaryText) {
-        console.warn("Summary generation timed out after 8s — using fallback");
+      if (!cancelled && !resolved) {
+        console.warn("Summary generation timed out — using fallback");
+        resolved = true;
         setQuizSummaryText(fallbackText);
       }
-    }, 8000);
+    }, 4000);
 
     (async () => {
       try {
@@ -1315,6 +1317,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         });
         if (cancelled) return;
         clearTimeout(timeoutId);
+        if (resolved) return;
+        resolved = true;
         setQuizSummaryText(summaryText || fallbackText);
         if (isElevenLabsAvailable()) {
           try {
@@ -1332,8 +1336,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         }
       } catch (err) {
         console.error("Summary generation failed:", err);
-        if (!cancelled) {
+        if (!cancelled && !resolved) {
           clearTimeout(timeoutId);
+          resolved = true;
           setQuizSummaryText(fallbackText);
         }
       }
@@ -4478,6 +4483,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                           onClick={() => {
                             const win = i === (currentData.bossQuiz?.correctIndex ?? -1);
                             if (win) {
+                              playSfx("correct");
+                              setTimeout(() => playSfx("coin"), 220);
+                              setTimeout(() => playSfx("coin"), 440);
                               setQuizResult(true);
                               setXp((p) => p + 50);
                               awardMoolies(COIN_REWARDS.QUIZ_WIN, lang === "es" ? "¡Victoria del Quiz!" : "Quiz Win!");
