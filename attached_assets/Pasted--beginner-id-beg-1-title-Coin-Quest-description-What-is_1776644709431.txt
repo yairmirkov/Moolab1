@@ -1,0 +1,21 @@
+"beginner": [
+    { "id": "beg_1", "title": "Coin Quest", "description": "What is money actually? How banks work and the difference between a vault and a piggy bank." },
+    { "id": "beg_2", "title": "The Earning Engine", "description": "What is a business? How profit works (Money In vs. Money Out)." },
+    { "id": "beg_3", "title": "The Smart Shopper", "description": "How advertising works. Paying for quality vs. just a brand name." },
+    { "id": "beg_4", "title": "The Golden Vault", "description": "The superpower of waiting. Saving up for the massive prize." },
+    { "id": "beg_5", "title": "Planting Money Trees", "description": "Who makes your products? The idea of owning a piece of the factory." }
+  ],
+  "intermediate": [
+    { "id": "int_1", "title": "Everyday Economics", "description": "The time-value of money. Why holding cash loses value over time." },
+    { "id": "int_2", "title": "Decoding Debt", "description": "Debt as a tool vs. a trap. Building a bulletproof credit score." },
+    { "id": "int_3", "title": "Hustle & Earn", "description": "High-ROI side hustles. Why hourly wages cap your earning potential." },
+    { "id": "int_4", "title": "The Wealth Builder", "description": "Finding companies with strong moats. Taking calculated risks." },
+    { "id": "int_5", "title": "Life Costs 101", "description": "The opportunity cost of depreciating assets. Keeping overhead low." }
+  ],
+  "pro": [
+    { "id": "pro_1", "title": "Portfolio Architect", "description": "Navigating high-volatility, leveraged ETFs, and AI plays." },
+    { "id": "pro_2", "title": "Empire Builder", "description": "Cash-flow real estate, using OPM, and evaluating commercial deals." },
+    { "id": "pro_3", "title": "Founder Fundamentals", "description": "Equity splits, pitching investors, and building business moats." },
+    { "id": "pro_4", "title": "Mastering Capital", "description": "Advanced leverage, tax optimization, and raising capital." },
+    { "id": "pro_5", "title": "Market Psychology", "description": "Contrarian investing and outsmarting the herd in market crashes." }
+  ]
