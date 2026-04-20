@@ -3768,11 +3768,13 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "60px 30px 30px",
+            padding: "calc(env(safe-area-inset-top, 0) + 60px) 30px calc(env(safe-area-inset-bottom, 0) + 80px)",
             backdropFilter: "blur(30px)",
             WebkitBackdropFilter: "blur(30px)",
             animation: "popIn 0.35s ease-out both",
             overflowY: "auto",
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
           }}
         >
           <button

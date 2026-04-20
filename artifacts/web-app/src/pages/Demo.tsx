@@ -68,16 +68,19 @@ export default function Demo() {
   );
   const device = DEVICES.find((d) => d.id === deviceId) ?? DEVICES[0];
   const [stage, setStage] = useState({ w: 0, h: 0 });
+  const [headerCollapsed, setHeaderCollapsed] = useState<boolean>(
+    () => localStorage.getItem("ws_demo_hdr") !== "open"
+  );
 
   useEffect(() => {
     const update = () => {
-      const headerH = 48;
+      const headerH = headerCollapsed ? 0 : 48;
       setStage({ w: window.innerWidth, h: window.innerHeight - headerH });
     };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, []);
+  }, [headerCollapsed]);
 
   const isResponsive = device.id === "responsive";
   const fitScale = isResponsive
@@ -88,8 +91,30 @@ export default function Demo() {
         (stage.h - 48) / device.h
       );
 
+  const persistHeader = (open: boolean) => {
+    localStorage.setItem("ws_demo_hdr", open ? "open" : "closed");
+    setHeaderCollapsed(!open);
+  };
+
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column", position: "relative" }}>
+      {headerCollapsed && (
+        <button
+          onClick={() => persistHeader(true)}
+          aria-label="Show demo controls"
+          style={{
+            position: "absolute", top: 6, right: 6, zIndex: 200,
+            background: "rgba(12,45,72,0.85)", border: "1px solid rgba(177,212,224,0.25)",
+            color: "#b1d4e0", fontFamily: FONT, fontWeight: 800, fontSize: "0.6rem",
+            letterSpacing: "0.08em", padding: "4px 10px", borderRadius: 999,
+            cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
+            backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
+          }}
+        >
+          <span style={{ color: "#FF6B6B" }}>●</span> DEMO ▾
+        </button>
+      )}
+      {!headerCollapsed && (
       <div style={{
         background: "linear-gradient(135deg, #0c2d48, #145374)",
         padding: "10px 20px",
@@ -107,6 +132,17 @@ export default function Demo() {
           <span style={{ color: "rgba(177,212,224,0.5)", fontSize: "0.7rem", fontWeight: 600 }}>
             {t(tx.noAuth, lang)}
           </span>
+          <button
+            onClick={() => persistHeader(false)}
+            aria-label="Hide demo controls"
+            style={{
+              background: "rgba(255,255,255,0.08)", border: "1px solid rgba(177,212,224,0.2)",
+              color: "#b1d4e0", fontFamily: FONT, fontWeight: 800, fontSize: "0.6rem",
+              padding: "3px 8px", borderRadius: 8, cursor: "pointer", marginLeft: 4,
+            }}
+          >
+            ▴ HIDE
+          </button>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -198,6 +234,7 @@ export default function Demo() {
           </select>
         </div>
       </div>
+      )}
 
       {isResponsive ? (
         <div style={{ flex: 1, overflow: "hidden" }}>
