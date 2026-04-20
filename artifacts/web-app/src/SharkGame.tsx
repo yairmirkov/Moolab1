@@ -295,10 +295,8 @@ export default function SharkGame({
           bottom: 0,
           left: 0,
           right: 0,
-          height: "15%",
-          background: "linear-gradient(to top, rgba(46,139,192,0.18) 0%, transparent 100%)",
-          backgroundSize: "200% 200%",
-          animation: "waveBg 6s ease-in-out infinite",
+          height: "40%",
+          background: "linear-gradient(to top, rgba(46,139,192,0.09) 0%, transparent 100%)",
           pointerEvents: "none",
           zIndex: 0,
         }}
