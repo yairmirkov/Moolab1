@@ -233,10 +233,15 @@ const generateCards = async (
         return lesson;
       });
     }
-    if (parsed?.bossQuiz?.options) {
-      const shuffled = shuffleOptions(parsed.bossQuiz.options, parsed.bossQuiz.correctIndex);
-      parsed.bossQuiz.options = shuffled.options;
-      parsed.bossQuiz.correctIndex = shuffled.correctIndex;
+    if (parsed?.bossQuiz) {
+      if (!parsed.bossQuiz.actionQuestion && parsed.bossQuiz.question) {
+        parsed.bossQuiz.actionQuestion = parsed.bossQuiz.question;
+      }
+      if (parsed.bossQuiz.options) {
+        const shuffled = shuffleOptions(parsed.bossQuiz.options, parsed.bossQuiz.correctIndex);
+        parsed.bossQuiz.options = shuffled.options;
+        parsed.bossQuiz.correctIndex = shuffled.correctIndex;
+      }
     }
     if (parsed?.lessons?.length) {
       const newTitles = parsed.lessons
