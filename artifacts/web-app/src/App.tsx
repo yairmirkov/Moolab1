@@ -4236,49 +4236,94 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             textAlign: "center",
           }}
         >
-          {quizResult === null ? (
-            <div style={{ animation: "fadeIn 0.5s ease-out" }}>
-              <h1 style={{ fontSize: "5rem", marginBottom: 10, filter: "drop-shadow(0 0 30px rgba(46,139,192,0.4))" }}>👑</h1>
-              <h2
-                style={{
-                  color: "#fff",
-                  fontSize: "2.6rem",
-                  fontWeight: 900,
-                  marginBottom: 6,
-                  letterSpacing: "-0.03em",
-                  background: "linear-gradient(135deg, #b1d4e0, #2e8bc0)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                {t.quiz.bossFight[lang]}
-              </h2>
-              <p style={{ color: "rgba(255,255,255,0.3)", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.12em", marginBottom: 6 }}>
-                {t.quiz.demonstrateMastery[lang]}
-              </p>
-              <p style={{ color: "rgba(255,255,255,0.2)", fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.06em", marginBottom: 36 }}>
-                {currentModule?.icon} {currentModule?.name?.toUpperCase()} &middot; {t.quiz.win[lang]} {currentModuleWins + 1}/{currentModule?.winsNeeded || 10}
-              </p>
-              {!quizStarted ? (
-                <button
-                  className="ws-btn"
-                  onClick={() => setQuizStarted(true)}
-                  style={{
-                    padding: "20px 60px",
-                    borderRadius: 20,
-                    border: "none",
-                    background: "linear-gradient(135deg, #2e8bc0, #145374)",
-                    fontWeight: 900,
-                    fontSize: "1.1rem",
-                    color: "#fff",
-                    boxShadow: "0 0 40px rgba(46,139,192,0.3), 0 8px 24px rgba(0,0,0,0.4)",
-                    cursor: "pointer",
-                    fontFamily: FONT,
-                    letterSpacing: "0.06em",
-                  }}
-                >
-                  {t.quiz.beginChallenge[lang]}
-                </button>
+          {quizResult === null ? (() => {
+            const BOSS_NEONS = ["#ff2d95","#39ff14","#ff9500","#00d4ff","#bf5cff","#ffe600","#ff3366","#00ffc8","#ff6ec7","#7afcff"];
+            const seed = (currentModule?.id || "boss") as string;
+            let bh = 0; for (let bi = 0; bi < seed.length; bi++) bh = (bh * 31 + seed.charCodeAt(bi)) >>> 0;
+            const neonA = BOSS_NEONS[bh % BOSS_NEONS.length];
+            const neonB = BOSS_NEONS[(bh + 3) % BOSS_NEONS.length];
+            return (
+            <div style={{ animation: "fadeIn 0.5s ease-out", position: "relative" }}>
+                    <style>{`
+                      @keyframes bossCrownFloat { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-10px) rotate(2deg)} }
+                      @keyframes bossOrbSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+                      @keyframes bossBtnPulse { 0%,100%{box-shadow:0 0 32px ${neonA}88, 0 0 80px ${neonB}55, 0 12px 28px rgba(0,0,0,0.5)} 50%{box-shadow:0 0 48px ${neonA}cc, 0 0 120px ${neonB}99, 0 12px 32px rgba(0,0,0,0.6)} }
+                      @keyframes bossTitleGlow { 0%,100%{filter:drop-shadow(0 0 12px ${neonA}66)} 50%{filter:drop-shadow(0 0 24px ${neonA}cc) drop-shadow(0 0 40px ${neonB}66)} }
+                    `}</style>
+                    <div style={{
+                      position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)",
+                      width: 360, height: 360, borderRadius: "50%",
+                      background: `radial-gradient(circle, ${neonA}22 0%, ${neonB}11 40%, transparent 70%)`,
+                      pointerEvents: "none", animation: "bossOrbSpin 24s linear infinite",
+                    }} />
+                    <h1 style={{
+                      fontSize: "6rem", marginBottom: 8, position: "relative", display: "inline-block",
+                      filter: `drop-shadow(0 0 30px ${neonA}99)`,
+                      animation: "bossCrownFloat 3.4s ease-in-out infinite",
+                    }}>👑</h1>
+                    <h2
+                      style={{
+                        color: "#fff",
+                        fontSize: "clamp(2.4rem, 9vw, 3.4rem)",
+                        fontWeight: 900,
+                        marginBottom: 10,
+                        letterSpacing: "-0.04em",
+                        lineHeight: 0.95,
+                        fontFamily: HEADING_FONT,
+                        background: `linear-gradient(135deg, ${neonA} 0%, #ffffff 50%, ${neonB} 100%)`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                        animation: "bossTitleGlow 2.6s ease-in-out infinite",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {t.quiz.bossFight[lang]}
+                    </h2>
+                    <div style={{
+                      display: "inline-flex", alignItems: "center", gap: 8,
+                      padding: "6px 14px", borderRadius: 999,
+                      background: `${neonA}15`, border: `1px solid ${neonA}55`,
+                      marginBottom: 10,
+                    }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: neonA, boxShadow: `0 0 10px ${neonA}` }} />
+                      <span style={{
+                        color: neonA, fontWeight: 900, fontSize: "0.62rem",
+                        letterSpacing: "0.16em", textTransform: "uppercase",
+                        textShadow: `0 0 10px ${neonA}88`,
+                      }}>{t.quiz.demonstrateMastery[lang]}</span>
+                    </div>
+                    <p style={{
+                      color: "rgba(255,255,255,0.55)", fontWeight: 700, fontSize: "0.65rem",
+                      letterSpacing: "0.08em", marginBottom: 36, fontFamily: FONT,
+                    }}>
+                      {currentModule?.icon} {currentModule?.name?.toUpperCase()} <span style={{ color: neonB, opacity: 0.6 }}>·</span> {t.quiz.win[lang]} <span style={{ color: neonA, fontWeight: 900 }}>{currentModuleWins + 1}/{currentModule?.winsNeeded || 10}</span>
+                    </p>
+                    {!quizStarted ? (
+                      <button
+                        className="ws-btn"
+                        onClick={() => setQuizStarted(true)}
+                        style={{
+                          padding: "20px 64px",
+                          borderRadius: 999,
+                          border: `2px solid ${neonA}`,
+                          background: `linear-gradient(135deg, ${neonA}, ${neonB})`,
+                          fontWeight: 900,
+                          fontSize: "1.15rem",
+                          color: "#0a0a0f",
+                          cursor: "pointer",
+                          fontFamily: HEADING_FONT,
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                          animation: "bossBtnPulse 2.2s ease-in-out infinite",
+                          transition: "transform 0.15s ease",
+                        }}
+                        onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.96)"; }}
+                        onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+                        onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+                      >
+                        ⚡ {t.quiz.beginChallenge[lang]}
+                      </button>
               ) : bossExplanation ? (
                 <div
                   style={{
@@ -4488,7 +4533,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 </div>
               )}
             </div>
-          ) : showQuizSummary && quizResult ? (
+            );
+          })() : showQuizSummary && quizResult ? (
             <div style={{
               animation: "fadeIn 0.8s ease-out both",
               display: "flex", flexDirection: "column", alignItems: "center",
