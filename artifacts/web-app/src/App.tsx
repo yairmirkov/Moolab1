@@ -3058,34 +3058,37 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 scrollSnapAlign: "start",
                 scrollSnapStop: "always",
                 overflow: "hidden",
-                background: "linear-gradient(160deg, #051528 0%, #020a14 100%)",
+                background: "#000",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: isWideViewport ? 32 : 16,
+                padding: isWideViewport ? 32 : 0,
               }}
             >
               <div style={{
                 position: "relative",
                 width: "100%",
-                maxWidth: isWideViewport ? 1024 : 384,
-                height: isWideViewport ? "75dvh" : "85dvh",
+                maxWidth: isWideViewport ? 1024 : "100%",
+                height: isWideViewport ? "75dvh" : "100dvh",
                 margin: "0 auto",
-                borderRadius: 24,
+                borderRadius: isWideViewport ? 24 : 0,
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: isWideViewport ? "row" : "column",
-                boxShadow:
-                  "0 30px 80px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.06)",
+                boxShadow: isWideViewport
+                  ? "0 30px 80px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.06)"
+                  : "none",
                 background: "#000",
               }}>
                 <div style={{
-                  position: "relative",
+                  position: isWideViewport ? "relative" : "absolute",
+                  inset: isWideViewport ? undefined : 0,
                   width: isWideViewport ? "50%" : "100%",
-                  height: isWideViewport ? "100%" : "45%",
+                  height: isWideViewport ? "100%" : "100%",
                   flexShrink: 0,
                   background: "#000",
                   overflow: "hidden",
+                  zIndex: 0,
                 }}>
                   <video
                     key={`v-${card.id}`}
@@ -3109,8 +3112,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   {!isWideViewport && (
                     <div style={{
                       position: "absolute", left: 0, right: 0, bottom: 0,
-                      height: "45%",
-                      background: "linear-gradient(to bottom, rgba(12,45,72,0) 0%, rgba(12,45,72,0.5) 55%, #0c2d48 100%)",
+                      height: "70%",
+                      background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.85) 100%)",
                       pointerEvents: "none",
                       zIndex: 1,
                     }} />
@@ -3118,21 +3121,28 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 </div>
 
                 <div style={{
-                  position: "relative",
+                  position: isWideViewport ? "relative" : "absolute",
+                  left: isWideViewport ? undefined : 0,
+                  right: isWideViewport ? undefined : 0,
+                  bottom: isWideViewport ? undefined : 0,
                   width: isWideViewport ? "50%" : "100%",
-                  height: isWideViewport ? "100%" : "55%",
+                  height: isWideViewport ? "100%" : "auto",
+                  maxHeight: isWideViewport ? undefined : "70dvh",
                   flexShrink: 0,
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: isWideViewport ? "center" : "flex-start",
+                  justifyContent: isWideViewport ? "center" : "flex-end",
                   alignItems: "flex-start",
-                  padding: isWideViewport ? 48 : 24,
+                  padding: isWideViewport ? 48 : "20px 20px 32px",
                   overflowY: "auto",
                   scrollbarWidth: "none",
-                  background: "linear-gradient(135deg, #0c2d48 0%, #061522 100%)",
-                  zIndex: 1,
+                  background: isWideViewport
+                    ? "linear-gradient(135deg, #0c2d48 0%, #061522 100%)"
+                    : "transparent",
+                  zIndex: 2,
                   animation: "fadeIn 0.5s ease-out both",
                   gap: 4,
+                  pointerEvents: "auto",
                 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                   <h1
