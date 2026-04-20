@@ -60,7 +60,7 @@ export default function SharkGame({
     initialized.current = true;
 
     const cx = el.clientWidth / 2;
-    const cy = el.clientHeight / 2;
+    const cy = el.clientHeight * 0.72;
     sharkRef.current = { x: cx, y: cy };
     targetRef.current = { x: cx, y: cy };
 
@@ -204,7 +204,7 @@ export default function SharkGame({
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(160deg, #eef6fb 0%, #e0f0f8 30%, #d0e8f2 60%, #f2f8fb 100%)",
+        background: "radial-gradient(ellipse at top, #0a1f3a 0%, #050d1c 60%, #02060f 100%)",
         fontFamily: FONT,
         position: "relative",
         overflow: "hidden",
@@ -235,7 +235,7 @@ export default function SharkGame({
             objectFit: "contain",
             transition: "width 0.3s, height 0.3s",
             willChange: "left, top, transform",
-            filter: "drop-shadow(0 4px 12px rgba(12,45,72,0.35))",
+            filter: "drop-shadow(0 4px 14px rgba(120,180,255,0.55))",
             zIndex: 2,
           }}
         />
@@ -257,8 +257,8 @@ export default function SharkGame({
             height: 32,
             margin: "0 auto 10px",
             borderRadius: "50%",
-            border: "3px solid rgba(46,139,192,0.12)",
-            borderTopColor: "#145374",
+            border: "3px solid rgba(255,255,255,0.1)",
+            borderTopColor: "#b1d4e0",
             animation: "ldSpin 0.7s linear infinite",
           }}
         />
@@ -267,7 +267,7 @@ export default function SharkGame({
             fontWeight: 800,
             fontSize: "0.85rem",
             letterSpacing: "-0.01em",
-            background: "linear-gradient(90deg,#145374,#2e8bc0)",
+            background: "linear-gradient(90deg,#ffffff,#b1d4e0)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             margin: 0,
@@ -280,7 +280,7 @@ export default function SharkGame({
           style={{
             fontSize: "0.6rem",
             fontWeight: 600,
-            color: "rgba(20,83,116,0.4)",
+            color: "rgba(207,225,245,0.5)",
             marginTop: 8,
             letterSpacing: "0.04em",
           }}
@@ -296,7 +296,7 @@ export default function SharkGame({
           left: 0,
           right: 0,
           height: "15%",
-          background: "linear-gradient(to top, rgba(46,139,192,0.06) 0%, transparent 100%)",
+          background: "linear-gradient(to top, rgba(46,139,192,0.18) 0%, transparent 100%)",
           backgroundSize: "200% 200%",
           animation: "waveBg 6s ease-in-out infinite",
           pointerEvents: "none",
