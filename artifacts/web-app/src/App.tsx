@@ -30,8 +30,7 @@ const SUBJECT_MASTERY_WINS = 10;
 const SUBJECT_WINS_NEEDED = SUBJECT_MASTERY_WINS;
 
 const COIN_REWARDS = {
-  CARD: 2,
-  BATCH: 10,
+  CORRECT_ANSWER: 5,
   QUIZ_WIN: 50,
   QUIZ_LOSS: 15,
   SUBJECT_UNLOCK: 100,
@@ -807,7 +806,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   });
   const [rewardToasts, setRewardToasts] = useState<Array<{ id: string; amount: number; label: string; big?: boolean }>>([]);
   const [confettiBurst, setConfettiBurst] = useState<number>(0);
-  const lastBatchAwardRef = useRef<number>(0);
   const awardMoolies = useCallback((amount: number, label: string, big = false) => {
     if (amount <= 0) return;
     setMoolies((p) => Math.round((p + amount) * 100) / 100);
@@ -1126,11 +1124,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     if (currentSlideIdx !== lastSlideRef.current) {
       lastSlideRef.current = currentSlideIdx;
       slidesScrolledRef.current += 1;
-      awardMoolies(COIN_REWARDS.CARD, lang === "es" ? "Tarjeta" : "Card");
-      if (slidesScrolledRef.current > 0 && slidesScrolledRef.current % 4 === 0 && slidesScrolledRef.current !== lastBatchAwardRef.current) {
-        lastBatchAwardRef.current = slidesScrolledRef.current;
-        awardMoolies(COIN_REWARDS.BATCH, lang === "es" ? "¡4 tarjetas seguidas!" : "4-card streak!");
-      }
     }
 
     if (
@@ -3274,6 +3267,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                                   if (idx === (card.miniGame?.correctIndex ?? -1)) {
                                     setCompletedSlides((p) => [...p, card.id]);
                                     setXp((p) => p + 10);
+                                    awardMoolies(COIN_REWARDS.CORRECT_ANSWER, lang === "es" ? "¡Correcto!" : "Correct!");
                                     triggerGreenFlash();
                                     if (completedSlides.length + 1 >= 5) {
                                       const bq = currentData?.bossQuiz;
