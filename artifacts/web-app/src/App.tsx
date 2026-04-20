@@ -870,6 +870,12 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   const selectedSubjectRef = useRef<string | null>(null);
   const [showSubjectPicker, setShowSubjectPicker] = useState(false);
   const [expandedSubjectId, setExpandedSubjectId] = useState<string | null>(null);
+  const [neonTick, setNeonTick] = useState(0);
+  useEffect(() => {
+    if (!showSubjectPicker) return;
+    const id = window.setInterval(() => setNeonTick((t) => t + 1), 2600);
+    return () => window.clearInterval(id);
+  }, [showSubjectPicker]);
 
   const [xp, setXp] = useState(() => load("xp", 0));
   const [streak, setStreak] = useState(() => load("streak", 0));
@@ -2493,7 +2499,20 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           display: "flex", flexDirection: "column", gap: 10,
           width: "100%", maxWidth: 440,
         }}>
-          {MODULES.map((mod, i) => {
+          {(() => {
+            const NEONS = [
+              "#ff2d95", // hot pink
+              "#39ff14", // neon green
+              "#ff9500", // neon orange
+              "#00d4ff", // electric blue
+              "#bf5cff", // neon purple
+              "#ffe600", // neon yellow
+              "#ff3366", // neon red
+              "#00ffc8", // neon teal
+              "#ff6ec7", // bubblegum
+              "#7afcff", // ice cyan
+            ];
+            return MODULES.map((mod, i) => {
             const wins = moduleProgress[mod.id] || 0;
             const pct = Math.min((wins / mod.winsNeeded) * 100, 100);
             const isComplete = wins >= mod.winsNeeded;
@@ -2503,6 +2522,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             const isCurrent = i === currentModuleIdx && !isComplete;
             const unlockMarkerPct = Math.min((mod.unlockThreshold / mod.winsNeeded) * 100, 100);
             const isExpanded = expandedSubjectId === mod.id;
+            const neon = NEONS[(i + neonTick) % NEONS.length];
             return (
               <button
                 key={mod.id}
@@ -2528,22 +2548,23 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   padding: "14px 16px", borderRadius: 16,
                   background: isLocked
                     ? "rgba(255,255,255,0.025)"
-                    : isCurrent
-                      ? "linear-gradient(100deg, rgba(46,139,192,0.22), rgba(120,180,255,0.06))"
-                      : "rgba(255,255,255,0.04)",
-                  border: isExpanded
-                    ? `1.5px solid ${levelAccent}`
-                    : isCurrent
-                      ? `1.5px solid ${levelAccent}88`
-                      : isComplete
-                        ? "1.5px solid rgba(74,222,128,0.5)"
-                        : "1px solid rgba(120,180,255,0.12)",
+                    : isExpanded
+                      ? `linear-gradient(100deg, ${neon}28, ${neon}08)`
+                      : isCurrent
+                        ? `linear-gradient(100deg, ${neon}22, ${neon}06)`
+                        : `linear-gradient(100deg, ${neon}12, rgba(255,255,255,0.03))`,
+                  border: `1.5px solid ${neon}${isExpanded ? "ee" : isCurrent ? "aa" : "55"}`,
+                  boxShadow: isLocked
+                    ? "none"
+                    : isExpanded
+                      ? `0 0 0 1px ${neon}55, 0 8px 28px ${neon}40, inset 0 0 24px ${neon}1a`
+                      : `0 0 0 1px ${neon}22, 0 6px 18px ${neon}22`,
                   cursor: "pointer",
                   fontFamily: FONT, textAlign: "left",
                   display: "flex", flexDirection: "column", gap: 0,
-                  opacity: isLocked ? 0.6 : 1,
-                  animation: `subjectFadeIn 0.5s ease-out ${0.1 + i * 0.06}s both${isCurrent && !isExpanded ? ", subjectGlow 3s ease-in-out infinite" : ""}`,
-                  transition: "transform 0.15s, border-color 0.2s, background 0.2s",
+                  opacity: isLocked ? 0.55 : 1,
+                  animation: `subjectFadeIn 0.5s ease-out ${0.1 + i * 0.06}s both`,
+                  transition: "transform 0.15s, border-color 0.6s ease, background 0.6s ease, box-shadow 0.6s ease",
                 }}
                 onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.985)"; }}
                 onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
