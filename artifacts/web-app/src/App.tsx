@@ -2697,6 +2697,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           @keyframes ldBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
           @keyframes enterPulse { 0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(46,139,192,0.3),0 8px 32px rgba(0,0,0,0.5)} 50%{transform:scale(1.04);box-shadow:0 0 80px rgba(46,139,192,0.5),0 12px 48px rgba(0,0,0,0.6)} }
           @keyframes enterFadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
           @keyframes sharkOrbit { 0%{transform:rotate(0deg) translateX(120px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)} }
           @keyframes sharkOrbit2 { 0%{transform:rotate(180deg) translateX(160px) rotate(-180deg)} 100%{transform:rotate(540deg) translateX(160px) rotate(-540deg)} }
           @keyframes sharkBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
@@ -3137,64 +3138,129 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     }} />
                   ))}
                 </div>
-                <div style={{
-                  position: "relative", zIndex: 1, textAlign: "center",
-                  animation: "enterFadeIn 0.8s ease-out both", maxWidth: 340,
-                }}>
-                  <div style={{ fontSize: "3rem", marginBottom: 20 }}>
-                    {isIntro ? "🧪" : "🏆"}
-                  </div>
-                  <p style={{
-                    fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.25em",
-                    color: "rgba(177,212,224,0.5)", textTransform: "uppercase", marginBottom: 16,
-                  }}>
-                    {isIntro
-                      ? (lang === "es" ? "TU SESIÓN DE HOY" : "TODAY'S SESSION")
-                      : (lang === "es" ? "SESIÓN COMPLETADA" : "SESSION COMPLETE")}
-                  </p>
-
-                  <div style={{
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                    padding: "4px 12px", borderRadius: 14,
-                    background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.2)",
-                    marginBottom: 16,
-                  }}>
-                    <span style={{ fontSize: "0.7rem" }}>🎙️</span>
-                    <span style={{
-                      fontSize: "0.55rem", fontWeight: 700, color: "rgba(177,212,224,0.6)",
-                      letterSpacing: "0.06em",
-                    }}>
-                      {lang === "es" ? "Mensaje de voz" : "Voice message"}
-                    </span>
-                  </div>
-                  <p style={{
-                    color: "#fff", fontSize: "1.2rem", fontWeight: 800,
-                    lineHeight: 1.4, letterSpacing: "-0.02em",
-                    textShadow: "0 2px 12px rgba(0,0,0,0.5)",
-                  }}>
-                    "{card.desc}"
-                  </p>
-                  {selectedSubject && (
+                {(() => {
+                  const INTRO_NEONS = ["#ff2d95","#39ff14","#ff9500","#00d4ff","#bf5cff","#ffe600","#ff3366","#00ffc8","#ff6ec7","#7afcff"];
+                  const seed = (currentModule?.id || selectedSubject || card.id || "intro") as string;
+                  let h1 = 0, h2 = 0;
+                  for (let k = 0; k < seed.length; k++) { h1 = (h1 * 31 + seed.charCodeAt(k)) >>> 0; h2 = (h2 * 17 + seed.charCodeAt(k) * 7) >>> 0; }
+                  const nA = INTRO_NEONS[h1 % INTRO_NEONS.length];
+                  let nB = INTRO_NEONS[h2 % INTRO_NEONS.length];
+                  if (nB === nA) nB = INTRO_NEONS[(h2 + 3) % INTRO_NEONS.length];
+                  const introWords = (lang === "es"
+                    ? ["¡Vamos!", "¡Empecemos!", "¡A jugar!", "¡A romperla!", "¡Modo titán!"]
+                    : ["Let's Go!", "Game On!", "Suit Up!", "Let's Cook!", "Titan Mode!"]);
+                  const winWords = (lang === "es"
+                    ? ["¡Lo lograste!", "¡Bien hecho!", "¡Imparable!", "¡Eres leyenda!"]
+                    : ["You did it!", "Crushed it!", "Unstoppable!", "Legend!"]);
+                  const word = (isIntro ? introWords : winWords)[h1 % (isIntro ? introWords.length : winWords.length)];
+                  return (
                     <div style={{
-                      marginTop: 24, display: "inline-flex", alignItems: "center",
-                      gap: 6, padding: "6px 14px", borderRadius: 20,
-                      background: "rgba(177,212,224,0.1)", border: "1px solid rgba(177,212,224,0.2)",
+                      position: "relative", zIndex: 1, textAlign: "center",
+                      animation: "enterFadeIn 0.8s ease-out both", maxWidth: 360,
                     }}>
-                      <span style={{
-                        fontSize: "0.6rem", fontWeight: 700, color: "rgba(177,212,224,0.6)",
-                        letterSpacing: "0.06em",
+                      <div style={{
+                        position: "relative", display: "inline-block", marginBottom: 18,
                       }}>
-                        {selectedSubject}
-                      </span>
+                        <div style={{
+                          position: "absolute", inset: -18, borderRadius: "50%",
+                          background: `radial-gradient(circle, ${nA}55 0%, transparent 70%)`,
+                          filter: "blur(8px)",
+                          animation: "moolieGlow 2.4s ease-in-out infinite",
+                        }} />
+                        <div style={{
+                          fontSize: "3.4rem", position: "relative",
+                          animation: "moolieBounce 1.2s ease-out, floatY 3s ease-in-out 1.2s infinite",
+                          filter: `drop-shadow(0 0 16px ${nA}99)`,
+                        }}>
+                          {isIntro ? "🧪" : "🏆"}
+                        </div>
+                      </div>
+                      <h1 style={{
+                        fontFamily: HEADING_FONT,
+                        fontSize: "2.2rem", fontWeight: 900,
+                        letterSpacing: "-0.03em", lineHeight: 1,
+                        margin: "0 0 6px 0",
+                        background: `linear-gradient(135deg, ${nA}, #fff 50%, ${nB})`,
+                        WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                        textShadow: `0 0 30px ${nA}55`,
+                        animation: "moolieTextPop 0.8s ease-out 0.2s both",
+                      }}>
+                        {word}
+                      </h1>
+                      <p style={{
+                        fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.28em",
+                        color: nA, textTransform: "uppercase", marginBottom: 18,
+                        textShadow: `0 0 10px ${nA}66`,
+                      }}>
+                        {isIntro
+                          ? (lang === "es" ? "TU SESIÓN DE HOY" : "TODAY'S SESSION")
+                          : (lang === "es" ? "SESIÓN COMPLETADA" : "SESSION COMPLETE")}
+                      </p>
+
+                      <div style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        padding: "5px 14px", borderRadius: 14,
+                        background: `${nB}18`, border: `1px solid ${nB}66`,
+                        boxShadow: `0 0 14px ${nB}33`,
+                        marginBottom: 18,
+                      }}>
+                        <span style={{ fontSize: "0.7rem" }}>🎙️</span>
+                        <span style={{
+                          fontSize: "0.55rem", fontWeight: 800, color: "#fff",
+                          letterSpacing: "0.08em", textTransform: "uppercase",
+                        }}>
+                          {lang === "es" ? "Mensaje de voz" : "Voice message"}
+                        </span>
+                      </div>
+                      <div style={{
+                        position: "relative",
+                        background: "rgba(0,0,0,0.35)",
+                        border: `1.5px solid ${nA}66`,
+                        borderRadius: 22, padding: "20px 22px",
+                        boxShadow: `0 0 0 1px ${nA}22, 0 0 30px ${nA}33, inset 0 1px 0 rgba(255,255,255,0.04)`,
+                        backdropFilter: "blur(12px)",
+                        WebkitBackdropFilter: "blur(12px)",
+                      }}>
+                        <span style={{
+                          position: "absolute", top: -10, left: 14,
+                          fontSize: "1.6rem", color: nA, fontFamily: HEADING_FONT,
+                          fontWeight: 900, lineHeight: 1, textShadow: `0 0 12px ${nA}99`,
+                        }}>“</span>
+                        <p style={{
+                          color: "#fff", fontSize: "1.05rem", fontWeight: 700,
+                          lineHeight: 1.45, letterSpacing: "-0.01em",
+                          textShadow: "0 2px 12px rgba(0,0,0,0.5)",
+                          margin: 0,
+                        }}>
+                          {card.desc}
+                        </p>
+                      </div>
+                      {selectedSubject && (
+                        <div style={{
+                          marginTop: 18, display: "inline-flex", alignItems: "center",
+                          gap: 6, padding: "6px 14px", borderRadius: 20,
+                          background: `${nA}15`, border: `1px solid ${nA}55`,
+                          boxShadow: `0 0 12px ${nA}33`,
+                        }}>
+                          <span style={{
+                            fontSize: "0.6rem", fontWeight: 800, color: "#fff",
+                            letterSpacing: "0.08em", textTransform: "uppercase",
+                          }}>
+                            {selectedSubject}
+                          </span>
+                        </div>
+                      )}
+                      <p style={{
+                        marginTop: 26, fontSize: "0.62rem", fontWeight: 700,
+                        color: "rgba(255,255,255,0.55)", letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        animation: "floatY 2s ease-in-out infinite",
+                      }}>
+                        {lang === "es" ? "Desliza para continuar ↓" : "Swipe to continue ↓"}
+                      </p>
                     </div>
-                  )}
-                  <p style={{
-                    marginTop: 28, fontSize: "0.6rem", fontWeight: 600,
-                    color: "rgba(177,212,224,0.3)", letterSpacing: "0.04em",
-                  }}>
-                    {lang === "es" ? "Desliza para continuar ↓" : "Swipe to continue ↓"}
-                  </p>
-                </div>
+                  );
+                })()}
               </div>
             );
           }
