@@ -3382,43 +3382,36 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     boxShadow: `0 0 0 1px ${cardNeon}33, 0 8px 32px ${cardNeon}55, inset 0 1px 0 rgba(255,255,255,0.05)`,
                     width: "100%",
                     maxWidth: 400,
+                    maxHeight: "60vh",
+                    overflowY: "auto",
+                    overscrollBehavior: "contain",
+                    WebkitOverflowScrolling: "touch",
                   }}
+                  onWheel={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
                 >
-                  {!effectiveRevealed ? (
-                    <div style={{ textAlign: "center", animation: "fadeIn 0.5s ease-out" }}>
-                      <div style={{
-                        color: cardNeon, fontSize: "0.55rem", fontWeight: 800,
-                        letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 14,
-                        textShadow: `0 0 8px ${cardNeon}66`,
-                      }}>{t.slide.part1[lang]}</div>
-                      <p style={{
-                        color: "#fff", fontSize: "clamp(0.85rem, 3.4vw, 1.02rem)", fontWeight: 800,
-                        lineHeight: 1.4, marginBottom: 24,
-                        textShadow: "0 1px 4px rgba(0,0,0,0.5)",
-                        textAlign: "left",
-                      }}>
-                        {card.miniGame?.contextSetup || card.miniGame?.question}
-                      </p>
-                      <button
-                        className="ws-btn"
-                        onClick={() => { playSfx("flip"); setRevealedSlides(p => ({ ...p, [card.id]: true })); }}
-                        style={{
-                          padding: "8px 20px", borderRadius: 10,
-                          background: `${cardNeon}26`,
-                          border: `1px solid ${cardNeon}77`,
-                          color: "#fff", fontWeight: 800, fontSize: "0.72rem",
-                          cursor: "pointer", fontFamily: FONT,
-                          letterSpacing: "0.04em",
-                          textShadow: `0 0 8px ${cardNeon}99`,
-                          boxShadow: `0 0 14px ${cardNeon}55`,
-                          animation: "contextPulse 2s ease-in-out infinite",
-                        }}
-                      >
-                        {t.slide.tapToContinue[lang]}
-                      </button>
-                    </div>
-                  ) : (
                     <div style={{ animation: "fadeIn 0.4s ease-out" }}>
+                      {setupText && (
+                        <>
+                          <div style={{
+                            color: cardNeon, fontSize: "0.55rem", fontWeight: 800,
+                            letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 10,
+                            textShadow: `0 0 8px ${cardNeon}66`,
+                          }}>{t.slide.part1[lang]}</div>
+                          <p style={{
+                            color: "#fff", fontSize: "clamp(0.82rem, 3.2vw, 0.96rem)", fontWeight: 700,
+                            lineHeight: 1.45, marginBottom: 18,
+                            textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                            textAlign: "left",
+                          }}>
+                            {setupText}
+                          </p>
+                          <div style={{
+                            height: 1, width: "100%", marginBottom: 14,
+                            background: `linear-gradient(90deg, transparent, ${cardNeon}55, transparent)`,
+                          }} />
+                        </>
+                      )}
                       <div style={{
                         color: cardNeon, fontSize: "0.55rem", fontWeight: 800,
                         letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 10,
@@ -3572,7 +3565,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                         </div>
                       )}
                     </div>
-                  )}
                 </div>
               </div>
               </div>
