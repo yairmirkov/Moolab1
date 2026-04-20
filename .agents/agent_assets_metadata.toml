@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "9gm6Wxj1HrOscwDYKtY0m"
+uri = "file://screenshots/confetti_burst.jpg"
+type = "image"
+title = "Confetti Reward Screen — Subject Mastered!"
