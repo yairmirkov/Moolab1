@@ -5,7 +5,8 @@ import { api } from "../api";
 import { useLang, useLangSuffix, t, translations } from "../useLang";
 import { GRADE_OPTIONS, getGradeOption, gradeLabel, gradeFromApiBucket } from "../gradeMap";
 
-const FONT = "'Lato', system-ui, -apple-system, sans-serif";
+const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
+const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const NAVY = "#0c2d48";
 const NAVY_LIGHT = "#145374";
 const ACCENT = "#2e8bc0";

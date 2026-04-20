@@ -1,7 +1,8 @@
 import { useEffect, useRef, useCallback } from "react";
 import type { Lang } from "./translations";
 
-const FONT = "'Lato', system-ui, -apple-system, sans-serif";
+const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
+const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const COIN_SIZE = 28;
 const SHARK_BASE = 80;
 const SHARK_MAX = 130;

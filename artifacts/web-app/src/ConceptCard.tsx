@@ -1,7 +1,8 @@
 import type { Lang } from "./translations";
 import { getFallbackVideo } from "./pexelsVideo";
 
-const FONT = "'Lato', system-ui, -apple-system, sans-serif";
+const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
+const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const HEADING_FONT = "'Bricolage Grotesque', 'Lato', system-ui, sans-serif";
 
 const CARD_NEONS = ["#ff2d95","#39ff14","#ff9500","#00d4ff","#bf5cff","#ffe600","#ff3366","#00ffc8","#ff6ec7","#7afcff"];

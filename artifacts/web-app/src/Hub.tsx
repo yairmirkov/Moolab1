@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import translations, { type Lang } from "./translations";
 
-const FONT = "'Lato', system-ui, -apple-system, sans-serif";
+const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
+const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 interface HubProps {

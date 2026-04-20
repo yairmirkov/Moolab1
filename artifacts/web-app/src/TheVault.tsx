@@ -1,7 +1,8 @@
 import { useState } from "react";
 import translations, { type Lang } from "./translations";
 
-const FONT = "'Lato', system-ui, -apple-system, sans-serif";
+const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
+const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
 
 export interface VaultItem {
   id: string;

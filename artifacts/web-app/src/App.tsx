@@ -420,7 +420,8 @@ const save = (k, v) => localStorage.setItem(`ws_${k}`, String(v));
 const loadStr = (k, d) => localStorage.getItem(`ws_${k}`) || d;
 const saveStr = (k, v) => localStorage.setItem(`ws_${k}`, v);
 
-const FONT = "'Lato', system-ui, -apple-system, sans-serif";
+const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
+const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const HEADING_FONT = "'Bricolage Grotesque', 'Lato', system-ui, sans-serif";
 
 type ThemeId = "navy" | "sunset" | "mint" | "electric";
