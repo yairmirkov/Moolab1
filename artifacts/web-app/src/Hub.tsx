@@ -13,11 +13,12 @@ interface HubProps {
   streak: number;
   bossWins: number;
   equippedItems: string[];
+  themeBg?: string;
   onNavigate: (view: "lab" | "tank" | "vault") => void;
   onOpenProfile: () => void;
 }
 
-export default function Hub({ lang, userName, moolies, xp, level, streak, bossWins, equippedItems, onNavigate, onOpenProfile }: HubProps) {
+export default function Hub({ lang, userName, moolies, xp, level, streak, bossWins, equippedItems, themeBg, onNavigate, onOpenProfile }: HubProps) {
   useEffect(() => {
     fetch(`${API_BASE}/stocks/prices`).catch(() => {});
   }, []);
@@ -83,7 +84,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
     <div style={{
       width: "100%",
       height: "100%",
-      background: "radial-gradient(ellipse at top, #0a1f3a 0%, #050d1c 60%, #02060f 100%)",
+      background: themeBg || "radial-gradient(ellipse at top, #0a1f3a 0%, #050d1c 60%, #02060f 100%)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -149,7 +150,8 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
             {lang === "es" ? "BIENVENIDO DE VUELTA" : "WELCOME BACK"}
           </div>
           <div style={{
-            fontSize: "1.3rem", fontWeight: 900, color: "#fff",
+            fontFamily: "'Bricolage Grotesque', 'Inter', sans-serif",
+            fontSize: "1.4rem", fontWeight: 800, color: "#fff",
             letterSpacing: "-0.02em", marginBottom: 8,
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
@@ -265,7 +267,8 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
             </div>
             <div style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
               <div style={{
-                fontSize: "0.92rem", fontWeight: 900, color: "#fff",
+                fontFamily: "'Bricolage Grotesque', 'Inter', sans-serif",
+                fontSize: "1rem", fontWeight: 800, color: "#fff",
                 letterSpacing: "-0.015em", marginBottom: 3,
                 whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
               }}>{card.title}</div>

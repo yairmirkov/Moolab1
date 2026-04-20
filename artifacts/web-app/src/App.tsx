@@ -421,6 +421,80 @@ const loadStr = (k, d) => localStorage.getItem(`ws_${k}`) || d;
 const saveStr = (k, v) => localStorage.setItem(`ws_${k}`, v);
 
 const FONT = "'Inter', system-ui, -apple-system, sans-serif";
+const HEADING_FONT = "'Bricolage Grotesque', 'Inter', system-ui, sans-serif";
+
+type ThemeId = "navy" | "sunset" | "mint" | "electric";
+const THEMES: Record<ThemeId, {
+  label: string; emoji: string;
+  hubBg: string;
+  slideBg: string;
+  panelBg: string;
+  accent: string;
+  accent2: string;
+}> = {
+  navy: {
+    label: "Navy", emoji: "🌊",
+    hubBg: "radial-gradient(ellipse at top, #0a1f3a 0%, #050d1c 60%, #02060f 100%)",
+    slideBg: "linear-gradient(160deg, #051528 0%, #020a14 100%)",
+    panelBg: "linear-gradient(135deg, #0c2d48 0%, #061522 100%)",
+    accent: "#2e8bc0", accent2: "#b1d4e0",
+  },
+  sunset: {
+    label: "Sunset", emoji: "🌅",
+    hubBg: "radial-gradient(ellipse at top, #ff8a5b 0%, #e64980 50%, #2a0e2e 100%)",
+    slideBg: "linear-gradient(160deg, #ff8a5b 0%, #5a0e3a 100%)",
+    panelBg: "linear-gradient(135deg, #e64980 0%, #4a0e3a 100%)",
+    accent: "#ff8a5b", accent2: "#ffd1a3",
+  },
+  mint: {
+    label: "Mint", emoji: "🍃",
+    hubBg: "radial-gradient(ellipse at top, #5eead4 0%, #14b8a6 45%, #042f2e 100%)",
+    slideBg: "linear-gradient(160deg, #042f2e 0%, #021412 100%)",
+    panelBg: "linear-gradient(135deg, #14b8a6 0%, #042f2e 100%)",
+    accent: "#5eead4", accent2: "#a7f3d0",
+  },
+  electric: {
+    label: "Electric", emoji: "⚡",
+    hubBg: "radial-gradient(ellipse at top, #a78bfa 0%, #7c3aed 45%, #1e0a3c 100%)",
+    slideBg: "linear-gradient(160deg, #1e0a3c 0%, #0a0418 100%)",
+    panelBg: "linear-gradient(135deg, #7c3aed 0%, #1e0a3c 100%)",
+    accent: "#a78bfa", accent2: "#e9d5ff",
+  },
+};
+
+const HYPE_LABELS = ["let's gooo", "you're cooking 🔥", "easy 💸", "fr fr", "no cap", "+vibes", "huge W", "bagged it", "money moves", "clean 🧼"];
+const pickHype = (): string => HYPE_LABELS[Math.floor(Math.random() * HYPE_LABELS.length)];
+
+let __audioCtx: AudioContext | null = null;
+const getAudioCtx = (): AudioContext | null => {
+  if (typeof window === "undefined") return null;
+  if (!__audioCtx) {
+    try { __audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)(); }
+    catch { return null; }
+  }
+  if (__audioCtx.state === "suspended") __audioCtx.resume().catch(() => {});
+  return __audioCtx;
+};
+const playTone = (freq: number, duration = 0.15, type: OscillatorType = "sine", gain = 0.12, slideTo?: number) => {
+  const ctx = getAudioCtx(); if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, ctx.currentTime + duration);
+    g.gain.setValueAtTime(gain, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + duration);
+  } catch {}
+};
+const SFX = {
+  flip: () => { playTone(520, 0.07, "triangle", 0.05); },
+  correct: () => { playTone(660, 0.1, "sine", 0.15); setTimeout(() => playTone(990, 0.16, "sine", 0.15), 80); },
+  wrong: () => { playTone(220, 0.18, "sawtooth", 0.08, 110); },
+  coin: () => { playTone(880, 0.06, "square", 0.07); setTimeout(() => playTone(1320, 0.08, "square", 0.06), 50); },
+};
 
 
 const getAgeFromYear = (yearStr: string): number => {
@@ -906,6 +980,35 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
   const [isMuted, setIsMuted] = useState(false);
   const isMutedRef = useRef(false);
+  const [sfxEnabled, setSfxEnabled] = useState<boolean>(() => loadStr("sfxEnabled", "false") === "true");
+  useEffect(() => { saveStr("sfxEnabled", String(sfxEnabled)); }, [sfxEnabled]);
+  const sfxEnabledRef = useRef<boolean>(sfxEnabled);
+  useEffect(() => { sfxEnabledRef.current = sfxEnabled; }, [sfxEnabled]);
+  const playSfx = useCallback((kind: "flip" | "correct" | "wrong" | "coin") => {
+    if (!sfxEnabledRef.current) return;
+    SFX[kind]();
+  }, []);
+  const [themeId, setThemeId] = useState<ThemeId>(() => (loadStr("themeId", "navy") as ThemeId));
+  useEffect(() => { saveStr("themeId", themeId); }, [themeId]);
+  const theme = THEMES[themeId] || THEMES.navy;
+  const [reactions, setReactions] = useState<Array<{ id: string; emoji: string; x: number; y: number; dx: number }>>([]);
+  const spawnReactions = useCallback((el: HTMLElement) => {
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const pool = ["👏", "🎉", "💯", "🔥", "✨", "🪙", "🚀"];
+    const next = Array.from({ length: 6 }).map((_, i) => ({
+      id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`,
+      emoji: pool[Math.floor(Math.random() * pool.length)],
+      x: cx + (Math.random() - 0.5) * 60,
+      y: cy,
+      dx: (Math.random() - 0.5) * 140,
+    }));
+    setReactions((p) => [...p, ...next]);
+    setTimeout(() => {
+      setReactions((p) => p.filter((r) => !next.find((n) => n.id === r.id)));
+    }, 1400);
+  }, []);
   const [speechSpeed, setSpeechSpeed] = useState<number>(1);
   const speechSpeedRef = useRef<number>(1);
   const progress = Math.min((completedSlides.length / 5) * 100, 100);
@@ -2674,22 +2777,30 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         }} />
       )}
 
-      {/* GLOW LINE — left edge scroll progress */}
+      {/* COIN STICKER PROGRESS — top center */}
       <div style={{
-        position: "absolute", top: 0, left: 0, width: 3, height: "100%",
+        position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)",
         zIndex: 15, pointerEvents: "none",
-        background: "rgba(255,255,255,0.03)",
-        display: activeTab === "lab" ? "block" : "none",
+        display: activeTab === "lab" ? "flex" : "none",
+        gap: 6, alignItems: "center",
+        padding: "6px 12px", borderRadius: 20,
+        background: "rgba(0,0,0,0.35)", backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        border: "1px solid rgba(255,255,255,0.1)",
       }}>
-        <div style={{
-          width: "100%",
-          height: `${scrollProgress}%`,
-          background: "linear-gradient(180deg, #2e8bc0, #b1d4e0, #145374)",
-          borderRadius: "0 0 2px 0",
-          transition: "height 0.3s ease-out",
-          boxShadow: scrollProgress > 0 ? "0 0 8px rgba(46,139,192,0.5), 0 0 20px rgba(46,139,192,0.2)" : "none",
-          animation: scrollProgress > 0 ? "glowPulse 2s ease-in-out infinite" : "none",
-        }} />
+        {Array.from({ length: 5 }).map((_, i) => {
+          const filled = completedSlides.length > i;
+          return (
+            <span key={i} style={{
+              fontSize: "1.1rem",
+              filter: filled ? "none" : "grayscale(1) opacity(0.35)",
+              transform: filled ? "scale(1.05)" : "scale(0.85)",
+              transition: "transform 0.3s ease, filter 0.3s ease",
+              display: "inline-block",
+              animation: filled ? `stickerPop 0.5s ease-out ${i * 0.04}s both` : "none",
+            }}>🪙</span>
+          );
+        })}
       </div>
 
       {/* MINIMAL HEADER — clickable name only */}
@@ -3047,6 +3158,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
           const answered = slideAnswers[card.id];
           const isCorrect = answered !== undefined && answered === card.miniGame?.correctIndex;
+          const setupText = card.miniGame?.contextSetup;
+          const autoReveal = !setupText || (typeof setupText === "string" && setupText.length < 80);
+          const effectiveRevealed = revealedSlides[card.id] || autoReveal;
 
           return (
             <div
@@ -3058,7 +3172,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 scrollSnapAlign: "start",
                 scrollSnapStop: "always",
                 overflow: "hidden",
-                background: "#000",
+                background: isWideViewport ? theme.slideBg : "#000",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -3071,7 +3185,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 maxWidth: isWideViewport ? 1024 : "100%",
                 height: isWideViewport ? "75dvh" : "100dvh",
                 margin: "0 auto",
-                borderRadius: isWideViewport ? 24 : 0,
+                borderRadius: isWideViewport ? 28 : 0,
+                transform: isWideViewport ? "rotate(-0.4deg)" : "none",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: isWideViewport ? "row" : "column",
@@ -3136,9 +3251,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   padding: isWideViewport ? 48 : "20px 20px 32px",
                   overflowY: "auto",
                   scrollbarWidth: "none",
-                  background: isWideViewport
-                    ? "linear-gradient(135deg, #0c2d48 0%, #061522 100%)"
-                    : "transparent",
+                  background: isWideViewport ? theme.panelBg : "transparent",
                   zIndex: 2,
                   animation: "fadeIn 0.5s ease-out both",
                   gap: 4,
@@ -3148,11 +3261,12 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   <h1
                     style={{
                       color: "#fff",
-                      fontSize: "clamp(1.6rem, 6.3vw, 2.34rem)",
-                      fontWeight: 900,
+                      fontFamily: HEADING_FONT,
+                      fontSize: "clamp(1.7rem, 6.6vw, 2.5rem)",
+                      fontWeight: 800,
                       margin: 0,
-                      letterSpacing: "-0.03em",
-                      lineHeight: 1.1,
+                      letterSpacing: "-0.025em",
+                      lineHeight: 1.05,
                       textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5)",
                       textAlign: "left",
                     }}
@@ -3201,7 +3315,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     maxWidth: 400,
                   }}
                 >
-                  {!revealedSlides[card.id] ? (
+                  {!effectiveRevealed ? (
                     <div style={{ textAlign: "center", animation: "fadeIn 0.5s ease-out" }}>
                       <div style={{
                         color: "rgba(46,139,192,0.5)", fontSize: "0.55rem", fontWeight: 800,
@@ -3217,7 +3331,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                       </p>
                       <button
                         className="ws-btn"
-                        onClick={() => setRevealedSlides(p => ({ ...p, [card.id]: true }))}
+                        onClick={() => { playSfx("flip"); setRevealedSlides(p => ({ ...p, [card.id]: true })); }}
                         style={{
                           padding: "8px 20px", borderRadius: 10,
                           background: "rgba(46,139,192,0.15)",
@@ -3271,20 +3385,25 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                             <button
                               className="ws-btn"
                               key={idx}
-                              onClick={() => {
+                              onClick={(e) => {
                                 if (slideAnswers[card.id] === undefined) {
                                   setSlideAnswers((p) => ({ ...p, [card.id]: idx }));
                                   if (idx === (card.miniGame?.correctIndex ?? -1)) {
                                     setCompletedSlides((p) => [...p, card.id]);
                                     setXp((p) => p + 10);
-                                    awardMoolies(COIN_REWARDS.CORRECT_ANSWER, lang === "es" ? "¡Correcto!" : "Correct!");
+                                    awardMoolies(COIN_REWARDS.CORRECT_ANSWER, pickHype());
                                     triggerGreenFlash();
+                                    playSfx("correct");
+                                    setTimeout(() => playSfx("coin"), 180);
+                                    spawnReactions(e.currentTarget as HTMLElement);
                                     if (completedSlides.length + 1 >= 5) {
                                       const bq = currentData?.bossQuiz;
                                       if (bq?.actionQuestion && Array.isArray(bq.options) && bq.options.length >= 2) {
                                         setTimeout(() => setQuizUnlocked(true), 800);
                                       }
                                     }
+                                  } else {
+                                    playSfx("wrong");
                                   }
                                 }
                               }}
@@ -3834,6 +3953,56 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               </button>
             </div>
 
+            {/* SFX Toggle */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", fontWeight: 600, fontFamily: FONT }}>
+                {lang === "es" ? "Efectos" : "SFX"}
+              </span>
+              <button
+                className="ws-btn"
+                onClick={() => { setSfxEnabled((v) => { if (!v) SFX.coin(); return !v; }); }}
+                style={{
+                  padding: "8px 16px", borderRadius: 12, fontFamily: FONT,
+                  background: sfxEnabled ? "rgba(46,139,192,0.12)" : "rgba(255,255,255,0.05)",
+                  border: sfxEnabled ? "1px solid rgba(46,139,192,0.3)" : "1px solid rgba(255,255,255,0.1)",
+                  color: sfxEnabled ? "#2e8bc0" : "rgba(255,255,255,0.5)",
+                  fontWeight: 700, fontSize: "0.75rem", cursor: "pointer",
+                  minWidth: 60, textAlign: "center",
+                }}
+              >
+                {sfxEnabled ? "🔔 On" : "🔕 Off"}
+              </button>
+            </div>
+
+            {/* Theme Picker */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", fontWeight: 600, fontFamily: FONT }}>
+                {lang === "es" ? "Tema" : "Vibe"}
+              </span>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6 }}>
+                {(Object.keys(THEMES) as ThemeId[]).map((id) => {
+                  const tdef = THEMES[id];
+                  const active = themeId === id;
+                  return (
+                    <button
+                      key={id}
+                      className="ws-btn"
+                      onClick={() => setThemeId(id)}
+                      style={{
+                        padding: "10px 8px", borderRadius: 12, fontFamily: FONT,
+                        background: tdef.panelBg,
+                        border: active ? `2px solid ${tdef.accent}` : "1px solid rgba(255,255,255,0.08)",
+                        color: "#fff", fontWeight: 700, fontSize: "0.7rem",
+                        cursor: "pointer", display: "flex", alignItems: "center", gap: 6, justifyContent: "center",
+                      }}
+                    >
+                      <span>{tdef.emoji}</span> {tdef.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Playback Speed */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", fontWeight: 600, fontFamily: FONT }}>
@@ -3952,6 +4121,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             streak={streak}
             bossWins={bossWins}
             equippedItems={equippedItems}
+            themeBg={theme.hubBg}
             onOpenProfile={() => setShowProfile(true)}
             onNavigate={(view) => {
               if (view === "lab") {
@@ -4537,6 +4707,24 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     <AppLayout>
       {content}
       <RewardOverlay toasts={rewardToasts} burstKey={confettiBurst} />
+      <style>{`
+        @keyframes stickerPop { 0%{transform:scale(0.4) rotate(-12deg);opacity:0} 60%{transform:scale(1.2) rotate(6deg);opacity:1} 100%{transform:scale(1.05) rotate(0)} }
+        @keyframes reactionFly { 0%{transform:translate(-50%,-50%) scale(0.6);opacity:0} 20%{transform:translate(calc(-50% + var(--rx,0px) * 0.3),calc(-50% - 30px)) scale(1.2);opacity:1} 100%{transform:translate(calc(-50% + var(--rx,0px)),calc(-50% - 200px)) scale(0.9);opacity:0} }
+      `}</style>
+      {reactions.length > 0 && (
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9998 }}>
+          {reactions.map((r) => (
+            <span key={r.id} style={{
+              position: "absolute",
+              left: r.x, top: r.y,
+              fontSize: "1.6rem",
+              animation: "reactionFly 1.4s cubic-bezier(.2,.6,.3,1) forwards",
+              // @ts-ignore
+              "--rx": `${r.dx}px`,
+            } as any}>{r.emoji}</span>
+          ))}
+        </div>
+      )}
     </AppLayout>
   );
 }
