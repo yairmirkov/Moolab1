@@ -4406,34 +4406,56 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               ) : (
                 <div
                   style={{
-                    background: "rgba(255,255,255,0.04)",
-                    padding: 26,
+                    background: "rgba(0,0,0,0.55)",
+                    padding: 22,
                     borderRadius: 28,
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: `1.5px solid ${neonA}`,
                     width: "100%",
-                    maxWidth: 360,
+                    maxWidth: 380,
+                    maxHeight: "60vh",
+                    overflowY: "auto",
+                    overscrollBehavior: "contain",
+                    WebkitOverflowScrolling: "touch",
                     backdropFilter: "blur(20px)",
                     WebkitBackdropFilter: "blur(20px)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+                    boxShadow: `0 0 0 1px ${neonA}33, 0 8px 32px ${neonA}55, 0 0 60px ${neonB}33, inset 0 1px 0 rgba(255,255,255,0.04)`,
                   }}
                 >
                   {currentData.bossQuiz?.contextSetup && (
-                    <p style={{
-                      color: "rgba(255,255,255,0.5)", fontSize: "0.78rem", fontWeight: 600,
-                      lineHeight: 1.5, marginBottom: 14, textAlign: "left",
-                    }}>
-                      {currentData.bossQuiz.contextSetup}
-                    </p>
+                    <>
+                      <div style={{
+                        color: neonA, fontSize: "0.55rem", fontWeight: 800,
+                        letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 10, textAlign: "left",
+                        textShadow: `0 0 8px ${neonA}66`,
+                      }}>{t.slide.part1[lang]}</div>
+                      <p style={{
+                        color: "#fff", fontSize: "0.82rem", fontWeight: 700,
+                        lineHeight: 1.5, marginBottom: 14, textAlign: "left",
+                        textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                      }}>
+                        {currentData.bossQuiz.contextSetup}
+                      </p>
+                      <div style={{
+                        height: 1, width: "100%", marginBottom: 14,
+                        background: `linear-gradient(90deg, transparent, ${neonA}55, transparent)`,
+                      }} />
+                    </>
                   )}
+                  <div style={{
+                    color: neonB, fontSize: "0.55rem", fontWeight: 800,
+                    letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 10, textAlign: "left",
+                    textShadow: `0 0 8px ${neonB}66`,
+                  }}>{t.slide.part2[lang]}</div>
                   <h3
                     style={{
                       color: "#fff",
-                      fontSize: "1.1rem",
-                      fontWeight: 800,
-                      marginBottom: 20,
-                      lineHeight: 1.35,
+                      fontSize: "1.05rem",
+                      fontWeight: 900,
+                      marginBottom: 18,
+                      lineHeight: 1.3,
                       letterSpacing: "-0.02em",
                       textAlign: "left",
+                      fontFamily: HEADING_FONT,
                     }}
                   >
                     {currentData.bossQuiz.actionQuestion}
@@ -4446,7 +4468,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     }}
                   >
                     {(currentData.bossQuiz?.options || []).map((opt, i) => {
-                      const colors = ["#FF6B6B", "#FFD93D", "#b1d4e0"];
+                      const optNeons = ["#ff2d95","#39ff14","#ff9500","#00d4ff","#bf5cff","#ffe600"];
+                      const optNeon = optNeons[i % optNeons.length];
+                      const colors = [optNeon, optNeon, optNeon];
                       return (
                         <button
                           className="ws-btn"
@@ -4504,28 +4528,35 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                           }}
                           style={{
                             width: "100%",
-                            padding: 18,
+                            padding: 14,
                             borderRadius: 16,
-                            border: "1px solid rgba(255,255,255,0.08)",
-                            background: "rgba(255,255,255,0.05)",
-                            color: "rgba(255,255,255,0.9)",
+                            border: `1.5px solid ${optNeon}88`,
+                            background: `${optNeon}12`,
+                            color: "#fff",
                             fontWeight: 700,
                             cursor: "pointer",
                             fontFamily: FONT,
-                            fontSize: "0.9rem",
+                            fontSize: "0.88rem",
                             display: "flex",
                             alignItems: "center",
                             gap: 12,
+                            boxShadow: `0 0 14px ${optNeon}33`,
+                            textAlign: "left",
+                            transition: "transform 0.15s ease, box-shadow 0.2s ease",
                           }}
+                          onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.98)"; }}
+                          onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+                          onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                         >
                           <span style={{
-                            width: 26, height: 26, borderRadius: 8, flexShrink: 0,
-                            background: `${colors[i % 3]}12`,
-                            border: `1px solid ${colors[i % 3]}30`,
+                            width: 30, height: 30, borderRadius: 10, flexShrink: 0,
+                            background: optNeon,
                             display: "flex", justifyContent: "center", alignItems: "center",
-                            fontSize: "0.65rem", fontWeight: 900, color: colors[i % 3],
+                            fontSize: "0.85rem", fontWeight: 900, color: "#0a0a0f",
+                            fontFamily: HEADING_FONT,
+                            boxShadow: `0 0 12px ${optNeon}99`,
                           }}>{String.fromCharCode(65 + i)}</span>
-                          {opt}
+                          <span style={{ flex: 1 }}>{opt}</span>
                         </button>
                       );
                     })}
