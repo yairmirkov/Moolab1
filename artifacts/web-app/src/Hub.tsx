@@ -113,8 +113,8 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       `}</style>
 
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "center",
-        gap: 20, marginTop: 40, width: "100%", maxWidth: "min(94vw, 720px)",
+        display: "flex", alignItems: "center", justifyContent: "flex-start",
+        gap: 16, marginTop: 40, width: "100%", maxWidth: "min(94vw, 760px)",
       }}>
         <button
           onClick={onOpenProfile}
@@ -174,8 +174,9 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       </div>
 
       <div style={{
-        display: "flex", gap: 10, marginTop: 18,
-        width: "100%", maxWidth: "min(94vw, 720px)",
+        display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 12, marginTop: 20,
+        width: "100%", maxWidth: "min(94vw, 760px)",
       }}>
         {[
           { label: lang === "es" ? "NVL" : "LVL", val: level, color: "#60a5fa", sub: `${xpInLevel}/${xpNeeded} XP`, showBar: true },
@@ -183,12 +184,12 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
           { label: lang === "es" ? "JEFES" : "BOSS", val: bossWins, color: "#FFD93D", sub: lang === "es" ? "victorias" : "wins", showBar: false },
         ].map((s) => (
           <div key={s.label} style={{
-            flex: 1,
             background: "linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015))",
-            padding: "12px 10px 10px", borderRadius: 16, textAlign: "center",
+            padding: "14px 12px 12px", borderRadius: 16, textAlign: "center",
             border: "1px solid rgba(120,180,255,0.1)",
             boxShadow: "0 1px 0 rgba(255,255,255,0.04) inset",
             position: "relative", overflow: "hidden",
+            minHeight: 92, display: "flex", flexDirection: "column", justifyContent: "center",
           }}>
             <div style={{ color: s.color, fontSize: "1.15rem", fontWeight: 900, letterSpacing: "-0.02em" }}>{s.val}</div>
             <div style={{
@@ -217,20 +218,20 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
 
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-        gap: 14, width: "100%", maxWidth: "min(94vw, 1100px)",
-        marginTop: 20, paddingBottom: 40,
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 12, width: "100%", maxWidth: "min(94vw, 760px)",
+        marginTop: 12, paddingBottom: 40,
       }}>
         {cards.map((card, idx) => (
           <button
             key={card.id}
             onClick={() => onNavigate(card.id)}
             style={{
-              width: "100%", padding: "22px 20px", borderRadius: 20,
+              width: "100%", padding: "18px 16px", borderRadius: 20,
               background: card.gradient,
               border: `1px solid ${card.border}`,
               cursor: "pointer", fontFamily: FONT,
-              display: "flex", alignItems: "center", gap: 16,
+              display: "flex", alignItems: "center", gap: 12,
               transition: "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
               animation: `hubFloat 5s ease-in-out ${idx * 0.4}s infinite`,
               boxShadow: `0 8px 28px ${card.glow}, 0 1px 0 rgba(255,255,255,0.04) inset`,
@@ -253,22 +254,24 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
               pointerEvents: "none",
             }} />
             <div style={{
-              width: 52, height: 52, borderRadius: 14,
+              width: 44, height: 44, borderRadius: 12,
               background: `radial-gradient(circle at 30% 30%, ${card.accent}33, rgba(255,255,255,0.04))`,
               border: `1px solid ${card.accent}40`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "1.7rem", flexShrink: 0,
+              fontSize: "1.4rem", flexShrink: 0,
               boxShadow: `inset 0 0 20px ${card.accent}15`,
             }}>
               {card.icon}
             </div>
             <div style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
               <div style={{
-                fontSize: "1.05rem", fontWeight: 900, color: "#fff",
-                letterSpacing: "-0.015em", marginBottom: 4,
+                fontSize: "0.92rem", fontWeight: 900, color: "#fff",
+                letterSpacing: "-0.015em", marginBottom: 3,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
               }}>{card.title}</div>
               <div style={{
-                fontSize: "0.68rem", fontWeight: 500,
+                fontSize: "0.62rem", fontWeight: 500,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 color: "rgba(207,225,245,0.55)", letterSpacing: "0.02em",
               }}>{card.subtitle}</div>
             </div>
