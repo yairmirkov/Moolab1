@@ -3729,9 +3729,72 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             </button>
           </div>
 
-          {/* Settings Controls */}
+          {/* Module Switcher (Testing) — moved up so it isn't cut off the screen */}
           <div style={{
             width: "100%", maxWidth: 300, marginTop: 24,
+            padding: "16px 18px", borderRadius: 18,
+            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+          }}>
+            <div style={{
+              color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", fontWeight: 700,
+              letterSpacing: "0.12em", marginBottom: 10, textAlign: "center",
+            }}>{t.profile.switchModule[lang]}</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {MODULES.map((mod, idx) => {
+                const prevWinsHere = idx > 0 ? (moduleProgress[MODULES[idx - 1].id] || 0) : Infinity;
+                const prevUnlockAtHere = idx > 0 ? (MODULES[idx - 1].unlockThreshold || SUBJECT_UNLOCK_THRESHOLD) : 0;
+                const locked = idx > 0 && prevWinsHere < prevUnlockAtHere;
+                const isActive = idx === currentModuleIdx;
+                return (
+                  <button
+                    className="ws-btn"
+                    key={mod.id}
+                    onClick={() => {
+                      if (locked) return;
+                      setCurrentModuleIdx(idx);
+                      setShowProfile(false);
+                      resetJourney();
+                    }}
+                    disabled={locked}
+                    style={{
+                      padding: "10px 14px", borderRadius: 12, fontFamily: FONT,
+                      background: isActive
+                        ? "rgba(46,139,192,0.1)"
+                        : locked ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.02)",
+                      border: isActive
+                        ? "1px solid rgba(46,139,192,0.3)"
+                        : locked ? "1px dashed rgba(255,255,255,0.06)" : "1px solid rgba(255,255,255,0.05)",
+                      color: isActive
+                        ? "#2e8bc0"
+                        : locked ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.5)",
+                      fontWeight: 700, fontSize: "0.7rem",
+                      cursor: locked ? "not-allowed" : "pointer",
+                      display: "flex", alignItems: "center", gap: 8,
+                      opacity: locked ? 0.55 : 1,
+                    }}
+                  >
+                    <span style={{ filter: locked ? "grayscale(0.7)" : "none" }}>{mod.icon}</span>
+                    <span>{mod.name}</span>
+                    {locked ? (
+                      <span style={{
+                        marginLeft: "auto", fontSize: "0.55rem", fontWeight: 800,
+                        color: "rgba(255,255,255,0.35)", display: "inline-flex",
+                        alignItems: "center", gap: 4,
+                      }}>
+                        🔒 {lang === "es" ? "Bloqueado" : "Locked"}
+                      </span>
+                    ) : isActive ? (
+                      <span style={{ marginLeft: "auto", fontSize: "0.5rem", fontWeight: 800, color: "#2e8bc0" }}>{t.moduleMap.active[lang]}</span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Settings Controls */}
+          <div style={{
+            width: "100%", maxWidth: 300, marginTop: 12,
             padding: "18px", borderRadius: 18,
             background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
             display: "flex", flexDirection: "column", gap: 16,
@@ -3831,44 +3894,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             </div>
           </div>
 
-          {/* Module Switcher (Testing) */}
-          <div style={{
-            width: "100%", maxWidth: 300, marginTop: 12,
-            padding: "16px 18px", borderRadius: 18,
-            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-          }}>
-            <div style={{
-              color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", fontWeight: 700,
-              letterSpacing: "0.12em", marginBottom: 10, textAlign: "center",
-            }}>{t.profile.switchModule[lang]}</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {MODULES.map((mod, idx) => (
-                <button
-                  className="ws-btn"
-                  key={mod.id}
-                  onClick={() => {
-                    setCurrentModuleIdx(idx);
-                    setShowProfile(false);
-                    resetJourney();
-                  }}
-                  style={{
-                    padding: "10px 14px", borderRadius: 12, fontFamily: FONT,
-                    background: idx === currentModuleIdx ? "rgba(46,139,192,0.1)" : "rgba(255,255,255,0.02)",
-                    border: idx === currentModuleIdx ? "1px solid rgba(46,139,192,0.3)" : "1px solid rgba(255,255,255,0.05)",
-                    color: idx === currentModuleIdx ? "#2e8bc0" : "rgba(255,255,255,0.5)",
-                    fontWeight: 700, fontSize: "0.7rem", cursor: "pointer",
-                    display: "flex", alignItems: "center", gap: 8,
-                  }}
-                >
-                  <span>{mod.icon}</span>
-                  <span>{mod.name}</span>
-                  {idx === currentModuleIdx && (
-                    <span style={{ marginLeft: "auto", fontSize: "0.5rem", fontWeight: 800, color: "#2e8bc0" }}>{t.moduleMap.active[lang]}</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 
