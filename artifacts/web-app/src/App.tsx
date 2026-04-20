@@ -2241,41 +2241,97 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     return parentDashContent;
   }
 
-  if (showSubjectPicker && !loading && !currentData)
+  if (showSubjectPicker && !loading && !currentData) {
+    const levelLabel = effectiveLevel === "beginner"
+      ? (lang === "es" ? "Principiante" : "Beginner")
+      : effectiveLevel === "intermediate"
+        ? (lang === "es" ? "Intermedio" : "Intermediate")
+        : (lang === "es" ? "Experto" : "Expert");
+    const levelAccent = effectiveLevel === "beginner" ? "#4ade80" : effectiveLevel === "intermediate" ? "#fbbf24" : "#a78bfa";
+    const completedCount = MODULES.filter((m) => (moduleProgress[m.id] || 0) >= m.winsNeeded).length;
     return (
       <div style={{
-        height: "100dvh", display: "flex", flexDirection: "column",
-        justifyContent: "center", alignItems: "center",
-        background: "linear-gradient(160deg, #eef6fb 0%, #e0f0f8 30%, #d0e8f2 60%, #f2f8fb 100%)",
-        fontFamily: FONT, padding: 24,
+        minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center",
+        background: "radial-gradient(ellipse at top, #0a1f3a 0%, #050d1c 60%, #02060f 100%)",
+        fontFamily: FONT, padding: "20px 20px 40px", color: "#e6f0ff",
       }}>
         <style>{`
           @keyframes subjectFadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-          @keyframes subjectPulse { 0%,100% { box-shadow: 0 4px 20px rgba(46,139,192,0.08); } 50% { box-shadow: 0 8px 30px rgba(46,139,192,0.18); } }
+          @keyframes subjectGlow { 0%,100% { box-shadow: 0 0 0 1px rgba(120,180,255,0.12), 0 8px 24px rgba(0,0,0,0.4); } 50% { box-shadow: 0 0 0 1px rgba(120,180,255,0.28), 0 12px 32px rgba(46,139,192,0.25); } }
+          @keyframes ringSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         `}</style>
-        <div style={{ animation: "subjectFadeIn 0.6s ease-out both", textAlign: "center", maxWidth: 400, width: "100%" }}>
-          <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>🧪</div>
+
+        {/* Top bar with back button */}
+        <div style={{
+          width: "100%", maxWidth: 440, display: "flex", alignItems: "center", justifyContent: "space-between",
+          marginBottom: 20, animation: "subjectFadeIn 0.5s ease-out both",
+        }}>
+          <button
+            onClick={() => { setShowSubjectPicker(false); navigateTo("hub"); }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "8px 14px", borderRadius: 999,
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              color: "#cfe1f5", fontFamily: FONT, fontSize: "0.72rem", fontWeight: 700,
+              cursor: "pointer", letterSpacing: "0.02em",
+            }}
+          >
+            <span style={{ fontSize: "0.9rem", lineHeight: 1 }}>←</span>
+            {lang === "es" ? "Hub" : "Hub"}
+          </button>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            padding: "6px 12px", borderRadius: 999,
+            background: `${levelAccent}15`, border: `1px solid ${levelAccent}55`,
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: levelAccent, boxShadow: `0 0 8px ${levelAccent}` }} />
+            <span style={{ fontSize: "0.65rem", fontWeight: 800, color: levelAccent, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              {levelLabel}
+            </span>
+          </div>
+        </div>
+
+        {/* Header */}
+        <div style={{ textAlign: "center", maxWidth: 440, width: "100%", marginBottom: 24, animation: "subjectFadeIn 0.55s ease-out 0.05s both" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            width: 56, height: 56, borderRadius: 18, marginBottom: 14,
+            background: "linear-gradient(135deg, rgba(46,139,192,0.25), rgba(120,180,255,0.08))",
+            border: "1px solid rgba(120,180,255,0.2)",
+            fontSize: "1.6rem",
+          }}>🧪</div>
           <h2 style={{
-            fontSize: "1.35rem", fontWeight: 900, color: "#0c2d48",
-            letterSpacing: "-0.03em", marginBottom: 6,
+            fontSize: "1.5rem", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 6,
+            background: "linear-gradient(135deg, #ffffff 0%, #b1d4e0 100%)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
           }}>
             {lang === "es" ? "¿Qué dominamos hoy?" : "What are we mastering today?"}
           </h2>
-          <p style={{
-            fontSize: "0.75rem", fontWeight: 600, color: "rgba(12,45,72,0.4)",
-            marginBottom: 28, letterSpacing: "0.01em",
-          }}>
+          <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "rgba(207,225,245,0.5)", letterSpacing: "0.01em", margin: 0 }}>
             {lang === "es" ? "Elige un tema para tu sesión" : "Pick a subject for your session"}
+            <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
+            <span style={{ color: levelAccent, fontWeight: 800 }}>{completedCount}/{MODULES.length}</span>
           </p>
-          <div style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr",
-            gap: 12, width: "100%",
-          }}>
-            {MODULES.map((mod, i) => (
+        </div>
+
+        {/* Subjects grid */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
+          width: "100%", maxWidth: 440,
+        }}>
+          {MODULES.map((mod, i) => {
+            const wins = moduleProgress[mod.id] || 0;
+            const pct = Math.min((wins / mod.winsNeeded) * 100, 100);
+            const isComplete = wins >= mod.winsNeeded;
+            const isLocked = i > currentModuleIdx && !isComplete;
+            const isCurrent = i === currentModuleIdx && !isComplete;
+            return (
               <button
                 key={mod.id}
                 className="ws-btn"
+                disabled={isLocked}
                 onClick={() => {
+                  if (isLocked) return;
                   setCurrentModuleIdx(i);
                   setSelectedSubject(mod.name);
                   selectedSubjectRef.current = mod.name;
@@ -2284,28 +2340,67 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   resetJourney(mod.name);
                 }}
                 style={{
-                  padding: "18px 14px", borderRadius: 20,
-                  background: "#fff", border: "1.5px solid rgba(46,139,192,0.12)",
-                  cursor: "pointer", fontFamily: FONT,
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-                  animation: `subjectFadeIn 0.5s ease-out ${0.1 + i * 0.07}s both, subjectPulse 3s ease-in-out ${i * 0.4}s infinite`,
+                  position: "relative", overflow: "hidden",
+                  padding: "18px 12px 14px", borderRadius: 18,
+                  background: isLocked
+                    ? "rgba(255,255,255,0.025)"
+                    : isCurrent
+                      ? "linear-gradient(160deg, rgba(46,139,192,0.22), rgba(120,180,255,0.06))"
+                      : "rgba(255,255,255,0.04)",
+                  border: isCurrent
+                    ? `1.5px solid ${levelAccent}88`
+                    : isComplete
+                      ? "1.5px solid rgba(74,222,128,0.5)"
+                      : "1px solid rgba(120,180,255,0.12)",
+                  cursor: isLocked ? "not-allowed" : "pointer",
+                  fontFamily: FONT,
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+                  opacity: isLocked ? 0.45 : 1,
+                  animation: `subjectFadeIn 0.5s ease-out ${0.1 + i * 0.06}s both${isCurrent ? ", subjectGlow 3s ease-in-out infinite" : ""}`,
                   transition: "transform 0.15s, border-color 0.2s",
                 }}
-                onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.96)"; }}
+                onPointerDown={(e) => { if (!isLocked) (e.currentTarget as HTMLElement).style.transform = "scale(0.96)"; }}
                 onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                 onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
               >
-                <span style={{ fontSize: "1.6rem" }}>{mod.icon}</span>
+                {isComplete && (
+                  <span style={{
+                    position: "absolute", top: 8, right: 8,
+                    width: 18, height: 18, borderRadius: "50%",
+                    background: "rgba(74,222,128,0.2)", border: "1px solid rgba(74,222,128,0.6)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "0.6rem", color: "#4ade80", fontWeight: 900,
+                  }}>✓</span>
+                )}
+                {isLocked && (
+                  <span style={{ position: "absolute", top: 8, right: 8, fontSize: "0.7rem", opacity: 0.6 }}>🔒</span>
+                )}
+                <span style={{ fontSize: "1.8rem", filter: isLocked ? "grayscale(1)" : "none" }}>{mod.icon}</span>
                 <span style={{
-                  fontSize: "0.78rem", fontWeight: 800, color: "#0c2d48",
-                  letterSpacing: "-0.01em", lineHeight: 1.2,
+                  fontSize: "0.78rem", fontWeight: 800, color: "#e6f0ff",
+                  letterSpacing: "-0.01em", lineHeight: 1.2, textAlign: "center", minHeight: 30,
                 }}>{mod.name}</span>
+                <div style={{ width: "100%", display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                    <div style={{
+                      width: `${pct}%`, height: "100%",
+                      background: isComplete
+                        ? "linear-gradient(90deg, #4ade80, #22c55e)"
+                        : `linear-gradient(90deg, ${levelAccent}, #b1d4e0)`,
+                      transition: "width 0.6s ease",
+                    }} />
+                  </div>
+                  <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "rgba(207,225,245,0.55)", minWidth: 18, textAlign: "right" }}>
+                    {wins}/{mod.winsNeeded}
+                  </span>
+                </div>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     );
+  }
 
   if (activeTab === "lab" && (loading || !currentData))
     return (
