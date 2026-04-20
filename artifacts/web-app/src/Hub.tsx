@@ -52,27 +52,30 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       icon: "🧪",
       title: lang === "es" ? "Entrar al Lab" : "Enter The Lab",
       subtitle: lang === "es" ? "Lecciones financieras con IA" : "AI-powered financial lessons",
-      gradient: "linear-gradient(135deg, #145374 0%, #2e8bc0 50%, #0c2d48 100%)",
-      border: "rgba(46,139,192,0.3)",
-      glow: "rgba(46,139,192,0.15)",
+      accent: "#60a5fa",
+      gradient: "linear-gradient(135deg, rgba(46,139,192,0.22) 0%, rgba(20,83,116,0.18) 60%, rgba(10,31,58,0.4) 100%)",
+      border: "rgba(96,165,250,0.35)",
+      glow: "rgba(46,139,192,0.18)",
     },
     {
       id: "tank" as const,
       icon: "🦈",
       title: lang === "es" ? "El Tanque" : "The Tank",
       subtitle: lang === "es" ? "Simulador de portafolio" : "Portfolio simulator",
-      gradient: "linear-gradient(135deg, #0c2d48 0%, #145374 50%, #2e8bc0 100%)",
-      border: "rgba(20,83,116,0.3)",
-      glow: "rgba(20,83,116,0.15)",
+      accent: "#22d3ee",
+      gradient: "linear-gradient(135deg, rgba(34,211,238,0.18) 0%, rgba(20,83,116,0.18) 60%, rgba(10,31,58,0.4) 100%)",
+      border: "rgba(34,211,238,0.3)",
+      glow: "rgba(34,211,238,0.14)",
     },
     {
       id: "vault" as const,
       icon: "🏦",
       title: lang === "es" ? "La Bóveda" : "The Vault",
       subtitle: lang === "es" ? "Centro de recompensas" : "Rewards center",
-      gradient: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-      border: "rgba(255,215,0,0.2)",
-      glow: "rgba(255,215,0,0.08)",
+      accent: "#fbbf24",
+      gradient: "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(120,80,20,0.16) 60%, rgba(10,15,30,0.5) 100%)",
+      border: "rgba(251,191,36,0.3)",
+      glow: "rgba(251,191,36,0.14)",
     },
   ];
 
@@ -80,14 +83,20 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
     <div style={{
       width: "100%",
       height: "100%",
-      background: "linear-gradient(180deg, #0a1628 0%, #0c2d48 40%, #091e30 100%)",
+      background: "radial-gradient(ellipse at top, #0a1f3a 0%, #050d1c 60%, #02060f 100%)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       padding: "0 24px",
       overflowY: "auto",
       fontFamily: FONT,
+      position: "relative",
     }}>
+      <div aria-hidden style={{
+        position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+        width: "120%", height: 320, pointerEvents: "none",
+        background: "radial-gradient(ellipse at center top, rgba(46,139,192,0.14), transparent 65%)",
+      }} />
       <style>{`
         @keyframes hubFloat {
           0%, 100% { transform: translateY(0); }
@@ -165,42 +174,45 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       </div>
 
       <div style={{
-        display: "flex", gap: 8, marginTop: 16,
+        display: "flex", gap: 10, marginTop: 18,
         width: "100%", maxWidth: "min(94vw, 720px)",
       }}>
         {[
-          { label: lang === "es" ? "NVL" : "LVL", val: level, color: "#2e8bc0", sub: `${xpInLevel}/${xpNeeded} XP` },
-          { label: lang === "es" ? "RACHA" : "STREAK", val: `${streak}🔥`, color: "#FF6B6B", sub: lang === "es" ? "días" : "days" },
-          { label: lang === "es" ? "JEFES" : "BOSS", val: bossWins, color: "#FFD93D", sub: lang === "es" ? "victorias" : "wins" },
+          { label: lang === "es" ? "NVL" : "LVL", val: level, color: "#60a5fa", sub: `${xpInLevel}/${xpNeeded} XP`, showBar: true },
+          { label: lang === "es" ? "RACHA" : "STREAK", val: `${streak}🔥`, color: "#FF6B6B", sub: lang === "es" ? "días" : "days", showBar: false },
+          { label: lang === "es" ? "JEFES" : "BOSS", val: bossWins, color: "#FFD93D", sub: lang === "es" ? "victorias" : "wins", showBar: false },
         ].map((s) => (
           <div key={s.label} style={{
-            flex: 1, background: "rgba(255,255,255,0.03)",
-            padding: "10px 8px 8px", borderRadius: 14, textAlign: "center",
-            border: "1px solid rgba(255,255,255,0.05)",
+            flex: 1,
+            background: "linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015))",
+            padding: "12px 10px 10px", borderRadius: 16, textAlign: "center",
+            border: "1px solid rgba(120,180,255,0.1)",
+            boxShadow: "0 1px 0 rgba(255,255,255,0.04) inset",
+            position: "relative", overflow: "hidden",
           }}>
-            <div style={{ color: s.color, fontSize: "1.1rem", fontWeight: 900 }}>{s.val}</div>
+            <div style={{ color: s.color, fontSize: "1.15rem", fontWeight: 900, letterSpacing: "-0.02em" }}>{s.val}</div>
             <div style={{
-              color: "rgba(255,255,255,0.25)", fontSize: "0.45rem", fontWeight: 700,
-              letterSpacing: "0.08em", marginTop: 2,
+              color: "rgba(207,225,245,0.45)", fontSize: "0.5rem", fontWeight: 800,
+              letterSpacing: "0.12em", marginTop: 3, textTransform: "uppercase",
             }}>{s.label}</div>
             <div style={{
-              color: "rgba(255,255,255,0.15)", fontSize: "0.4rem", fontWeight: 600, marginTop: 1,
+              color: "rgba(207,225,245,0.3)", fontSize: "0.5rem", fontWeight: 600, marginTop: 2,
             }}>{s.sub}</div>
+            {s.showBar && (
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0, height: 3,
+                background: "rgba(120,180,255,0.08)",
+              }}>
+                <div style={{
+                  height: "100%",
+                  width: `${xpPct}%`,
+                  background: "linear-gradient(90deg, #2e8bc0, #b1d4e0)",
+                  transition: "width 0.8s ease",
+                }} />
+              </div>
+            )}
           </div>
         ))}
-      </div>
-
-      <div style={{
-        width: "100%", maxWidth: "min(94vw, 720px)", marginTop: 8,
-        background: "rgba(46,139,192,0.06)", borderRadius: 10,
-        height: 4, overflow: "hidden",
-      }}>
-        <div style={{
-          height: "100%", borderRadius: 10,
-          background: "linear-gradient(90deg, #2e8bc0, #b1d4e0)",
-          width: `${xpPct}%`,
-          transition: "width 0.8s ease",
-        }} />
       </div>
 
       <div style={{
@@ -214,45 +226,54 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
             key={card.id}
             onClick={() => onNavigate(card.id)}
             style={{
-              width: "100%", padding: "24px 20px", borderRadius: 22,
+              width: "100%", padding: "22px 20px", borderRadius: 20,
               background: card.gradient,
               border: `1px solid ${card.border}`,
               cursor: "pointer", fontFamily: FONT,
               display: "flex", alignItems: "center", gap: 16,
-              transition: "all 0.3s ease",
-              animation: `hubFloat 4s ease-in-out ${idx * 0.3}s infinite`,
-              boxShadow: `0 4px 24px ${card.glow}, 0 1px 3px rgba(0,0,0,0.3)`,
+              transition: "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+              animation: `hubFloat 5s ease-in-out ${idx * 0.4}s infinite`,
+              boxShadow: `0 8px 28px ${card.glow}, 0 1px 0 rgba(255,255,255,0.04) inset`,
               position: "relative", overflow: "hidden",
             }}
+            onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.985)"; }}
+            onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+            onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
           >
-            <div style={{
+            <div aria-hidden style={{
+              position: "absolute", top: 0, left: 0, bottom: 0, width: 3,
+              background: card.accent, opacity: 0.7,
+              boxShadow: `0 0 12px ${card.accent}66`,
+            }} />
+            <div aria-hidden style={{
               position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
+              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%)",
               backgroundSize: "200% 100%",
-              animation: "hubShine 4s ease-in-out infinite",
+              animation: "hubShine 5s ease-in-out infinite",
               pointerEvents: "none",
             }} />
             <div style={{
-              width: 50, height: 50, borderRadius: 16,
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              width: 52, height: 52, borderRadius: 14,
+              background: `radial-gradient(circle at 30% 30%, ${card.accent}33, rgba(255,255,255,0.04))`,
+              border: `1px solid ${card.accent}40`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "1.6rem", flexShrink: 0,
+              fontSize: "1.7rem", flexShrink: 0,
+              boxShadow: `inset 0 0 20px ${card.accent}15`,
             }}>
               {card.icon}
             </div>
-            <div style={{ flex: 1, textAlign: "left" }}>
+            <div style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
               <div style={{
                 fontSize: "1.05rem", fontWeight: 900, color: "#fff",
-                letterSpacing: "-0.01em", marginBottom: 3,
+                letterSpacing: "-0.015em", marginBottom: 4,
               }}>{card.title}</div>
               <div style={{
                 fontSize: "0.68rem", fontWeight: 500,
-                color: "rgba(177,212,224,0.5)", letterSpacing: "0.02em",
+                color: "rgba(207,225,245,0.55)", letterSpacing: "0.02em",
               }}>{card.subtitle}</div>
             </div>
             <div style={{
-              fontSize: "1.2rem", color: "rgba(177,212,224,0.3)", fontWeight: 300,
+              fontSize: "1.1rem", color: card.accent, fontWeight: 400, opacity: 0.7,
             }}>→</div>
           </button>
         ))}
