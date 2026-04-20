@@ -4287,6 +4287,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           }}
         >
         <div
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
           style={{
             width: "100%",
             height: "100%",
@@ -4302,10 +4304,13 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 : "radial-gradient(ellipse at center, rgba(46,139,192,0.08) 0%, #0c2d48 60%, #091e30 100%)",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
+            justifyContent: quizStarted && quizResult === null ? "flex-start" : "center",
             alignItems: "center",
-            padding: 30,
+            padding: quizStarted && quizResult === null ? "24px 16px calc(env(safe-area-inset-bottom, 0) + 32px) 16px" : 30,
             textAlign: "center",
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
           }}
         >
           {quizResult === null ? (() => {
@@ -4322,23 +4327,27 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                       @keyframes bossBtnPulse { 0%,100%{box-shadow:0 0 32px ${neonA}88, 0 0 80px ${neonB}55, 0 12px 28px rgba(0,0,0,0.5)} 50%{box-shadow:0 0 48px ${neonA}cc, 0 0 120px ${neonB}99, 0 12px 32px rgba(0,0,0,0.6)} }
                       @keyframes bossTitleGlow { 0%,100%{filter:drop-shadow(0 0 12px ${neonA}66)} 50%{filter:drop-shadow(0 0 24px ${neonA}cc) drop-shadow(0 0 40px ${neonB}66)} }
                     `}</style>
-                    <div style={{
-                      position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)",
-                      width: 360, height: 360, borderRadius: "50%",
-                      background: `radial-gradient(circle, ${neonA}22 0%, ${neonB}11 40%, transparent 70%)`,
-                      pointerEvents: "none", animation: "bossOrbSpin 24s linear infinite",
-                    }} />
+                    {!quizStarted && (
+                      <div style={{
+                        position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)",
+                        width: 360, height: 360, borderRadius: "50%",
+                        background: `radial-gradient(circle, ${neonA}22 0%, ${neonB}11 40%, transparent 70%)`,
+                        pointerEvents: "none", animation: "bossOrbSpin 24s linear infinite",
+                      }} />
+                    )}
                     <h1 style={{
-                      fontSize: "6rem", marginBottom: 8, position: "relative", display: "inline-block",
-                      filter: `drop-shadow(0 0 30px ${neonA}99)`,
+                      fontSize: quizStarted ? "2.4rem" : "6rem",
+                      marginBottom: quizStarted ? 4 : 8,
+                      position: "relative", display: "inline-block",
+                      filter: `drop-shadow(0 0 ${quizStarted ? 14 : 30}px ${neonA}99)`,
                       animation: "bossCrownFloat 3.4s ease-in-out infinite",
                     }}>👑</h1>
                     <h2
                       style={{
                         color: "#fff",
-                        fontSize: "clamp(2.4rem, 9vw, 3.4rem)",
+                        fontSize: quizStarted ? "clamp(1.4rem, 5vw, 1.8rem)" : "clamp(2.4rem, 9vw, 3.4rem)",
                         fontWeight: 900,
-                        marginBottom: 10,
+                        marginBottom: quizStarted ? 8 : 10,
                         letterSpacing: "-0.04em",
                         lineHeight: 0.95,
                         fontFamily: HEADING_FONT,
@@ -4352,22 +4361,26 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     >
                       {t.quiz.bossFight[lang]}
                     </h2>
-                    <div style={{
-                      display: "inline-flex", alignItems: "center", gap: 8,
-                      padding: "6px 14px", borderRadius: 999,
-                      background: `${neonA}15`, border: `1px solid ${neonA}55`,
-                      marginBottom: 10,
-                    }}>
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: neonA, boxShadow: `0 0 10px ${neonA}` }} />
-                      <span style={{
-                        color: neonA, fontWeight: 900, fontSize: "0.62rem",
-                        letterSpacing: "0.16em", textTransform: "uppercase",
-                        textShadow: `0 0 10px ${neonA}88`,
-                      }}>{t.quiz.demonstrateMastery[lang]}</span>
-                    </div>
+                    {!quizStarted && (
+                      <div style={{
+                        display: "inline-flex", alignItems: "center", gap: 8,
+                        padding: "6px 14px", borderRadius: 999,
+                        background: `${neonA}15`, border: `1px solid ${neonA}55`,
+                        marginBottom: 10,
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: neonA, boxShadow: `0 0 10px ${neonA}` }} />
+                        <span style={{
+                          color: neonA, fontWeight: 900, fontSize: "0.62rem",
+                          letterSpacing: "0.16em", textTransform: "uppercase",
+                          textShadow: `0 0 10px ${neonA}88`,
+                        }}>{t.quiz.demonstrateMastery[lang]}</span>
+                      </div>
+                    )}
                     <p style={{
                       color: "rgba(255,255,255,0.55)", fontWeight: 700, fontSize: "0.65rem",
-                      letterSpacing: "0.08em", marginBottom: 36, fontFamily: FONT,
+                      letterSpacing: "0.08em",
+                      marginBottom: quizStarted ? 18 : 36,
+                      fontFamily: FONT,
                     }}>
                       {currentModule?.icon} {currentModule?.name?.toUpperCase()} <span style={{ color: neonB, opacity: 0.6 }}>·</span> {t.quiz.win[lang]} <span style={{ color: neonA, fontWeight: 900 }}>{currentModuleWins + 1}/{currentModule?.winsNeeded || 10}</span>
                     </p>
@@ -4480,14 +4493,11 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   style={{
                     background: "rgba(0,0,0,0.55)",
                     padding: 22,
-                    borderRadius: 28,
+                    borderRadius: 24,
                     border: `1.5px solid ${neonA}`,
                     width: "100%",
-                    maxWidth: 380,
-                    maxHeight: "60vh",
-                    overflowY: "auto",
-                    overscrollBehavior: "contain",
-                    WebkitOverflowScrolling: "touch",
+                    maxWidth: 420,
+                    margin: "0 auto",
                     backdropFilter: "blur(20px)",
                     WebkitBackdropFilter: "blur(20px)",
                     boxShadow: `0 0 0 1px ${neonA}33, 0 8px 32px ${neonA}55, 0 0 60px ${neonB}33, inset 0 1px 0 rgba(255,255,255,0.04)`,
