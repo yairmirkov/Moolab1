@@ -22,11 +22,12 @@ interface FamilyState {
 }
 
 interface ModuleInfo {
-  id: number;
+  id: string;
   icon: string;
   name: string;
   topic: string;
   winsNeeded: number;
+  level?: "beginner" | "intermediate" | "expert";
 }
 
 interface CommandCenterProps {
@@ -34,7 +35,7 @@ interface CommandCenterProps {
   parentName: string;
   familyState: FamilyState;
   modules: ModuleInfo[];
-  moduleProgress: Record<number, number>;
+  moduleProgress: Record<string, number>;
   currentModuleIdx: number;
   xp: number;
   level: number;
@@ -99,7 +100,7 @@ export default function CommandCenter({
 }: CommandCenterProps) {
   const [activeTab, setActiveTab] = useState(0);
   const tabs = [t.cc.tabOverview[lang], t.cc.tabLabProgress[lang], t.cc.tabFamilyUsers[lang], t.cc.tabBilling[lang]];
-  const totalModulesComplete = modules.filter((mod, idx) => (moduleProgress[idx] || 0) >= mod.winsNeeded).length;
+  const totalModulesComplete = modules.filter((mod) => (moduleProgress[mod.id] || 0) >= mod.winsNeeded).length;
   const overallPct = modules.length > 0 ? Math.round((totalModulesComplete / modules.length) * 100) : 0;
   const students = familyState.students || [];
 
@@ -146,12 +147,12 @@ export default function CommandCenter({
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <span style={{ fontSize: "0.65rem", fontWeight: 700, color: NAVY }}>{t.cc.currentModuleProgress[lang]}</span>
             <span style={{ fontSize: "0.6rem", fontWeight: 600, color: NAVY_TEXT_MUTED }}>
-              {moduleProgress[currentModuleIdx] || 0}/{modules[currentModuleIdx]?.winsNeeded || 10}
+              {moduleProgress[modules[currentModuleIdx]?.id || ""] || 0}/{modules[currentModuleIdx]?.winsNeeded || 3}
             </span>
           </div>
           <div style={{ width: "100%", height: 8, borderRadius: 4, background: NAVY_SUBTLE }}>
             <div style={{
-              width: `${Math.min(((moduleProgress[currentModuleIdx] || 0) / (modules[currentModuleIdx]?.winsNeeded || 10)) * 100, 100)}%`,
+              width: `${Math.min(((moduleProgress[modules[currentModuleIdx]?.id || ""] || 0) / (modules[currentModuleIdx]?.winsNeeded || 3)) * 100, 100)}%`,
               height: "100%", borderRadius: 4,
               background: `linear-gradient(90deg, ${NAVY}, ${NAVY_LIGHT})`,
               transition: "width 0.8s ease",
@@ -204,7 +205,7 @@ export default function CommandCenter({
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           {modules.map((mod, idx) => {
-            const wins = moduleProgress[idx] || 0;
+            const wins = moduleProgress[mod.id] || 0;
             const done = wins >= mod.winsNeeded;
             const isActive = idx === currentModuleIdx && !done;
             const pct = Math.round((wins / mod.winsNeeded) * 100);

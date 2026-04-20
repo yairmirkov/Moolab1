@@ -25,17 +25,33 @@ const toBand = (ageGroup: string): AgeBand =>
     ? (ageGroup as AgeBand)
     : "Teens";
 
-const getModules = (lang: Lang, ageGroup: string) => {
-  const band = toBand(ageGroup);
-  const names = translations.modules.names[lang][band];
-  const topics = translations.modules.topics[band];
-  return MODULE_ICONS.map((icon, i) => ({
-    id: i,
-    icon,
-    name: names[i],
-    topic: topics[i],
-    winsNeeded: MODULE_WINS_NEEDED,
+const SUBJECT_WINS_NEEDED = 3;
+
+const getModules = (lang: Lang, level: UserLevel) => {
+  const subs = translations.subjects[level][lang];
+  const icons = translations.subjectIcons[level];
+  return subs.map((s: { id: string; title: string; description: string }, i: number) => ({
+    id: s.id,
+    level,
+    icon: icons[i] || "\u2728",
+    name: s.title,
+    topic: s.description,
+    winsNeeded: SUBJECT_WINS_NEEDED,
   }));
+};
+
+const computeEffectiveLevel = (
+  progress: Record<string, number>,
+  override: UserLevel | "auto",
+): UserLevel => {
+  if (override !== "auto") return override;
+  const wonInLevel = (lvl: UserLevel) =>
+    translations.subjects[lvl].en.filter(
+      (s: { id: string }) => (progress[s.id] || 0) >= SUBJECT_WINS_NEEDED,
+    ).length;
+  if (wonInLevel("intermediate") >= 5) return "expert";
+  if (wonInLevel("beginner") >= 5) return "intermediate";
+  return "beginner";
 };
 
 const shuffleOptions = (options: string[], correctIndex: number) => {
@@ -183,7 +199,7 @@ const generateCards = async (
   }
 };
 
-const SUBJECT_OPTIONS = {
+const SUBJECT_OPTIONS_LEGACY = {
   en: [
     { key: "compound_interest", label: "Compound Interest", icon: "📈" },
     { key: "market_basics", label: "Market Basics", icon: "🏛️" },
@@ -704,7 +720,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
   const [appStarted, setAppStarted] = useState(skipOnboarding);
   const [ageGroup, setAgeGroup] = useState(skipOnboarding ? demoAgeGroup : "");
-  const MODULES = useMemo(() => getModules(lang, ageGroup || "Teens"), [lang, ageGroup]);
   const [loading, setLoading] = useState(false);
   const [quizUnlocked, setQuizUnlocked] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
@@ -783,9 +798,21 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     return () => ro.disconnect();
   }, []);
   const [currentModuleIdx, setCurrentModuleIdx] = useState(() => load("modIdx", 0));
-  const [moduleProgress, setModuleProgress] = useState<Record<number, number>>(() => {
-    try { return JSON.parse(localStorage.getItem("ws_modProg") || "{}"); } catch { return {}; }
+  const [moduleProgress, setModuleProgress] = useState<Record<string, number>>(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem("ws_modProg") || "{}");
+      const keys = Object.keys(raw);
+      const allNumeric = keys.length > 0 && keys.every((k) => /^\d+$/.test(k));
+      return allNumeric ? {} : raw;
+    } catch { return {}; }
   });
+
+  const demoLevelOverrideRaw = (loadStr("demo_level", "auto") as UserLevel | "auto");
+  const effectiveLevel = useMemo(
+    () => computeEffectiveLevel(moduleProgress, demoMode ? demoLevelOverrideRaw : "auto"),
+    [moduleProgress, demoMode, demoLevelOverrideRaw],
+  );
+  const MODULES = useMemo(() => getModules(lang, effectiveLevel), [lang, effectiveLevel]);
 
   const [revealedExplanations, setRevealedExplanations] = useState<Record<string, boolean>>({});
   const [bossExplanation, setBossExplanation] = useState<string | null>(null);
@@ -816,8 +843,16 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   const [flashBlue, setFlashBlue] = useState(false);
 
   const currentModule = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
-  const currentModuleWins = moduleProgress[currentModuleIdx] || 0;
+  const currentModuleWins = currentModule ? (moduleProgress[currentModule.id] || 0) : 0;
   const allModulesComplete = currentModuleIdx >= MODULES.length;
+
+  const lastEffectiveLevelRef = useRef<UserLevel>(effectiveLevel);
+  useEffect(() => {
+    if (lastEffectiveLevelRef.current !== effectiveLevel) {
+      lastEffectiveLevelRef.current = effectiveLevel;
+      setCurrentModuleIdx(0);
+    }
+  }, [effectiveLevel]);
 
   useEffect(() => {
     save("xp", xp);
@@ -916,9 +951,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       ? `¡Hola${userName ? `, ${userName}` : ""}! Prepárate para una sesión increíble de aprendizaje financiero.`
       : `Hey${userName ? `, ${userName}` : ""}! Get ready for an awesome financial learning session.`;
 
-    const demoLevelOverride = demoMode ? (loadStr("demo_level", "auto") as UserLevel | "auto") : "auto";
-    const autoLevel = computeUserLevel(moduleProgress[currentModuleIdx] || 0);
-    const userLevel: UserLevel = demoLevelOverride !== "auto" ? demoLevelOverride : autoLevel;
+    const userLevel: UserLevel = mod?.level || effectiveLevel;
     generateCards(ageGroup, topic, currentLang, country, 4, { requestedTypes: initialTypes, subjectTitle: subjectOverride || selectedSubjectRef.current || mod?.name, birthYear, userLevel }).then(async (data) => {
       if (!data?.lessons?.length) {
         setLoading(false);
@@ -1042,9 +1075,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         try {
           const currentLang = langRef.current;
           const nextTypes = getRequestedTypes(totalSlides, 4);
-          const demoLevelOverride2 = demoMode ? (loadStr("demo_level", "auto") as UserLevel | "auto") : "auto";
-          const autoLevel2 = computeUserLevel(moduleProgress[currentModuleIdx] || 0);
-          const userLevel2: UserLevel = demoLevelOverride2 !== "auto" ? demoLevelOverride2 : autoLevel2;
+          const userLevel2: UserLevel = currentModule?.level || effectiveLevel;
           const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear, userLevel: userLevel2 });
           if (newData) {
             let nl = newData.lessons.map((l: any) => ({
@@ -1074,7 +1105,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   const summaryFetchedForQuiz = useRef<string | null>(null);
   useEffect(() => {
     if (quizResult !== true) { summaryFetchedForQuiz.current = null; return; }
-    const quizKey = `${userName}_${ageGroup}_${currentModuleIdx}`;
+    const quizKey = `${userName}_${ageGroup}_${currentModule?.id ?? currentModuleIdx}`;
     if (summaryFetchedForQuiz.current === quizKey) return;
     summaryFetchedForQuiz.current = quizKey;
 
@@ -2240,17 +2271,17 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             display: "grid", gridTemplateColumns: "1fr 1fr",
             gap: 12, width: "100%",
           }}>
-            {SUBJECT_OPTIONS[lang].map((subj, i) => (
+            {MODULES.map((mod, i) => (
               <button
-                key={subj.key}
+                key={mod.id}
                 className="ws-btn"
                 onClick={() => {
-                  const label = subj.label;
-                  setSelectedSubject(label);
-                  selectedSubjectRef.current = label;
+                  setCurrentModuleIdx(i);
+                  setSelectedSubject(mod.name);
+                  selectedSubjectRef.current = mod.name;
                   setShowSubjectPicker(false);
                   navigateTo("lab");
-                  resetJourney(label);
+                  resetJourney(mod.name);
                 }}
                 style={{
                   padding: "18px 14px", borderRadius: 20,
@@ -2264,11 +2295,11 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                 onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
               >
-                <span style={{ fontSize: "1.6rem" }}>{subj.icon}</span>
+                <span style={{ fontSize: "1.6rem" }}>{mod.icon}</span>
                 <span style={{
                   fontSize: "0.78rem", fontWeight: 800, color: "#0c2d48",
                   letterSpacing: "-0.01em", lineHeight: 1.2,
-                }}>{subj.label}</span>
+                }}>{mod.name}</span>
               </button>
             ))}
           </div>
@@ -2542,12 +2573,12 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
           }}>{t.moduleMap.title[lang]}</h2>
           <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.65rem", fontWeight: 600, marginBottom: 24, letterSpacing: "0.1em" }}>
-            {Object.entries(moduleProgress).filter(([, v]) => v >= 3).length}/{MODULES.length} {t.moduleMap.completed[lang]}
+            {MODULES.filter((m) => (moduleProgress[m.id] || 0) >= m.winsNeeded).length}/{MODULES.length} {t.moduleMap.completed[lang]}
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 360 }}>
             {MODULES.map((mod, idx) => {
-              const wins = moduleProgress[idx] || 0;
+              const wins = moduleProgress[mod.id] || 0;
               const isComplete = wins >= mod.winsNeeded;
               const isCurrent = idx === currentModuleIdx;
               const isLocked = idx > currentModuleIdx && !isComplete;
@@ -2680,9 +2711,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                           setIsFetchingMore(true);
                           const currentLang = langRef.current;
                           const nextTypes = getRequestedTypes(totalSlides, 4);
-                          const demoLevelOverride3 = demoMode ? (loadStr("demo_level", "auto") as UserLevel | "auto") : "auto";
-                          const autoLevel3 = computeUserLevel(moduleProgress[currentModuleIdx] || 0);
-                          const userLevel3: UserLevel = demoLevelOverride3 !== "auto" ? demoLevelOverride3 : autoLevel3;
+                          const userLevel3: UserLevel = currentModule?.level || effectiveLevel;
                           generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear, userLevel: userLevel3 }).then(async (newData) => {
                             if (newData?.lessons) {
                               let nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
@@ -3923,14 +3952,23 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                               setBossWins((p) => p + 1);
                               setModuleProgress((prev) => {
                                 const newProg = { ...prev };
-                                const curWins = (newProg[currentModuleIdx] || 0) + 1;
-                                newProg[currentModuleIdx] = curWins;
-                                if (curWins >= (currentModule?.winsNeeded || 10)) {
-                                  setTimeout(() => {
-                                    if (currentModuleIdx < MODULES.length - 1) {
-                                      setCurrentModuleIdx((p) => p + 1);
-                                    }
-                                  }, 2000);
+                                const key = currentModule?.id;
+                                if (!key) return prev;
+                                const curWins = (newProg[key] || 0) + 1;
+                                newProg[key] = curWins;
+                                if (curWins >= (currentModule?.winsNeeded || SUBJECT_WINS_NEEDED)) {
+                                  // If this win promotes the user to the next level (all 5 in current level done),
+                                  // skip the in-level increment — the effectiveLevel-change effect will reset idx to 0.
+                                  const willPromote = MODULES.every(
+                                    (m) => (newProg[m.id] || 0) >= m.winsNeeded,
+                                  );
+                                  if (!willPromote) {
+                                    setTimeout(() => {
+                                      if (currentModuleIdx < MODULES.length - 1) {
+                                        setCurrentModuleIdx((p) => p + 1);
+                                      }
+                                    }, 2000);
+                                  }
                                 }
                                 return newProg;
                               });
