@@ -29,6 +29,20 @@ const SUBJECT_UNLOCK_THRESHOLD = 3;
 const SUBJECT_MASTERY_WINS = 10;
 const SUBJECT_WINS_NEEDED = SUBJECT_MASTERY_WINS;
 
+const COIN_REWARDS = {
+  CARD: 2,
+  BATCH: 10,
+  QUIZ_WIN: 50,
+  QUIZ_LOSS: 15,
+  SUBJECT_UNLOCK: 100,
+  SUBJECT_MASTERY: 250,
+  LEVEL_GRADUATION: 1000,
+  DAILY_BASE: 10,
+  STREAK_7: 100,
+  STREAK_30: 500,
+  STREAK_100: 2000,
+};
+
 const getBonusSubjects = (_lang: Lang, _level: UserLevel): Array<{
   id: string; title: string; description: string; icon: string;
 }> => {
@@ -791,6 +805,41 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     if (demoMode) { save("moolies", 1000); return 1000; }
     return load("moolies", 0);
   });
+  const [rewardToasts, setRewardToasts] = useState<Array<{ id: string; amount: number; label: string; big?: boolean }>>([]);
+  const [confettiBurst, setConfettiBurst] = useState<number>(0);
+  const lastBatchAwardRef = useRef<number>(0);
+  const awardMoolies = useCallback((amount: number, label: string, big = false) => {
+    if (amount <= 0) return;
+    setMoolies((p) => Math.round((p + amount) * 100) / 100);
+    const id = Math.random().toString(36).slice(2);
+    setRewardToasts((t) => [...t, { id, amount, label, big }]);
+    if (big) setConfettiBurst((n) => n + 1);
+    const ttl = big ? 3800 : 2200;
+    setTimeout(() => {
+      setRewardToasts((t) => t.filter((x) => x.id !== id));
+    }, ttl);
+  }, []);
+  const [dailyStreakDays, setDailyStreakDays] = useState<number>(() => load("dailyStreakDays", 0));
+  useEffect(() => { save("dailyStreakDays", dailyStreakDays); }, [dailyStreakDays]);
+  const dailyClaimRanRef = useRef(false);
+  useEffect(() => {
+    if (dailyClaimRanRef.current || demoMode) return;
+    dailyClaimRanRef.current = true;
+    const today = new Date().toISOString().slice(0, 10);
+    const last = loadStr("lastDailyClaim", "");
+    if (last === today) return;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const newDays = last === yesterday ? dailyStreakDays + 1 : 1;
+    saveStr("lastDailyClaim", today);
+    setDailyStreakDays(newDays);
+    const baseReward = COIN_REWARDS.DAILY_BASE * Math.min(5, Math.max(1, Math.ceil(newDays / 5)));
+    setTimeout(() => {
+      awardMoolies(baseReward, lang === "es" ? `Día ${newDays} 🔥` : `Day ${newDays} 🔥`);
+      if (newDays === 7) setTimeout(() => awardMoolies(COIN_REWARDS.STREAK_7, lang === "es" ? "¡7 días seguidos!" : "7-day streak!", true), 700);
+      if (newDays === 30) setTimeout(() => awardMoolies(COIN_REWARDS.STREAK_30, lang === "es" ? "¡30 días seguidos!" : "30-day streak!", true), 700);
+      if (newDays === 100) setTimeout(() => awardMoolies(COIN_REWARDS.STREAK_100, lang === "es" ? "¡100 días seguidos!" : "100-day streak!", true), 700);
+    }, 1200);
+  }, [demoMode, dailyStreakDays, awardMoolies, lang]);
   const [unlockedItems, setUnlockedItems] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem("ws_unlockedItems") || "[]"); } catch { return []; }
   });
@@ -1077,6 +1126,11 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     if (currentSlideIdx !== lastSlideRef.current) {
       lastSlideRef.current = currentSlideIdx;
       slidesScrolledRef.current += 1;
+      awardMoolies(COIN_REWARDS.CARD, lang === "es" ? "Tarjeta" : "Card");
+      if (slidesScrolledRef.current > 0 && slidesScrolledRef.current % 4 === 0 && slidesScrolledRef.current !== lastBatchAwardRef.current) {
+        lastBatchAwardRef.current = slidesScrolledRef.current;
+        awardMoolies(COIN_REWARDS.BATCH, lang === "es" ? "¡4 tarjetas seguidas!" : "4-card streak!");
+      }
     }
 
     if (
@@ -4093,7 +4147,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                             if (win) {
                               setQuizResult(true);
                               setXp((p) => p + 50);
-                              setMoolies((p) => Math.round(p + 50));
+                              awardMoolies(COIN_REWARDS.QUIZ_WIN, lang === "es" ? "¡Victoria del Quiz!" : "Quiz Win!");
                               setStreak((p) => p + 1);
                               setBossWins((p) => p + 1);
                               setModuleProgress((prev) => {
@@ -4116,11 +4170,26 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                                       }
                                     }, 2000);
                                   }
+                                  setTimeout(() => {
+                                    awardMoolies(COIN_REWARDS.SUBJECT_UNLOCK, lang === "es" ? "¡Siguiente tema desbloqueado!" : "Next subject unlocked!", true);
+                                  }, 600);
+                                }
+                                if (prevWins < SUBJECT_MASTERY_WINS && curWins >= SUBJECT_MASTERY_WINS) {
+                                  setTimeout(() => {
+                                    awardMoolies(COIN_REWARDS.SUBJECT_MASTERY, lang === "es" ? "¡Tema Dominado!" : "Subject Mastered!", true);
+                                  }, 900);
+                                  const willPromote = MODULES.every((m) => (newProg[m.id] || 0) >= m.winsNeeded);
+                                  if (willPromote) {
+                                    setTimeout(() => {
+                                      awardMoolies(COIN_REWARDS.LEVEL_GRADUATION, lang === "es" ? "🎓 ¡Nivel Graduado!" : "🎓 Level Graduated!", true);
+                                    }, 1800);
+                                  }
                                 }
                                 return newProg;
                               });
                             } else {
                               setStreak(0);
+                              awardMoolies(COIN_REWARDS.QUIZ_LOSS, lang === "es" ? "Premio de consolación" : "Consolation prize");
                               setBossExplanation(currentData.bossQuiz?.explanation || t.quiz.defaultBossExplanation[lang]);
                             }
                           }}
@@ -4438,7 +4507,137 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   return (
     <AppLayout>
       {content}
+      <RewardOverlay toasts={rewardToasts} burstKey={confettiBurst} />
     </AppLayout>
+  );
+}
+
+function RewardOverlay({ toasts, burstKey }: { toasts: Array<{ id: string; amount: number; label: string; big?: boolean }>; burstKey: number }) {
+  const [pieces, setPieces] = useState<Array<{ id: string; left: number; delay: number; rot: number; color: string; emoji: string }>>([]);
+  useEffect(() => {
+    if (!burstKey) return;
+    const colors = ["#FFD700", "#FFA500", "#2e8bc0", "#b1d4e0", "#ff7a59", "#a78bfa"];
+    const emojis = ["🪙", "✨", "⭐", "💎", "🎉"];
+    const burst = Array.from({ length: 36 }).map((_, i) => ({
+      id: `${burstKey}-${i}`,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.25,
+      rot: (Math.random() - 0.5) * 720,
+      color: colors[i % colors.length],
+      emoji: emojis[i % emojis.length],
+    }));
+    setPieces(burst);
+    const t = setTimeout(() => setPieces([]), 3500);
+    return () => clearTimeout(t);
+  }, [burstKey]);
+
+  return (
+    <>
+      <style>{`
+        @keyframes mooliesToastIn {
+          0% { opacity: 0; transform: translateY(-12px) scale(0.85); }
+          15% { opacity: 1; transform: translateY(0) scale(1.06); }
+          25% { transform: translateY(0) scale(1); }
+          80% { opacity: 1; transform: translateY(0) scale(1); }
+          100% { opacity: 0; transform: translateY(-8px) scale(0.95); }
+        }
+        @keyframes mooliesToastBig {
+          0% { opacity: 0; transform: translateY(-20px) scale(0.6); }
+          12% { opacity: 1; transform: translateY(0) scale(1.18); }
+          22% { transform: translateY(0) scale(0.98); }
+          32% { transform: translateY(0) scale(1.05); }
+          80% { opacity: 1; transform: translateY(0) scale(1); }
+          100% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+        }
+        @keyframes confettiFall {
+          0% { opacity: 0; transform: translate3d(0, -20vh, 0) rotate(0deg); }
+          10% { opacity: 1; }
+          100% { opacity: 0; transform: translate3d(var(--dx, 0px), 110vh, 0) rotate(var(--rot, 360deg)); }
+        }
+      `}</style>
+      <div
+        style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          pointerEvents: "none", zIndex: 9999, overflow: "hidden",
+        }}
+      >
+        {pieces.length > 0 && (
+          <div style={{ position: "absolute", inset: 0 }}>
+            {pieces.map((p) => (
+              <div
+                key={p.id}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: `${p.left}%`,
+                  fontSize: "1.4rem",
+                  color: p.color,
+                  // @ts-ignore custom prop
+                  "--rot": `${p.rot}deg`,
+                  "--dx": `${(p.left - 50) * 0.6}px`,
+                  animation: `confettiFall 2.8s cubic-bezier(.2,.55,.4,1) ${p.delay}s forwards`,
+                  textShadow: `0 0 8px ${p.color}80`,
+                } as any}
+              >
+                {p.emoji}
+              </div>
+            ))}
+          </div>
+        )}
+        <div
+          style={{
+            position: "absolute",
+            top: 70,
+            left: 0,
+            right: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          {toasts.map((t) => (
+            <div
+              key={t.id}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: t.big ? "12px 22px" : "8px 16px",
+                borderRadius: 999,
+                background: t.big
+                  ? "linear-gradient(135deg, rgba(255,215,0,0.22), rgba(255,165,0,0.18))"
+                  : "rgba(8, 16, 32, 0.85)",
+                border: t.big
+                  ? "1px solid rgba(255,215,0,0.55)"
+                  : "1px solid rgba(255,215,0,0.35)",
+                boxShadow: t.big
+                  ? "0 8px 32px rgba(255,180,0,0.45), 0 0 24px rgba(255,215,0,0.35)"
+                  : "0 4px 18px rgba(0,0,0,0.45)",
+                backdropFilter: "blur(14px)",
+                WebkitBackdropFilter: "blur(14px)",
+                color: "#fff",
+                fontWeight: 800,
+                fontSize: t.big ? "0.95rem" : "0.78rem",
+                letterSpacing: "-0.01em",
+                animation: `${t.big ? "mooliesToastBig" : "mooliesToastIn"} ${t.big ? "3.6s" : "2.1s"} ease-out forwards`,
+              }}
+            >
+              <img src="/moolie-coin.png" alt="" style={{ width: t.big ? 28 : 20, height: t.big ? 28 : 20, objectFit: "contain" }} />
+              <span style={{
+                background: "linear-gradient(135deg, #FFD700, #FFA500)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                fontWeight: 900,
+              }}>
+                +{t.amount}
+              </span>
+              <span style={{ color: "rgba(255,255,255,0.85)" }}>{t.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 
