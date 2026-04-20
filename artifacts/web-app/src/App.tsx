@@ -869,6 +869,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const selectedSubjectRef = useRef<string | null>(null);
   const [showSubjectPicker, setShowSubjectPicker] = useState(false);
+  const [expandedSubjectId, setExpandedSubjectId] = useState<string | null>(null);
 
   const [xp, setXp] = useState(() => load("xp", 0));
   const [streak, setStreak] = useState(() => load("streak", 0));
@@ -2501,13 +2502,20 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             const isLocked = i > 0 && prevWins < prevUnlockAt;
             const isCurrent = i === currentModuleIdx && !isComplete;
             const unlockMarkerPct = Math.min((mod.unlockThreshold / mod.winsNeeded) * 100, 100);
+            const isExpanded = expandedSubjectId === mod.id;
             return (
               <button
                 key={mod.id}
                 className="ws-btn"
-                disabled={isLocked}
                 onClick={() => {
-                  if (isLocked) return;
+                  if (isLocked) {
+                    setExpandedSubjectId(isExpanded ? null : mod.id);
+                    return;
+                  }
+                  if (!isExpanded) {
+                    setExpandedSubjectId(mod.id);
+                    return;
+                  }
                   setCurrentModuleIdx(i);
                   setSelectedSubject(mod.name);
                   selectedSubjectRef.current = mod.name;
@@ -2523,22 +2531,25 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     : isCurrent
                       ? "linear-gradient(100deg, rgba(46,139,192,0.22), rgba(120,180,255,0.06))"
                       : "rgba(255,255,255,0.04)",
-                  border: isCurrent
-                    ? `1.5px solid ${levelAccent}88`
-                    : isComplete
-                      ? "1.5px solid rgba(74,222,128,0.5)"
-                      : "1px solid rgba(120,180,255,0.12)",
-                  cursor: isLocked ? "not-allowed" : "pointer",
+                  border: isExpanded
+                    ? `1.5px solid ${levelAccent}`
+                    : isCurrent
+                      ? `1.5px solid ${levelAccent}88`
+                      : isComplete
+                        ? "1.5px solid rgba(74,222,128,0.5)"
+                        : "1px solid rgba(120,180,255,0.12)",
+                  cursor: "pointer",
                   fontFamily: FONT, textAlign: "left",
-                  display: "flex", alignItems: "center", gap: 14,
-                  opacity: isLocked ? 0.5 : 1,
-                  animation: `subjectFadeIn 0.5s ease-out ${0.1 + i * 0.06}s both${isCurrent ? ", subjectGlow 3s ease-in-out infinite" : ""}`,
-                  transition: "transform 0.15s, border-color 0.2s",
+                  display: "flex", flexDirection: "column", gap: 0,
+                  opacity: isLocked ? 0.6 : 1,
+                  animation: `subjectFadeIn 0.5s ease-out ${0.1 + i * 0.06}s both${isCurrent && !isExpanded ? ", subjectGlow 3s ease-in-out infinite" : ""}`,
+                  transition: "transform 0.15s, border-color 0.2s, background 0.2s",
                 }}
-                onPointerDown={(e) => { if (!isLocked) (e.currentTarget as HTMLElement).style.transform = "scale(0.985)"; }}
+                onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.985)"; }}
                 onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                 onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
               >
+                <div style={{ display: "flex", alignItems: "center", gap: 14, width: "100%" }}>
                 <div style={{
                   flexShrink: 0, width: 44, height: 44, borderRadius: 12,
                   display: "flex", alignItems: "center", justifyContent: "center",
@@ -2585,7 +2596,48 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 <span style={{
                   flexShrink: 0, fontSize: "1rem",
                   color: isLocked ? "rgba(207,225,245,0.25)" : "rgba(207,225,245,0.55)",
+                  transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                  transition: "transform 0.25s ease",
                 }}>›</span>
+                </div>
+                {isExpanded && (
+                  <div style={{
+                    marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(120,180,255,0.12)",
+                    width: "100%", display: "flex", flexDirection: "column", gap: 10,
+                    animation: "subjectFadeIn 0.25s ease-out both",
+                  }}>
+                    <p style={{
+                      margin: 0, fontSize: "0.78rem", lineHeight: 1.5,
+                      color: "rgba(207,225,245,0.85)", fontWeight: 500,
+                    }}>
+                      {mod.topic}
+                    </p>
+                    {!isLocked ? (
+                      <div style={{
+                        display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: 6,
+                        padding: "8px 14px", borderRadius: 999,
+                        background: `linear-gradient(135deg, ${levelAccent}, ${levelAccent}cc)`,
+                        color: "#0a1f3a", fontWeight: 800, fontSize: "0.72rem",
+                        letterSpacing: "0.02em",
+                      }}>
+                        {isComplete
+                          ? (lang === "es" ? "Practicar otra vez →" : "Practice again →")
+                          : wins > 0
+                            ? (lang === "es" ? "Continuar →" : "Continue →")
+                            : (lang === "es" ? "Empezar →" : "Start →")}
+                      </div>
+                    ) : (
+                      <div style={{
+                        fontSize: "0.68rem", fontWeight: 700, color: "rgba(207,225,245,0.55)",
+                        letterSpacing: "0.02em",
+                      }}>
+                        🔒 {lang === "es"
+                          ? `Gana ${prevUnlockAt} en el tema anterior para desbloquear`
+                          : `Earn ${prevUnlockAt} wins in the previous subject to unlock`}
+                      </div>
+                    )}
+                  </div>
+                )}
               </button>
             );
           })}
