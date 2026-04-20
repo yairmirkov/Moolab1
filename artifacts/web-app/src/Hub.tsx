@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import translations, { type Lang } from "./translations";
 
-const FONT = "'Inter', system-ui, -apple-system, sans-serif";
+const FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 interface HubProps {
@@ -150,7 +150,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
             {lang === "es" ? "BIENVENIDO DE VUELTA" : "WELCOME BACK"}
           </div>
           <div style={{
-            fontFamily: "'Bricolage Grotesque', 'Inter', sans-serif",
+            fontFamily: "'Bricolage Grotesque', 'Lato', sans-serif",
             fontSize: "1.4rem", fontWeight: 800, color: "#fff",
             letterSpacing: "-0.02em", marginBottom: 8,
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
@@ -267,7 +267,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
             </div>
             <div style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
               <div style={{
-                fontFamily: "'Bricolage Grotesque', 'Inter', sans-serif",
+                fontFamily: "'Bricolage Grotesque', 'Lato', sans-serif",
                 fontSize: "1rem", fontWeight: 800, color: "#fff",
                 letterSpacing: "-0.015em", marginBottom: 3,
                 whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",

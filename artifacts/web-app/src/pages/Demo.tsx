@@ -3,7 +3,7 @@ import App from "../App";
 import { useLang, t, translations } from "../useLang";
 import { GRADE_OPTIONS, getGradeOption, birthYearForGrade, gradeLabel } from "../gradeMap";
 
-const FONT = "'Inter', system-ui, -apple-system, sans-serif";
+const FONT = "'Lato', system-ui, -apple-system, sans-serif";
 
 type Device = {
   id: string;

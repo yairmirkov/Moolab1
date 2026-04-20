@@ -2,7 +2,7 @@ import { useState } from "react";
 import translations from "./translations";
 import type { Lang } from "./translations";
 
-const FONT = "'Inter', system-ui, -apple-system, sans-serif";
+const FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const NAVY = "#001F5B";
 const NAVY_LIGHT = "#003D99";
 const NAVY_SUBTLE = "rgba(0,31,91,0.06)";

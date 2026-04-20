@@ -27,7 +27,7 @@ export default function Privacy() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white font-['Inter',system-ui,sans-serif] text-[#0c2d48]">
+    <div className="min-h-screen bg-white font-['Bricolage_Grotesque','Lato',system-ui,sans-serif] text-[#0c2d48]">
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-sky-100">
         <div className="max-w-4xl mx-auto px-5 py-3.5 flex items-center justify-between">
           <button
