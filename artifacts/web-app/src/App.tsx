@@ -13,6 +13,24 @@ import AppLayout from "./AppLayout";
 import Hub from "./Hub";
 import { useFeed } from "./FeedContext";
 import { api } from "./api";
+import { useAuth } from "./AuthContext";
+import { buildCardPrompt, buildShortTextPrompt, pickVibeSeed, effectiveSkillLevel, type SkillLevel as PromptSkillLevel } from "./cardPrompt";
+
+const RECENT_TITLES_MAX = 24;
+const recentTitlesBySubject = new Map<string, string[]>();
+function pushRecentTitles(subjectKey: string, titles: string[]) {
+  if (!subjectKey || !titles.length) return;
+  const arr = recentTitlesBySubject.get(subjectKey) || [];
+  for (const t of titles) {
+    if (!t) continue;
+    arr.push(t);
+  }
+  while (arr.length > RECENT_TITLES_MAX) arr.shift();
+  recentTitlesBySubject.set(subjectKey, arr);
+}
+function getRecentTitles(subjectKey: string): string[] {
+  return recentTitlesBySubject.get(subjectKey) || [];
+}
 
 type TabId = "hub" | "lab" | "tank" | "vault";
 
@@ -156,42 +174,34 @@ const generateCards = async (
   lang: Lang = "en",
   country?: string,
   batchSize: number = 10,
-  opts?: { requestedTypes?: string[]; subjectTitle?: string; birthYear?: string; userLevel?: UserLevel },
+  opts?: { requestedTypes?: string[]; subjectTitle?: string; birthYear?: string; userLevel?: UserLevel; grade?: string | null; skillFloor?: PromptSkillLevel | null; subjectId?: string | null },
 ) => {
   const timerLabel = `Gemini API (batch=${batchSize})`;
   console.time(timerLabel);
   let timerEnded = false;
   const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  const personaKey = toBand(ageGroup);
-  const persona = translations.gemini.persona[personaKey][lang];
-  const doctrine = translations.gemini.coreDoctrine[lang];
-  const ageShark = translations.gemini.sharkByAge[personaKey][lang];
-  const suffix = translations.gemini.promptSuffix[lang];
-  const gradeLevel = computeGradeLevel(opts?.birthYear, ageGroup, lang);
-  const userLevel: UserLevel = opts?.userLevel || "beginner";
-  const userLevelLbl = userLevelLabel(userLevel, lang);
-  const levelRules = translations.gemini.userLevelRules[userLevel][lang];
-  const subjectTitle = (opts?.subjectTitle || "").trim();
-  const subjectDescription = (topic || "").trim();
-  const inputDataBlock = lang === "es"
-    ? `\n\nDATOS DE ENTRADA (debes personalizar TODO el contenido en torno a esto):\n- Título de la Materia: ${subjectTitle || "(sin especificar)"}\n- Descripción de la Materia: ${subjectDescription || "(sin especificar)"}\n- Nivel Escolar Objetivo: ${gradeLevel}\n- Nivel de Habilidad del Usuario: ${userLevelLbl}\n\nREGLAS ESTRICTAS DE HIPER-PERSONALIZACIÓN:\n1. MOTOR DE ANALOGÍAS: Cada analogía, escenario y miniGame DEBE encajar con el Nivel Escolar anterior. No inventes ejemplos fuera de su mundo.\n2. ENFOQUE EN MATERIA: Cada tarjeta DEBE conectarse explícitamente con el Título y Descripción de la Materia anteriores.\n3. TONO: Nunca patrocines. Trátalos como un futuro CEO. Oraciones contundentes, fáciles de leer en un móvil — sin muros de texto.\n4. CALIBRACIÓN POR NIVEL DE HABILIDAD (${userLevelLbl}): ${levelRules}`
-    : `\n\nINPUT DATA (you must personalize ALL content around this):\n- Subject Title: ${subjectTitle || "(unspecified)"}\n- Subject Description: ${subjectDescription || "(unspecified)"}\n- Target Grade Level: ${gradeLevel}\n- User Skill Level: ${userLevelLbl}\n\nSTRICT HYPER-PERSONALIZATION RULES:\n1. ANALOGY ENGINE: Every analogy, scenario, and miniGame MUST fit the Target Grade Level above. Do not invent examples outside their world.\n2. SUBJECT FOCUS: Every card MUST explicitly connect to the Subject Title and Subject Description above.\n3. TONE: Never patronize. Treat them like a future CEO. Punchy sentences, mobile-readable — no walls of text.\n4. SKILL-LEVEL CALIBRATION (${userLevelLbl}): ${levelRules}`;
-  const countryLine = country ? (lang === "es"
-    ? ` El usuario se encuentra en: ${country}. Debes usar una división de localización 30/70. El 70% de tus conceptos financieros, ejemplos y mecánicas de mercado deben ser Globales (Wall Street, Crypto, clases de activos amplias). El 30% de tus ejemplos DEBEN estar hiperlocalizados al país del usuario.`
-    : ` The user is based in: ${country}. You must use a 30/70 localization split. 70% of your financial concepts, examples, and market mechanics should be Global (Wall Street, Crypto, broad asset classes). 30% of your examples MUST be hyper-localized to the user's country.`
-  ) : "";
-  const langLine = lang === "es"
-    ? " IMPORTANTE: TODA tu respuesta DEBE estar completamente en ESPAÑOL. No mezcles idiomas."
-    : " IMPORTANT: Your ENTIRE response MUST be in ENGLISH. Do not mix languages.";
+  const subjectTitle = (opts?.subjectTitle || "").trim() || "(unspecified)";
+  const subjectDescription = (topic || "").trim() || "(unspecified)";
+  const computedSkill: PromptSkillLevel = (opts?.userLevel as PromptSkillLevel) || "beginner";
+  const skillLevel = effectiveSkillLevel(computedSkill, opts?.skillFloor || null);
   const requestedTypes = opts?.requestedTypes || getRequestedTypes(0, batchSize);
-  const typesLine = lang === "es"
-    ? ` requestedTypes: [${requestedTypes.map(t => `"${t}"`).join(", ")}]. GENERA EXACTAMENTE ${requestedTypes.length} lecciones en el array "lessons" con estos tipos en este ORDEN EXACTO.`
-    : ` requestedTypes: [${requestedTypes.map(t => `"${t}"`).join(", ")}]. Generate EXACTLY ${requestedTypes.length} lessons in the "lessons" array with these types in this EXACT order.`;
-  const tiktokTextRule = lang === "es"
-    ? " REGLA CRÍTICA DE SALIDA: EL TEXTO VISIBLE EN PANTALLA (title, desc, opciones de juego, diálogo de podcast) DEBE SER MÁXIMO 1 O 2 ORACIONES CONTUNDENTES (MENOS DE 120 CARACTERES). EXCEPCIÓN: tooltip_explanation DEBE ser 2-3 oraciones (30-45 palabras) porque aparece en un modal aparte. PIENSA COMO UN SUBTÍTULO RÁPIDO DE TIKTOK para todo lo demás."
-    : " CRITICAL OUTPUT RULE: ON-SCREEN TEXT (title, desc, game options, podcast dialogue) MUST BE A MAXIMUM OF 1 OR 2 PUNCHY SENTENCES (UNDER 120 CHARACTERS). EXCEPTION: tooltip_explanation MUST be 2-3 sentences (30-45 words) because it appears in a separate modal. THINK LIKE A FAST-PACED TIKTOK CAPTION for everything else.";
-  const prompt = `${persona} ${doctrine} ${ageShark} ${suffix}${inputDataBlock}${countryLine}${langLine}${typesLine}${tiktokTextRule}`;
+  const subjectKey = opts?.subjectId || subjectTitle;
+  const vibeSeed = pickVibeSeed();
+  const prompt = buildCardPrompt({
+    lang,
+    grade: opts?.grade || null,
+    birthYear: opts?.birthYear,
+    ageGroup,
+    skillLevel,
+    subjectId: opts?.subjectId || null,
+    subjectTitle,
+    subjectDescription,
+    country,
+    requestedTypes,
+    vibeSeed,
+    recentTitles: getRecentTitles(subjectKey),
+  });
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -228,6 +238,12 @@ const generateCards = async (
       parsed.bossQuiz.options = shuffled.options;
       parsed.bossQuiz.correctIndex = shuffled.correctIndex;
     }
+    if (parsed?.lessons?.length) {
+      const newTitles = parsed.lessons
+        .map((l: any) => (l.title || l.term || "").trim())
+        .filter((s: string) => s.length > 0);
+      pushRecentTitles(subjectKey, newTitles);
+    }
     return parsed;
   } catch (e) {
     endTimer();
@@ -262,23 +278,20 @@ const SUBJECT_OPTIONS_LEGACY = {
   ],
 };
 
-const generateShortText = async (type: "intro" | "summary", opts: { name: string; ageGroup: string; subject: string; lang: Lang }): Promise<string> => {
+const generateShortText = async (type: "intro" | "summary", opts: { name: string; ageGroup: string; subject: string; lang: Lang; grade?: string | null; birthYear?: string; skillLevel?: PromptSkillLevel | null }): Promise<string> => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) return type === "intro"
     ? (opts.lang === "es" ? `¡Hola ${opts.name}! Hoy conquistamos ${opts.subject}. ¡Vamos!` : `Hey ${opts.name}! Today we're mastering ${opts.subject}. Let's go!`)
     : (opts.lang === "es" ? `¡Increíble, ${opts.name}! Dominaste ${opts.subject}. ¡Sigue así!` : `Amazing work, ${opts.name}! You crushed ${opts.subject}. Keep going!`);
-  const gradeHint = opts.ageGroup === "Kids"
-    ? (opts.lang === "es" ? "Grados 3-5 (analogías de juguetes/videojuegos)" : "Grades 3-5 (toy/video-game analogies)")
-    : opts.ageGroup === "Teens"
-      ? (opts.lang === "es" ? "Grados 6-12 (negocios secundarios, primer trabajo, sneakers)" : "Grades 6-12 (side hustles, first jobs, sneakers)")
-      : (opts.lang === "es" ? "Universidad/Adulto (portafolios, salarios)" : "College/Adult (portfolios, salaries)");
-  const instruction = type === "intro"
-    ? (opts.lang === "es"
-      ? `Eres el Motor Maestro de Currículo de Moolab. Genera un saludo ÚNICO, carismático y personalizado para ${opts.name}. Nivel escolar objetivo: ${gradeHint}. La materia de hoy: ${opts.subject}. MÁXIMO 25 palabras. Trátalo como un futuro CEO — nunca lo subestimes. Varía tu energía y vocabulario cada vez. Solo responde con el texto, sin comillas ni formato.`
-      : `You are the Master Curriculum Engine for Moolab. Generate a UNIQUE, charismatic personalized greeting for ${opts.name}. Target grade level: ${gradeHint}. Today's subject: ${opts.subject}. MAX 25 words. Treat them like a future CEO — never patronize. Vary your energy and vocabulary every time. Respond with ONLY the text, no quotes or formatting.`)
-    : (opts.lang === "es"
-      ? `Eres el Motor Maestro de Currículo de Moolab. Genera una felicitación ÚNICA y alentadora para ${opts.name} (${gradeHint}) que acaba de completar una lección sobre ${opts.subject}. MÁXIMO 25 palabras. Trátalo como un futuro CEO. Varía el tono cada vez. Solo texto, sin comillas.`
-      : `You are the Master Curriculum Engine for Moolab. Generate a UNIQUE encouraging congratulations for ${opts.name} (${gradeHint}) who just completed a lesson on ${opts.subject}. MAX 25 words. Treat them like a future CEO. Vary the tone every time. Respond with ONLY the text, no quotes.`);
+  const instruction = buildShortTextPrompt(type, {
+    name: opts.name,
+    lang: opts.lang,
+    grade: opts.grade || null,
+    birthYear: opts.birthYear,
+    ageGroup: opts.ageGroup,
+    skillLevel: opts.skillLevel || "beginner",
+    subject: opts.subject,
+  });
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -829,6 +842,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
   const t = translations;
 
+  const auth = useAuth();
+  const childGrade: string | null = auth?.child?.grade ?? null;
+  const childSkillFloor: PromptSkillLevel | null = (auth?.child?.skillLevel as PromptSkillLevel) ?? null;
+
   const [appStarted, setAppStarted] = useState(skipOnboarding);
   const [ageGroup, setAgeGroup] = useState(skipOnboarding ? demoAgeGroup : "");
   const [loading, setLoading] = useState(false);
@@ -1092,7 +1109,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     }
   }, []);
 
-  const resetJourney = useCallback((subjectOverride?: string) => {
+  const resetJourney = useCallback((subjectOverride?: string, modOverride?: { id?: string; name?: string; topic?: string; level?: UserLevel } | null) => {
     resetFeedSession();
     setLoading(true);
     setPreloadReady(false);
@@ -1107,7 +1124,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     stopElevenLabsAudio();
     bufferCardAudioPlayed.clear();
     bufferCardObserved.clear();
-    const mod = MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
+    const mod = modOverride || MODULES[Math.min(currentModuleIdx, MODULES.length - 1)];
     const topic = subjectOverride || selectedSubjectRef.current || mod?.topic;
     const country = loadStr("country", "");
     const currentLang = langRef.current;
@@ -1120,6 +1137,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       ageGroup,
       subject: subjectOverride || selectedSubjectRef.current || mod?.topic || "finance",
       lang: currentLang,
+      grade: childGrade,
+      birthYear,
+      skillLevel: effectiveSkillLevel((mod?.level || effectiveLevel) as PromptSkillLevel, childSkillFloor),
     });
 
     const introFallback = currentLang === "es"
@@ -1127,7 +1147,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       : `Hey${userName ? `, ${userName}` : ""}! Get ready for an awesome financial learning session.`;
 
     const userLevel: UserLevel = mod?.level || effectiveLevel;
-    generateCards(ageGroup, topic, currentLang, country, 4, { requestedTypes: initialTypes, subjectTitle: subjectOverride || selectedSubjectRef.current || mod?.name, birthYear, userLevel }).then(async (data) => {
+    generateCards(ageGroup, topic, currentLang, country, 4, { requestedTypes: initialTypes, subjectTitle: subjectOverride || selectedSubjectRef.current || mod?.name, birthYear, userLevel, grade: childGrade, skillFloor: childSkillFloor, subjectId: mod?.id || selectedSubjectRef.current }).then(async (data) => {
       if (!data?.lessons?.length) {
         setLoading(false);
         console.timeEnd("Loading Bay (4 cards + audio)");
@@ -1251,7 +1271,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           const currentLang = langRef.current;
           const nextTypes = getRequestedTypes(totalSlides, 4);
           const userLevel2: UserLevel = currentModule?.level || effectiveLevel;
-          const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear, userLevel: userLevel2 });
+          const newData = await generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear, userLevel: userLevel2, grade: childGrade, skillFloor: childSkillFloor, subjectId: currentModule?.id || selectedSubjectRef.current });
           if (newData) {
             let nl = newData.lessons.map((l: any) => ({
               ...l,
@@ -1315,6 +1335,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           ageGroup,
           subject: selectedSubjectRef.current || currentModule?.topic || "finance",
           lang: currentLang,
+          grade: childGrade,
+          birthYear,
+          skillLevel: effectiveSkillLevel((currentModule?.level || effectiveLevel) as PromptSkillLevel, childSkillFloor),
         });
         if (cancelled) return;
         clearTimeout(timeoutId);
@@ -2541,7 +2564,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   selectedSubjectRef.current = mod.name;
                   setShowSubjectPicker(false);
                   navigateTo("lab");
-                  resetJourney(mod.name);
+                  resetJourney(mod.name, mod);
                 }}
                 style={{
                   position: "relative", overflow: "hidden",
@@ -3089,7 +3112,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                           const currentLang = langRef.current;
                           const nextTypes = getRequestedTypes(totalSlides, 4);
                           const userLevel3: UserLevel = currentModule?.level || effectiveLevel;
-                          generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear, userLevel: userLevel3 }).then(async (newData) => {
+                          generateCards(ageGroup, selectedSubjectRef.current || currentModule?.topic, currentLang, loadStr("country", ""), 4, { requestedTypes: nextTypes, subjectTitle: selectedSubjectRef.current || currentModule?.name, birthYear, userLevel: userLevel3, grade: childGrade, skillFloor: childSkillFloor, subjectId: currentModule?.id || selectedSubjectRef.current }).then(async (newData) => {
                             if (newData?.lessons) {
                               let nl = newData.lessons.map((l: any) => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
                               nl = await resolveVideoUrls(nl);

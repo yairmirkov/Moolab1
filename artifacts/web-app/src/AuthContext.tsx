@@ -12,6 +12,8 @@ interface ChildUser {
   username: string;
   displayName: string;
   ageGroup: string;
+  grade?: string | null;
+  skillLevel?: string | null;
 }
 
 interface AuthContextType {

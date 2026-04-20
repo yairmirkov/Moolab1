@@ -30,8 +30,11 @@ export const api = {
 
   getChildren: () => request("/children"),
 
-  createChild: (displayName: string, ageGroup: string) =>
-    request("/children", { method: "POST", body: JSON.stringify({ displayName, ageGroup }) }),
+  createChild: (displayName: string, ageGroup: string, grade?: string, skillLevel?: string) =>
+    request("/children", { method: "POST", body: JSON.stringify({ displayName, ageGroup, grade, skillLevel }) }),
+
+  updateChildGrade: (id: number, grade: string, skillLevel?: string) =>
+    request(`/children/${id}/grade`, { method: "PUT", body: JSON.stringify({ grade, skillLevel }) }),
 
   deleteChild: (id: number) =>
     request(`/children/${id}`, { method: "DELETE" }),

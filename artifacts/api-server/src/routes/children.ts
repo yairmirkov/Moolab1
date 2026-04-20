@@ -27,6 +27,9 @@ router.get("/children", async (req, res) => {
     displayName: childrenTable.displayName,
     pin: childrenTable.pin,
     ageGroup: childrenTable.ageGroup,
+    grade: childrenTable.grade,
+    skillLevel: childrenTable.skillLevel,
+    gradeUpdatedAt: childrenTable.gradeUpdatedAt,
     xp: childrenTable.xp,
     level: childrenTable.level,
     streak: childrenTable.streak,
@@ -40,6 +43,9 @@ router.get("/children", async (req, res) => {
   return res.json(children);
 });
 
+const VALID_SKILL_LEVELS = ["beginner", "intermediate", "expert"];
+const VALID_GRADES = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "college", "adult"];
+
 router.post("/children", async (req, res) => {
   const parentId = (req.session as any)?.parentId;
   if (!parentId) {
@@ -47,13 +53,15 @@ router.post("/children", async (req, res) => {
   }
 
   try {
-    const { displayName, ageGroup } = req.body;
+    const { displayName, ageGroup, grade, skillLevel } = req.body;
     if (!displayName || !ageGroup) {
       return res.status(400).json({ error: "Display name and age group are required" });
     }
     if (!["8-12", "13-15", "16-18"].includes(ageGroup)) {
       return res.status(400).json({ error: "Invalid age group. Must be 8-12, 13-15, or 16-18" });
     }
+    const finalGrade: string | null = grade && VALID_GRADES.includes(grade) ? grade : null;
+    const finalSkill = skillLevel && VALID_SKILL_LEVELS.includes(skillLevel) ? skillLevel : "beginner";
 
     let username = generateUsername(displayName);
     let attempts = 0;
@@ -72,6 +80,9 @@ router.post("/children", async (req, res) => {
       pin,
       displayName,
       ageGroup,
+      grade: finalGrade,
+      skillLevel: finalSkill,
+      gradeUpdatedAt: finalGrade ? new Date() : null,
       moolies: 50,
     }).returning();
 
@@ -81,6 +92,9 @@ router.post("/children", async (req, res) => {
       displayName: child.displayName,
       pin: child.pin,
       ageGroup: child.ageGroup,
+      grade: child.grade,
+      skillLevel: child.skillLevel,
+      gradeUpdatedAt: child.gradeUpdatedAt,
       xp: child.xp,
       level: child.level,
       streak: child.streak,
@@ -92,6 +106,20 @@ router.post("/children", async (req, res) => {
     console.error("Create child error:", err);
     return res.status(500).json({ error: "Failed to create child profile" });
   }
+});
+
+router.put("/children/:id/grade", async (req, res) => {
+  const parentId = (req.session as any)?.parentId;
+  if (!parentId) return res.status(401).json({ error: "Not authenticated" });
+  const childId = parseInt(req.params.id);
+  const [child] = await db.select().from(childrenTable).where(eq(childrenTable.id, childId));
+  if (!child || child.parentId !== parentId) return res.status(404).json({ error: "Child not found" });
+  const { grade, skillLevel } = req.body || {};
+  const updates: any = { gradeUpdatedAt: new Date() };
+  if (grade && VALID_GRADES.includes(grade)) updates.grade = grade;
+  if (skillLevel && VALID_SKILL_LEVELS.includes(skillLevel)) updates.skillLevel = skillLevel;
+  await db.update(childrenTable).set(updates).where(eq(childrenTable.id, childId));
+  return res.json({ ok: true });
 });
 
 router.put("/children/me/progress", async (req, res) => {

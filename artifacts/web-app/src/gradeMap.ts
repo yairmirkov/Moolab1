@@ -45,3 +45,29 @@ export function gradeFromApiBucket(bucket: string): string {
   if (bucket === "16-18") return "11";
   return "8";
 }
+
+export type SkillLevel = "beginner" | "intermediate" | "expert";
+
+export const SKILL_LEVELS: Array<{ id: SkillLevel; labelEn: string; labelEs: string; descEn: string; descEs: string }> = [
+  { id: "beginner",     labelEn: "Beginner",     labelEs: "Principiante", descEn: "No financial background yet — start from scratch.", descEs: "Sin experiencia financiera — empezar desde cero." },
+  { id: "intermediate", labelEn: "Intermediate", labelEs: "Intermedio",   descEn: "Knows the basics — push into mechanics.",          descEs: "Conoce lo básico — profundizar en mecánicas." },
+  { id: "expert",       labelEn: "Expert",       labelEs: "Experto",      descEn: "Solid foundation — go advanced.",                  descEs: "Base sólida — ir a nivel avanzado." },
+];
+
+export function nextGradeId(id: string): string | null {
+  const idx = GRADE_OPTIONS.findIndex((g) => g.id === id);
+  if (idx === -1 || idx >= GRADE_OPTIONS.length - 1) return null;
+  return GRADE_OPTIONS[idx + 1].id;
+}
+
+export function shouldPromptGradePromotion(child: { grade?: string | null; gradeUpdatedAt?: string | Date | null }): boolean {
+  if (!child.grade) return false;
+  if (child.grade === "college" || child.grade === "adult") return false;
+  const now = new Date();
+  const month = now.getMonth();
+  if (month < 7 || month > 9) return false;
+  const lastUpdate = child.gradeUpdatedAt ? new Date(child.gradeUpdatedAt) : null;
+  if (!lastUpdate) return true;
+  const juneFirstThisYear = new Date(now.getFullYear(), 5, 1);
+  return lastUpdate.getTime() < juneFirstThisYear.getTime();
+}

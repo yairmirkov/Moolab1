@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { api } from "../api";
 import { useLang, useLangSuffix, t, translations } from "../useLang";
-import { GRADE_OPTIONS, getGradeOption, gradeLabel, gradeFromApiBucket } from "../gradeMap";
+import { GRADE_OPTIONS, getGradeOption, gradeLabel, gradeFromApiBucket, SKILL_LEVELS, type SkillLevel, nextGradeId, shouldPromptGradePromotion } from "../gradeMap";
 
 const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
 const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
@@ -20,6 +20,9 @@ interface ChildProfile {
   displayName: string;
   pin: string;
   ageGroup: string;
+  grade?: string | null;
+  skillLevel?: string | null;
+  gradeUpdatedAt?: string | null;
   xp?: number;
   level?: number;
   streak?: number;
@@ -68,7 +71,15 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newGrade, setNewGrade] = useState("3");
+  const [newSkill, setNewSkill] = useState<SkillLevel>("beginner");
   const [creating, setCreating] = useState(false);
+  const [dismissedPromotes, setDismissedPromotes] = useState<Set<number>>(() => {
+    try {
+      const raw = sessionStorage.getItem("ws_dismissed_promotes");
+      return raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch { return new Set(); }
+  });
+  const [promoting, setPromoting] = useState<number | null>(null);
   const [loadingChildren, setLoadingChildren] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "progress" | "family" | "billing">("overview");
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
@@ -94,18 +105,45 @@ export default function Dashboard() {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const child = await api.createChild(newName.trim(), getGradeOption(newGrade).apiBucket);
+      const child = await api.createChild(newName.trim(), getGradeOption(newGrade).apiBucket, newGrade, newSkill);
       setChildren((prev) => [...prev, child]);
       if (selectedChildId == null) setSelectedChildId(child.id);
       setShowModal(false);
       setNewName("");
       setNewGrade("3");
+      setNewSkill("beginner");
     } catch (err: any) {
       alert(err.message || t(tx.failedCreate, lang));
     } finally {
       setCreating(false);
     }
   };
+
+  const persistDismissed = (s: Set<number>) => {
+    try { sessionStorage.setItem("ws_dismissed_promotes", JSON.stringify(Array.from(s))); } catch {}
+  };
+
+  const handlePromote = async (child: ChildProfile, action: "promote" | "stay") => {
+    setPromoting(child.id);
+    try {
+      const targetGrade = action === "promote" ? (nextGradeId(child.grade || "3") || child.grade || "3") : (child.grade || "3");
+      await api.updateChildGrade(child.id, targetGrade, (child.skillLevel as SkillLevel) || "beginner");
+      const stamped = new Date().toISOString();
+      setChildren((prev) => prev.map((c) => c.id === child.id ? { ...c, grade: targetGrade, gradeUpdatedAt: stamped } : c));
+    } catch (err: any) {
+      alert(err.message || "Failed to update grade");
+    } finally {
+      setPromoting(null);
+    }
+  };
+
+  const dismissPromote = (id: number) => {
+    setDismissedPromotes((prev) => {
+      const next = new Set(prev); next.add(id); persistDismissed(next); return next;
+    });
+  };
+
+  const promotesNeeded = children.filter((c) => shouldPromptGradePromotion(c) && !dismissedPromotes.has(c.id));
 
   const handleDelete = async (id: number) => {
     if (!confirm(t(tx.removeProfile, lang))) return;
@@ -349,6 +387,48 @@ export default function Dashboard() {
         }}>{t(tx.addChild, lang)}</button>
       </div>
 
+      {promotesNeeded.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {promotesNeeded.map((c) => {
+            const next = nextGradeId(c.grade || "3");
+            return (
+              <div key={`promote-${c.id}`} style={{
+                background: "linear-gradient(135deg, rgba(255,200,87,0.18), rgba(255,149,0,0.08))",
+                border: "1.5px solid rgba(255,149,0,0.35)", borderRadius: 14, padding: "14px 16px",
+                display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+              }}>
+                <div style={{ fontSize: "1.3rem" }}>🎒</div>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ fontWeight: 900, fontSize: "0.85rem", color: NAVY }}>
+                    {lang === "es" ? `Nuevo año escolar para ${c.displayName}` : `New school year for ${c.displayName}`}
+                  </div>
+                  <div style={{ fontSize: "0.7rem", fontWeight: 600, color: NAVY_MUTED, marginTop: 2 }}>
+                    {lang === "es"
+                      ? `Actualmente en ${gradeLabel(c.grade || "3", lang)}. ¿Avanzar a ${next ? gradeLabel(next, lang) : gradeLabel(c.grade || "3", lang)}?`
+                      : `Currently in ${gradeLabel(c.grade || "3", lang)}. Promote to ${next ? gradeLabel(next, lang) : gradeLabel(c.grade || "3", lang)}?`}
+                  </div>
+                </div>
+                {next && (
+                  <button disabled={promoting === c.id} onClick={() => handlePromote(c, "promote")} style={{
+                    background: "#ff9500", border: "none", color: "#fff", fontFamily: FONT, fontWeight: 900,
+                    fontSize: "0.7rem", padding: "9px 14px", borderRadius: 10, cursor: "pointer",
+                    opacity: promoting === c.id ? 0.6 : 1,
+                  }}>{lang === "es" ? "Avanzar" : "Promote"}</button>
+                )}
+                <button disabled={promoting === c.id} onClick={() => handlePromote(c, "stay")} style={{
+                  background: "#fff", border: `1.5px solid ${NAVY_BORDER}`, color: NAVY, fontFamily: FONT,
+                  fontWeight: 800, fontSize: "0.7rem", padding: "9px 14px", borderRadius: 10, cursor: "pointer",
+                  opacity: promoting === c.id ? 0.6 : 1,
+                }}>{lang === "es" ? "Mantener" : "Keep same"}</button>
+                <button onClick={() => dismissPromote(c.id)} title={lang === "es" ? "Recordar luego" : "Remind later"} style={{
+                  background: "none", border: "none", color: "rgba(12,45,72,0.4)", cursor: "pointer", fontSize: "1rem", padding: 4,
+                }}>✕</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {loadingChildren ? (
         <div style={{ textAlign: "center", color: NAVY_MUTED, padding: 40, fontWeight: 600 }}>
           {t(tx.loadingProfiles, lang)}
@@ -380,7 +460,14 @@ export default function Dashboard() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 900, fontSize: "0.95rem", color: NAVY }}>{child.displayName}</div>
                   <div style={{ fontSize: "0.65rem", fontWeight: 600, color: NAVY_MUTED, marginTop: 2 }}>
-                    @{child.username} · {t(tx.ageGroupLabel, lang)} {gradeLabel(gradeFromApiBucket(child.ageGroup), lang)}
+                    @{child.username} · {t(tx.ageGroupLabel, lang)} {gradeLabel(child.grade || gradeFromApiBucket(child.ageGroup), lang)}
+                  </div>
+                  <div style={{ display: "inline-flex", marginTop: 5, padding: "3px 8px", borderRadius: 6,
+                    background: child.skillLevel === "expert" ? "rgba(255,149,0,0.12)" : child.skillLevel === "intermediate" ? "rgba(46,139,192,0.12)" : "rgba(57,255,20,0.12)",
+                    fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase",
+                    color: child.skillLevel === "expert" ? "#ff9500" : child.skillLevel === "intermediate" ? ACCENT : "#1f9b00",
+                  }}>
+                    {(SKILL_LEVELS.find((s) => s.id === (child.skillLevel || "beginner")) || SKILL_LEVELS[0])[lang === "es" ? "labelEs" : "labelEn"]}
                   </div>
                 </div>
                 <div style={{
@@ -608,6 +695,26 @@ export default function Dashboard() {
                     ))}
                   </optgroup>
                 </select>
+              </div>
+              <div>
+                <label style={{ display: "block", color: NAVY_MUTED, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
+                  {lang === "es" ? "NIVEL DE HABILIDAD INICIAL" : "STARTING SKILL LEVEL"}
+                </label>
+                <select value={newSkill} onChange={(e) => setNewSkill(e.target.value as SkillLevel)} style={{
+                  width: "100%", padding: "13px 16px", borderRadius: 12,
+                  background: "rgba(177,212,224,0.12)", border: "1.5px solid rgba(46,139,192,0.15)",
+                  color: NAVY, fontFamily: FONT, fontWeight: 700, fontSize: "0.9rem",
+                  outline: "none", boxSizing: "border-box", cursor: "pointer",
+                }}>
+                  {SKILL_LEVELS.map((s) => (
+                    <option key={s.id} value={s.id}>{lang === "es" ? s.labelEs : s.labelEn}</option>
+                  ))}
+                </select>
+                <div style={{ fontSize: "0.62rem", fontWeight: 600, color: NAVY_MUTED, marginTop: 6, paddingLeft: 4, lineHeight: 1.35 }}>
+                  {lang === "es"
+                    ? "La mayoría empieza como Principiante. Elige más alto solo si tu hijo ya conoce lo básico de finanzas."
+                    : "Most kids start as Beginner. Pick higher only if your child already knows financial basics."}
+                </div>
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
