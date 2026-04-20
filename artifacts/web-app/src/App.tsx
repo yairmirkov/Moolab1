@@ -2548,17 +2548,13 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   padding: "14px 16px", borderRadius: 16,
                   background: isLocked
                     ? "rgba(255,255,255,0.025)"
-                    : isExpanded
-                      ? `linear-gradient(100deg, ${neon}28, ${neon}08)`
-                      : isCurrent
-                        ? `linear-gradient(100deg, ${neon}22, ${neon}06)`
-                        : `linear-gradient(100deg, ${neon}12, rgba(255,255,255,0.03))`,
-                  border: `1.5px solid ${neon}${isExpanded ? "ee" : isCurrent ? "aa" : "55"}`,
+                    : "rgba(255,255,255,0.04)",
+                  border: `1.5px solid ${neon}${isExpanded ? "ee" : isCurrent ? "aa" : "66"}`,
                   boxShadow: isLocked
                     ? "none"
                     : isExpanded
-                      ? `0 0 0 1px ${neon}55, 0 8px 28px ${neon}40, inset 0 0 24px ${neon}1a`
-                      : `0 0 0 1px ${neon}22, 0 6px 18px ${neon}22`,
+                      ? `0 0 0 1px ${neon}55, 0 8px 28px ${neon}55`
+                      : `0 4px 14px ${neon}26`,
                   cursor: "pointer",
                   fontFamily: FONT, textAlign: "left",
                   display: "flex", flexDirection: "column", gap: 0,
@@ -2574,10 +2570,11 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 <div style={{
                   flexShrink: 0, width: 44, height: 44, borderRadius: 12,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: isComplete ? "rgba(74,222,128,0.15)" : "rgba(120,180,255,0.08)",
-                  border: `1px solid ${isComplete ? "rgba(74,222,128,0.35)" : "rgba(120,180,255,0.15)"}`,
+                  background: isLocked ? "rgba(255,255,255,0.04)" : `${neon}1f`,
+                  border: `1px solid ${isLocked ? "rgba(255,255,255,0.08)" : `${neon}66`}`,
                   fontSize: "1.4rem",
                   filter: isLocked ? "grayscale(1)" : "none",
+                  transition: "background 0.6s ease, border-color 0.6s ease",
                 }}>
                   {mod.icon}
                 </div>
@@ -2601,8 +2598,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                       width: `${pct}%`, height: "100%",
                       background: isComplete
                         ? "linear-gradient(90deg, #4ade80, #22c55e)"
-                        : `linear-gradient(90deg, ${levelAccent}, #b1d4e0)`,
-                      transition: "width 0.6s ease",
+                        : `linear-gradient(90deg, ${neon}, ${neon}aa)`,
+                      transition: "width 0.6s ease, background 0.6s ease",
                     }} />
                     {!isComplete && unlockMarkerPct < 100 && (
                       <div title={lang === "es" ? "Desbloqueo" : "Unlock"} style={{
@@ -2623,7 +2620,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 </div>
                 {isExpanded && (
                   <div style={{
-                    marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(120,180,255,0.12)",
+                    marginTop: 12, paddingTop: 12, borderTop: `1px solid ${neon}33`,
                     width: "100%", display: "flex", flexDirection: "column", gap: 10,
                     animation: "subjectFadeIn 0.25s ease-out both",
                   }}>
@@ -2637,9 +2634,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                       <div style={{
                         display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: 6,
                         padding: "8px 14px", borderRadius: 999,
-                        background: `linear-gradient(135deg, ${levelAccent}, ${levelAccent}cc)`,
-                        color: "#0a1f3a", fontWeight: 800, fontSize: "0.72rem",
+                        background: `linear-gradient(135deg, ${neon}, ${neon}cc)`,
+                        color: "#0a0a0f", fontWeight: 800, fontSize: "0.72rem",
                         letterSpacing: "0.02em",
+                        boxShadow: `0 4px 14px ${neon}66`,
                       }}>
                         {isComplete
                           ? (lang === "es" ? "Practicar otra vez →" : "Practice again →")
@@ -2661,7 +2659,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 )}
               </button>
             );
-          })}
+          });
+          })()}
         </div>
 
         <p style={{
