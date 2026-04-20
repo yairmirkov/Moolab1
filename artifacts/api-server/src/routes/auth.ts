@@ -6,6 +6,13 @@ import { eq } from "drizzle-orm";
 
 const router = Router();
 
+function gradeFromAgeGroup(bucket: string | null | undefined): string {
+  if (bucket === "8-12") return "3";
+  if (bucket === "13-15") return "8";
+  if (bucket === "16-18") return "11";
+  return "8";
+}
+
 router.post("/auth/register", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -78,14 +85,30 @@ router.post("/auth/child-login", async (req, res) => {
     (req.session as any).childId = child.id;
     (req.session as any).ageGroup = child.ageGroup;
 
+    let grade: string | null = (child as any).grade ?? null;
+    let skillLevel: string | null = (child as any).skillLevel ?? null;
+    let gradeUpdatedAt: Date | null = (child as any).gradeUpdatedAt ?? null;
+    if (!grade) {
+      grade = gradeFromAgeGroup(child.ageGroup);
+      skillLevel = skillLevel || "beginner";
+      gradeUpdatedAt = new Date();
+      try {
+        await db.update(childrenTable)
+          .set({ grade, skillLevel, gradeUpdatedAt })
+          .where(eq(childrenTable.id, child.id));
+      } catch (e) {
+        console.warn("Lazy grade migration failed for child", child.id, e);
+      }
+    }
+
     return res.json({
       id: child.id,
       username: child.username,
       displayName: child.displayName,
       ageGroup: child.ageGroup,
-      grade: (child as any).grade ?? null,
-      skillLevel: (child as any).skillLevel ?? null,
-      gradeUpdatedAt: (child as any).gradeUpdatedAt ?? null,
+      grade,
+      skillLevel,
+      gradeUpdatedAt,
       xp: child.xp,
       level: child.level,
       streak: child.streak,

@@ -5,6 +5,13 @@ import { eq } from "drizzle-orm";
 
 const router = Router();
 
+function gradeFromAgeGroup(bucket: string | null | undefined): string {
+  if (bucket === "8-12") return "3";
+  if (bucket === "13-15") return "8";
+  if (bucket === "16-18") return "11";
+  return "8";
+}
+
 function generateUsername(displayName: string): string {
   const base = displayName.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10) || "user";
   const suffix = Math.floor(10 + Math.random() * 90);
@@ -40,7 +47,22 @@ router.get("/children", async (req, res) => {
     createdAt: childrenTable.createdAt,
   }).from(childrenTable).where(eq(childrenTable.parentId, parentId));
 
-  return res.json(children);
+  const migrated = await Promise.all(children.map(async (c) => {
+    if (c.grade) return c;
+    const grade = gradeFromAgeGroup(c.ageGroup);
+    const skillLevel = c.skillLevel || "beginner";
+    const gradeUpdatedAt = new Date();
+    try {
+      await db.update(childrenTable)
+        .set({ grade, skillLevel, gradeUpdatedAt })
+        .where(eq(childrenTable.id, c.id));
+    } catch (e) {
+      console.warn("Lazy grade migration failed for child", c.id, e);
+    }
+    return { ...c, grade, skillLevel, gradeUpdatedAt };
+  }));
+
+  return res.json(migrated);
 });
 
 const VALID_SKILL_LEVELS = ["beginner", "intermediate", "expert"];
