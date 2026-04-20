@@ -25,19 +25,42 @@ const toBand = (ageGroup: string): AgeBand =>
     ? (ageGroup as AgeBand)
     : "Teens";
 
-const SUBJECT_WINS_NEEDED = 3;
+const SUBJECT_UNLOCK_THRESHOLD = 3;
+const SUBJECT_MASTERY_WINS = 10;
+const SUBJECT_WINS_NEEDED = SUBJECT_MASTERY_WINS;
+
+const getBonusSubjects = (_lang: Lang, _level: UserLevel): Array<{
+  id: string; title: string; description: string; icon: string;
+}> => {
+  // Scaffolding for future bonus/seasonal subjects. Returning [] keeps the
+  // pipeline ready without affecting graduation requirements.
+  return [];
+};
 
 const getModules = (lang: Lang, level: UserLevel) => {
   const subs = translations.subjects[level][lang];
   const icons = translations.subjectIcons[level];
-  return subs.map((s: { id: string; title: string; description: string }, i: number) => ({
+  const core = subs.map((s: { id: string; title: string; description: string }, i: number) => ({
     id: s.id,
     level,
     icon: icons[i] || "\u2728",
     name: s.title,
     topic: s.description,
-    winsNeeded: SUBJECT_WINS_NEEDED,
+    winsNeeded: SUBJECT_MASTERY_WINS,
+    unlockThreshold: SUBJECT_UNLOCK_THRESHOLD,
+    isBonus: false,
   }));
+  const bonus = getBonusSubjects(lang, level).map((b) => ({
+    id: b.id,
+    level,
+    icon: b.icon,
+    name: b.title,
+    topic: b.description,
+    winsNeeded: SUBJECT_MASTERY_WINS,
+    unlockThreshold: SUBJECT_UNLOCK_THRESHOLD,
+    isBonus: true,
+  }));
+  return [...core, ...bonus];
 };
 
 const computeEffectiveLevel = (
@@ -45,12 +68,12 @@ const computeEffectiveLevel = (
   override: UserLevel | "auto",
 ): UserLevel => {
   if (override !== "auto") return override;
-  const wonInLevel = (lvl: UserLevel) =>
+  const masteredInLevel = (lvl: UserLevel) =>
     translations.subjects[lvl].en.filter(
-      (s: { id: string }) => (progress[s.id] || 0) >= SUBJECT_WINS_NEEDED,
+      (s: { id: string }) => (progress[s.id] || 0) >= SUBJECT_MASTERY_WINS,
     ).length;
-  if (wonInLevel("intermediate") >= 5) return "expert";
-  if (wonInLevel("beginner") >= 5) return "intermediate";
+  if (masteredInLevel("intermediate") >= 5) return "expert";
+  if (masteredInLevel("beginner") >= 5) return "intermediate";
   return "beginner";
 };
 
@@ -2314,17 +2337,20 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           </p>
         </div>
 
-        {/* Subjects grid */}
+        {/* Subjects list — one wide button per row */}
         <div style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
+          display: "flex", flexDirection: "column", gap: 10,
           width: "100%", maxWidth: 440,
         }}>
           {MODULES.map((mod, i) => {
             const wins = moduleProgress[mod.id] || 0;
             const pct = Math.min((wins / mod.winsNeeded) * 100, 100);
             const isComplete = wins >= mod.winsNeeded;
-            const isLocked = i > currentModuleIdx && !isComplete;
+            const prevWins = i > 0 ? (moduleProgress[MODULES[i - 1].id] || 0) : Infinity;
+            const prevUnlockAt = i > 0 ? (MODULES[i - 1].unlockThreshold || SUBJECT_UNLOCK_THRESHOLD) : 0;
+            const isLocked = i > 0 && prevWins < prevUnlockAt;
             const isCurrent = i === currentModuleIdx && !isComplete;
+            const unlockMarkerPct = Math.min((mod.unlockThreshold / mod.winsNeeded) * 100, 100);
             return (
               <button
                 key={mod.id}
@@ -2341,11 +2367,11 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 }}
                 style={{
                   position: "relative", overflow: "hidden",
-                  padding: "18px 12px 14px", borderRadius: 18,
+                  padding: "14px 16px", borderRadius: 16,
                   background: isLocked
                     ? "rgba(255,255,255,0.025)"
                     : isCurrent
-                      ? "linear-gradient(160deg, rgba(46,139,192,0.22), rgba(120,180,255,0.06))"
+                      ? "linear-gradient(100deg, rgba(46,139,192,0.22), rgba(120,180,255,0.06))"
                       : "rgba(255,255,255,0.04)",
                   border: isCurrent
                     ? `1.5px solid ${levelAccent}88`
@@ -2353,35 +2379,42 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                       ? "1.5px solid rgba(74,222,128,0.5)"
                       : "1px solid rgba(120,180,255,0.12)",
                   cursor: isLocked ? "not-allowed" : "pointer",
-                  fontFamily: FONT,
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-                  opacity: isLocked ? 0.45 : 1,
+                  fontFamily: FONT, textAlign: "left",
+                  display: "flex", alignItems: "center", gap: 14,
+                  opacity: isLocked ? 0.5 : 1,
                   animation: `subjectFadeIn 0.5s ease-out ${0.1 + i * 0.06}s both${isCurrent ? ", subjectGlow 3s ease-in-out infinite" : ""}`,
                   transition: "transform 0.15s, border-color 0.2s",
                 }}
-                onPointerDown={(e) => { if (!isLocked) (e.currentTarget as HTMLElement).style.transform = "scale(0.96)"; }}
+                onPointerDown={(e) => { if (!isLocked) (e.currentTarget as HTMLElement).style.transform = "scale(0.985)"; }}
                 onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                 onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
               >
-                {isComplete && (
-                  <span style={{
-                    position: "absolute", top: 8, right: 8,
-                    width: 18, height: 18, borderRadius: "50%",
-                    background: "rgba(74,222,128,0.2)", border: "1px solid rgba(74,222,128,0.6)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "0.6rem", color: "#4ade80", fontWeight: 900,
-                  }}>✓</span>
-                )}
-                {isLocked && (
-                  <span style={{ position: "absolute", top: 8, right: 8, fontSize: "0.7rem", opacity: 0.6 }}>🔒</span>
-                )}
-                <span style={{ fontSize: "1.8rem", filter: isLocked ? "grayscale(1)" : "none" }}>{mod.icon}</span>
-                <span style={{
-                  fontSize: "0.78rem", fontWeight: 800, color: "#e6f0ff",
-                  letterSpacing: "-0.01em", lineHeight: 1.2, textAlign: "center", minHeight: 30,
-                }}>{mod.name}</span>
-                <div style={{ width: "100%", display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                <div style={{
+                  flexShrink: 0, width: 44, height: 44, borderRadius: 12,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: isComplete ? "rgba(74,222,128,0.15)" : "rgba(120,180,255,0.08)",
+                  border: `1px solid ${isComplete ? "rgba(74,222,128,0.35)" : "rgba(120,180,255,0.15)"}`,
+                  fontSize: "1.4rem",
+                  filter: isLocked ? "grayscale(1)" : "none",
+                }}>
+                  {mod.icon}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
+                    <span style={{
+                      fontSize: "0.85rem", fontWeight: 800, color: "#e6f0ff",
+                      letterSpacing: "-0.01em", lineHeight: 1.2,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>{mod.name}</span>
+                    <span style={{
+                      flexShrink: 0, fontSize: "0.6rem", fontWeight: 800,
+                      color: isComplete ? "#4ade80" : "rgba(207,225,245,0.6)",
+                      letterSpacing: "0.04em",
+                    }}>
+                      {isLocked ? "🔒" : isComplete ? `★ ${wins}/${mod.winsNeeded}` : `${wins}/${mod.winsNeeded}`}
+                    </span>
+                  </div>
+                  <div style={{ position: "relative", width: "100%", height: 5, borderRadius: 3, background: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
                     <div style={{
                       width: `${pct}%`, height: "100%",
                       background: isComplete
@@ -2389,15 +2422,33 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                         : `linear-gradient(90deg, ${levelAccent}, #b1d4e0)`,
                       transition: "width 0.6s ease",
                     }} />
+                    {!isComplete && unlockMarkerPct < 100 && (
+                      <div title={lang === "es" ? "Desbloqueo" : "Unlock"} style={{
+                        position: "absolute", top: -2, bottom: -2,
+                        left: `calc(${unlockMarkerPct}% - 1px)`, width: 2,
+                        background: wins >= mod.unlockThreshold ? "rgba(74,222,128,0.85)" : "rgba(255,255,255,0.45)",
+                        borderRadius: 1,
+                      }} />
+                    )}
                   </div>
-                  <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "rgba(207,225,245,0.55)", minWidth: 18, textAlign: "right" }}>
-                    {wins}/{mod.winsNeeded}
-                  </span>
                 </div>
+                <span style={{
+                  flexShrink: 0, fontSize: "1rem",
+                  color: isLocked ? "rgba(207,225,245,0.25)" : "rgba(207,225,245,0.55)",
+                }}>›</span>
               </button>
             );
           })}
         </div>
+
+        <p style={{
+          marginTop: 18, maxWidth: 440, width: "100%", textAlign: "center",
+          fontSize: "0.62rem", fontWeight: 600, color: "rgba(207,225,245,0.4)", letterSpacing: "0.02em",
+        }}>
+          {lang === "es"
+            ? `Gana ${SUBJECT_UNLOCK_THRESHOLD} para desbloquear el siguiente · Domina los 5 con ${SUBJECT_MASTERY_WINS} para graduarte`
+            : `${SUBJECT_UNLOCK_THRESHOLD} wins to unlock the next · Master all 5 with ${SUBJECT_MASTERY_WINS} to graduate`}
+        </p>
       </div>
     );
   }
@@ -4049,11 +4100,12 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                                 const newProg = { ...prev };
                                 const key = currentModule?.id;
                                 if (!key) return prev;
-                                const curWins = (newProg[key] || 0) + 1;
+                                const prevWins = newProg[key] || 0;
+                                const curWins = prevWins + 1;
                                 newProg[key] = curWins;
-                                if (curWins >= (currentModule?.winsNeeded || SUBJECT_WINS_NEEDED)) {
-                                  // If this win promotes the user to the next level (all 5 in current level done),
-                                  // skip the in-level increment — the effectiveLevel-change effect will reset idx to 0.
+                                const unlockAt = currentModule?.unlockThreshold || SUBJECT_UNLOCK_THRESHOLD;
+                                // Auto-advance to next subject the moment user crosses the unlock threshold.
+                                if (prevWins < unlockAt && curWins >= unlockAt) {
                                   const willPromote = MODULES.every(
                                     (m) => (newProg[m.id] || 0) >= m.winsNeeded,
                                   );
