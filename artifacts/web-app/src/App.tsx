@@ -870,12 +870,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   const selectedSubjectRef = useRef<string | null>(null);
   const [showSubjectPicker, setShowSubjectPicker] = useState(false);
   const [expandedSubjectId, setExpandedSubjectId] = useState<string | null>(null);
-  const [neonTick, setNeonTick] = useState(0);
-  useEffect(() => {
-    if (!showSubjectPicker) return;
-    const id = window.setInterval(() => setNeonTick((t) => t + 1), 2600);
-    return () => window.clearInterval(id);
-  }, [showSubjectPicker]);
 
   const [xp, setXp] = useState(() => load("xp", 0));
   const [streak, setStreak] = useState(() => load("streak", 0));
@@ -2522,7 +2516,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             const isCurrent = i === currentModuleIdx && !isComplete;
             const unlockMarkerPct = Math.min((mod.unlockThreshold / mod.winsNeeded) * 100, 100);
             const isExpanded = expandedSubjectId === mod.id;
-            const neon = NEONS[(i + neonTick) % NEONS.length];
+            const neon = NEONS[i % NEONS.length];
             return (
               <button
                 key={mod.id}
@@ -3233,6 +3227,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           const setupText = card.miniGame?.contextSetup;
           const autoReveal = !setupText || (typeof setupText === "string" && setupText.length < 80);
           const effectiveRevealed = revealedSlides[card.id] || autoReveal;
+          const CARD_NEONS = ["#ff2d95","#39ff14","#ff9500","#00d4ff","#bf5cff","#ffe600","#ff3366","#00ffc8","#ff6ec7","#7afcff"];
+          let __h = 0; for (let __i = 0; __i < (card.id || "").length; __i++) __h = (__h * 31 + (card.id as string).charCodeAt(__i)) >>> 0;
+          const cardNeon = CARD_NEONS[__h % CARD_NEONS.length];
 
           return (
             <div
@@ -3381,8 +3378,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     borderRadius: 24,
                     backdropFilter: "blur(30px)",
                     WebkitBackdropFilter: "blur(30px)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+                    border: `1.5px solid ${cardNeon}`,
+                    boxShadow: `0 0 0 1px ${cardNeon}33, 0 8px 32px ${cardNeon}55, inset 0 1px 0 rgba(255,255,255,0.05)`,
                     width: "100%",
                     maxWidth: 400,
                   }}
@@ -3390,8 +3387,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   {!effectiveRevealed ? (
                     <div style={{ textAlign: "center", animation: "fadeIn 0.5s ease-out" }}>
                       <div style={{
-                        color: "rgba(46,139,192,0.5)", fontSize: "0.55rem", fontWeight: 800,
+                        color: cardNeon, fontSize: "0.55rem", fontWeight: 800,
                         letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 14,
+                        textShadow: `0 0 8px ${cardNeon}66`,
                       }}>{t.slide.part1[lang]}</div>
                       <p style={{
                         color: "#fff", fontSize: "clamp(0.85rem, 3.4vw, 1.02rem)", fontWeight: 800,
@@ -3406,11 +3404,13 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                         onClick={() => { playSfx("flip"); setRevealedSlides(p => ({ ...p, [card.id]: true })); }}
                         style={{
                           padding: "8px 20px", borderRadius: 10,
-                          background: "rgba(46,139,192,0.15)",
-                          border: "none",
-                          color: "rgba(177,212,224,0.7)", fontWeight: 700, fontSize: "0.72rem",
+                          background: `${cardNeon}26`,
+                          border: `1px solid ${cardNeon}77`,
+                          color: "#fff", fontWeight: 800, fontSize: "0.72rem",
                           cursor: "pointer", fontFamily: FONT,
                           letterSpacing: "0.04em",
+                          textShadow: `0 0 8px ${cardNeon}99`,
+                          boxShadow: `0 0 14px ${cardNeon}55`,
                           animation: "contextPulse 2s ease-in-out infinite",
                         }}
                       >
@@ -3420,8 +3420,9 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   ) : (
                     <div style={{ animation: "fadeIn 0.4s ease-out" }}>
                       <div style={{
-                        color: "rgba(46,139,192,0.5)", fontSize: "0.55rem", fontWeight: 800,
+                        color: cardNeon, fontSize: "0.55rem", fontWeight: 800,
                         letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 10,
+                        textShadow: `0 0 8px ${cardNeon}66`,
                       }}>{t.slide.part2[lang]}</div>
                       <p
                         style={{
