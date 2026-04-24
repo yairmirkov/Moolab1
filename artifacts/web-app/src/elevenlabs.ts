@@ -1,35 +1,7 @@
-const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY as string | undefined;
-
-const EL_ERROR_CODES: Record<number, string> = {
-  400: "invalid_request",
-  401: "authentication_error",
-  402: "payment_required",
-  403: "authorization_error",
-  404: "not_found",
-  409: "conflict",
-  429: "rate_limit_error",
-  500: "internal_error",
-  503: "service_unavailable",
-};
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 const _log = (msg: string) => {
   console.log(`[ElevenLabs] ${msg}`);
-};
-
-const _parseApiError = async (res: Response): Promise<string> => {
-  const label = EL_ERROR_CODES[res.status] || `http_${res.status}`;
-  let detail = "";
-  try {
-    const body = await res.json();
-    const d = body?.detail;
-    if (typeof d === "string") detail = d;
-    else if (d?.message) detail = `${d.status || ""}: ${d.message}`;
-    else if (body?.message) detail = body.message;
-    else detail = JSON.stringify(body).substring(0, 100);
-  } catch {
-    detail = res.statusText;
-  }
-  return `${res.status} ${label} - ${detail}`;
 };
 
 const VOICE_MAP = {
@@ -85,8 +57,40 @@ export function getVoiceIdForRole(role: "Host" | "Expert" | "Guest1" | "Guest2" 
 }
 
 let currentAudio: HTMLAudioElement | null = null;
+let _availableCache: boolean | null = null;
+let _availableProbe: Promise<boolean> | null = null;
 
-export const isElevenLabsAvailable = (): boolean => !!ELEVENLABS_API_KEY;
+async function probeAvailable(): Promise<boolean> {
+  if (_availableCache !== null) return _availableCache;
+  if (_availableProbe) return _availableProbe;
+  _availableProbe = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/elevenlabs/status`, { credentials: "include" });
+      if (!res.ok) { _availableCache = false; return false; }
+      const data = await res.json();
+      _availableCache = !!data?.available;
+      return _availableCache;
+    } catch {
+      _availableCache = false;
+      return false;
+    }
+  })();
+  return _availableProbe;
+}
+
+probeAvailable();
+
+export const isElevenLabsAvailable = (): boolean => _availableCache !== false;
+
+async function fetchTtsBlob(text: string, voiceId: string, voiceSettings?: Record<string, unknown>, signal?: AbortSignal): Promise<Response> {
+  return fetch(`${API_BASE}/elevenlabs/tts`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, voiceId, voiceSettings }),
+    signal,
+  });
+}
 
 export type FetchBlobResult = {
   url: string | null;
@@ -99,23 +103,14 @@ export const fetchAudioBlob = async (
   voiceId: string,
   voiceSettings?: { stability?: number; similarity_boost?: number; style?: number; use_speaker_boost?: boolean },
 ): Promise<FetchBlobResult> => {
-  if (!ELEVENLABS_API_KEY) { _log("fetchBlob: NO KEY"); return { url: null, httpStatus: 0, error: "no_key" }; }
   try {
     _log(`fetchBlob: voice=${voiceId.substring(0,8)}, "${text.substring(0, 25)}..."`);
     const settings = voiceSettings ?? { stability: 0.5, similarity_boost: 0.75, style: 0.4, use_speaker_boost: true };
-    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "xi-api-key": ELEVENLABS_API_KEY },
-      body: JSON.stringify({
-        text,
-        model_id: "eleven_multilingual_v2",
-        voice_settings: settings,
-      }),
-    });
+    const res = await fetchTtsBlob(text, voiceId, settings);
     if (!res.ok) {
-      const errMsg = await _parseApiError(res);
-      _log(`fetchBlob: ${errMsg}`);
-      return { url: null, httpStatus: res.status, error: EL_ERROR_CODES[res.status] || `http_${res.status}` };
+      _log(`fetchBlob: ${res.status}`);
+      if (res.status === 500) _availableCache = false;
+      return { url: null, httpStatus: res.status, error: `http_${res.status}` };
     }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -155,8 +150,6 @@ export const speakWithElevenLabs = async (
     onError?: () => void;
   },
 ): Promise<boolean> => {
-  if (!ELEVENLABS_API_KEY) return false;
-
   const voiceLang = resolveVoiceLang(lang);
   const voiceId = VOICE_MAP[voiceLang].Narrator;
   return _speak(text, voiceId, opts);
@@ -171,8 +164,6 @@ export const speakPodcastLine = (
     signal?: AbortSignal;
   },
 ): Promise<"done" | "aborted" | "error"> => {
-  if (!ELEVENLABS_API_KEY) return Promise.resolve("error");
-
   const voiceLang = resolveVoiceLang(lang);
   const voiceId = getVoiceId(speaker, voiceLang);
   const speed = opts?.speed ?? 1.0;
@@ -192,33 +183,18 @@ export const speakPodcastLine = (
     let podTimerEnded = false;
     const endPodTimer = () => { if (!podTimerEnded) { podTimerEnded = true; console.timeEnd(podTimerLabel); } };
     try {
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "xi-api-key": ELEVENLABS_API_KEY!,
-          },
-          body: JSON.stringify({
-            text,
-            model_id: "eleven_multilingual_v2",
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-              style: 0.4,
-              use_speaker_boost: true,
-            },
-          }),
-          signal: opts?.signal,
-        },
-      );
+      const response = await fetchTtsBlob(text, voiceId, {
+        stability: 0.5,
+        similarity_boost: 0.75,
+        style: 0.4,
+        use_speaker_boost: true,
+      }, opts?.signal);
 
       endPodTimer();
 
       if (!response.ok) {
-        const errMsg = await _parseApiError(response);
-        _log(`podcastLine: ${errMsg}`);
+        _log(`podcastLine: ${response.status}`);
+        if (response.status === 500) _availableCache = false;
         settle("error");
         return;
       }
@@ -273,8 +249,6 @@ async function _speak(
     onError?: () => void;
   },
 ): Promise<boolean> {
-  if (!ELEVENLABS_API_KEY) return false;
-
   const speed = opts?.speed ?? 1.0;
   const timerLabel = `ElevenLabs API (_speak, ${text.substring(0, 30)}...)`;
   console.time(timerLabel);
@@ -282,32 +256,18 @@ async function _speak(
   const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
 
   try {
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "xi-api-key": ELEVENLABS_API_KEY,
-        },
-        body: JSON.stringify({
-          text,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.4,
-            use_speaker_boost: true,
-          },
-        }),
-      },
-    );
+    const response = await fetchTtsBlob(text, voiceId, {
+      stability: 0.5,
+      similarity_boost: 0.75,
+      style: 0.4,
+      use_speaker_boost: true,
+    });
 
     endTimer();
 
     if (!response.ok) {
-      const errMsg = await _parseApiError(response);
-      _log(`_speak: ${errMsg}`);
+      _log(`_speak: ${response.status}`);
+      if (response.status === 500) _availableCache = false;
       opts?.onError?.();
       return false;
     }

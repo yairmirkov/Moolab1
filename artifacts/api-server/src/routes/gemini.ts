@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from "express";
+import { createRateLimit } from "../middlewares/rateLimit";
 
 const router = Router();
 
@@ -6,8 +7,9 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 const MAX_PROMPT_LENGTH = 32000;
+const generateLimiter = createRateLimit({ windowMs: 60_000, max: 30, label: "gemini" });
 
-router.post("/gemini/generate", async (req: Request, res: Response) => {
+router.post("/gemini/generate", generateLimiter, async (req: Request, res: Response) => {
   const session = req.session as any;
   const isAuthed = Boolean(session?.parentId || session?.childId);
   if (!isAuthed) {

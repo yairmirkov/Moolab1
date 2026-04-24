@@ -5,6 +5,7 @@ import childrenRouter from "./children";
 import pexelsRouter from "./pexels";
 import stocksRouter from "./stocks";
 import geminiRouter from "./gemini";
+import elevenlabsRouter from "./elevenlabs";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(childrenRouter);
 router.use(pexelsRouter);
 router.use(stocksRouter);
 router.use(geminiRouter);
+router.use(elevenlabsRouter);
 
 export default router;
