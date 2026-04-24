@@ -180,7 +180,6 @@ const generateCards = async (
   console.time(timerLabel);
   let timerEnded = false;
   const endTimer = () => { if (!timerEnded) { timerEnded = true; console.timeEnd(timerLabel); } };
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const subjectTitle = (opts?.subjectTitle || "").trim() || "(unspecified)";
   const subjectDescription = (topic || "").trim() || "(unspecified)";
   const computedSkill: PromptSkillLevel = (opts?.userLevel as PromptSkillLevel) || "beginner";
@@ -204,16 +203,17 @@ const generateCards = async (
   });
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${import.meta.env.VITE_API_URL || "/api"}/gemini/generate`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        credentials: "include",
+        body: JSON.stringify({ prompt }),
       },
     );
     const data = await response.json();
     endTimer();
-    const cleanText = data.candidates[0].content.parts[0].text
+    const cleanText = (data?.text || "")
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
@@ -284,10 +284,6 @@ const SUBJECT_OPTIONS_LEGACY = {
 };
 
 const generateShortText = async (type: "intro" | "summary", opts: { name: string; ageGroup: string; subject: string; lang: Lang; grade?: string | null; birthYear?: string; skillLevel?: PromptSkillLevel | null }): Promise<string> => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) return type === "intro"
-    ? (opts.lang === "es" ? `¡Hola ${opts.name}! Hoy conquistamos ${opts.subject}. ¡Vamos!` : `Hey ${opts.name}! Today we're mastering ${opts.subject}. Let's go!`)
-    : (opts.lang === "es" ? `¡Increíble, ${opts.name}! Dominaste ${opts.subject}. ¡Sigue así!` : `Amazing work, ${opts.name}! You crushed ${opts.subject}. Keep going!`);
   const instruction = buildShortTextPrompt(type, {
     name: opts.name,
     lang: opts.lang,
@@ -299,11 +295,11 @@ const generateShortText = async (type: "intro" | "summary", opts: { name: string
   });
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text: instruction }] }] }) },
+      `${import.meta.env.VITE_API_URL || "/api"}/gemini/generate`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ prompt: instruction }) },
     );
     const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || (type === "intro" ? `Hey ${opts.name}! Let's dive in!` : `Great job, ${opts.name}!`);
+    return (data?.text || "").trim() || (type === "intro" ? `Hey ${opts.name}! Let's dive in!` : `Great job, ${opts.name}!`);
   } catch {
     return type === "intro" ? `Hey ${opts.name}! Let's dive in!` : `Great job, ${opts.name}!`;
   }
