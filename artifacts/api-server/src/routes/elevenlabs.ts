@@ -13,11 +13,6 @@ router.get("/elevenlabs/status", (req: Request, res: Response) => {
 });
 
 router.post("/elevenlabs/tts", ttsLimiter, async (req: Request, res: Response) => {
-  const session = req.session as any;
-  const isAuthed = Boolean(session?.parentId || session?.childId);
-  if (!isAuthed) {
-    return res.status(401).json({ error: "Authentication required" });
-  }
   if (!ELEVENLABS_API_KEY) {
     return res.status(500).json({ error: "Server not configured" });
   }

@@ -10,12 +10,6 @@ const MAX_PROMPT_LENGTH = 32000;
 const generateLimiter = createRateLimit({ windowMs: 60_000, max: 30, label: "gemini" });
 
 router.post("/gemini/generate", generateLimiter, async (req: Request, res: Response) => {
-  const session = req.session as any;
-  const isAuthed = Boolean(session?.parentId || session?.childId);
-  if (!isAuthed) {
-    return res.status(401).json({ error: "Authentication required" });
-  }
-
   if (!GEMINI_API_KEY) {
     console.error("[Gemini] Missing GEMINI_API_KEY env var");
     return res.status(500).json({ error: "Server not configured" });

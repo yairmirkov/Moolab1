@@ -7,7 +7,8 @@ const buckets = new Map<string, Bucket>();
 export function createRateLimit(opts: { windowMs: number; max: number; label: string }) {
   return function rateLimit(req: Request, res: Response, next: NextFunction) {
     const session = req.session as any;
-    const key = `${opts.label}:${session?.parentId || session?.childId || req.ip || "anon"}`;
+    const sid = (req as any).sessionID || "";
+    const key = `${opts.label}:${session?.parentId || session?.childId || sid || req.ip || "anon"}`;
     const now = Date.now();
     const bucket = buckets.get(key);
     if (!bucket || bucket.resetAt < now) {
