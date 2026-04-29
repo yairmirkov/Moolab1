@@ -108,6 +108,12 @@ const computeEffectiveLevel = (
   return "beginner";
 };
 
+// Strip leading option labels Gemini sometimes bakes in like "A. ", "(B) ", "C) ", "1. ", "1) "
+const stripOptionPrefix = (raw: unknown): string => {
+  if (typeof raw !== "string") return String(raw ?? "");
+  return raw.replace(/^\s*(?:[\(\[]?\s*[A-Za-z0-9]\s*[\)\].:\-—]\s*)+/, "").trim();
+};
+
 const shuffleOptions = (options: string[], correctIndex: number) => {
   const correctAnswer = options[correctIndex];
   const shuffled = [...options];
@@ -226,6 +232,7 @@ const generateCards = async (
         if (lesson.type === "podcast_clip") lesson.type = "podcast";
         if (!lesson.type || !["journey", "concept", "podcast"].includes(lesson.type)) lesson.type = "journey";
         if (lesson.miniGame?.options) {
+          lesson.miniGame.options = lesson.miniGame.options.map(stripOptionPrefix);
           const shuffled = shuffleOptions(lesson.miniGame.options, lesson.miniGame.correctIndex);
           lesson.miniGame.options = shuffled.options;
           lesson.miniGame.correctIndex = shuffled.correctIndex;
@@ -238,6 +245,7 @@ const generateCards = async (
         parsed.bossQuiz.actionQuestion = parsed.bossQuiz.question;
       }
       if (parsed.bossQuiz.options) {
+        parsed.bossQuiz.options = parsed.bossQuiz.options.map(stripOptionPrefix);
         const shuffled = shuffleOptions(parsed.bossQuiz.options, parsed.bossQuiz.correctIndex);
         parsed.bossQuiz.options = shuffled.options;
         parsed.bossQuiz.correctIndex = shuffled.correctIndex;
@@ -4695,15 +4703,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                           onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                           onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
                         >
-                          <span style={{
-                            width: 30, height: 30, borderRadius: 10, flexShrink: 0,
-                            background: optNeon,
-                            display: "flex", justifyContent: "center", alignItems: "center",
-                            fontSize: "0.85rem", fontWeight: 900, color: "#0a0a0f",
-                            fontFamily: HEADING_FONT,
-                            boxShadow: `0 0 12px ${optNeon}99`,
-                          }}>{String.fromCharCode(65 + i)}</span>
-                          <span style={{ flex: 1 }}>{opt}</span>
+                          <span style={{ flex: 1, textAlign: "center" }}>{opt}</span>
                         </button>
                       );
                     })}
