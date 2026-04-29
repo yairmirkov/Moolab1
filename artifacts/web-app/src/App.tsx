@@ -1361,7 +1361,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         setQuizSummaryText(finalText);
         if (isElevenLabsAvailable()) {
           try {
-            const r = await fetchAudioBlob(finalText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true });
+            const r = await fetchAudioBlob(finalText, getVoiceIdForRole("Host", currentLang), { stability: 0.32, similarity_boost: 0.88, style: 0.85, use_speaker_boost: true });
             if (cancelled) return;
             if (r.url) setQuizSummaryAudioUrl(r.url);
           } catch (audioErr) {
@@ -1395,6 +1395,11 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     const picked = winTitles[Math.floor(Math.random() * winTitles.length)];
     setQuizResultPick(picked);
     setShowQuizSummary(true);
+    setConfettiBurst((n) => n + 1);
+    setTimeout(() => setConfettiBurst((n) => n + 1), 600);
+    setTimeout(() => setConfettiBurst((n) => n + 1), 1300);
+    playSfx("correct");
+    setTimeout(() => playSfx("coin"), 250);
   }, [quizResult, userName, ageGroup, currentModule]);
 
   // Effect C: autoplay the summary audio once both the win has happened AND the audio is ready.
@@ -4716,68 +4721,108 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             <div style={{
               animation: "fadeIn 0.8s ease-out both",
               display: "flex", flexDirection: "column", alignItems: "center",
-              justifyContent: "center", textAlign: "center", padding: 32, maxWidth: 380,
+              justifyContent: "center", textAlign: "center", padding: 32, maxWidth: 400,
+              position: "relative",
             }}>
               <style>{`
                 @keyframes moolieBounce {
-                  0%, 100% { transform: translateY(0) scale(1); }
-                  30% { transform: translateY(-18px) scale(1.1); }
-                  50% { transform: translateY(-6px) scale(1.05); }
-                  70% { transform: translateY(-10px) scale(1.08); }
+                  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+                  20% { transform: translateY(-22px) scale(1.15) rotate(-8deg); }
+                  40% { transform: translateY(-4px) scale(1.05) rotate(6deg); }
+                  60% { transform: translateY(-14px) scale(1.1) rotate(-4deg); }
+                  80% { transform: translateY(-2px) scale(1.03) rotate(2deg); }
                 }
                 @keyframes moolieGlow {
-                  0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,165,0,0.15); }
-                  50% { box-shadow: 0 0 35px rgba(255,215,0,0.5), 0 0 60px rgba(255,165,0,0.25); }
+                  0%, 100% { box-shadow: 0 0 30px rgba(255,215,0,0.55), 0 0 60px rgba(255,165,0,0.3), 0 0 90px rgba(255,140,0,0.15); }
+                  50% { box-shadow: 0 0 50px rgba(255,215,0,0.8), 0 0 90px rgba(255,165,0,0.5), 0 0 130px rgba(255,140,0,0.25); }
                 }
                 @keyframes moolieTextPop {
                   0% { opacity: 0; transform: scale(0.5) translateY(10px); }
-                  60% { opacity: 1; transform: scale(1.15) translateY(-2px); }
+                  60% { opacity: 1; transform: scale(1.2) translateY(-2px); }
                   100% { opacity: 1; transform: scale(1) translateY(0); }
                 }
+                @keyframes celebFlare {
+                  0% { opacity: 0; transform: scale(0.6) rotate(-10deg); }
+                  60% { opacity: 1; transform: scale(1.25) rotate(8deg); }
+                  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+                }
+                @keyframes sparkleFloat {
+                  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.85; }
+                  50% { transform: translateY(-6px) rotate(12deg); opacity: 1; }
+                }
+                @keyframes warmHalo {
+                  0%, 100% { opacity: 0.55; transform: scale(1); }
+                  50% { opacity: 0.85; transform: scale(1.08); }
+                }
               `}</style>
+              <div aria-hidden style={{
+                position: "absolute", top: "8%", left: "50%", transform: "translateX(-50%)",
+                width: 360, height: 360, borderRadius: "50%", pointerEvents: "none",
+                background: "radial-gradient(circle, rgba(255,200,80,0.22) 0%, rgba(255,140,40,0.08) 45%, transparent 70%)",
+                animation: "warmHalo 3.5s ease-in-out infinite",
+                filter: "blur(8px)", zIndex: 0,
+              }} />
               <div style={{
-                width: 80, height: 80, borderRadius: "50%",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                marginBottom: 12,
-                animation: "moolieBounce 1.2s ease-out, moolieGlow 2s ease-in-out infinite",
+                fontSize: "2.2rem", marginBottom: 4, letterSpacing: "0.3em",
+                animation: "celebFlare 0.7s cubic-bezier(.34,1.56,.64,1) both",
+                position: "relative", zIndex: 1,
               }}>
-                <img src="/moolie-coin.png" alt="Moolies" style={{ width: 72, height: 72, objectFit: "contain" }} />
+                <span style={{ display: "inline-block", animation: "sparkleFloat 2.4s ease-in-out infinite" }}>🎉</span>
+                <span style={{ display: "inline-block", animation: "sparkleFloat 2.4s ease-in-out 0.4s infinite" }}>✨</span>
+                <span style={{ display: "inline-block", animation: "sparkleFloat 2.4s ease-in-out 0.8s infinite" }}>🎊</span>
+              </div>
+              <div style={{
+                width: 92, height: 92, borderRadius: "50%",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                marginBottom: 14,
+                animation: "moolieBounce 1.4s cubic-bezier(.34,1.56,.64,1), moolieGlow 2s ease-in-out infinite",
+                position: "relative", zIndex: 1,
+              }}>
+                <img src="/moolie-coin.png" alt="Moolies" style={{ width: 84, height: 84, objectFit: "contain" }} />
               </div>
               <p style={{
-                fontSize: "1rem", fontWeight: 900, letterSpacing: "0.04em",
-                background: "linear-gradient(135deg, #FFD700, #FFA500)",
+                fontSize: "1.5rem", fontWeight: 900, letterSpacing: "-0.01em",
+                background: "linear-gradient(135deg, #FFE066, #FFB347, #FF9533)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
                 margin: "0 0 6px 0",
-                animation: "moolieTextPop 0.8s ease-out 0.3s both",
+                animation: "moolieTextPop 0.8s cubic-bezier(.34,1.56,.64,1) 0.3s both",
+                textShadow: "0 0 28px rgba(255,180,60,0.35)",
+                position: "relative", zIndex: 1,
               }}>
                 {t.quiz.mooliesEarned[lang]}
               </p>
               <p style={{
-                fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.25em",
-                color: "rgba(177,212,224,0.5)", textTransform: "uppercase", marginBottom: 16,
+                fontSize: "0.65rem", fontWeight: 900, letterSpacing: "0.3em",
+                background: "linear-gradient(135deg, #FFD700, #FFA500)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                textTransform: "uppercase", marginBottom: 18,
+                position: "relative", zIndex: 1,
               }}>
-                {lang === "es" ? "SESIÓN COMPLETADA" : "SESSION COMPLETE"}
+                ★ {lang === "es" ? "SESIÓN COMPLETADA" : "SESSION COMPLETE"} ★
               </p>
               {quizSummaryText ? (
                 <>
                   <div style={{
                     display: "inline-flex", alignItems: "center", gap: 6,
-                    padding: "4px 12px", borderRadius: 14,
-                    background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.2)",
-                    marginBottom: 16,
+                    padding: "5px 14px", borderRadius: 16,
+                    background: "linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,140,40,0.12))",
+                    border: "1px solid rgba(255,200,80,0.4)",
+                    marginBottom: 18, position: "relative", zIndex: 1,
+                    boxShadow: "0 0 18px rgba(255,180,60,0.2)",
                   }}>
-                    <span style={{ fontSize: "0.7rem" }}>🎙️</span>
+                    <span style={{ fontSize: "0.8rem" }}>🎙️</span>
                     <span style={{
-                      fontSize: "0.55rem", fontWeight: 700, color: "rgba(177,212,224,0.6)",
-                      letterSpacing: "0.06em",
+                      fontSize: "0.6rem", fontWeight: 800, color: "#FFD78A",
+                      letterSpacing: "0.08em",
                     }}>
                       {lang === "es" ? "Mensaje de voz" : "Voice message"}
                     </span>
                   </div>
                   <p style={{
-                    color: "#fff", fontSize: "1.15rem", fontWeight: 800,
-                    lineHeight: 1.4, letterSpacing: "-0.02em",
-                    textShadow: "0 2px 12px rgba(0,0,0,0.5)", marginBottom: 32,
+                    color: "#fff", fontSize: "1.18rem", fontWeight: 800,
+                    lineHeight: 1.42, letterSpacing: "-0.02em",
+                    textShadow: "0 2px 16px rgba(255,180,60,0.25), 0 2px 8px rgba(0,0,0,0.5)",
+                    marginBottom: 32, position: "relative", zIndex: 1,
                   }}>
                     "{quizSummaryText}"
                   </p>
@@ -4785,15 +4830,16 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               ) : (
                 <div style={{
                   display: "flex", alignItems: "center", gap: 8, marginBottom: 32,
+                  position: "relative", zIndex: 1,
                 }}>
                   <div style={{
                     width: 14, height: 14, borderRadius: "50%",
-                    border: "2px solid rgba(46,139,192,0.25)",
-                    borderTopColor: "#2e8bc0",
+                    border: "2px solid rgba(255,200,80,0.3)",
+                    borderTopColor: "#FFB347",
                     animation: "ldSpin 0.8s linear infinite",
                   }} />
-                  <span style={{ color: "rgba(177,212,224,0.4)", fontSize: "0.65rem", fontWeight: 700 }}>
-                    {lang === "es" ? "Preparando resumen..." : "Preparing summary..."}
+                  <span style={{ color: "rgba(255,215,140,0.7)", fontSize: "0.65rem", fontWeight: 700 }}>
+                    {lang === "es" ? "Preparando tu recap..." : "Cooking up your recap..."}
                   </span>
                 </div>
               )}
@@ -4801,12 +4847,12 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 <div style={{
                   display: "inline-flex", alignItems: "center",
                   gap: 6, padding: "6px 14px", borderRadius: 20,
-                  background: "rgba(177,212,224,0.1)", border: "1px solid rgba(177,212,224,0.2)",
-                  marginBottom: 28,
+                  background: "rgba(255,200,80,0.1)", border: "1px solid rgba(255,200,80,0.25)",
+                  marginBottom: 28, position: "relative", zIndex: 1,
                 }}>
                   <span style={{
-                    fontSize: "0.6rem", fontWeight: 700, color: "rgba(177,212,224,0.6)",
-                    letterSpacing: "0.06em",
+                    fontSize: "0.6rem", fontWeight: 800, color: "rgba(255,215,140,0.85)",
+                    letterSpacing: "0.08em", textTransform: "uppercase",
                   }}>
                     {selectedSubject}
                   </span>
@@ -4824,16 +4870,18 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   }), 1000);
                 }}
                 style={{
-                  padding: "16px 48px", borderRadius: 18, border: "none",
+                  padding: "16px 52px", borderRadius: 20, border: "none",
                   background: quizSummaryText
-                    ? "linear-gradient(135deg, #2e8bc0, #145374)"
-                    : "rgba(46,139,192,0.25)",
-                  fontWeight: 900, fontSize: "0.95rem", color: "#fff",
-                  fontFamily: FONT, letterSpacing: "0.04em", cursor: "pointer",
+                    ? "linear-gradient(135deg, #FFD24A, #FF9533)"
+                    : "rgba(255,180,60,0.25)",
+                  fontWeight: 900, fontSize: "1rem",
+                  color: quizSummaryText ? "#1a1207" : "#fff",
+                  fontFamily: FONT, letterSpacing: "0.05em", cursor: "pointer",
                   boxShadow: quizSummaryText
-                    ? "0 0 30px rgba(46,139,192,0.25), 0 6px 20px rgba(0,0,0,0.4)"
+                    ? "0 0 36px rgba(255,180,60,0.5), 0 8px 22px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5)"
                     : "none",
-                  transition: "all 0.4s ease",
+                  transition: "all 0.4s ease", position: "relative", zIndex: 1,
+                  textShadow: quizSummaryText ? "0 1px 0 rgba(255,255,255,0.3)" : "none",
                 }}
               >
                 {quizSummaryText

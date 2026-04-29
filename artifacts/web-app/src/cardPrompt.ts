@@ -706,16 +706,20 @@ export function buildShortTextPrompt(type: "intro" | "summary", opts: {
       : `You are the Moolab Master Curriculum Engine. Generate a UNIQUE, charismatic personalized greeting for ${opts.name}. Grade: ${gradeLabel}. Skill: ${skill}. Today's subject: ${opts.subject}. User's world: ${world}. MAX 25 words. Treat them like a future CEO. Vary your energy and vocabulary every time. Respond with ONLY the text, no quotes or formatting.`;
   }
   return isEs
-    ? `Eres el Motor Maestro de Currículo de Moolab. Genera un RECAP de exactamente 2 oraciones para ${opts.name} (${gradeLabel}, habilidad ${skill}) que acaba de terminar una sesión sobre ${opts.subject}. Mundo del usuario: ${world}.
+    ? `Eres el Motor Maestro de Currículo de Moolab. ${opts.name} (${gradeLabel}, habilidad ${skill}) ACABA DE GANAR el desafío de ${opts.subject}. Genera un RECAP CELEBRATORIO de exactamente 2 oraciones. Mundo del usuario: ${world}.
 
-ORACIÓN 1: Nombra el CONCEPTO CLAVE que un estudiante de nivel ${skill} aprende sobre ${opts.subject} y qué significa en lenguaje sencillo para su mundo.
-ORACIÓN 2: Un insight accionable o principio memorable que se llevan — canaliza a Buffett ("nunca pierdas dinero", interés compuesto, foso, margen de seguridad) o Mr. Wonderful ("flujo de caja es rey", "el dinero es mi soldado", regla del 5%) cuando sea natural.
+TONO: Cálido, orgulloso, victorioso — como un mentor chocando los cinco después de una jugada clutch. Comienza con energía ganadora ("¡Ahí está!", "¡Boom!", "Eso es jugar como CEO", "Lo clavaste", etc. — varía cada vez). Permitido un signo de exclamación.
 
-MÁX 45 palabras TOTAL. Directo, agudo, sin relleno. Trátalo como un futuro CEO. Varía el tono cada vez. Solo el texto, sin comillas ni formato ni etiquetas de oración.`
-    : `You are the Moolab Master Curriculum Engine. Generate a 2-sentence RECAP for ${opts.name} (${gradeLabel}, ${skill} skill) who just finished a session on ${opts.subject}. User's world: ${world}.
+ORACIÓN 1: Reconoce la victoria + nombra el CONCEPTO CLAVE que dominaron en lenguaje de su mundo.
+ORACIÓN 2: Un insight accionable o principio memorable para llevarse — canaliza a Buffett ("nunca pierdas dinero", interés compuesto, foso, margen de seguridad) o Mr. Wonderful ("flujo de caja es rey", "el dinero es mi soldado", regla del 5%) cuando sea natural.
 
-SENTENCE 1: Name the CORE CONCEPT a ${skill}-level learner takes away about ${opts.subject} and what it means in plain language for their world.
-SENTENCE 2: One actionable insight or memorable principle they leave with — channel Buffett ("never lose money", compound interest, moat, margin of safety) or Mr. Wonderful ("cash flow is king", "money is my soldier", 5% rule) when natural.
+MÁX 45 palabras TOTAL. Punchy, alegre, sincero — sin relleno empalagoso. Solo el texto, sin comillas ni formato ni etiquetas.`
+    : `You are the Moolab Master Curriculum Engine. ${opts.name} (${gradeLabel}, ${skill} skill) JUST WON the ${opts.subject} challenge. Generate a CELEBRATORY 2-sentence RECAP. User's world: ${world}.
 
-MAX 45 words TOTAL. Direct, sharp, no fluff. Treat them like a future CEO. Vary tone every time. Only the text, no quotes, no formatting, no sentence labels.`;
+TONE: Warm, proud, victorious — like a mentor high-fiving after a clutch play. Open with winning energy ("There it is!", "Boom!", "That's CEO play", "You nailed it", "Crushed it", etc. — vary every time). One exclamation point allowed.
+
+SENTENCE 1: Acknowledge the win + name the CORE CONCEPT they just mastered in their world's language.
+SENTENCE 2: One actionable insight or memorable principle to take with them — channel Buffett ("never lose money", compound interest, moat, margin of safety) or Mr. Wonderful ("cash flow is king", "money is my soldier", 5% rule) when natural.
+
+MAX 45 words TOTAL. Punchy, joyful, sincere — no saccharine fluff. Only the text, no quotes, no formatting, no labels.`;
 }
