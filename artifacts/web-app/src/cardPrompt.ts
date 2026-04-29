@@ -32,10 +32,10 @@ const GRADE_CONTEXTS: Record<GradeBucket, GradeContext> = {
     bucket: "middle",
     labelEn: "Middle School (6-8, ages 11-13)",
     labelEs: "Secundaria (6-8, edades 11-13)",
-    worldEn: "Their world is friend groups, social media, school clubs, sports teams, sneaker drops, BookTok, FIFA/Madden, Fortnite, Valorant. Money still mostly comes from parents/grandparents but they negotiate for more. Some do micro-hustles (reselling, mowing lawns, babysitting). They know what a debit card is; they DO NOT use credit cards, file taxes, or sign leases.",
-    worldEs: "Su mundo son los grupos de amigos, redes sociales, clubes escolares, equipos deportivos, drops de tenis, BookTok, FIFA, Fortnite, Valorant. El dinero aún viene de padres/abuelos pero negocian por más. Algunos hacen micro-negocios (reventa, cortar grama, cuidar niños). Conocen la tarjeta de débito; NO usan tarjetas de crédito, ni declaran impuestos, ni firman contratos.",
-    referencesEn: "Group chats, sneaker resale (Nike/Jordan/Adidas), TikTok Shop, Discord servers, Champions League/NBA cards, FIFA Ultimate Team, Fortnite battle pass, BookTok must-reads, school dances, first phone plan, class trip fundraiser, Stranger Things merch, lawn-mowing gig.",
-    referencesEs: "Chats grupales, reventa de tenis (Nike/Jordan/Adidas), TikTok Shop, servidores de Discord, cartas de Champions/NBA, FIFA Ultimate Team, pase de batalla de Fortnite, lecturas de BookTok, fiestas escolares, primer plan de teléfono, recaudación para viaje escolar, mercancía de Stranger Things.",
+    worldEn: "Their world is friend groups, social media, school clubs, sports teams, BookTok, FIFA/Madden, Fortnite, Valorant. Money still mostly comes from parents/grandparents but they negotiate for more. Some do micro-hustles (lemonade-stand-grown-up, reselling, mowing lawns, babysitting, pet-walking, tutoring younger kids). They know what a debit card is; they DO NOT use credit cards, file taxes, or sign leases. They are CURIOUS about how rich people got rich — Buffett, Mr. Wonderful, founders.",
+    worldEs: "Su mundo son los grupos de amigos, redes sociales, clubes escolares, equipos deportivos, BookTok, FIFA, Fortnite, Valorant. El dinero aún viene de padres/abuelos pero negocian por más. Algunos hacen micro-negocios (puesto de limonada nivel pro, reventa, cortar grama, cuidar niños, pasear perros, tutorear). Conocen la tarjeta de débito; NO usan tarjetas de crédito, ni declaran impuestos, ni firman contratos. Sienten CURIOSIDAD por cómo se hicieron ricos los ricos — Buffett, Mr. Wonderful, fundadores.",
+    referencesEn: "Group chats, micro-business ideas (car wash, bake sale, custom bracelets, Etsy stickers), eBay/Mercari flips, Pokemon TCG resale, occasional sneaker flip, TikTok Shop, Discord servers, Champions League/NBA cards, FIFA Ultimate Team, Fortnite battle pass, BookTok must-reads, school dances, first phone plan, class trip fundraiser, lawn-mowing gig, first piggy-bank-to-savings-account moment.",
+    referencesEs: "Chats grupales, ideas de micro-negocio (lavado de carros, ventas de pasteles, pulseras personalizadas, stickers de Etsy), reventas en eBay/Mercari, reventa de cartas Pokémon, reventa ocasional de tenis, TikTok Shop, servidores de Discord, cartas de Champions/NBA, FIFA Ultimate Team, pase de batalla de Fortnite, lecturas de BookTok, fiestas escolares, primer plan de teléfono, recaudación para viaje escolar, gig de cortar grama, primer paso de alcancía a cuenta de ahorros.",
     bannedAnaloguesEn: "401k, IRA, mortgage closing costs, leveraged ETFs, options Greeks, equity splits.",
     bannedAnaloguesEs: "401k, IRA, costos de cierre de hipoteca, ETFs apalancados, griegas de opciones, divisiones de equity.",
   },
@@ -520,7 +520,6 @@ const VIBE_SEEDS = [
   "a chaotic FIFA Ultimate Team draft",
   "a TikTok Live going viral",
   "a Mr Beast challenge gone wrong",
-  "a sneaker drop at midnight",
   "lunch table at school",
   "a Brawl Stars team chat",
   "a roommate move-in day",
@@ -530,6 +529,15 @@ const VIBE_SEEDS = [
   "an Uber ride home after a win",
   "a study session at 2am during finals",
   "the gym at 6am when nobody's there",
+  "a Shark Tank pitch where Mr Wonderful raises an eyebrow",
+  "the moment a side hustle hits its first $100",
+  "Buffett sipping a Cherry Coke at the Berkshire annual meeting",
+  "checking your portfolio after the bell rings",
+  "a garage-sale haggle that turns into a flip",
+  "the first time a compound-interest chart clicks",
+  "a yard sign that says BUSINESS FOR SALE",
+  "a kid running a lemonade stand with a Square reader",
+  "watching a stock split happen in real time",
 ];
 
 export function pickVibeSeed(): string {
@@ -569,8 +577,62 @@ const SKILL_RULES: Record<SkillLevel, { en: string; es: string }> = {
 const PERSONA_EN = "SYSTEM PERSONA: You are the Master Curriculum Engine for Moolab, an elite financial literacy app. Your goal is to teach users the mindset of an investor, founder, and wealth builder. TONE: Sharp, respectful, real. Never patronize. Treat every user like a future CEO — even a 7-year-old. Punchy mobile-readable sentences. CURRENCY RULE: When discussing real money, prices or investments, use US Dollars (USD) or Dominican Pesos (DOP). Gaming currencies (Robux, V-Bucks) ONLY as analogies, NEVER as a money substitute.";
 const PERSONA_ES = "PERSONA DEL SISTEMA: Eres el Motor Maestro de Currículo de Moolab, una app de educación financiera élite. Tu meta es enseñar la mentalidad de inversor, fundador y constructor de riqueza. TONO: Agudo, respetuoso, real. Nunca subestimes. Trata a cada usuario como un futuro CEO — incluso un niño de 7 años. Oraciones contundentes y legibles en móvil. REGLA DE MONEDA: Cuando hables de dinero real, precios o inversiones, usa Dólares (USD) o Pesos Dominicanos (DOP). Las monedas de videojuegos (Robux, V-Bucks) SOLO como analogías, NUNCA como sustituto. GENERA TODO EL CONTENIDO EN ESPAÑOL.";
 
-const DOCTRINE_EN = "CORE DOCTRINE — TITANS & TACTICS: Blend Buffett/Munger long-term fundamentals with modern active strategies. Foundations: patience, compound interest, avoiding bad debt, identifying wonderful businesses with moats. Advanced (when grade allows): leverage used safely, asymmetric upside, ownership over wages, speed of execution.";
-const DOCTRINE_ES = "DOCTRINA CENTRAL — TITANES Y TÁCTICAS: Combina los fundamentos a largo plazo de Buffett/Munger con estrategias modernas activas. Fundamentos: paciencia, interés compuesto, evitar deuda mala, identificar negocios maravillosos con fosos. Avanzado (si el grado lo permite): apalancamiento seguro, ventaja asimétrica, propiedad sobre salarios, velocidad de ejecución.";
+const DOCTRINE_EN = `CORE DOCTRINE — TITANS & TACTICS: This app teaches the user to think like Warren Buffett, Charlie Munger, and Kevin "Mr. Wonderful" O'Leary. Blend their wisdom into EVERY batch.
+
+BUFFETT / MUNGER PRINCIPLES (weave 1-2 per batch, name-drop when natural):
+- "Rule No. 1: never lose money. Rule No. 2: never forget Rule No. 1."
+- "Be fearful when others are greedy, and greedy when others are fearful."
+- "Our favorite holding period is forever." — patience compounds.
+- Buy WONDERFUL BUSINESSES at a fair price, not fair businesses at a wonderful price.
+- MOAT: durable competitive advantage (brand, network effect, switching costs, low-cost producer).
+- CIRCLE OF COMPETENCE: only invest in what you understand.
+- MARGIN OF SAFETY: never pay full price for an asset.
+- "Mr. Market is a manic-depressive partner — let him serve you, not guide you."
+- Compound interest is the 8th wonder of the world. Start early, never interrupt it unnecessarily.
+- Avoid leverage you can't survive; "to make money you didn't have, by risking money you did, is foolish."
+- Buffett's "20-slot punchcard" — imagine you only get 20 investment decisions in life.
+
+MR. WONDERFUL (KEVIN O'LEARY) PRINCIPLES (weave 1 per batch, name-drop when natural):
+- "Money is my soldier. I send it out into battle and it comes back with prisoners — and friends."
+- CASH FLOW IS KING. A business that doesn't pay you back monthly is a hobby, not an investment.
+- The 90-day rule: every business should give you back your capital within reach, with a plan.
+- Be RUTHLESS on bad investments — "take it out behind the barn and shoot it" before it bleeds you.
+- Frugal on the small things: a $5 latte is a $25 dividend you didn't collect.
+- Diversify: never let any one position exceed ~5% of your portfolio (O'Leary's portfolio rule).
+- Dividend-paying stocks > flashy growth that never pays you.
+- Be the COCKROACH of business — survive every recession, every downturn.
+
+MODERN STACK (when grade allows): index funds (VOO/QQQ), Roth IRA, employer 401k match, asymmetric founder upside, ownership over wages, speed of execution. Always frame these as TOOLS that obey the timeless principles above.
+
+EVERY BATCH should reference at least one Buffett OR O'Leary principle (more for intermediate/expert). Attribute briefly when natural ("As Buffett says...", "Mr. Wonderful's rule...") — but don't force it on every card.`;
+
+const DOCTRINE_ES = `DOCTRINA CENTRAL — TITANES Y TÁCTICAS: Esta app enseña al usuario a pensar como Warren Buffett, Charlie Munger y Kevin "Mr. Wonderful" O'Leary. Mezcla su sabiduría en CADA lote.
+
+PRINCIPIOS BUFFETT / MUNGER (incluye 1-2 por lote, menciónalos cuando sea natural):
+- "Regla N°1: nunca pierdas dinero. Regla N°2: nunca olvides la Regla N°1."
+- "Sé temeroso cuando otros son codiciosos, y codicioso cuando otros temen."
+- "Nuestro periodo favorito de tenencia es para siempre." — la paciencia capitaliza.
+- Compra NEGOCIOS MARAVILLOSOS a precio justo, no negocios mediocres a precio maravilloso.
+- FOSO (MOAT): ventaja competitiva durable (marca, efecto de red, costos de cambio, productor de bajo costo).
+- CÍRCULO DE COMPETENCIA: solo invierte en lo que entiendes.
+- MARGEN DE SEGURIDAD: nunca pagues precio completo por un activo.
+- "Mr. Market es un socio maníaco-depresivo — deja que te sirva, no que te guíe."
+- El interés compuesto es la 8ª maravilla del mundo. Empieza temprano, no lo interrumpas.
+- Evita apalancamiento que no puedas sobrevivir.
+- "Tarjeta de 20 perforaciones" de Buffett — imagina que solo tienes 20 decisiones de inversión en la vida.
+
+PRINCIPIOS MR. WONDERFUL (KEVIN O'LEARY) (incluye 1 por lote, menciónalo cuando sea natural):
+- "El dinero es mi soldado. Lo envío a la batalla y regresa con prisioneros — y amigos."
+- EL FLUJO DE CAJA ES REY. Un negocio que no te paga mensualmente es un pasatiempo, no una inversión.
+- Sé IMPLACABLE con malas inversiones — "llévala detrás del granero y dispárale" antes de que te desangre.
+- Frugal en lo pequeño: un café de $5 es un dividendo de $25 que no cobraste.
+- Diversifica: ninguna posición debe superar ~5% del portafolio (regla de O'Leary).
+- Acciones que pagan dividendos > crecimiento llamativo que nunca te paga.
+- Sé la CUCARACHA del negocio — sobrevive cada recesión.
+
+STACK MODERNO (si el grado lo permite): fondos índice (VOO/QQQ), Roth IRA, match de 401k del empleador, upside asimétrico de fundador, propiedad sobre salarios, velocidad de ejecución. Siempre enmarca esto como HERRAMIENTAS que obedecen los principios atemporales de arriba.
+
+CADA LOTE debe referenciar al menos un principio de Buffett O O'Leary (más para intermedio/experto). Atribuye brevemente cuando sea natural ("Como dice Buffett...", "La regla de Mr. Wonderful...") — pero no fuerces en cada tarjeta.`;
 
 const SCHEMA_EN = "OUTPUT FORMAT (RAW JSON ONLY, no markdown fences). Top-level: { lessons: [...], bossQuiz: { question, options, correctIndex, explanation } }. Each lesson MUST have: id (omit, will be added), type (one of 'journey' | 'concept' | 'podcast'), tooltip_explanation (2-3 sentences, 30-45 words, plain elaboration of the card's core idea), video_search_keyword (1-2 word ENGLISH search term for stock video). 'journey' type: title (2-4 words), desc (1 punchy sentence), miniGame { contextSetup (1-2 short sentences anchoring a real scenario from the grade-context world), actionQuestion (1 sentence question), options (3-4 strings), correctIndex (number), explanation (2-3 sentence charismatic explanation) }. 'concept' type: term, definition (1 sentence for expert, 1-2 sentences otherwise), analogy (1 short relatable analogy), tooltip_explanation, video_search_keyword. 'podcast' type: title (2-4 words), dialogue (array of {speaker: 'Host'|'Expert', text: string}, MAX 4 exchanges, each line under 25 words), tooltip_explanation, video_search_keyword. ON-SCREEN TEXT (title/desc/options/dialogue) MUST be UNDER 120 chars per element. tooltip_explanation is the EXCEPTION (30-45 words). Think TikTok caption brevity for everything else.";
 const SCHEMA_ES = "FORMATO DE SALIDA (JSON CRUDO solamente, sin fences markdown). Top-level: { lessons: [...], bossQuiz: { question, options, correctIndex, explanation } }. Cada lección DEBE tener: type ('journey' | 'concept' | 'podcast'), tooltip_explanation (2-3 oraciones, 30-45 palabras), video_search_keyword (término de búsqueda 1-2 palabras EN INGLÉS). 'journey': title (2-4 palabras), desc (1 oración contundente), miniGame { contextSetup (1-2 oraciones cortas anclando un escenario real del mundo del grado), actionQuestion (1 oración pregunta), options (3-4 strings), correctIndex (número), explanation (2-3 oraciones explicación carismática) }. 'concept': term, definition (1 oración para experto, 1-2 si no), analogy (1 analogía relatable), tooltip_explanation, video_search_keyword. 'podcast': title (2-4 palabras), dialogue (array {speaker: 'Host'|'Expert', text}, MÁX 4 intercambios, cada línea bajo 25 palabras), tooltip_explanation, video_search_keyword. EL TEXTO EN PANTALLA (title/desc/options/dialogue) DEBE ser MENOR a 120 caracteres por elemento. tooltip_explanation es la EXCEPCIÓN (30-45 palabras). Brevedad estilo subtítulo de TikTok para todo lo demás.";
