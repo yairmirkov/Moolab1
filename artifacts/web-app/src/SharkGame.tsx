@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import type { Lang } from "./translations";
 
 const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
@@ -22,10 +22,15 @@ interface Coin {
 export default function SharkGame({
   progress,
   lang,
+  onCoinCollected,
 }: {
   progress: string;
   lang: Lang;
+  onCoinCollected?: () => void;
 }) {
+  const [coinCount, setCoinCount] = useState(0);
+  const onCoinCollectedRef = useRef(onCoinCollected);
+  useEffect(() => { onCoinCollectedRef.current = onCoinCollected; }, [onCoinCollected]);
   const canvasRef = useRef<HTMLDivElement>(null);
   const sharkRef = useRef({ x: 0, y: 0 });
   const targetRef = useRef({ x: 0, y: 0 });
@@ -132,6 +137,8 @@ export default function SharkGame({
             coinEl.style.opacity = "0";
             coinEl.style.transition = "all 0.2s ease-out";
           }
+          setCoinCount((n) => n + 1);
+          onCoinCollectedRef.current?.();
           return false;
         }
 
@@ -218,6 +225,35 @@ export default function SharkGame({
         @keyframes waveBg { 0% { background-position: 0% 50% } 50% { background-position: 100% 50% } 100% { background-position: 0% 50% } }
       `}</style>
 
+      <div
+        style={{
+          position: "absolute",
+          top: "max(14px, env(safe-area-inset-top))",
+          right: 14,
+          zIndex: 4,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "6px 12px",
+          borderRadius: 999,
+          background: "rgba(0,0,0,0.45)",
+          border: "1px solid rgba(255,215,0,0.35)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          fontFamily: SMALL_FONT,
+          fontWeight: 900,
+          color: "#FFD700",
+          fontSize: "0.9rem",
+          letterSpacing: "0.02em",
+          pointerEvents: "none",
+          transform: coinCount > 0 ? "scale(1.06)" : "scale(1)",
+          transition: "transform 0.2s ease-out",
+          boxShadow: coinCount > 0 ? "0 0 14px rgba(255,215,0,0.35)" : "none",
+        }}
+      >
+        <img src={`${import.meta.env.BASE_URL}moolie-coin.png`} alt="" style={{ width: 18, height: 18 }} />
+        <span>+{coinCount}</span>
+      </div>
       <div
         ref={canvasRef}
         style={{ position: "absolute", inset: 0, cursor: "pointer", zIndex: 1 }}

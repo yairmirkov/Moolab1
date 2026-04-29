@@ -2815,7 +2815,14 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             </button>
           </div>
         ) : (
-          <SharkGame progress={preloadProgress} lang={lang} />
+          <SharkGame
+            progress={preloadProgress}
+            lang={lang}
+            onCoinCollected={() => {
+              setMoolies((p) => Math.round((p + 1) * 100) / 100);
+              playSfx("coin");
+            }}
+          />
         )}
       </div>
     );
