@@ -1120,6 +1120,11 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     setQuizResult(null);
     setRevealedExplanations({});
     setBossExplanation(null);
+    summaryPrefetchKey.current = null;
+    summaryShownKey.current = null;
+    summaryAudioPlayedKey.current = null;
+    setQuizSummaryText(null);
+    setQuizSummaryAudioUrl(null);
     setRevealedSlides({});
     setAudioUnlocked(false);
     stopElevenLabsAudio();
@@ -1298,21 +1303,21 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     }
   };
 
-  const summaryFetchedForQuiz = useRef<string | null>(null);
+  const summaryPrefetchKey = useRef<string | null>(null);
+  const summaryShownKey = useRef<string | null>(null);
+  const summaryAudioPlayedKey = useRef<string | null>(null);
+
+  // Effect A: prefetch the summary the moment the user enters the quiz screen.
+  // This way it's ready (or nearly ready) by the time they answer correctly.
   useEffect(() => {
-    if (quizResult !== true) { summaryFetchedForQuiz.current = null; return; }
+    if (!quizStarted) return;
     const quizKey = `${userName}_${ageGroup}_${currentModule?.id ?? currentModuleIdx}`;
-    if (summaryFetchedForQuiz.current === quizKey) return;
-    summaryFetchedForQuiz.current = quizKey;
+    if (summaryPrefetchKey.current === quizKey) return;
+    summaryPrefetchKey.current = quizKey;
 
     const currentLang = langRef.current;
     let cancelled = false;
 
-    const winTitles = translations.winTitles[currentLang];
-    const picked = winTitles[Math.floor(Math.random() * winTitles.length)];
-    setQuizResultPick(picked);
-
-    setShowQuizSummary(true);
     setQuizSummaryText(null);
     setQuizSummaryAudioUrl(null);
 
@@ -1327,7 +1332,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         resolved = true;
         setQuizSummaryText(fallbackText);
       }
-    }, 4000);
+    }, 8000);
 
     (async () => {
       try {
@@ -1344,17 +1349,13 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         clearTimeout(timeoutId);
         if (resolved) return;
         resolved = true;
-        setQuizSummaryText(summaryText || fallbackText);
+        const finalText = summaryText || fallbackText;
+        setQuizSummaryText(finalText);
         if (isElevenLabsAvailable()) {
           try {
-            const r = await fetchAudioBlob(summaryText || fallbackText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true });
+            const r = await fetchAudioBlob(finalText, getVoiceIdForRole("Host", currentLang), { stability: 0.75, similarity_boost: 0.85, style: 0.55, use_speaker_boost: true });
             if (cancelled) return;
-            if (r.url) {
-              setQuizSummaryAudioUrl(r.url);
-              if (!isMutedRef.current && speechSpeedRef.current > 0) {
-                playBlobAudio(r.url, speechSpeedRef.current);
-              }
-            }
+            if (r.url) setQuizSummaryAudioUrl(r.url);
           } catch (audioErr) {
             console.error("Summary audio fetch failed:", audioErr);
           }
@@ -1369,7 +1370,35 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       }
     })();
     return () => { cancelled = true; clearTimeout(timeoutId); };
+  }, [quizStarted, userName, ageGroup, currentModule]);
+
+  // Effect B: on a correct answer, flip the summary screen on and pick a win title.
+  useEffect(() => {
+    if (quizResult !== true) {
+      summaryShownKey.current = null;
+      summaryAudioPlayedKey.current = null;
+      return;
+    }
+    const quizKey = `${userName}_${ageGroup}_${currentModule?.id ?? currentModuleIdx}`;
+    if (summaryShownKey.current === quizKey) return;
+    summaryShownKey.current = quizKey;
+    const currentLang = langRef.current;
+    const winTitles = translations.winTitles[currentLang];
+    const picked = winTitles[Math.floor(Math.random() * winTitles.length)];
+    setQuizResultPick(picked);
+    setShowQuizSummary(true);
   }, [quizResult, userName, ageGroup, currentModule]);
+
+  // Effect C: autoplay the summary audio once both the win has happened AND the audio is ready.
+  useEffect(() => {
+    if (quizResult !== true || !quizSummaryAudioUrl) return;
+    const quizKey = `${userName}_${ageGroup}_${currentModule?.id ?? currentModuleIdx}`;
+    if (summaryAudioPlayedKey.current === quizKey) return;
+    summaryAudioPlayedKey.current = quizKey;
+    if (!isMutedRef.current && speechSpeedRef.current > 0) {
+      playBlobAudio(quizSummaryAudioUrl, speechSpeedRef.current);
+    }
+  }, [quizResult, quizSummaryAudioUrl, userName, ageGroup, currentModule]);
 
   const triggerGreenFlash = () => {
     setFlashBlue(true);

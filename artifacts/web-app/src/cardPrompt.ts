@@ -706,6 +706,16 @@ export function buildShortTextPrompt(type: "intro" | "summary", opts: {
       : `You are the Moolab Master Curriculum Engine. Generate a UNIQUE, charismatic personalized greeting for ${opts.name}. Grade: ${gradeLabel}. Skill: ${skill}. Today's subject: ${opts.subject}. User's world: ${world}. MAX 25 words. Treat them like a future CEO. Vary your energy and vocabulary every time. Respond with ONLY the text, no quotes or formatting.`;
   }
   return isEs
-    ? `Eres el Motor Maestro de Currículo de Moolab. Genera una felicitación ÚNICA y alentadora para ${opts.name} (${gradeLabel}, habilidad ${skill}) que acaba de completar una lección sobre ${opts.subject}. Mundo: ${world}. MÁX 25 palabras. Trátalo como un futuro CEO. Varía el tono cada vez. Solo texto, sin comillas.`
-    : `You are the Moolab Master Curriculum Engine. Generate a UNIQUE encouraging note for ${opts.name} (${gradeLabel}, ${skill} skill) who just finished a lesson on ${opts.subject}. World: ${world}. MAX 25 words. Treat them like a future CEO. Vary tone every time. Only the text, no quotes.`;
+    ? `Eres el Motor Maestro de Currículo de Moolab. Genera un RECAP de exactamente 2 oraciones para ${opts.name} (${gradeLabel}, habilidad ${skill}) que acaba de terminar una sesión sobre ${opts.subject}. Mundo del usuario: ${world}.
+
+ORACIÓN 1: Nombra el CONCEPTO CLAVE que un estudiante de nivel ${skill} aprende sobre ${opts.subject} y qué significa en lenguaje sencillo para su mundo.
+ORACIÓN 2: Un insight accionable o principio memorable que se llevan — canaliza a Buffett ("nunca pierdas dinero", interés compuesto, foso, margen de seguridad) o Mr. Wonderful ("flujo de caja es rey", "el dinero es mi soldado", regla del 5%) cuando sea natural.
+
+MÁX 45 palabras TOTAL. Directo, agudo, sin relleno. Trátalo como un futuro CEO. Varía el tono cada vez. Solo el texto, sin comillas ni formato ni etiquetas de oración.`
+    : `You are the Moolab Master Curriculum Engine. Generate a 2-sentence RECAP for ${opts.name} (${gradeLabel}, ${skill} skill) who just finished a session on ${opts.subject}. User's world: ${world}.
+
+SENTENCE 1: Name the CORE CONCEPT a ${skill}-level learner takes away about ${opts.subject} and what it means in plain language for their world.
+SENTENCE 2: One actionable insight or memorable principle they leave with — channel Buffett ("never lose money", compound interest, moat, margin of safety) or Mr. Wonderful ("cash flow is king", "money is my soldier", 5% rule) when natural.
+
+MAX 45 words TOTAL. Direct, sharp, no fluff. Treat them like a future CEO. Vary tone every time. Only the text, no quotes, no formatting, no sentence labels.`;
 }
