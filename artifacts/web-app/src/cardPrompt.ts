@@ -623,6 +623,12 @@ BILL ACKMAN (concentrated conviction, deep research):
 
 HONORABLE MENTIONS (sprinkle occasionally — Bezos's "Day 1" + customer obsession + regret minimization, Naval's "specific knowledge + leverage + equity over salary," Peter Lynch's "invest in what you know" / ten-baggers).
 
+MINDSET SPIRIT — JIM ROHN & TONY ROBBINS (the ENERGY layer, not the financial layer):
+These two are NOT for investing advice. They are the SPIRIT behind the UI — the tone of encouragement, the kick that gets the user to take action. Use them in OPENERS, ENCOURAGEMENTS, TRANSITIONS, and the post-quiz win moment — never as financial citations.
+- Jim Rohn: "Discipline weighs ounces, regret weighs tons." "You're the average of the 5 people you spend most time with." "Don't wish it were easier — wish you were better." "Formal education makes a living; self-education makes a fortune." "If you don't design your own life plan, chances are you'll fall into someone else's plan."
+- Tony Robbins: "Where focus goes, energy flows." "The only impossible journey is the one you never begin." "Massive action over passive talk." STATE management first — your physiology drives your psychology. "Progress equals happiness." "Identity shapes behavior — decide WHO you are."
+- HOW TO USE: 1 short Rohn or Robbins phrase MAX per batch, woven into a desc, contextSetup, or explanation as a kick — never a full quote dump, never attributed formally. Think "the spirit of a phrase" not "as Jim Rohn says..."
+
 MODERN STACK (when grade allows): index funds (VOO/QQQ), Roth IRA, employer 401k match, asymmetric founder upside, ownership over wages, speed of execution. Frame these as TOOLS that obey the timeless principles above.
 
 USAGE RULES — DO NOT OVERDO IT:
@@ -630,6 +636,7 @@ USAGE RULES — DO NOT OVERDO IT:
 - VARY the mentor across the 5 cards — do not lean on the same name twice in one batch unless the topic truly demands it.
 - Match mentor to topic: Buffett/Munger for value & patience, O'Leary for cash flow & frugality, Dalio for risk & cycles, Musk for innovation & ambition, Wood for tech disruption, Jobs for product/design/focus, Ackman for conviction.
 - Attribute briefly and naturally ("As Munger says...", "Dalio's principle...", "Cathie Wood's bet...") — never stack quotes or turn cards into hero worship.
+- Jim Rohn / Tony Robbins are the MOTIVATIONAL spirit — sprinkle their ENERGY into framings, never quote them as financial authorities.
 - The user's own brain is the goal. These are mentors to LEARN FROM, not idols to copy.`;
 
 const DOCTRINE_ES = `DOCTRINA CENTRAL — TITANES Y TÁCTICAS: Esta app expone al usuario a un CORO de inversionistas y fundadores legendarios para que tomen herramientas, no ídolos. La misión es ayudar al usuario a construir SU PROPIO estilo — estos mentores son guías, nunca dioses. Elige al mentor cuyo lente MEJOR ENCAJE con el tema de la tarjeta.
@@ -678,6 +685,12 @@ BILL ACKMAN (convicción concentrada, investigación profunda):
 
 MENCIONES DE HONOR (rocía ocasionalmente — "Día 1" de Bezos + obsesión por el cliente + minimización de arrepentimientos, "conocimiento específico + apalancamiento + equity sobre salario" de Naval, "invierte en lo que conoces" / ten-baggers de Peter Lynch).
 
+ESPÍRITU MENTAL — JIM ROHN Y TONY ROBBINS (la capa de ENERGÍA, no la financiera):
+Estos dos NO son para consejo de inversión. Son el ESPÍRITU detrás de la UI — el tono de aliento, la patada que mueve al usuario a la acción. Úsalos en APERTURAS, ALIENTOS, TRANSICIONES y el momento de victoria post-quiz — nunca como citas financieras.
+- Jim Rohn: "La disciplina pesa onzas, el arrepentimiento pesa toneladas." "Eres el promedio de las 5 personas con quienes pasas más tiempo." "No desees que sea más fácil — desea ser mejor." "La educación formal te da para vivir; la auto-educación te da una fortuna." "Si no diseñas tu propio plan de vida, caerás en el plan de alguien más."
+- Tony Robbins: "Donde va el foco, fluye la energía." "El único viaje imposible es el que nunca comienzas." "Acción masiva sobre charla pasiva." Maneja tu ESTADO primero — tu fisiología maneja tu psicología. "Progreso es felicidad." "La identidad da forma al comportamiento — decide QUIÉN eres."
+- CÓMO USAR: 1 frase corta de Rohn o Robbins MÁX por lote, tejida dentro de un desc, contextSetup o explicación como patada — nunca un volcado completo de cita, nunca atribución formal. Piensa "el espíritu de una frase" no "como dice Jim Rohn..."
+
 STACK MODERNO (si el grado lo permite): fondos índice (VOO/QQQ), Roth IRA, match de 401k del empleador, upside asimétrico de fundador, propiedad sobre salarios, velocidad de ejecución. Enmarca como HERRAMIENTAS que obedecen los principios atemporales de arriba.
 
 REGLAS DE USO — NO EXAGERES:
@@ -685,6 +698,7 @@ REGLAS DE USO — NO EXAGERES:
 - VARÍA al mentor entre las 5 tarjetas — no repitas el mismo nombre dos veces en un lote a menos que el tema realmente lo exija.
 - Empareja mentor con tema: Buffett/Munger para valor y paciencia, O'Leary para flujo de caja y frugalidad, Dalio para riesgo y ciclos, Musk para innovación y ambición, Wood para disrupción tech, Jobs para producto/diseño/foco, Ackman para convicción.
 - Atribuye brevemente y natural ("Como dice Munger...", "Principio de Dalio...", "Apuesta de Cathie Wood...") — nunca apiles citas ni conviertas las tarjetas en culto al héroe.
+- Jim Rohn / Tony Robbins son el espíritu MOTIVACIONAL — rocía su ENERGÍA en encuadres, nunca los cites como autoridades financieras.
 - El cerebro propio del usuario es la meta. Estos son mentores para APRENDER, no ídolos para copiar.`;
 
 const SCHEMA_EN = "OUTPUT FORMAT (RAW JSON ONLY, no markdown fences). Top-level: { lessons: [...], bossQuiz: { question, options, correctIndex, explanation } }. Each lesson MUST have: id (omit, will be added), type (one of 'journey' | 'concept' | 'podcast'), tooltip_explanation (2-3 sentences, 30-45 words, plain elaboration of the card's core idea), video_search_keyword (1-2 word ENGLISH search term for stock video). 'journey' type: title (2-4 words), desc (1 punchy sentence), miniGame { contextSetup (1-2 short sentences anchoring a real scenario from the grade-context world), actionQuestion (1 sentence question), options (3-4 strings), correctIndex (number), explanation (2-3 sentence charismatic explanation) }. 'concept' type: term, definition (1 sentence for expert, 1-2 sentences otherwise), analogy (1 short relatable analogy), tooltip_explanation, video_search_keyword. 'podcast' type: title (2-4 words), dialogue (array of {speaker: 'Host'|'Expert', text: string}, MAX 4 exchanges, each line under 25 words), tooltip_explanation, video_search_keyword. ON-SCREEN TEXT (title/desc/options/dialogue) MUST be UNDER 120 chars per element. tooltip_explanation is the EXCEPTION (30-45 words). Think TikTok caption brevity for everything else. CRITICAL OPTION RULE: NEVER prefix any option string with letters or numbers like 'A.', 'B)', '1.', '(C)' — write the answer text only. The UI handles ordering. This applies to BOTH miniGame.options AND bossQuiz.options.";
