@@ -45,7 +45,6 @@ function ContactSection() {
       await api.sendContact(name.trim(), email.trim(), message.trim(), "en");
       setSent(true);
       setName(""); setEmail(""); setMessage("");
-      setTimeout(() => setSent(false), 5000);
     } catch (err: any) {
       setError(err?.message || "Could not send. Please try again.");
     } finally {
@@ -72,6 +71,43 @@ function ContactSection() {
           </p>
         </div>
 
+        {sent ? (
+          <div className="bg-white rounded-2xl border border-sky-200/60 p-8 sm:p-12 shadow-xl shadow-sky-100/40 text-center animate-[fadeInUp_0.4s_ease-out]">
+            <style>{`
+              @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+              @keyframes checkPop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+              @keyframes ringPulse { 0% { transform: scale(0.8); opacity: 0.6; } 100% { transform: scale(1.7); opacity: 0; } }
+            `}</style>
+            <div className="relative w-24 h-24 mx-auto mb-6">
+              <div aria-hidden className="absolute inset-0 rounded-full bg-sky-300/40" style={{ animation: "ringPulse 1.6s ease-out infinite" }} />
+              <div
+                className="relative w-24 h-24 rounded-full flex items-center justify-center"
+                style={{
+                  background: "linear-gradient(135deg, #2e8bc0, #145374)",
+                  boxShadow: "0 8px 32px rgba(46,139,192,0.5), inset 0 2px 8px rgba(255,255,255,0.3)",
+                  animation: "checkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                }}
+              >
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-black tracking-tight mb-3 bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">
+              Message Sent! 🎉
+            </h3>
+            <p className="text-sm sm:text-base text-[#0c2d48]/65 font-medium max-w-md mx-auto mb-6 leading-relaxed">
+              Thanks for reaching out. Our team will reply to your email within 24 hours.
+            </p>
+            <button
+              type="button"
+              onClick={() => setSent(false)}
+              className="px-6 py-2.5 rounded-full bg-sky-50 border border-sky-200 text-[#145374] font-bold text-xs tracking-wide hover:bg-sky-100 transition-all cursor-pointer"
+            >
+              Send another message
+            </button>
+          </div>
+        ) : (
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl border border-sky-200/60 p-6 sm:p-8 shadow-xl shadow-sky-100/40 space-y-4"
@@ -113,15 +149,11 @@ function ContactSection() {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div
-              className={`text-xs font-bold transition-all ${sent ? "text-[#145374] opacity-100" : error ? "text-rose-600 opacity-100" : "opacity-0"}`}
+              className={`text-xs font-bold transition-all ${error ? "text-rose-600 opacity-100" : "opacity-0"}`}
               role="status"
               aria-live="polite"
             >
-              {sent
-                ? "✓ Message Sent! We'll be in touch shortly."
-                : error
-                  ? `✕ ${error}`
-                  : "placeholder"}
+              {error ? `✕ ${error}` : "placeholder"}
             </div>
             <button
               type="submit"
@@ -132,6 +164,7 @@ function ContactSection() {
             </button>
           </div>
         </form>
+        )}
       </div>
     </section>
   );

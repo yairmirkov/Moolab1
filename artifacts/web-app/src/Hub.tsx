@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import translations, { type Lang } from "./translations";
+import ContactModal from "./ContactModal";
 
 const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
 const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
@@ -20,6 +21,7 @@ interface HubProps {
 }
 
 export default function Hub({ lang, userName, moolies, xp, level, streak, bossWins, equippedItems, themeBg, onNavigate, onOpenProfile }: HubProps) {
+  const [contactOpen, setContactOpen] = useState(false);
   useEffect(() => {
     fetch(`${API_BASE}/stocks/prices`).catch(() => {});
   }, []);
@@ -285,7 +287,42 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
             }}>→</div>
           </button>
         ))}
+
+        <button
+          onClick={() => setContactOpen(true)}
+          style={{
+            marginTop: 4, alignSelf: "center",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(120,180,255,0.18)",
+            color: "rgba(207,225,245,0.75)",
+            fontSize: "0.78rem", fontWeight: 700, fontFamily: FONT,
+            padding: "10px 22px", borderRadius: 999, cursor: "pointer",
+            display: "inline-flex", alignItems: "center", gap: 8,
+            letterSpacing: "0.02em",
+            transition: "background 0.18s ease, color 0.18s ease, border-color 0.18s ease",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "rgba(46,139,192,0.14)";
+            (e.currentTarget as HTMLElement).style.color = "#fff";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(46,139,192,0.5)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+            (e.currentTarget as HTMLElement).style.color = "rgba(207,225,245,0.75)";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(120,180,255,0.18)";
+          }}
+        >
+          <span style={{ fontSize: "0.95rem" }}>✉️</span>
+          {lang === "es" ? "¿Necesitas ayuda? Contáctanos" : "Need help? Contact us"}
+        </button>
       </div>
+
+      <ContactModal
+        open={contactOpen}
+        lang={lang}
+        defaultName={userName}
+        onClose={() => setContactOpen(false)}
+      />
     </div>
   );
 }
