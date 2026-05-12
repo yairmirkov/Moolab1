@@ -41,4 +41,7 @@ export const api = {
 
   syncChildProgress: (progress: { xp?: number; level?: number; streak?: number; bossWins?: number; moolies?: number; lessonsCompleted?: number }) =>
     request("/children/me/progress", { method: "PUT", body: JSON.stringify(progress) }),
+
+  sendContact: (name: string, email: string, message: string, lang: "en" | "es") =>
+    request("/contact", { method: "POST", body: JSON.stringify({ name, email, message, lang }) }),
 };

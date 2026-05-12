@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { api } from "./api";
 
 const MoolabLogo = ({ height = 32, glow = false }: { height?: number; glow?: boolean }) => (
   <img
@@ -32,13 +33,24 @@ function ContactSection() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) return;
-    setSent(true);
-    setName(""); setEmail(""); setMessage("");
-    setTimeout(() => setSent(false), 4000);
+    if (!name.trim() || !email.trim() || !message.trim() || sending) return;
+    setSending(true);
+    setError("");
+    try {
+      await api.sendContact(name.trim(), email.trim(), message.trim(), "es");
+      setSent(true);
+      setName(""); setEmail(""); setMessage("");
+      setTimeout(() => setSent(false), 5000);
+    } catch (err: any) {
+      setError(err?.message || "No se pudo enviar. Inténtalo de nuevo.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -101,17 +113,22 @@ function ContactSection() {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div
-              className={`text-xs font-bold transition-all ${sent ? "text-[#145374] opacity-100" : "opacity-0"}`}
+              className={`text-xs font-bold transition-all ${sent ? "text-[#145374] opacity-100" : error ? "text-rose-600 opacity-100" : "opacity-0"}`}
               role="status"
               aria-live="polite"
             >
-              ✓ ¡Mensaje enviado! Te contactaremos pronto.
+              {sent
+                ? "✓ ¡Mensaje enviado! Te contactaremos pronto."
+                : error
+                  ? `✕ ${error}`
+                  : "placeholder"}
             </div>
             <button
               type="submit"
-              className="px-7 py-3 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm tracking-wide shadow-lg shadow-sky-200/50 hover:shadow-sky-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+              disabled={sending}
+              className="px-7 py-3 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm tracking-wide shadow-lg shadow-sky-200/50 hover:shadow-sky-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              Enviar mensaje
+              {sending ? "Enviando..." : "Enviar mensaje"}
             </button>
           </div>
         </form>

@@ -6,6 +6,7 @@ import pexelsRouter from "./pexels";
 import stocksRouter from "./stocks";
 import geminiRouter from "./gemini";
 import elevenlabsRouter from "./elevenlabs";
+import contactRouter from "./contact";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(pexelsRouter);
 router.use(stocksRouter);
 router.use(geminiRouter);
 router.use(elevenlabsRouter);
+router.use(contactRouter);
 
 export default router;
