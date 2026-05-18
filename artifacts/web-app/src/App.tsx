@@ -8,6 +8,7 @@ import translations, { type Lang } from "./translations";
 import { isElevenLabsAvailable, speakWithElevenLabs, stopElevenLabsAudio, speakPodcastLine, resolveVoiceLang, getVoiceIdForRole, fetchAudioBlob, playBlobAudio } from "./elevenlabs";
 import { resolveVideoUrls } from "./pexelsVideo";
 import TheVault from "./TheVault";
+import { findEquippedTitle } from "./titles";
 import Sandbox from "./Sandbox";
 import AppLayout from "./AppLayout";
 import Hub from "./Hub";
@@ -3656,22 +3657,40 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             const hasSharkBorder = equippedItems.includes("shark_border");
             const hasNeonHacker = equippedItems.includes("neon_hacker");
             const hasDiamondTrail = equippedItems.includes("diamond_trail");
+            const hasGradientAvatar = equippedItems.includes("gradient_avatar");
+            const hasLionFrame = equippedItems.includes("lion_frame");
+            const hasHolographic = equippedItems.includes("holographic_border");
+            const hasGoldCrown = equippedItems.includes("gold_crown");
+            const hasAnyBorder = hasSharkBorder || hasNeonHacker || hasDiamondTrail || hasGradientAvatar || hasLionFrame || hasHolographic;
             const borderGrad = hasSharkBorder
               ? "linear-gradient(135deg, #FFD700, #FFA500, #FFD700)"
               : hasNeonHacker
               ? "linear-gradient(135deg, #00ff87, #60efff, #00ff87)"
               : hasDiamondTrail
               ? "linear-gradient(135deg, #a78bfa, #60a5fa, #a78bfa)"
+              : hasGradientAvatar
+              ? "linear-gradient(135deg, #ff2d95, #ff9500, #39ff14, #00d4ff, #bf5cff)"
+              : hasLionFrame
+              ? "linear-gradient(135deg, #ff9500, #ff6b35, #ff2d00)"
+              : hasHolographic
+              ? "linear-gradient(135deg, #60efff, #ff2d95, #39ff14, #bf5cff)"
               : "linear-gradient(135deg, rgba(46,139,192,0.3), rgba(177,212,224,0.2))";
-            const borderWidth = hasSharkBorder || hasNeonHacker || hasDiamondTrail ? 3 : 2;
+            const borderWidth = hasAnyBorder ? 3 : 2;
             const glowShadow = hasSharkBorder
               ? "0 0 20px rgba(255,215,0,0.4), 0 0 40px rgba(255,165,0,0.2)"
               : hasNeonHacker
               ? "0 0 20px rgba(0,255,135,0.4), 0 0 40px rgba(96,239,255,0.2)"
               : hasDiamondTrail
               ? "0 0 20px rgba(167,139,250,0.4), 0 0 40px rgba(96,165,250,0.2)"
+              : hasGradientAvatar
+              ? "0 0 22px rgba(255,45,149,0.35), 0 0 44px rgba(96,239,255,0.18)"
+              : hasLionFrame
+              ? "0 0 22px rgba(255,149,0,0.4), 0 0 44px rgba(255,107,53,0.2)"
+              : hasHolographic
+              ? "0 0 22px rgba(96,239,255,0.35), 0 0 44px rgba(191,92,255,0.2)"
               : "none";
             const initials = (userName || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+            const equippedTitle = findEquippedTitle(equippedItems);
 
             return (
               <>
@@ -3680,22 +3699,38 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   gap: 24, marginBottom: 16, width: "100%", maxWidth: 300,
                 }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                    <div style={{
-                      width: 90, height: 90, borderRadius: "50%",
-                      background: borderGrad, padding: borderWidth,
-                      boxShadow: glowShadow,
-                      animation: (hasSharkBorder || hasNeonHacker || hasDiamondTrail) ? "avatarGlow 3s ease-in-out infinite" : "none",
-                    }}>
+                    <div style={{ position: "relative", width: 90, height: 90 }}>
+                      {hasGoldCrown && (
+                        <div style={{
+                          position: "absolute", top: -22, left: "50%",
+                          transform: "translateX(-50%)",
+                          fontSize: "1.8rem", filter: "drop-shadow(0 2px 6px rgba(255,215,0,0.5))",
+                          pointerEvents: "none", zIndex: 2,
+                        }}>👑</div>
+                      )}
                       <div style={{
-                        width: "100%", height: "100%", borderRadius: "50%",
-                        background: "linear-gradient(135deg, #0c2d48, #145374)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "1.8rem", fontWeight: 900, color: "#b1d4e0",
-                        letterSpacing: "0.05em",
+                        width: 90, height: 90, borderRadius: "50%",
+                        background: borderGrad, padding: borderWidth,
+                        boxShadow: glowShadow,
+                        animation: hasAnyBorder ? "avatarGlow 3s ease-in-out infinite" : "none",
                       }}>
-                        {initials}
+                        <div style={{
+                          width: "100%", height: "100%", borderRadius: "50%",
+                          background: "linear-gradient(135deg, #0c2d48, #145374)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: "1.8rem", fontWeight: 900, color: "#b1d4e0",
+                          letterSpacing: "0.05em",
+                        }}>
+                          {initials}
+                        </div>
                       </div>
                     </div>
+                    {equippedTitle && (
+                      <div style={{
+                        fontSize: "0.55rem", fontWeight: 800, color: "#b1d4e0",
+                        letterSpacing: "0.05em", textAlign: "center",
+                      }}>{equippedTitle.emoji} {equippedTitle.label[lang]}</div>
+                    )}
                     <div style={{ fontSize: "0.45rem", fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                       {lang === "es" ? "AVATAR" : "AVATAR"}
                     </div>
@@ -4062,6 +4097,14 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           moolies={moolies}
           unlockedItems={unlockedItems}
           equippedItems={equippedItems}
+          userStats={{
+            bossWins,
+            level,
+            streak,
+            moolies,
+            subjectsMastered: Object.values(moduleProgress).filter((v: number) => v >= SUBJECT_MASTERY_WINS).length,
+            totalXp: xp,
+          }}
           onPurchase={(itemId, cost) => {
             setMoolies((p) => Math.round((p - cost) * 100) / 100);
             setUnlockedItems((prev) => [...prev, itemId]);
@@ -4071,6 +4114,22 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             setEquippedItems((prev) =>
               prev.includes(itemId) ? prev.filter((x) => x !== itemId) : [...prev, itemId]
             );
+          }}
+          onEquipTitle={(titleId) => {
+            setEquippedItems((prev) => {
+              const withoutTitles = prev.filter((x) => !x.startsWith("title_"));
+              return titleId ? [...withoutTitles, `title_${titleId}`] : withoutTitles;
+            });
+          }}
+          onBuyConsumable={(itemId, cost) => {
+            setMoolies((p) => Math.round((p - cost) * 100) / 100);
+            try {
+              const cur = JSON.parse(localStorage.getItem("ws_consumables") || "{}");
+              cur[itemId] = (cur[itemId] || 0) + 1;
+              localStorage.setItem("ws_consumables", JSON.stringify(cur));
+            } catch {
+              localStorage.setItem("ws_consumables", JSON.stringify({ [itemId]: 1 }));
+            }
           }}
           onClose={() => navigateTo("hub")}
         />

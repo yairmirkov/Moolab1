@@ -1,0 +1,89 @@
+Reorganize the user profile and settings into Hub.tsx. Remove the separate profile overlay from App.tsx (showProfile state and its render block) and move everything into the Hub itself.
+1. Hub layout restructure:
+The Hub now has these sections top to bottom:
+A. Header bar (already exists, enhance it):
+
+Left: Avatar circle (tappable → opens avatar upload sheet)
+Center: Username + equipped title below it in small text
+Right: Moolies balance + ⚙️ settings gear button
+
+B. Stats row (keep existing LVL / STREAK / BOSS grid, no changes)
+C. Navigation cards (keep existing Lab / Tank / Vault cards, no changes)
+D. NEW — "My Progress" horizontal scroll section:
+tsx<div style={{ overflowX: "auto", display: "flex", gap: 12, padding: "0 24px" }}>
+  {MODULES.map(mod => (
+    // compact card: icon + name + mini progress bar + wins/winsNeeded
+  ))}
+</div>
+Show all modules as compact horizontal cards (160px wide each). Locked modules show 🔒. Tapping an unlocked module calls onNavigate("lab") and sets that module active. Pass modules, moduleProgress, currentModuleIdx, onSelectModule: (idx: number) => void as new props to Hub.
+E. NEW — Settings bottom sheet:
+Add a ⚙️ button to the header right side. Tapping it slides up a bottom sheet overlay (not a full screen takeover) with:
+
+Sound toggle (on/off)
+SFX toggle (on/off)
+Playback speed (1x / 1.5x / 2x)
+Vibe/theme picker (existing 4 themes)
+Language toggle (EN / ES)
+
+Bottom sheet style: slides up from bottom, borderRadius: "24px 24px 0 0", dark background, backdrop blur behind it, tap outside to dismiss. Height: auto, max 70vh, scrollable inside.
+Pass these as props to Hub:
+tsisMuted: boolean
+onToggleMute: () => void
+sfxEnabled: boolean
+onToggleSfx: () => void
+speechSpeed: number
+onSetSpeed: (s: number) => void
+themeId: ThemeId
+onSetTheme: (t: ThemeId) => void
+lang: Lang
+onSetLang: (l: Lang) => void
+2. Avatar upload:
+Add avatar: string | null and onSetAvatar: (url: string) => void props to Hub.
+When user taps the avatar circle, show a small bottom sheet with:
+
+"📷 Upload photo" button → triggers <input type="file" accept="image/*">
+On file select, convert to base64, send to /api/moderate-image endpoint with the base64 data
+If moderation passes: store base64 in localStorage key ws_avatar, call onSetAvatar, display as <img> inside the avatar circle
+If moderation fails: show toast "That image isn't allowed. Please choose another. 🚫"
+"Remove photo" option if avatar already set
+Keep initials fallback if no avatar set
+
+In App.tsx:
+
+Add avatar state: const [avatar, setAvatar] = useState<string | null>(() => localStorage.getItem("ws_avatar"))
+Pass to Hub and profile panel
+Display avatar image in profile panel and reaction overlays where initials currently show
+
+In the server/backend, add a /api/moderate-image endpoint that:
+
+Accepts { imageBase64: string }
+Calls the Google Cloud Vision SafeSearch API (or if not available, use a simple check via the Anthropic API with a vision prompt: "Does this image contain nudity, violence, or inappropriate content for children? Answer only YES or NO")
+Returns { safe: boolean }
+If the moderation service is unavailable, default to { safe: true } with a console warning
+
+3. Responsive layout:
+Wrap the Hub content in a max-width container that adapts:
+tsconst isWide = containerWidth >= 768; // use ResizeObserver on the hub container
+On wide screens (tablet/desktop):
+
+Header: avatar left, stats right in a single row
+Navigation cards: 3-column grid instead of vertical stack
+Progress section: full grid instead of horizontal scroll
+Settings sheet: appears as a side panel on the right instead of bottom sheet
+
+On narrow screens (mobile): current layout unchanged.
+Use a ResizeObserver on the hub's root div ref, same pattern already used in App.tsx for isWideViewport.
+4. Remove from App.tsx:
+
+Delete the showProfile state and the entire profile overlay render block (the {showProfile && (...)} section)
+Delete the "Back to Hub" button inside the profile overlay
+Remove onOpenProfile prop usage — replace the username tap in the lab feed header with a direct call to navigateTo("hub")
+Keep setShowParentDash and parent dashboard overlay untouched
+
+5. Keep unchanged:
+
+All existing Hub card styles and animations
+Moolies display
+ContactModal
+All game logic in App.tsx
+TheVault, Sandbox, ConceptCard, SharkGame

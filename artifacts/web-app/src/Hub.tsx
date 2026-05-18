@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import translations, { type Lang } from "./translations";
+import { type Lang } from "./translations";
 import ContactModal from "./ContactModal";
+import { findEquippedTitle } from "./titles";
 
 const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
-const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 interface HubProps {
@@ -29,13 +29,23 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
   const hasSharkBorder = equippedItems.includes("shark_border");
   const hasNeonHacker = equippedItems.includes("neon_hacker");
   const hasDiamondTrail = equippedItems.includes("diamond_trail");
-  const hasBorder = hasSharkBorder || hasNeonHacker || hasDiamondTrail;
+  const hasGradientAvatar = equippedItems.includes("gradient_avatar");
+  const hasLionFrame = equippedItems.includes("lion_frame");
+  const hasHolographic = equippedItems.includes("holographic_border");
+  const hasGoldCrown = equippedItems.includes("gold_crown");
+  const hasBorder = hasSharkBorder || hasNeonHacker || hasDiamondTrail || hasGradientAvatar || hasLionFrame || hasHolographic;
   const borderGrad = hasSharkBorder
     ? "linear-gradient(135deg, #FFD700, #FFA500, #FFD700)"
     : hasNeonHacker
     ? "linear-gradient(135deg, #00ff87, #60efff, #00ff87)"
     : hasDiamondTrail
     ? "linear-gradient(135deg, #a78bfa, #60a5fa, #a78bfa)"
+    : hasGradientAvatar
+    ? "linear-gradient(135deg, #ff2d95, #ff9500, #39ff14, #00d4ff, #bf5cff)"
+    : hasLionFrame
+    ? "linear-gradient(135deg, #ff9500, #ff6b35, #ff2d00)"
+    : hasHolographic
+    ? "linear-gradient(135deg, #60efff, #ff2d95, #39ff14, #bf5cff)"
     : "linear-gradient(135deg, rgba(46,139,192,0.3), rgba(177,212,224,0.2))";
   const borderWidth = hasBorder ? 3 : 2;
   const glowShadow = hasSharkBorder
@@ -44,11 +54,18 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
     ? "0 0 20px rgba(0,255,135,0.4), 0 0 40px rgba(96,239,255,0.2)"
     : hasDiamondTrail
     ? "0 0 20px rgba(167,139,250,0.4), 0 0 40px rgba(96,165,250,0.2)"
+    : hasGradientAvatar
+    ? "0 0 20px rgba(255,45,149,0.35), 0 0 40px rgba(96,239,255,0.18)"
+    : hasLionFrame
+    ? "0 0 20px rgba(255,149,0,0.4), 0 0 40px rgba(255,107,53,0.2)"
+    : hasHolographic
+    ? "0 0 20px rgba(96,239,255,0.35), 0 0 40px rgba(191,92,255,0.2)"
     : "none";
   const initials = (userName || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
   const xpInLevel = xp % (level * 50);
   const xpNeeded = level * 50;
   const xpPct = Math.min((xpInLevel / xpNeeded) * 100, 100);
+  const equippedTitle = findEquippedTitle(equippedItems);
 
   const cards = [
     {
@@ -127,20 +144,31 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
             display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
           }}
         >
-          <div style={{
-            width: 80, height: 80, borderRadius: "50%",
-            background: borderGrad, padding: borderWidth,
-            boxShadow: glowShadow,
-            animation: hasBorder ? "avatarGlow 3s ease-in-out infinite" : "none",
-          }}>
+          <div style={{ position: "relative", width: 80, height: 80 }}>
+            {hasGoldCrown && (
+              <div style={{
+                position: "absolute", top: -20, left: "50%",
+                transform: "translateX(-50%)",
+                fontSize: "1.6rem",
+                filter: "drop-shadow(0 2px 6px rgba(255,215,0,0.5))",
+                pointerEvents: "none", zIndex: 2,
+              }}>👑</div>
+            )}
             <div style={{
-              width: "100%", height: "100%", borderRadius: "50%",
-              background: "linear-gradient(135deg, #0c2d48, #145374)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "1.5rem", fontWeight: 900, color: "#b1d4e0",
-              letterSpacing: "0.05em",
+              width: 80, height: 80, borderRadius: "50%",
+              background: borderGrad, padding: borderWidth,
+              boxShadow: glowShadow,
+              animation: hasBorder ? "avatarGlow 3s ease-in-out infinite" : "none",
             }}>
-              {initials}
+              <div style={{
+                width: "100%", height: "100%", borderRadius: "50%",
+                background: "linear-gradient(135deg, #0c2d48, #145374)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "1.5rem", fontWeight: 900, color: "#b1d4e0",
+                letterSpacing: "0.05em",
+              }}>
+                {initials}
+              </div>
             </div>
           </div>
         </button>
@@ -155,11 +183,17 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
           <div style={{
             fontFamily: "'Bricolage Grotesque', 'Lato', sans-serif",
             fontSize: "1.4rem", fontWeight: 800, color: "#fff",
-            letterSpacing: "-0.02em", marginBottom: 8,
+            letterSpacing: "-0.02em", marginBottom: 2,
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
             {userName || (lang === "es" ? "Explorador" : "Explorer")}
           </div>
+          {equippedTitle && (
+            <div style={{
+              fontSize: "0.62rem", fontWeight: 800, color: "#b1d4e0",
+              letterSpacing: "0.03em", marginBottom: 6,
+            }}>{equippedTitle.emoji} {equippedTitle.label[lang]}</div>
+          )}
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <div style={{
