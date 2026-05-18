@@ -921,8 +921,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       setRewardToasts((t) => t.filter((x) => x.id !== id));
     }, ttl);
   }, []);
-  const [dailyStreakDays, setDailyStreakDays] = useState<number>(() => load("dailyStreakDays", 0));
-  useEffect(() => { save("dailyStreakDays", dailyStreakDays); }, [dailyStreakDays]);
   const dailyClaimRanRef = useRef(false);
   useEffect(() => {
     if (dailyClaimRanRef.current || demoMode) return;
@@ -931,9 +929,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
     const last = loadStr("lastDailyClaim", "");
     if (last === today) return;
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    const newDays = last === yesterday ? dailyStreakDays + 1 : 1;
+    const prevStreak = load("streak", 0);
+    const newDays = last === yesterday ? prevStreak + 1 : 1;
     saveStr("lastDailyClaim", today);
-    setDailyStreakDays(newDays);
+    setStreak(newDays);
     const baseReward = COIN_REWARDS.DAILY_BASE * Math.min(5, Math.max(1, Math.ceil(newDays / 5)));
     setTimeout(() => {
       awardMoolies(baseReward, lang === "es" ? `Día ${newDays} 🔥` : `Day ${newDays} 🔥`);
@@ -941,7 +940,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       if (newDays === 30) setTimeout(() => awardMoolies(COIN_REWARDS.STREAK_30, lang === "es" ? "¡30 días seguidos!" : "30-day streak!", true), 700);
       if (newDays === 100) setTimeout(() => awardMoolies(COIN_REWARDS.STREAK_100, lang === "es" ? "¡100 días seguidos!" : "100-day streak!", true), 700);
     }, 1200);
-  }, [demoMode, dailyStreakDays, awardMoolies, lang]);
+  }, [demoMode, awardMoolies, lang]);
   const [unlockedItems, setUnlockedItems] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem("ws_unlockedItems") || "[]"); } catch { return []; }
   });
@@ -4410,7 +4409,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                               setQuizResult(true);
                               setXp((p) => p + 50);
                               awardMoolies(COIN_REWARDS.QUIZ_WIN, lang === "es" ? "¡Victoria del Quiz!" : "Quiz Win!");
-                              setStreak((p) => p + 1);
                               setBossWins((p) => p + 1);
                               setModuleProgress((prev) => {
                                 const newProg = { ...prev };
@@ -4450,7 +4448,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                                 return newProg;
                               });
                             } else {
-                              setStreak(0);
                               awardMoolies(COIN_REWARDS.QUIZ_LOSS, lang === "es" ? "Premio de consolación" : "Consolation prize");
                               setBossExplanation(currentData.bossQuiz?.explanation || t.quiz.defaultBossExplanation[lang]);
                             }

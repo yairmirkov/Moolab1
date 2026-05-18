@@ -1,0 +1,73 @@
+Update TheVault.tsx and related files with the following changes:
+1. Add these cosmetic items to VAULT_ITEMS:
+ts{ id: "gradient_avatar", name: "Gradient Avatar", desc: "Rainbow shifting avatar border", cost: 300, icon: "🎨", gradient: "linear-gradient(135deg, #ff2d95, #ff9500, #39ff14, #00d4ff, #bf5cff)", glowColor: "rgba(255,45,149,0.3)", category: "cosmetic", isNew: true },
+{ id: "gold_crown", name: "Gold Crown", desc: "Crown icon above your username", cost: 400, icon: "👑", gradient: "linear-gradient(135deg, #FFD700, #FFA500, #FFD700)", glowColor: "rgba(255,215,0,0.35)", category: "cosmetic", isNew: true },
+{ id: "lion_frame", name: "Lion Avatar Frame", desc: "Aggressive energy border", cost: 450, icon: "🦁", gradient: "linear-gradient(135deg, #ff9500, #ff6b35, #ff2d00)", glowColor: "rgba(255,149,0,0.35)", category: "cosmetic", isNew: true },
+{ id: "holographic_border", name: "Holographic Border", desc: "Iridescent shifting frame", cost: 600, icon: "🌈", gradient: "linear-gradient(135deg, #60efff, #ff2d95, #39ff14, #bf5cff)", glowColor: "rgba(96,239,255,0.3)", category: "cosmetic", isNew: true },
+2. Add seasonal items to VAULT_ITEMS:
+Determine current season with:
+tsconst getCurrentSeason = () => {
+  const month = new Date().getMonth() + 1;
+  if (month === 10) return "halloween";
+  if (month === 12) return "winter";
+  if (month === 4) return "spring";
+  if (month === 7) return "summer";
+  return null;
+};
+const activeSeason = getCurrentSeason();
+Add these items with category: "seasonal". Each has an availableMonth field. Only show seasonal items where availableMonth === new Date().getMonth() + 1, otherwise the Seasonal tab shows "No active seasonal items right now — check back later 🌊":
+ts{ id: "halloween_pack", name: "Halloween Pack 🎃", desc: "Spooky card backgrounds", cost: 200, icon: "🎃", gradient: "linear-gradient(135deg, #ff6b35, #2d0a00)", glowColor: "rgba(255,107,53,0.3)", category: "seasonal", availableMonth: 10, isNew: false },
+{ id: "winter_bundle", name: "Winter Bundle ❄️", desc: "Frost UI accents", cost: 200, icon: "❄️", gradient: "linear-gradient(135deg, #60efff, #0061ff)", glowColor: "rgba(96,239,255,0.3)", category: "seasonal", availableMonth: 12, isNew: false },
+{ id: "spring_fresh", name: "Spring Fresh 🌸", desc: "Clean pastel theme", cost: 200, icon: "🌸", gradient: "linear-gradient(135deg, #ff9de2, #a8edea)", glowColor: "rgba(255,157,226,0.3)", category: "seasonal", availableMonth: 4, isNew: false },
+{ id: "summer_vibes", name: "Summer Vibes 🏖️", desc: "Beach background pack", cost: 200, icon: "🏖️", gradient: "linear-gradient(135deg, #f7c948, #ff6b35)", glowColor: "rgba(247,201,72,0.3)", category: "seasonal", availableMonth: 7, isNew: false },
+For active seasonal items, show a countdown badge: "⏳ X days left" calculated from days remaining in that month.
+3. Add auto-earned titles system:
+Create a new file titles.ts:
+tsexport interface Title {
+  id: string;
+  emoji: string;
+  label: string;
+  condition: (stats: UserStats) => boolean;
+  hint: string; // shown when locked
+}
+
+export interface UserStats {
+  bossWins: number;
+  level: number;
+  streak: number;
+  moolies: number;
+  subjectsMastered: number;
+  totalXp: number;
+}
+
+export const TITLES: Title[] = [
+  { id: "analyst", emoji: "💼", label: "The Analyst", condition: s => s.subjectsMastered >= 1, hint: "Master your first subject" },
+  { id: "bull", emoji: "📈", label: "Bull", condition: s => s.bossWins >= 3, hint: "Win 3 boss fights" },
+  { id: "banker", emoji: "🏦", label: "Banker", condition: s => s.level >= 5, hint: "Reach level 5" },
+  { id: "big_brain", emoji: "🧠", label: "Big Brain", condition: s => s.totalXp >= 500, hint: "Earn 500 total XP" },
+  { id: "whale", emoji: "🐋", label: "Whale", condition: s => s.moolies >= 1000, hint: "Accumulate 1,000 moolies" },
+  { id: "moon_chaser", emoji: "🚀", label: "Moon Chaser", condition: s => s.streak >= 7, hint: "Reach a 7-day streak" },
+  { id: "money_moves", emoji: "💰", label: "Money Moves", condition: s => s.subjectsMastered >= 3, hint: "Master 3 subjects" },
+  { id: "top_shark", emoji: "🦈", label: "Top Shark", condition: s => s.bossWins >= 10, hint: "Win 10 boss fights" },
+  { id: "megalodon", emoji: "🦷", label: "Megalodon", condition: s => s.bossWins >= 25, hint: "Win 25 boss fights" },
+  { id: "legend", emoji: "⚡", label: "Legend", condition: s => s.level >= 10 && s.subjectsMastered >= 5, hint: "Reach level 10 and master 5 subjects" },
+  { id: "compound_king", emoji: "📊", label: "Compound King", condition: s => s.totalXp >= 2000, hint: "Earn 2,000 total XP" },
+  { id: "hodler", emoji: "💎", label: "Diamond Hands", condition: s => s.streak >= 30, hint: "30-day streak" },
+];
+4. Add a Titles tab in TheVault:
+Add UserStats as a prop to TheVaultProps. In the Titles tab, show all titles in a grid. Each title card shows:
+
+Emoji large, label, unlock hint
+If TITLES.find(t => t.id).condition(userStats) is true: green "UNLOCKED ✓" badge, card fully bright
+If locked: opacity: 0.45, padlock icon, hint text visible
+An "EQUIP" button on unlocked titles (only one title equippable at a time), stored in equippedItems as "title_analyst" etc.
+
+Show the equipped title next to the username in Hub.tsx and in the profile panel in App.tsx — look up the equipped title from TITLES and render {emoji} {label} in small text below the username.
+5. In App.tsx:
+
+Pass userStats to TheVault: { bossWins, level, streak, moolies, subjectsMastered: Object.values(moduleProgress).filter(v => v >= SUBJECT_MASTERY_WINS).length, totalXp: xp }
+When a seasonal item is purchased, apply its theme the same way existing cosmetic items apply (store in equippedItems, check in App.tsx hub background and card backgrounds)
+gold_crown: render a 👑 absolutely positioned above the avatar in Hub.tsx and the profile panel when equipped
+gradient_avatar / lion_frame / holographic_border: add their gradients to the borderGrad logic in Hub.tsx and App.tsx profile panel alongside existing border items
+
+Keep unchanged: all existing items, purchase flow, toast, animations, onClose, moolies display.
