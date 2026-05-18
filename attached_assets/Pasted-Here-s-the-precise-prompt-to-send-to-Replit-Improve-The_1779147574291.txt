@@ -1,0 +1,49 @@
+Here's the precise prompt to send to Replit:
+
+Improve TheVault.tsx with these specific changes:
+1. Add a category field to VaultItem type:
+tscategory: "cosmetic" | "powerup" | "title" | "seasonal";
+isNew?: boolean;
+Assign categories to existing items:
+
+shark_border, neon_hacker, fire_emoji, diamond_trail → "cosmetic"
+value_investor → "title"
+vault_master → "title"
+
+2. Add tabs row below the moolies balance:
+State: const [activeTab, setActiveTab] = useState<"all" | "cosmetic" | "powerup" | "title" | "seasonal">("all")
+Tabs: All · Cosmetics · Power-ups · Titles · Seasonal
+Filter VAULT_ITEMS by activeTab before rendering the grid. Style active tab with a blue underline/highlight, inactive tabs muted. Seasonal tab shows an empty state message: "Coming soon 🌊" if no seasonal items exist.
+3. Add this new consumable item to VAULT_ITEMS:
+ts{
+  id: "streak_freeze",
+  name: "Streak Freeze",
+  desc: "Protect your streak for 1 missed day",
+  cost: 75,
+  icon: "❄️",
+  gradient: "linear-gradient(135deg, #60efff, #0061ff)",
+  glowColor: "rgba(96,239,255,0.3)",
+  category: "powerup",
+  isNew: true,
+}
+Consumables can be purchased multiple times. Track purchase count in localStorage key ws_consumables as a JSON object { streak_freeze: N }. Add a prop onBuyConsumable: (itemId: string, cost: number) => void to TheVaultProps. In App.tsx, handle onBuyConsumable by deducting moolies and incrementing the count in localStorage. Show the current owned count on the card as a small badge like "×2" if count > 0.
+4. Daily Deal:
+At the top of the items list (before the filtered grid), show a "🔥 Daily Deal" section with one featured item. Pick it deterministically using:
+tsconst today = new Date().toISOString().slice(0, 10);
+const seed = today.split("-").reduce((a, b) => a + parseInt(b), 0);
+const dealItem = VAULT_ITEMS[seed % VAULT_ITEMS.length];
+const dealPrice = Math.floor(dealItem.cost * 0.7);
+Show it as a wide full-width card at the top with a 🔥 DAILY DEAL badge and the original price crossed out next to the discounted price. Only show the daily deal section when activeTab === "all". Use the same purchase/confirm flow as other items.
+5. "New" badge:
+On any item where isNew: true, render a small NEW pill badge in the top-right corner of the item card. Style: bright green background #39ff14, dark text, 0.45rem font, 4px 7px padding, borderRadius: 6.
+6. Purchase confirmation:
+Replace the single-tap buy with a two-step confirm flow per card.
+State: const [confirmingId, setConfirmingId] = useState<string | null>(null)
+When user taps the buy button:
+
+If confirmingId !== item.id: set confirmingId to item.id, button changes to show "Confirm purchase?"
+Show two buttons: ✓ Confirm (calls onPurchase or onBuyConsumable, resets confirmingId) and ✕ Cancel (resets confirmingId)
+If user taps anywhere outside the card (or taps another card's buy button), reset confirmingId
+Already-owned non-consumable items (equip/unequip) skip the confirm flow entirely
+
+Keep unchanged: all existing styles, animations, FONT, moolies balance display, onPurchase, onEquip, onClose props and their behavior.

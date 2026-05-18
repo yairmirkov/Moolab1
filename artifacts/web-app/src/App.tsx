@@ -882,13 +882,15 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   const getFamilyState = (): { parent?: string; students?: { nickname: string; pin: string; birthYear: string; country: string }[] } => {
     try { return JSON.parse(localStorage.getItem("ws_family") || "{}"); } catch { return {}; }
   };
-  const [onboardStep, setOnboardStep] = useState(() => {
-    const savedType = loadStr("acctType", "");
-    const savedName = loadStr("name", "");
-    if (savedType && savedName) return 2;
-    if (savedType) return 2;
-    return 0;
-  });
+  type OnboardView =
+    | "choose"
+    | "kid-login"
+    | "parent-signup"
+    | "add-child"
+    | "parent-home"
+    | "parent-login";
+  const [onboardView, setOnboardView] = useState<OnboardView>("choose");
+  const [kidLoginError, setKidLoginError] = useState("");
   const [showModuleMap, setShowModuleMap] = useState(false);
   const [showParentDash, setShowParentDash] = useState(false);
   const [showLanding, setShowLanding] = useState(!skipOnboarding);
@@ -1438,13 +1440,13 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
   if (showLanding) {
     const loginHandler = () => {
-      setOnboardStep(6);
+      setOnboardView("parent-login");
       setShowLanding(false);
       setFadeIn(true);
       setTimeout(() => setFadeIn(false), 700);
     };
     const signUpHandler = () => {
-      setOnboardStep(0);
+      setOnboardView("choose");
       setShowLanding(false);
       setFadeIn(true);
       setTimeout(() => setFadeIn(false), 700);
@@ -1463,12 +1465,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       setFamilyVersion((v) => v + 1);
     };
 
-    const canFinish = accountType === "parent"
-      ? (parentName.trim() && userName.trim() && birthYear)
-      : (userName.trim() && birthYear);
-
     const stepContent = () => {
-      if (onboardStep === 0) {
+      if (onboardView === "choose") {
         return (
           <>
             <img
@@ -1493,7 +1491,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 onClick={() => {
                   setAccountType("learner");
                   saveStr("acctType", "learner");
-                  setOnboardStep(5);
+                  setUserName("");
+                  setBirthYear("");
+                  setKidLoginError("");
+                  setOnboardView("kid-login");
                 }}
                 style={{
                   display: "flex", alignItems: "center", gap: 16,
@@ -1524,7 +1525,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 onClick={() => {
                   setAccountType("parent");
                   saveStr("acctType", "parent");
-                  setOnboardStep(7);
+                  setOnboardView("parent-signup");
                 }}
                 style={{
                   display: "flex", alignItems: "center", gap: 16,
@@ -1553,7 +1554,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
             <button
               className="ws-btn"
-              onClick={() => setOnboardStep(6)}
+              onClick={() => { setAccountType("parent"); saveStr("acctType", "parent"); setOnboardView("parent-login"); }}
               style={{
                 background: "none", border: "none", color: "rgba(12,45,72,0.35)",
                 fontFamily: FONT, fontWeight: 700, fontSize: "0.7rem",
@@ -1571,14 +1572,16 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         );
       }
 
-      if (onboardStep === 3) {
-        const [pinNickname, setPinNickname] = [userName, setUserName];
-        const [pinCode, setPinCode] = [birthYear, setBirthYear];
+      if (onboardView === "kid-login") {
+        const pinNickname = userName;
+        const pinCode = birthYear;
+        const canLogin = pinNickname.trim().length > 0 && pinCode.length === 4;
 
         const attemptPinLogin = () => {
-          const family = (() => { try { return JSON.parse(localStorage.getItem("ws_family") || "{}"); } catch { return {}; } })();
+          if (!canLogin) return;
+          const family = getFamilyState();
           const students = family.students || [];
-          const match = students.find((s: any) => s.nickname.toLowerCase() === pinNickname.trim().toLowerCase() && s.pin === pinCode.trim());
+          const match = students.find((s) => s.nickname.toLowerCase() === pinNickname.trim().toLowerCase() && s.pin === pinCode.trim());
           if (match) {
             setUserName(match.nickname);
             saveStr("name", match.nickname);
@@ -1590,7 +1593,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             saveStr("acctType", "learner");
             startSession({ birthYear: match.birthYear, accountType: "learner" });
           } else {
-            alert(t.auth.incorrectPin[lang]);
+            setKidLoginError(t.auth.incorrectPin[lang]);
           }
         };
 
@@ -1613,7 +1616,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   type="text"
                   placeholder={t.auth.nicknamePlaceholder[lang]}
                   value={pinNickname}
-                  onChange={(e) => { setPinNickname(e.target.value); }}
+                  onChange={(e) => { setUserName(e.target.value); setKidLoginError(""); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") attemptPinLogin(); }}
                   style={{
                     width: "100%", padding: "14px 18px", borderRadius: 14,
                     background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
@@ -1633,10 +1637,12 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   maxLength={4}
                   placeholder="• • • •"
                   value={pinCode}
-                  onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPinCode(v); }}
+                  onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setBirthYear(v); setKidLoginError(""); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") attemptPinLogin(); }}
                   style={{
                     width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    background: "rgba(255,255,255,0.7)",
+                    border: kidLoginError ? "1px solid rgba(220,53,69,0.45)" : "1px solid rgba(46,139,192,0.2)",
                     color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "1.4rem",
                     outline: "none", caretColor: "#145374", boxSizing: "border-box",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.04)", textAlign: "center",
@@ -1646,20 +1652,31 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               </div>
             </div>
 
+            {kidLoginError && (
+              <div style={{
+                width: "100%", maxWidth: 340, marginBottom: 14, padding: "10px 14px",
+                borderRadius: 10, background: "rgba(220,53,69,0.08)",
+                border: "1px solid rgba(220,53,69,0.25)", color: "#b32a3a",
+                fontSize: "0.72rem", fontWeight: 700, textAlign: "center",
+              }}>
+                {kidLoginError}
+              </div>
+            )}
+
             <button
               className="ws-btn"
               onClick={attemptPinLogin}
-              disabled={!pinNickname.trim() || pinCode.length !== 4}
+              disabled={!canLogin}
               style={{
                 width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
-                background: (pinNickname.trim() && pinCode.length === 4)
+                background: canLogin
                   ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
                   : "rgba(12,45,72,0.08)",
-                color: (pinNickname.trim() && pinCode.length === 4) ? "#fff" : "rgba(12,45,72,0.25)",
+                color: canLogin ? "#fff" : "rgba(12,45,72,0.25)",
                 fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
-                cursor: (pinNickname.trim() && pinCode.length === 4) ? "pointer" : "default",
-                boxShadow: (pinNickname.trim() && pinCode.length === 4)
+                cursor: canLogin ? "pointer" : "default",
+                boxShadow: canLogin
                   ? "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)"
                   : "none",
                 transition: "all 0.3s ease",
@@ -1671,227 +1688,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         );
       }
 
-      if (onboardStep === 5) {
-        const sharkReady = userName.trim() && birthYear;
-        return (
-          <>
-            <div style={{ fontSize: "2.8rem", marginBottom: 12 }}>🦈</div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
-              {t.auth.sharkSetup[lang]}
-            </h2>
-            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28, maxWidth: 300, textAlign: "center", lineHeight: 1.5 }}>
-              {t.auth.sharkSetupDesc[lang]}
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
-              <div>
-                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {t.auth.yourNickname[lang]}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t.auth.sharkNamePlaceholder[lang]}
-                  value={userName}
-                  onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
-                  style={{
-                    width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
-                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {t.auth.birthYear[lang]}
-                </label>
-                <select
-                  value={birthYear}
-                  onChange={(e) => { setBirthYear(e.target.value); saveStr("birth", e.target.value); }}
-                  style={{
-                    width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
-                    color: birthYear ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", boxSizing: "border-box", colorScheme: "light",
-                    appearance: "none", WebkitAppearance: "none",
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
-                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-                  }}
-                >
-                  <option value="" disabled>{t.onboard.selectYear[lang]}</option>
-                  {Array.from({ length: 22 }, (_, i) => new Date().getFullYear() - 4 - i).map((yr) => (
-                    <option key={yr} value={String(yr)} style={{ background: "#fff", color: "#0c2d48" }}>{yr}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {t.onboard.countryLabel[lang]}
-                </label>
-                <select
-                  value={userCountry}
-                  onChange={(e) => { setUserCountry(e.target.value); saveStr("country", e.target.value); }}
-                  style={{
-                    width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
-                    color: userCountry ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", boxSizing: "border-box", colorScheme: "light",
-                    appearance: "none", WebkitAppearance: "none",
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
-                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-                  }}
-                >
-                  <option value="" disabled>{countryLoading ? t.onboard.detectingLocation[lang] : t.onboard.countryPlaceholder[lang]}</option>
-                  {COUNTRIES.map((c) => (
-                    <option key={c} value={c} style={{ background: "#fff", color: "#0c2d48" }}>{c}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {birthYear && (
-              <div style={{
-                marginBottom: 16, padding: "8px 16px", borderRadius: 12,
-                background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.2)",
-                animation: "ageBtn 0.3s ease-out both",
-              }}>
-                <span style={{ color: "#145374", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
-                  {(() => {
-                    const age = getAgeFromYear(birthYear);
-                    const group = getAgeGroup(age);
-                    if (group === "Kids") return t.onboard.trackKids[lang];
-                    if (group === "Teens") return t.onboard.trackTeens[lang];
-                    return t.onboard.trackAdults[lang];
-                  })()}
-                </span>
-              </div>
-            )}
-
-            <button
-              className="ws-btn"
-              onClick={() => startSession({ birthYear, accountType: "learner" })}
-              disabled={!sharkReady}
-              style={{
-                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
-                border: "none", fontFamily: FONT,
-                background: sharkReady
-                  ? "linear-gradient(135deg, #0c2d48, #145374)"
-                  : "rgba(12,45,72,0.08)",
-                color: sharkReady ? "#fff" : "rgba(12,45,72,0.25)",
-                fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
-                cursor: sharkReady ? "pointer" : "default",
-                boxShadow: sharkReady
-                  ? "0 0 40px rgba(12,45,72,0.3), 0 8px 24px rgba(0,0,0,0.12)"
-                  : "none",
-                transition: "all 0.3s ease",
-              }}
-            >
-              🦈 {t.auth.startSwimming[lang]}
-            </button>
-          </>
-        );
-      }
-
-      if (onboardStep === 6) {
-        return (
-          <>
-            <img
-              src="/moolab-logo-trimmed.png"
-              alt="Moolab"
-              style={{
-                height: 70, width: "auto", objectFit: "contain", marginBottom: 8,
-                filter: "drop-shadow(0 0 20px rgba(46,139,192,0.3))",
-              }}
-            />
-            <h2 style={{ fontSize: "1.6rem", fontWeight: 900, margin: "0 0 4px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
-              {t.auth.loginTitle[lang]}
-            </h2>
-            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.75rem", fontWeight: 600, marginBottom: 32 }}>
-              {t.auth.loginSubtitle[lang]}
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 16 }}>
-              <button
-                className="ws-btn"
-                onClick={() => {
-                  setAccountType("parent");
-                  saveStr("acctType", "parent");
-                  setOnboardStep(1);
-                }}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                  width: "100%", padding: "16px 24px", borderRadius: 16,
-                  background: "#000", border: "none", color: "#fff",
-                  fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-                {t.auth.continueApple[lang]}
-                <span style={{ fontSize: "0.5rem", opacity: 0.5, fontWeight: 600, marginLeft: 4 }}>({t.auth.comingSoon[lang]})</span>
-              </button>
-              <button
-                className="ws-btn"
-                onClick={() => {
-                  setAccountType("parent");
-                  saveStr("acctType", "parent");
-                  setOnboardStep(1);
-                }}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                  width: "100%", padding: "16px 24px", borderRadius: 16,
-                  background: "#fff", border: "1px solid rgba(12,45,72,0.12)", color: "#0c2d48",
-                  fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                {t.auth.continueGoogle[lang]}
-                <span style={{ fontSize: "0.5rem", opacity: 0.4, fontWeight: 600, marginLeft: 4 }}>({t.auth.comingSoon[lang]})</span>
-              </button>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", maxWidth: 340, margin: "12px 0" }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(12,45,72,0.08)" }} />
-              <span style={{ color: "rgba(12,45,72,0.25)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em" }}>
-                {t.auth.or[lang]}
-              </span>
-              <div style={{ flex: 1, height: 1, background: "rgba(12,45,72,0.08)" }} />
-            </div>
-
-            <button
-              className="ws-btn"
-              onClick={() => setOnboardStep(3)}
-              style={{
-                width: "100%", maxWidth: 340, padding: "16px 24px", borderRadius: 16,
-                background: "rgba(46,139,192,0.06)", border: "1px solid rgba(46,139,192,0.15)",
-                color: "#145374", fontFamily: FONT, fontWeight: 800, fontSize: "0.85rem",
-                cursor: "pointer",
-              }}
-            >
-              🦈 {t.auth.returningShark[lang]}
-            </button>
-
-            <button
-              className="ws-btn"
-              onClick={() => setOnboardStep(0)}
-              style={{
-                background: "none", border: "none", color: "rgba(12,45,72,0.35)",
-                fontFamily: FONT, fontWeight: 700, fontSize: "0.7rem",
-                cursor: "pointer", padding: "8px 0", marginTop: 16,
-                textDecoration: "underline", textUnderlineOffset: 3,
-              }}
-            >
-              {t.auth.noAccountYet[lang]}
-            </button>
-          </>
-        );
-      }
-
-      if (onboardStep === 7) {
+      if (onboardView === "parent-signup") {
+        const canContinue = parentName.trim().length > 0;
         return (
           <>
             <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>👨‍👩‍👧</div>
@@ -1900,70 +1698,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             </h2>
             <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
               {t.auth.parentSignUpDesc[lang]}
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
-              <button
-                className="ws-btn"
-                onClick={() => setOnboardStep(1)}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                  width: "100%", padding: "16px 24px", borderRadius: 16,
-                  background: "#000", border: "none", color: "#fff",
-                  fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-                {t.auth.continueApple[lang]}
-                <span style={{ fontSize: "0.5rem", opacity: 0.5, fontWeight: 600, marginLeft: 4 }}>({t.auth.comingSoon[lang]})</span>
-              </button>
-              <button
-                className="ws-btn"
-                onClick={() => setOnboardStep(1)}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                  width: "100%", padding: "16px 24px", borderRadius: 16,
-                  background: "#fff", border: "1px solid rgba(12,45,72,0.12)", color: "#0c2d48",
-                  fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                {t.auth.continueGoogle[lang]}
-                <span style={{ fontSize: "0.5rem", opacity: 0.4, fontWeight: 600, marginLeft: 4 }}>({t.auth.comingSoon[lang]})</span>
-              </button>
-            </div>
-
-            <p style={{ color: "rgba(12,45,72,0.25)", fontSize: "0.55rem", fontWeight: 600, marginBottom: 16, textAlign: "center", maxWidth: 280, lineHeight: 1.5 }}>
-              {lang === "en" ? "For now, tap either button to continue with the demo setup" : "Por ahora, toca cualquier botón para continuar con la demo"}
-            </p>
-
-            <button
-              className="ws-btn"
-              onClick={() => setOnboardStep(6)}
-              style={{
-                background: "none", border: "none", color: "rgba(12,45,72,0.35)",
-                fontFamily: FONT, fontWeight: 700, fontSize: "0.7rem",
-                cursor: "pointer", padding: "8px 0",
-                textDecoration: "underline", textUnderlineOffset: 3,
-              }}
-            >
-              {t.auth.alreadyHaveAccount[lang]}
-            </button>
-          </>
-        );
-      }
-
-      if (onboardStep === 1) {
-        return (
-          <>
-            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>✅</div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
-              {t.auth.commandCenter[lang]}
-            </h2>
-            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
-              {t.auth.setupProfiles[lang]}
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
@@ -1985,12 +1719,174 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               </div>
             </div>
 
-            {(familyState.students || []).length > 0 && (
+            <button
+              className="ws-btn"
+              onClick={() => {
+                if (!canContinue) return;
+                saveFamily({ ...familyState, parent: parentName });
+                setGeneratedPin(String(Math.floor(1000 + Math.random() * 9000)));
+                setUserName("");
+                setBirthYear("");
+                setUserCountry("");
+                setOnboardView((familyState.students || []).length > 0 ? "parent-home" : "add-child");
+              }}
+              disabled={!canContinue}
+              style={{
+                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                border: "none", fontFamily: FONT,
+                background: canContinue
+                  ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
+                  : "rgba(12,45,72,0.08)",
+                color: canContinue ? "#fff" : "rgba(12,45,72,0.25)",
+                fontWeight: 900, fontSize: "1.05rem", letterSpacing: "0.06em",
+                cursor: canContinue ? "pointer" : "default",
+                boxShadow: canContinue
+                  ? "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)"
+                  : "none",
+                transition: "all 0.3s ease",
+              }}
+            >
+              {lang === "es" ? "Continuar" : "Continue"}
+            </button>
+
+            <button
+              className="ws-btn"
+              onClick={() => setOnboardView("parent-login")}
+              style={{
+                background: "none", border: "none", color: "rgba(12,45,72,0.35)",
+                fontFamily: FONT, fontWeight: 700, fontSize: "0.7rem",
+                cursor: "pointer", padding: "8px 0", marginTop: 16,
+                textDecoration: "underline", textUnderlineOffset: 3,
+              }}
+            >
+              {t.auth.alreadyHaveAccount[lang]}
+            </button>
+          </>
+        );
+      }
+
+
+      if (onboardView === "parent-login") {
+        const canLogin = parentName.trim().length > 0;
+        const handleLogin = () => {
+          if (!canLogin) return;
+          const students = familyState.students || [];
+          setAccountType("parent");
+          saveStr("acctType", "parent");
+          saveFamily({ ...familyState, parent: parentName });
+          if (students.length === 0) {
+            setGeneratedPin(String(Math.floor(1000 + Math.random() * 9000)));
+            setUserName("");
+            setBirthYear("");
+            setUserCountry("");
+            setOnboardView("add-child");
+            return;
+          }
+          const firstStudent = students[0];
+          setUserName(firstStudent.nickname);
+          saveStr("name", firstStudent.nickname);
+          setBirthYear(firstStudent.birthYear);
+          saveStr("birth", firstStudent.birthYear);
+          setUserCountry(firstStudent.country || "");
+          saveStr("country", firstStudent.country || "");
+          startSession({ birthYear: firstStudent.birthYear, accountType: "parent" });
+        };
+        return (
+          <>
+            <img
+              src="/moolab-logo-trimmed.png"
+              alt="Moolab"
+              style={{
+                height: 70, width: "auto", objectFit: "contain", marginBottom: 8,
+                filter: "drop-shadow(0 0 20px rgba(46,139,192,0.3))",
+              }}
+            />
+            <h2 style={{ fontSize: "1.6rem", fontWeight: 900, margin: "0 0 4px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
+              {t.auth.loginTitle[lang]}
+            </h2>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.75rem", fontWeight: 600, marginBottom: 32 }}>
+              {t.auth.loginSubtitle[lang]}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+              <div>
+                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>{t.onboard.yourName[lang]}</label>
+                <input
+                  type="text"
+                  placeholder={t.onboard.parentPlaceholder[lang]}
+                  value={parentName}
+                  onChange={(e) => { setParentName(e.target.value); saveStr("parentName", e.target.value); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 14,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
+                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                  }}
+                />
+              </div>
+            </div>
+
+            <button
+              className="ws-btn"
+              onClick={handleLogin}
+              disabled={!canLogin}
+              style={{
+                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                border: "none", fontFamily: FONT,
+                background: canLogin
+                  ? "linear-gradient(135deg, #0c2d48, #145374)"
+                  : "rgba(12,45,72,0.08)",
+                color: canLogin ? "#fff" : "rgba(12,45,72,0.25)",
+                fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
+                cursor: canLogin ? "pointer" : "default",
+                boxShadow: canLogin
+                  ? "0 0 40px rgba(12,45,72,0.3), 0 8px 24px rgba(0,0,0,0.12)"
+                  : "none",
+                transition: "all 0.3s ease",
+              }}
+            >
+              {t.auth.enter[lang]}
+            </button>
+
+            <button
+              className="ws-btn"
+              onClick={() => setOnboardView("choose")}
+              style={{
+                background: "none", border: "none", color: "rgba(12,45,72,0.35)",
+                fontFamily: FONT, fontWeight: 700, fontSize: "0.7rem",
+                cursor: "pointer", padding: "8px 0", marginTop: 16,
+                textDecoration: "underline", textUnderlineOffset: 3,
+              }}
+            >
+              {t.auth.noAccountYet[lang]}
+            </button>
+          </>
+        );
+      }
+
+
+      if (onboardView === "parent-home") {
+        const students = familyState.students || [];
+        const effectiveParent = parentName.trim() || familyState.parent || "";
+        const canEnter = students.length > 0 && effectiveParent.length > 0;
+        return (
+          <>
+            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>✅</div>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
+              {t.auth.commandCenter[lang]}
+            </h2>
+            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
+              {t.auth.setupProfiles[lang]}
+            </p>
+
+            {students.length > 0 && (
               <div style={{ width: "100%", maxWidth: 340, marginBottom: 16 }}>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 8, paddingLeft: 4 }}>
                   {t.auth.studentProfiles[lang]}
                 </label>
-                {familyState.students!.map((s, idx) => (
+                {students.map((s, idx) => (
                   <div key={idx} style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     padding: "12px 16px", borderRadius: 14, marginBottom: 8,
@@ -2005,7 +1901,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     <button
                       className="ws-btn"
                       onClick={() => {
-                        const updated = { ...familyState, students: familyState.students!.filter((_, i) => i !== idx) };
+                        const updated = { ...familyState, students: students.filter((_, i) => i !== idx) };
                         saveFamily(updated);
                       }}
                       style={{
@@ -2020,7 +1916,13 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
             <button
               className="ws-btn"
-              onClick={() => { setGeneratedPin(String(Math.floor(1000 + Math.random() * 9000))); setUserName(""); setBirthYear(""); setOnboardStep(4); }}
+              onClick={() => {
+                setGeneratedPin(String(Math.floor(1000 + Math.random() * 9000)));
+                setUserName("");
+                setBirthYear("");
+                setUserCountry("");
+                setOnboardView("add-child");
+              }}
               style={{
                 width: "100%", maxWidth: 340, padding: "14px 20px", borderRadius: 16,
                 background: "rgba(46,139,192,0.08)", border: "1px dashed rgba(46,139,192,0.25)",
@@ -2031,15 +1933,17 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               + {t.auth.createStudentProfile[lang]}
             </button>
 
-            {parentName.trim() && (familyState.students || []).length > 0 && (
+            {canEnter && (
               <button
                 className="ws-btn"
                 onClick={() => {
-                  const updated = { ...familyState, parent: parentName };
-                  saveFamily(updated);
+                  const parentVal = effectiveParent;
+                  saveFamily({ ...familyState, parent: parentVal });
+                  setParentName(parentVal);
+                  saveStr("parentName", parentVal);
                   setAccountType("parent");
                   saveStr("acctType", "parent");
-                  const firstStudent = familyState.students![0];
+                  const firstStudent = students[0];
                   setUserName(firstStudent.nickname);
                   saveStr("name", firstStudent.nickname);
                   setBirthYear(firstStudent.birthYear);
@@ -2065,12 +1969,13 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         );
       }
 
-      if (onboardStep === 4) {
-        const [newNickname, setNewNickname] = [userName, setUserName];
-        const [newBirthYear, setNewBirthYear] = [birthYear, setBirthYear];
-        const [newCountry, setNewCountry] = [userCountry, setUserCountry];
-
-
+      if (onboardView === "add-child") {
+        const newNickname = userName;
+        const newBirthYear = birthYear;
+        const newCountry = userCountry;
+        const setNewNickname = setUserName;
+        const setNewBirthYear = setBirthYear;
+        const setNewCountry = setUserCountry;
         const canCreate = newNickname.trim() && newBirthYear;
 
         return (
@@ -2203,7 +2108,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 saveFamily(updated);
                 setUserName("");
                 setBirthYear("");
-                setOnboardStep(1);
+                setUserCountry("");
+                setOnboardView("parent-home");
               }}
               disabled={!canCreate}
               style={{
@@ -2227,148 +2133,6 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         );
       }
 
-      if (onboardStep === 2) {
-        return (
-          <>
-            <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>
-              {accountType === "parent" ? "👨‍👩‍👧" : "✏️"}
-            </div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.02em", color: "#0c2d48" }}>
-              {accountType === "parent" ? t.onboard.parentSetup[lang] : t.onboard.tellAboutYou[lang]}
-            </h2>
-            <p style={{ color: "rgba(12,45,72,0.4)", fontSize: "0.7rem", fontWeight: 600, marginBottom: 28 }}>
-              {accountType === "parent" ? t.onboard.personalizeLessons[lang] : t.onboard.pickLevel[lang]}
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
-              {accountType === "parent" && (
-                <div>
-                  <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>{t.onboard.yourName[lang]}</label>
-                  <input
-                    type="text"
-                    placeholder={t.onboard.parentPlaceholder[lang]}
-                    value={parentName}
-                    onChange={(e) => { setParentName(e.target.value); saveStr("parentName", e.target.value); }}
-                    style={{
-                      width: "100%", padding: "14px 18px", borderRadius: 14,
-                      background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
-                      color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                      outline: "none", caretColor: "#145374", boxSizing: "border-box",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-                    }}
-                  />
-                </div>
-              )}
-              <div>
-                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {accountType === "parent" ? t.onboard.childName[lang] : t.onboard.yourName[lang]}
-                </label>
-                <input
-                  type="text"
-                  placeholder={accountType === "parent" ? t.onboard.childPlaceholder[lang] : t.onboard.namePlaceholder[lang]}
-                  value={userName}
-                  onChange={(e) => { setUserName(e.target.value); saveStr("name", e.target.value); }}
-                  style={{
-                    width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
-                    color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", caretColor: "#145374", boxSizing: "border-box",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {accountType === "parent" ? t.onboard.childBirthYear[lang] : t.onboard.yourBirthYear[lang]}
-                </label>
-                <select
-                  value={birthYear}
-                  onChange={(e) => { setBirthYear(e.target.value); saveStr("birth", e.target.value); }}
-                  style={{
-                    width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
-                    color: birthYear ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", boxSizing: "border-box", colorScheme: "light",
-                    appearance: "none", WebkitAppearance: "none",
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
-                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-                  }}
-                >
-                  <option value="" disabled>{t.onboard.selectYear[lang]}</option>
-                  {Array.from({ length: 22 }, (_, i) => new Date().getFullYear() - 4 - i).map((yr) => (
-                    <option key={yr} value={String(yr)} style={{ background: "#fff", color: "#0c2d48" }}>{yr}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
-                  {t.onboard.countryLabel[lang]}
-                </label>
-                <select
-                  value={userCountry}
-                  onChange={(e) => { setUserCountry(e.target.value); saveStr("country", e.target.value); }}
-                  style={{
-                    width: "100%", padding: "14px 18px", borderRadius: 14,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid rgba(46,139,192,0.2)",
-                    color: userCountry ? "#0c2d48" : "rgba(12,45,72,0.35)", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
-                    outline: "none", boxSizing: "border-box", colorScheme: "light",
-                    appearance: "none", WebkitAppearance: "none",
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(12,45,72,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E\")",
-                    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-                  }}
-                >
-                  <option value="" disabled>{countryLoading ? t.onboard.detectingLocation[lang] : t.onboard.countryPlaceholder[lang]}</option>
-                  {COUNTRIES.map((c) => (
-                    <option key={c} value={c} style={{ background: "#fff", color: "#0c2d48" }}>{c}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {birthYear && (
-              <div style={{
-                marginBottom: 20, padding: "8px 16px", borderRadius: 12,
-                background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.2)",
-                animation: "ageBtn 0.3s ease-out both",
-              }}>
-                <span style={{ color: "#145374", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
-                  {(() => {
-                    const age = getAgeFromYear(birthYear);
-                    const group = getAgeGroup(age);
-                    if (group === "Kids") return t.onboard.trackKids[lang];
-                    if (group === "Teens") return t.onboard.trackTeens[lang];
-                    return t.onboard.trackAdults[lang];
-                  })()}
-                </span>
-              </div>
-            )}
-
-            <button
-              className="ws-btn"
-              onClick={startSession}
-              disabled={!canFinish}
-              style={{
-                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
-                border: "none", fontFamily: FONT,
-                background: canFinish
-                  ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
-                  : "rgba(12,45,72,0.08)",
-                color: canFinish ? "#fff" : "rgba(12,45,72,0.25)",
-                fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.06em",
-                cursor: canFinish ? "pointer" : "default",
-                boxShadow: canFinish
-                  ? "0 0 40px rgba(46,139,192,0.2), 0 8px 24px rgba(0,0,0,0.08)"
-                  : "none",
-                transition: "all 0.3s ease",
-              }}
-            >
-              {t.onboard.startLearning[lang]}
-            </button>
-          </>
-        );
-      }
       return null;
     };
 
@@ -2422,13 +2186,17 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           }}
         >{lang === "en" ? "ES" : "EN"}</button>
 
-        {onboardStep > 0 && (
+        {onboardView !== "choose" && (
           <button
             className="ws-btn"
             onClick={() => {
-              if (onboardStep === 3) setOnboardStep(0);
-              else if (onboardStep === 4) setOnboardStep(1);
-              else setOnboardStep(onboardStep - 1);
+              if (onboardView === "kid-login" || onboardView === "parent-signup" || onboardView === "parent-login") {
+                setOnboardView("choose");
+              } else if (onboardView === "add-child") {
+                setOnboardView((familyState.students || []).length > 0 ? "parent-home" : "parent-signup");
+              } else if (onboardView === "parent-home") {
+                setOnboardView("parent-signup");
+              }
             }}
             style={{
               position: "absolute", top: 20, left: 20, background: "none", border: "none",
@@ -2438,7 +2206,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           >←</button>
         )}
 
-        <div key={onboardStep} style={{ display: "flex", flexDirection: "column", alignItems: "center", animation: "stepSlide 0.35s ease-out both", width: "100%" }}>
+        <div key={onboardView} style={{ display: "flex", flexDirection: "column", alignItems: "center", animation: "stepSlide 0.35s ease-out both", width: "100%" }}>
           {stepContent()}
         </div>
       </div>
@@ -2446,7 +2214,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   }
   const handleParentLogout = () => {
     setAppStarted(false);
-    setOnboardStep(0);
+    setOnboardView("choose");
+    setKidLoginError("");
     setAccountType("");
     saveStr("acctType", "");
     setParentName("");
@@ -2473,7 +2242,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       bossWins={bossWins}
       userName={userName}
       onLogout={accountType === "parent" ? handleParentLogout : () => setShowParentDash(false)}
-      onCreateStudent={() => { setAppStarted(false); setOnboardStep(4); }}
+      onCreateStudent={() => { setAppStarted(false); setGeneratedPin(String(Math.floor(1000 + Math.random() * 9000))); setUserName(""); setBirthYear(""); setUserCountry(""); setOnboardView("add-child"); }}
       onLangToggle={() => {
         const newLang = lang === "en" ? "es" : "en";
         setLang(newLang as Lang);
