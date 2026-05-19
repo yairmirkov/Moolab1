@@ -1,6 +1,51 @@
 import { useEffect, useMemo, useState } from "react";
 import { type Lang } from "./translations";
 import { TITLES, titleEquipKey, type UserStats } from "./titles";
+import TutorialOverlay, { type TutorialStep } from "./TutorialOverlay";
+
+const VAULT_TUT_KEY = "ws_tut_vault_v1";
+const VAULT_STEPS: TutorialStep[] = [
+  {
+    icon: "🏦",
+    title: { en: "Welcome to The Vault", es: "Bienvenido a La Bóveda" },
+    body: {
+      en: "This is where you spend Moolies on cool stuff — borders, themes, power-ups, and exclusive titles.",
+      es: "Aquí gastas Moolies en cosas geniales — bordes, temas, power-ups y títulos exclusivos.",
+    },
+  },
+  {
+    icon: "🔥",
+    title: { en: "Catch the Daily Deal", es: "Atrapa la Oferta del Día" },
+    body: {
+      en: "A fresh item is 30% off every day. Check back daily — deals rotate at midnight.",
+      es: "Un artículo nuevo tiene 30% de descuento cada día. Vuelve a revisar — las ofertas cambian a medianoche.",
+    },
+  },
+  {
+    icon: "🏷️",
+    title: { en: "Browse by Tab", es: "Explora por Pestaña" },
+    body: {
+      en: "Cosmetics customize your look. Power-ups give in-game advantages. Seasonal items only stick around for one month.",
+      es: "Los cosméticos personalizan tu estilo. Los power-ups dan ventajas. Los artículos de temporada solo duran un mes.",
+    },
+  },
+  {
+    icon: "🏆",
+    title: { en: "Earn Titles, Don't Buy Them", es: "Gana Títulos, no los Compres" },
+    body: {
+      en: "Titles unlock automatically by leveling up, winning bosses, and growing streaks. Tap Titles to see what's next.",
+      es: "Los títulos se desbloquean al subir de nivel, ganar jefes y mantener rachas. Toca Títulos para ver qué sigue.",
+    },
+  },
+  {
+    icon: "👆",
+    title: { en: "Tap to Buy or Equip", es: "Toca para Comprar o Equipar" },
+    body: {
+      en: "Tap an item once to preview, again to confirm. Owned items toggle equip with a single tap.",
+      es: "Toca un artículo una vez para previsualizar, otra para confirmar. Los artículos que tienes se equipan con un solo toque.",
+    },
+  },
+];
 
 const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
 
@@ -212,6 +257,11 @@ export default function TheVault({
   const [toast, setToast] = useState<string | null>(null);
   const [purchasedAnim, setPurchasedAnim] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("all");
+  const [tutOpen, setTutOpen] = useState(false);
+  useEffect(() => {
+    if (localStorage.getItem(VAULT_TUT_KEY) !== "1") setTutOpen(true);
+  }, []);
+  const closeTut = () => { setTutOpen(false); localStorage.setItem(VAULT_TUT_KEY, "1"); };
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [consumables, setConsumables] = useState<Record<string, number>>(() => readConsumables());
 
@@ -618,7 +668,10 @@ export default function TheVault({
         }
       `}</style>
 
-      <div style={{ padding: "12px 20px 0", width: "100%", maxWidth: "min(94vw, 1100px)" }}>
+      <div style={{
+        padding: "12px 20px 0", width: "100%", maxWidth: "min(94vw, 1100px)",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           style={{
@@ -628,6 +681,17 @@ export default function TheVault({
             fontSize: "0.9rem", color: "#b1d4e0", cursor: "pointer", fontFamily: FONT,
           }}
         >←</button>
+        <button
+          onClick={(e) => { e.stopPropagation(); setTutOpen(true); }}
+          aria-label={lang === "es" ? "Cómo funciona" : "How it works"}
+          style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.28)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "0.95rem", color: "#2e8bc0", cursor: "pointer",
+            fontFamily: FONT, fontWeight: 900,
+          }}
+        >?</button>
       </div>
 
       <div style={{ marginTop: 8, marginBottom: 10, textAlign: "center", animation: "vaultSlideUp 0.6s ease-out both" }}>
@@ -716,6 +780,14 @@ export default function TheVault({
           boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
         }}>{toast}</div>
       )}
+
+      <TutorialOverlay
+        open={tutOpen}
+        lang={lang}
+        steps={VAULT_STEPS}
+        accent="#2e8bc0"
+        onClose={closeTut}
+      />
     </div>
   );
 }

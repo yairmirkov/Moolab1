@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { type Lang } from "./translations";
 import ContactModal from "./ContactModal";
 import { findEquippedTitle } from "./titles";
+import Preferences from "./Preferences";
 
 const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
@@ -22,6 +23,7 @@ interface HubProps {
 
 export default function Hub({ lang, userName, moolies, xp, level, streak, bossWins, equippedItems, themeBg, onNavigate, onOpenProfile }: HubProps) {
   const [contactOpen, setContactOpen] = useState(false);
+  const [prefsOpen, setPrefsOpen] = useState(false);
   useEffect(() => {
     fetch(`${API_BASE}/stocks/prices`).catch(() => {});
   }, []);
@@ -97,6 +99,16 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       gradient: "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(120,80,20,0.16) 60%, rgba(10,15,30,0.5) 100%)",
       border: "rgba(251,191,36,0.3)",
       glow: "rgba(251,191,36,0.14)",
+    },
+    {
+      id: "prefs" as const,
+      icon: "👤",
+      title: lang === "es" ? "Preferencias" : "Preferences",
+      subtitle: lang === "es" ? "Cuéntanos sobre ti" : "Tell us about yourself",
+      accent: "#b27ffd",
+      gradient: "linear-gradient(135deg, rgba(178,127,253,0.18) 0%, rgba(80,40,140,0.16) 60%, rgba(10,15,30,0.5) 100%)",
+      border: "rgba(178,127,253,0.32)",
+      glow: "rgba(178,127,253,0.16)",
     },
   ];
 
@@ -263,7 +275,10 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
         {cards.map((card, idx) => (
           <button
             key={card.id}
-            onClick={() => onNavigate(card.id)}
+            onClick={() => {
+              if (card.id === "prefs") setPrefsOpen(true);
+              else onNavigate(card.id);
+            }}
             style={{
               width: "100%", padding: "22px 22px", borderRadius: 22,
               background: card.gradient,
@@ -357,6 +372,10 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
         defaultName={userName}
         onClose={() => setContactOpen(false)}
       />
+
+      {prefsOpen && (
+        <Preferences lang={lang} onClose={() => setPrefsOpen(false)} />
+      )}
     </div>
   );
 }

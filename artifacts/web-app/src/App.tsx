@@ -447,7 +447,7 @@ const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-seri
 const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
 const HEADING_FONT = "'Bricolage Grotesque', 'Lato', system-ui, sans-serif";
 
-type ThemeId = "navy" | "sunset" | "mint" | "electric";
+type ThemeId = "navy" | "sunset" | "mint" | "electric" | "neon_hacker" | "halloween" | "winter" | "spring" | "summer";
 const THEMES: Record<ThemeId, {
   label: string; emoji: string;
   hubBg: string;
@@ -484,7 +484,55 @@ const THEMES: Record<ThemeId, {
     panelBg: "linear-gradient(135deg, #7c3aed 0%, #1e0a3c 100%)",
     accent: "#a78bfa", accent2: "#e9d5ff",
   },
+  // ------- Cosmetic-driven themes (from equipped Vault items) -------
+  neon_hacker: {
+    label: "Neon Hacker", emoji: "💻",
+    hubBg: "radial-gradient(ellipse at top, #001a14 0%, #000806 60%, #000000 100%)",
+    slideBg: "linear-gradient(160deg, #001a14 0%, #000000 100%)",
+    panelBg: "linear-gradient(135deg, #002a22 0%, #000806 100%)",
+    accent: "#00ff87", accent2: "#60efff",
+  },
+  // ------- Seasonal themes -------
+  halloween: {
+    label: "Halloween", emoji: "🎃",
+    hubBg: "radial-gradient(ellipse at top, #ff7518 0%, #6b1a8a 55%, #1a0a1f 100%)",
+    slideBg: "linear-gradient(160deg, #2a0f1a 0%, #0a0510 100%)",
+    panelBg: "linear-gradient(135deg, #6b1a8a 0%, #1a0a1f 100%)",
+    accent: "#ff7518", accent2: "#c084fc",
+  },
+  winter: {
+    label: "Winter", emoji: "❄️",
+    hubBg: "radial-gradient(ellipse at top, #e0f2fe 0%, #7dd3fc 35%, #082f49 100%)",
+    slideBg: "linear-gradient(160deg, #0c2d4c 0%, #04121f 100%)",
+    panelBg: "linear-gradient(135deg, #1e40af 0%, #082f49 100%)",
+    accent: "#7dd3fc", accent2: "#e0f2fe",
+  },
+  spring: {
+    label: "Spring", emoji: "🌸",
+    hubBg: "radial-gradient(ellipse at top, #fbcfe8 0%, #bef264 45%, #1a3a1a 100%)",
+    slideBg: "linear-gradient(160deg, #2a3d1a 0%, #0f1a08 100%)",
+    panelBg: "linear-gradient(135deg, #ec4899 0%, #4d7c0f 100%)",
+    accent: "#f472b6", accent2: "#bef264",
+  },
+  summer: {
+    label: "Summer", emoji: "🏖️",
+    hubBg: "radial-gradient(ellipse at top, #fde68a 0%, #06b6d4 45%, #052e3a 100%)",
+    slideBg: "linear-gradient(160deg, #064e62 0%, #021820 100%)",
+    panelBg: "linear-gradient(135deg, #f59e0b 0%, #06b6d4 100%)",
+    accent: "#fb923c", accent2: "#22d3ee",
+  },
 };
+
+// Equipped Vault items can override the user-selected theme.
+// Priority: seasonal pack > cosmetic theme > user preference.
+function resolveEffectiveThemeId(equipped: string[], userTheme: ThemeId): ThemeId {
+  if (equipped.includes("halloween_pack")) return "halloween";
+  if (equipped.includes("winter_bundle")) return "winter";
+  if (equipped.includes("spring_fresh")) return "spring";
+  if (equipped.includes("summer_vibes")) return "summer";
+  if (equipped.includes("neon_hacker")) return "neon_hacker";
+  return userTheme;
+}
 
 const HYPE_LABELS = ["let's gooo", "you're cooking 🔥", "easy 💸", "fr fr", "no cap", "+vibes", "huge W", "bagged it", "money moves", "clean 🧼"];
 const pickHype = (): string => HYPE_LABELS[Math.floor(Math.random() * HYPE_LABELS.length)];
@@ -1020,7 +1068,8 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
   }, []);
   const [themeId, setThemeId] = useState<ThemeId>(() => (loadStr("themeId", "navy") as ThemeId));
   useEffect(() => { saveStr("themeId", themeId); }, [themeId]);
-  const theme = THEMES[themeId] || THEMES.navy;
+  const effectiveThemeId = resolveEffectiveThemeId(equippedItems, themeId);
+  const theme = THEMES[effectiveThemeId] || THEMES.navy;
   const [reactions, setReactions] = useState<Array<{ id: string; emoji: string; x: number; y: number; dx: number }>>([]);
   const spawnReactions = useCallback((el: HTMLElement) => {
     const rect = el.getBoundingClientRect();

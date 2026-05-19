@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import translations, { type Lang } from "./translations";
+import TutorialOverlay from "./TutorialOverlay";
 
 const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
 const SMALL_FONT = "'Lato', system-ui, -apple-system, sans-serif";
@@ -109,6 +110,42 @@ interface SandboxProps {
   onClose: () => void;
 }
 
+const TANK_TUT_KEY = "ws_tut_tank_v1";
+const TANK_STEPS: import("./TutorialOverlay").TutorialStep[] = [
+  {
+    icon: "🦈",
+    title: { en: "Welcome to The Tank", es: "Bienvenido al Tanque" },
+    body: {
+      en: "This is your practice market. Real prices, fake risk — invest Moolies and learn how money grows.",
+      es: "Este es tu mercado de práctica. Precios reales, riesgo falso — invierte Moolies y aprende cómo crece el dinero.",
+    },
+  },
+  {
+    icon: "📊",
+    title: { en: "Browse the Market", es: "Explora el Mercado" },
+    body: {
+      en: "Tap any asset to see its chart. Green = up, red = down. Riskier assets can grow faster, but can also drop hard.",
+      es: "Toca un activo para ver su gráfico. Verde = sube, rojo = baja. Los activos arriesgados crecen más rápido, pero también caen fuerte.",
+    },
+  },
+  {
+    icon: "💰",
+    title: { en: "Buy with Moolies", es: "Compra con Moolies" },
+    body: {
+      en: "Pick a quantity and confirm. Your Moolies get locked into that asset until you sell.",
+      es: "Elige una cantidad y confirma. Tus Moolies quedan invertidos en ese activo hasta que vendas.",
+    },
+  },
+  {
+    icon: "💼",
+    title: { en: "Track in Portfolio", es: "Sigue tu Cartera" },
+    body: {
+      en: "The Portfolio tab shows what you own and how much you've gained or lost. Sell anytime to lock in your winnings.",
+      es: "La pestaña Cartera muestra lo que tienes y cuánto has ganado o perdido. Vende cuando quieras para asegurar ganancias.",
+    },
+  },
+];
+
 export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: SandboxProps) {
   const t = translations.sandbox;
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -120,6 +157,11 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
   const [buyQty, setBuyQty] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [tab, setTab] = useState<"market" | "portfolio">("market");
+  const [tutOpen, setTutOpen] = useState(false);
+  useEffect(() => {
+    if (localStorage.getItem(TANK_TUT_KEY) !== "1") setTutOpen(true);
+  }, []);
+  const closeTut = () => { setTutOpen(false); localStorage.setItem(TANK_TUT_KEY, "1"); };
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -298,6 +340,17 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
             {Math.round(moolies).toLocaleString()}
           </span>
         </div>
+        <button
+          onClick={() => setTutOpen(true)}
+          aria-label={lang === "es" ? "Cómo funciona" : "How it works"}
+          style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.28)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "0.95rem", color: "#2e8bc0", cursor: "pointer", flexShrink: 0,
+            fontFamily: FONT, fontWeight: 900,
+          }}
+        >?</button>
       </div>
 
       <div style={{
@@ -315,6 +368,18 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
             {t2 === "market" ? "📊 MARKET" : `💼 ${t.portfolio[lang].toUpperCase()}`}
           </button>
         ))}
+      </div>
+
+      {/* Always-visible hint */}
+      <div style={{
+        padding: "6px 20px 2px", fontSize: "0.62rem", fontWeight: 700,
+        color: "rgba(177,212,224,0.45)", letterSpacing: "0.04em",
+        display: "flex", alignItems: "center", gap: 6,
+      }}>
+        <span style={{ opacity: 0.7 }}>💡</span>
+        {tab === "market"
+          ? (lang === "es" ? "Toca un activo para invertir Moolies" : "Tap an asset to invest Moolies")
+          : (lang === "es" ? "Vende cuando quieras para asegurar ganancias" : "Sell anytime to lock in gains")}
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px 80px" }}>
@@ -671,6 +736,14 @@ export default function Sandbox({ lang, moolies, onSpend, onEarn, onClose }: San
           color: "#fff",
         }}>{toast}</div>
       )}
+
+      <TutorialOverlay
+        open={tutOpen}
+        lang={lang}
+        steps={TANK_STEPS}
+        accent="#2e8bc0"
+        onClose={closeTut}
+      />
     </div>
   );
 }
