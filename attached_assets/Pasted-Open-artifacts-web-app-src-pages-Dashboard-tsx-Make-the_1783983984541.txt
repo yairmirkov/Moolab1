@@ -1,0 +1,47 @@
+Open artifacts/web-app/src/pages/Dashboard.tsx. Make these two changes:
+Change 1 — Add a copiedPinId state variable.
+Find this line (near the top of the Dashboard component, with the other useState declarations):
+tsconst [selectedChildId, setSelectedChildId] = useState<number | null>(null);
+Add this new line immediately after it:
+tsconst [copiedPinId, setCopiedPinId] = useState<number | null>(null);
+Change 2 — Add a copy button next to the PIN in child cards.
+In renderFamily(), find this exact JSX block (inside the .map((child) => ...) loop):
+tsx<div style={{
+  padding: "6px 11px", borderRadius: 8,
+  background: NAVY_SUBTLE, textAlign: "center",
+}}>
+  <div style={{ fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.12em", color: NAVY_MUTED }}>{t(tx.pinLabel, lang)}</div>
+  <div style={{ fontSize: "0.95rem", fontWeight: 900, color: NAVY, fontFamily: "monospace", letterSpacing: "0.12em" }}>{child.pin}</div>
+</div>
+Replace it with:
+tsx<div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+  <div style={{
+    padding: "6px 11px", borderRadius: 8,
+    background: NAVY_SUBTLE, textAlign: "center",
+  }}>
+    <div style={{ fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.12em", color: NAVY_MUTED }}>{t(tx.pinLabel, lang)}</div>
+    <div style={{ fontSize: "0.95rem", fontWeight: 900, color: NAVY, fontFamily: "monospace", letterSpacing: "0.12em" }}>{child.pin}</div>
+  </div>
+  <button
+    onClick={() => {
+      navigator.clipboard.writeText(child.pin).then(() => {
+        setCopiedPinId(child.id);
+        setTimeout(() => setCopiedPinId(null), 2000);
+      });
+    }}
+    title="Copy PIN"
+    style={{
+      background: copiedPinId === child.id ? "rgba(46,139,192,0.12)" : "none",
+      border: "none", cursor: "pointer", fontSize: "0.9rem", padding: 5, borderRadius: 6,
+      transition: "background 0.2s",
+    }}
+  >
+    {copiedPinId === child.id ? "✓" : "📋"}
+  </button>
+</div>
+Change 3 — Default to Family tab when parent has no children.
+Find this line inside the useEffect that loads children (the one that calls api.getChildren()):
+tsif (list.length && selectedChildId == null) setSelectedChildId(list[0].id);
+Add one line immediately after it:
+tsif (list.length === 0) setActiveTab("family");
+After these changes: the Family tab will automatically be active when a parent logs in with no children yet, and every child card in the Family tab will have a 📋 button next to their PIN that copies it to clipboard and briefly shows ✓.

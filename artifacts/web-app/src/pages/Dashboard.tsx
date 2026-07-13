@@ -83,6 +83,7 @@ export default function Dashboard() {
   const [loadingChildren, setLoadingChildren] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "progress" | "family" | "billing">("overview");
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
+  const [copiedPinId, setCopiedPinId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!parent) {
@@ -93,6 +94,7 @@ export default function Dashboard() {
       .then((list) => {
         setChildren(list);
         if (list.length && selectedChildId == null) setSelectedChildId(list[0].id);
+        if (list.length === 0) setActiveTab("family");
       })
       .catch(() => {})
       .finally(() => setLoadingChildren(false));
@@ -470,12 +472,30 @@ export default function Dashboard() {
                     {(SKILL_LEVELS.find((s) => s.id === (child.skillLevel || "beginner")) || SKILL_LEVELS[0])[lang === "es" ? "labelEs" : "labelEn"]}
                   </div>
                 </div>
-                <div style={{
-                  padding: "6px 11px", borderRadius: 8,
-                  background: NAVY_SUBTLE, textAlign: "center",
-                }}>
-                  <div style={{ fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.12em", color: NAVY_MUTED }}>{t(tx.pinLabel, lang)}</div>
-                  <div style={{ fontSize: "0.95rem", fontWeight: 900, color: NAVY, fontFamily: "monospace", letterSpacing: "0.12em" }}>{child.pin}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{
+                    padding: "6px 11px", borderRadius: 8,
+                    background: NAVY_SUBTLE, textAlign: "center",
+                  }}>
+                    <div style={{ fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.12em", color: NAVY_MUTED }}>{t(tx.pinLabel, lang)}</div>
+                    <div style={{ fontSize: "0.95rem", fontWeight: 900, color: NAVY, fontFamily: "monospace", letterSpacing: "0.12em" }}>{child.pin}</div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(child.pin).then(() => {
+                        setCopiedPinId(child.id);
+                        setTimeout(() => setCopiedPinId(null), 2000);
+                      });
+                    }}
+                    title="Copy PIN"
+                    style={{
+                      background: copiedPinId === child.id ? "rgba(46,139,192,0.12)" : "none",
+                      border: "none", cursor: "pointer", fontSize: "0.9rem", padding: 5, borderRadius: 6,
+                      transition: "background 0.2s",
+                    }}
+                  >
+                    {copiedPinId === child.id ? "✓" : "📋"}
+                  </button>
                 </div>
                 <button onClick={() => handleDelete(child.id)} title={t(tx.removeTitle, lang)} style={{
                   background: "none", border: "none", color: "rgba(12,45,72,0.25)",
