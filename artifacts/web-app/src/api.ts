@@ -52,4 +52,10 @@ export const api = {
 
   sendContact: (name: string, email: string, message: string, lang: "en" | "es") =>
     request("/contact", { method: "POST", body: JSON.stringify({ name, email, message, lang }) }),
+
+  adminGetParents: () => request("/admin/parents"),
+
+  adminGetChildren: () => request("/admin/children"),
+
+  adminGetMessages: () => request("/admin/messages"),
 };
