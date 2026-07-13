@@ -212,7 +212,7 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
       </nav>
 
       {/* HERO */}
-      <section className="relative pt-24 sm:pt-28 pb-20 sm:pb-24 px-6 overflow-hidden">
+      <section className="relative pt-24 sm:pt-28 pb-8 sm:pb-12 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-sky-50/60 via-white to-white" />
         <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-sky-200/20 blur-3xl" />
         <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-sky-300/15 blur-3xl" />
@@ -241,7 +241,7 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
             Start Free &#x26A1;
           </button>
           <p className="text-xs text-[#0c2d48]/30 font-medium mt-5">Free to start · No ads · Safe for kids</p>
-          <p className="text-[10px] text-[#0c2d48]/20 font-medium mt-2">Moolab = moola (money) + lab. The place where money fluency is made.</p>
+          <p className="text-[10px] text-[#0c2d48]/40 font-medium mt-2">Moolab = moola (money) + lab. The place where money fluency is made.</p>
         </div>
       </section>
 
