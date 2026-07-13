@@ -217,6 +217,10 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
         <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-sky-200/20 blur-3xl" />
         <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-sky-300/15 blur-3xl" />
         <div className="relative max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0c2d48]/5 border border-[#0c2d48]/10 mb-7">
+            <span style={{ fontSize: "1rem" }}>🦈</span>
+            <span className="text-xs font-bold text-[#145374] tracking-wide">Think Shark Tank meets Duolingo — for kids</span>
+          </div>
           <h1
             className="font-black tracking-tight leading-[1.1] mb-6 sm:mb-8"
             style={{ fontSize: "clamp(1.875rem, 6vw, 3.5rem)" }}
@@ -234,9 +238,10 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
             onClick={goSignUp}
             className="px-9 py-4 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm sm:text-base tracking-wide shadow-xl shadow-sky-300/30 hover:shadow-sky-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
           >
-            Start Now &#x26A1;
+            Start Free &#x26A1;
           </button>
           <p className="text-xs text-[#0c2d48]/30 font-medium mt-5">Free to start · No ads · Safe for kids</p>
+          <p className="text-[10px] text-[#0c2d48]/20 font-medium mt-2">Moolab = moola (money) + lab. The place where money fluency is made.</p>
         </div>
       </section>
 
@@ -251,8 +256,93 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
             <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">how money works.</span>
           </h2>
           <p className="text-base sm:text-lg text-[#0c2d48]/55 font-medium leading-relaxed max-w-2xl mx-auto">
-            Piggy banks don't teach them to invest, and real trading apps are too dangerous. We built the bridge.
+            Piggy banks don't teach them to invest, and real trading apps are too dangerous. We built the bridge between childhood play and financial confidence.
           </p>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF STRIP */}
+      <section className="py-10 sm:py-12 px-6 bg-white border-b border-sky-100/60">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-3 gap-6 text-center">
+            {[
+              { value: "5 min", label: "A day is all it takes" },
+              { value: "K–12", label: "Every grade covered" },
+              { value: "$0", label: "Real money at risk" },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="text-2xl sm:text-3xl font-black text-[#145374] tracking-tight">{stat.value}</div>
+                <div className="text-xs sm:text-sm font-semibold text-[#0c2d48]/45 mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* APP PREVIEW */}
+      <section className="py-16 sm:py-20 px-6 bg-white">
+        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+          <div className="flex-1 text-left">
+            <p className="text-xs font-bold text-[#145374] uppercase tracking-[0.15em] mb-3">Inside the app</p>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#0c2d48] mb-4 leading-tight">
+              Your kid's financial<br />command center.
+            </h2>
+            <p className="text-sm sm:text-base text-[#0c2d48]/55 font-medium leading-relaxed mb-6">
+              AI-powered lessons, a live stock simulator, and a reward economy — all in one place designed for how kids actually learn.
+            </p>
+            <div className="flex flex-col gap-3">
+              {[
+                { icon: "🧠", text: "Bite-sized lessons that stick in 5 minutes" },
+                { icon: "📈", text: "Real market data, zero real risk" },
+                { icon: "🏆", text: "Rewards that make learning addictive" },
+              ].map((item) => (
+                <div key={item.text} className="flex items-center gap-3">
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-sm font-semibold text-[#0c2d48]/70">{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex justify-center">
+            <div style={{
+              width: 260,
+              background: "#0a1629",
+              borderRadius: 36,
+              padding: "14px 10px",
+              boxShadow: "0 40px 80px rgba(12,45,72,0.25), 0 0 0 8px #0c2d48",
+            }}>
+              <div style={{ borderRadius: 28, overflow: "hidden", background: "#0a1629" }}>
+                <div style={{ padding: "10px 18px 6px", display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "rgba(177,212,224,0.4)", fontSize: 10, fontWeight: 700 }}>9:41</span>
+                  <div style={{ width: 20, height: 6, background: "rgba(255,255,255,0.1)", borderRadius: 3, marginTop: 3 }} />
+                </div>
+                <div style={{ padding: "6px 18px 12px" }}>
+                  <div style={{ color: "rgba(177,212,224,0.45)", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 3 }}>LEVEL 4 SHARK</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ color: "#fff", fontSize: 16, fontWeight: 900 }}>The Lab 🧪</div>
+                    <div style={{ color: "#2e8bc0", fontSize: 11, fontWeight: 800 }}>1,240 XP</div>
+                  </div>
+                  <div style={{ marginTop: 7, height: 4, background: "rgba(255,255,255,0.07)", borderRadius: 2, overflow: "hidden" }}>
+                    <div style={{ width: "65%", height: "100%", background: "linear-gradient(90deg, #2e8bc0, #b1d4e0)", borderRadius: 2 }} />
+                  </div>
+                </div>
+                <div style={{ margin: "0 10px 10px", background: "#0d1f35", borderRadius: 16, padding: "16px 14px" }}>
+                  <div style={{ color: "rgba(177,212,224,0.4)", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", marginBottom: 7, textTransform: "uppercase" }}>TODAY'S LESSON</div>
+                  <div style={{ color: "#fff", fontSize: 12, fontWeight: 900, marginBottom: 5, lineHeight: 1.4 }}>What is Compound Interest?</div>
+                  <div style={{ color: "rgba(177,212,224,0.5)", fontSize: 10, fontWeight: 600, lineHeight: 1.5, marginBottom: 12 }}>Money that earns money. The secret weapon of every great investor.</div>
+                  <div style={{ background: "linear-gradient(135deg, #145374, #2e8bc0)", borderRadius: 10, padding: "9px 0", textAlign: "center", color: "#fff", fontWeight: 900, fontSize: 11 }}>Start Lesson →</div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-around", padding: "6px 10px 14px" }}>
+                  {[{ v: "12🔥", l: "Streak" }, { v: "850", l: "Moolies" }, { v: "5", l: "Boss Wins" }].map((s) => (
+                    <div key={s.l} style={{ textAlign: "center" }}>
+                      <div style={{ color: "#fff", fontWeight: 900, fontSize: 13 }}>{s.v}</div>
+                      <div style={{ color: "rgba(177,212,224,0.35)", fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 2 }}>{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -327,8 +417,11 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
             <br />
             <span style={{ color: "#b1d4e0" }}>you wish you had.</span>
           </h2>
-          <p className="text-sm sm:text-base font-semibold mb-10" style={{ color: "rgba(177,212,224,0.55)" }}>
+          <p className="text-sm sm:text-base font-semibold mb-3" style={{ color: "rgba(177,212,224,0.55)" }}>
             5 minutes a day. A lifetime of fluency.
+          </p>
+          <p className="text-xs font-medium mb-10" style={{ color: "rgba(177,212,224,0.3)" }}>
+            Join the families raising the next generation of financially confident kids.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <button
