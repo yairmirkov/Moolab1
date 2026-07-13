@@ -12,6 +12,7 @@ export default function Register() {
   const lang = useLang();
   const langSuffix = useLangSuffix();
   const tx = translations.pages.register;
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -32,7 +33,8 @@ export default function Register() {
     setLoading(true);
     try {
       await registerParent(email, password);
-      navigate(`/dashboard${langSuffix}`);
+      if (name.trim()) localStorage.setItem("ws_parentName", name.trim());
+      navigate("/onboarding" + langSuffix);
     } catch (err: any) {
       setError(err.message || t(tx.registrationFailed, lang));
     } finally {
@@ -40,7 +42,7 @@ export default function Register() {
     }
   };
 
-  const ready = email.trim() && password.length >= 6 && password === confirm;
+  const ready = name.trim() && email.trim() && password.length >= 6 && password === confirm;
 
   return (
     <div style={{
@@ -65,6 +67,24 @@ export default function Register() {
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div>
+            <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
+              YOUR NAME
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Sarah"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={{
+                width: "100%", padding: "14px 18px", borderRadius: 14,
+                background: "rgba(177,212,224,0.12)", border: "1.5px solid rgba(46,139,192,0.15)",
+                color: "#0c2d48", fontFamily: FONT, fontWeight: 700, fontSize: "0.95rem",
+                outline: "none", boxSizing: "border-box",
+              }}
+            />
+          </div>
+
           <div>
             <label style={{ display: "block", color: "rgba(12,45,72,0.5)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
               {t(tx.email, lang)}
