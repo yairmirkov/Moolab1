@@ -75,7 +75,7 @@ router.post("/children", async (req, res) => {
   }
 
   try {
-    const { displayName, ageGroup, grade, skillLevel } = req.body;
+    const { displayName, ageGroup, grade, skillLevel, pin: requestedPin } = req.body;
     if (!displayName || !ageGroup) {
       return res.status(400).json({ error: "Display name and age group are required" });
     }
@@ -94,7 +94,7 @@ router.post("/children", async (req, res) => {
       attempts++;
     }
 
-    const pin = generatePin();
+    const pin = typeof requestedPin === "string" && /^\d{4}$/.test(requestedPin) ? requestedPin : generatePin();
 
     const [child] = await db.insert(childrenTable).values({
       parentId,

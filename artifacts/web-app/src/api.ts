@@ -1,3 +1,5 @@
+import { getGradeOption } from "./gradeMap";
+
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 async function request(path: string, options: RequestInit = {}) {
@@ -32,6 +34,12 @@ export const api = {
 
   createChild: (displayName: string, ageGroup: string, grade?: string, skillLevel?: string) =>
     request("/children", { method: "POST", body: JSON.stringify({ displayName, ageGroup, grade, skillLevel }) }),
+
+  addChild: ({ displayName, grade, skillLevel, pin }: { displayName: string; grade: string; skillLevel?: string; pin?: string }) =>
+    request("/children", {
+      method: "POST",
+      body: JSON.stringify({ displayName, ageGroup: getGradeOption(grade).apiBucket, grade, skillLevel, pin }),
+    }),
 
   updateChildGrade: (id: number, grade: string, skillLevel?: string) =>
     request(`/children/${id}/grade`, { method: "PUT", body: JSON.stringify({ grade, skillLevel }) }),

@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Onboarding from "./pages/Onboarding";
 import AppLogin from "./pages/AppLogin";
 import Demo from "./pages/Demo";
 import Feed from "./pages/Feed";
@@ -36,6 +37,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/app-login" element={<AppLogin />} />
         <Route path="/demo" element={<Demo />} />
         <Route path="/feed" element={<Feed />} />
