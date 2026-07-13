@@ -40,10 +40,12 @@ export default function Login() {
       display: "flex", alignItems: "center", justifyContent: "center",
       fontFamily: FONT, padding: 20,
     }}>
+      <div style={{ width: "100%", maxWidth: 420 }}>
       <div style={{
-        width: "100%", maxWidth: 420, background: "#fff",
+        width: "100%", background: "#fff",
         borderRadius: 28, padding: "48px 36px",
         boxShadow: "0 20px 60px rgba(12,45,72,0.08)",
+        boxSizing: "border-box",
       }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <img src={`${import.meta.env.BASE_URL}moolab-logo-trimmed.png`} alt="Moolab" style={{ height: 60, marginBottom: 12, display: "block", marginLeft: "auto", marginRight: "auto" }} />
@@ -122,14 +124,39 @@ export default function Login() {
               {t(tx.createAccount, lang)}
             </Link>
           </p>
-          <Link to={`/app-login${langSuffix}`} style={{
-            display: "block", marginTop: 12, color: "rgba(12,45,72,0.35)",
-            fontSize: "0.75rem", fontWeight: 700, textDecoration: "underline",
-            textUnderlineOffset: 3,
-          }}>
-            {t(tx.studentPinAccess, lang)}
-          </Link>
         </div>
+      </div>
+
+      <Link
+        to={`/app-login${langSuffix}`}
+        style={{
+          display: "flex", alignItems: "center", gap: 16,
+          background: "linear-gradient(135deg, #0a1f35, #0c2d48)",
+          borderRadius: 20, padding: 22, marginTop: 16,
+          textDecoration: "none",
+          transition: "transform 0.2s ease, box-shadow 0.2s ease",
+          boxSizing: "border-box",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "translateY(-2px)";
+          e.currentTarget.style.boxShadow = "0 12px 36px rgba(12,45,72,0.25)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = "none";
+        }}
+      >
+        <span style={{ fontSize: "1.8rem" }}>🦈</span>
+        <span style={{ flex: 1 }}>
+          <span style={{ display: "block", color: "#fff", fontWeight: 900, fontSize: "1rem", letterSpacing: "-0.01em" }}>
+            Student Login
+          </span>
+          <span style={{ display: "block", color: "rgba(177,212,224,0.55)", fontWeight: 600, fontSize: "0.78rem", marginTop: 2 }}>
+            Enter username &amp; PIN to play
+          </span>
+        </span>
+        <span style={{ color: "rgba(177,212,224,0.7)", fontSize: "1.3rem", fontWeight: 900 }}>→</span>
+      </Link>
       </div>
     </div>
   );
