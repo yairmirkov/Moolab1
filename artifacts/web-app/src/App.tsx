@@ -523,6 +523,18 @@ const THEMES: Record<ThemeId, {
   },
 };
 
+function hexLuminance(hex: string): number {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0,2), 16) / 255;
+  const g = parseInt(h.slice(2,4), 16) / 255;
+  const b = parseInt(h.slice(4,6), 16) / 255;
+  const toLinear = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+function vibeTextColor(bgHex: string): string {
+  return hexLuminance(bgHex) > 0.25 ? "#0c2d48" : "#ffffff";
+}
+
 // Equipped Vault items can override the user-selected theme.
 // Priority: seasonal pack > cosmetic theme > user preference.
 function resolveEffectiveThemeId(equipped: string[], userTheme: ThemeId): ThemeId {
@@ -4005,10 +4017,14 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                       className="ws-btn"
                       onClick={() => setThemeId(id)}
                       style={{
-                        padding: "10px 8px", borderRadius: 12, fontFamily: FONT,
-                        background: tdef.panelBg,
-                        border: active ? `2px solid ${tdef.accent}` : "1px solid rgba(255,255,255,0.08)",
-                        color: "#fff", fontWeight: 700, fontSize: "0.7rem",
+                        padding: "10px 8px", minHeight: 56, borderRadius: 14, fontFamily: FONT,
+                        background: tdef.accent,
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: vibeTextColor(tdef.accent),
+                        textShadow: "none",
+                        fontWeight: 800, fontSize: "0.72rem",
+                        outline: active ? "2px solid #fff" : "none",
+                        outlineOffset: active ? "2px" : undefined,
                         cursor: "pointer", display: "flex", alignItems: "center", gap: 6, justifyContent: "center",
                       }}
                     >
