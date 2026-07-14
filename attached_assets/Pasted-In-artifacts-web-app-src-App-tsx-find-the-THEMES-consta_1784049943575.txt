@@ -1,0 +1,35 @@
+In artifacts/web-app/src/App.tsx, find the THEMES constant (around line 454) and the section that renders the vibe/theme picker buttons (search for "neon_hacker" near button/onClick code, or search for the string "Navy" or "Sunset" near onClick handlers that call setTheme or similar).
+
+Step 1 — Add a luminance helper right after the THEMES constant definition:
+
+function hexLuminance(hex: string): number {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0,2), 16) / 255;
+  const g = parseInt(h.slice(2,4), 16) / 255;
+  const b = parseInt(h.slice(4,6), 16) / 255;
+  const toLinear = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+function vibeTextColor(bgHex: string): string {
+  return hexLuminance(bgHex) > 0.25 ? "#0c2d48" : "#ffffff";
+}
+
+Step 2 — Find each vibe theme button in the JSX. Each button currently uses one of the theme's colors as its background (likely the accent or a derived color). Update each button so that:
+
+a) The button background uses the theme's accent color as a solid color (e.g., background: theme.accent)
+b) The text color is set dynamically: color: vibeTextColor(theme.accent)
+c) Add textShadow: "none" (override any inherited shadow that might hide text)
+d) Add a selected-state indicator: if the current theme matches this button's theme id, add a white ring: outline: "2px solid #fff", outlineOffset: "2px"
+
+Specifically for these themes whose accent colors are light, the text should be dark (#0c2d48):
+- winter (accent: "#7dd3fc" — light blue)
+- spring (accent: "#f472b6" — pink, medium — use dark text)
+- summer (accent: "#fb923c" — orange, medium-light — use dark text)
+
+And these themes whose accent colors are dark or vivid on dark bg need white text:
+- navy, sunset, mint, electric, neon_hacker, halloween
+
+Step 3 — Make each vibe button taller and easier to tap:
+padding: "10px 8px", minHeight: 56, borderRadius: 14, fontSize: "0.72rem", fontWeight: 800
+
+After this change, all 9 vibe theme buttons should have clearly readable text regardless of the color scheme, and the active theme should have a visible white outline ring.

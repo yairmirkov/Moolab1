@@ -1,3 +1,5 @@
+In artifacts/web-app/src/Hub.tsx, completely replace the file contents with the following:
+
 import { useEffect, useState } from "react";
 import { type Lang } from "./translations";
 import ContactModal from "./ContactModal";
@@ -431,3 +433,5 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
     </div>
   );
 }
+
+After this change the Hub should show: a proper hero section (avatar + username large + XP progress bar + streak/boss badges inline), a ⚙️ preferences button top-right, and 3 nav cards (Lab, Tank, Vault) in an auto-fill grid — 1 column on mobile, 3 columns on desktop. No more orphaned Preferences card.
