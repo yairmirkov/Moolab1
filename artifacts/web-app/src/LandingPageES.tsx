@@ -212,11 +212,15 @@ export default function LandingPageES({ onParentLogin, onTestApp, onSignUp }: La
       </nav>
 
       {/* HERO */}
-      <section className="relative pt-24 sm:pt-28 pb-20 sm:pb-24 px-6 overflow-hidden">
+      <section className="relative pt-24 sm:pt-28 pb-8 sm:pb-12 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-sky-50/60 via-white to-white" />
         <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-sky-200/20 blur-3xl" />
         <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-sky-300/15 blur-3xl" />
         <div className="relative max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0c2d48]/5 border border-[#0c2d48]/10 mb-7">
+            <span style={{ fontSize: "1rem" }}>🦈</span>
+            <span className="text-xs font-bold text-[#145374] tracking-wide">Piensa en Shark Tank más Duolingo — para niños</span>
+          </div>
           <h1
             className="font-black tracking-tight leading-[1.1] mb-6 sm:mb-8"
             style={{ fontSize: "clamp(1.875rem, 6vw, 3.5rem)" }}
@@ -234,9 +238,10 @@ export default function LandingPageES({ onParentLogin, onTestApp, onSignUp }: La
             onClick={goSignUp}
             className="px-9 py-4 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm sm:text-base tracking-wide shadow-xl shadow-sky-300/30 hover:shadow-sky-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
           >
-            Empezar Ahora &#x26A1;
+            Empieza Gratis &#x26A1;
           </button>
           <p className="text-xs text-[#0c2d48]/30 font-medium mt-5">Gratis para empezar · Sin anuncios · Seguro para niños</p>
+          <p className="text-[10px] text-[#0c2d48]/40 font-medium mt-2">Moolab = moola (dinero) + lab (laboratorio). El lugar donde se crea la fluidez financiera.</p>
         </div>
       </section>
 
@@ -251,8 +256,93 @@ export default function LandingPageES({ onParentLogin, onTestApp, onSignUp }: La
             <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">cómo funciona el dinero.</span>
           </h2>
           <p className="text-base sm:text-lg text-[#0c2d48]/55 font-medium leading-relaxed max-w-2xl mx-auto">
-            Las alcancías no enseñan a invertir, y las apps reales de inversión son demasiado peligrosas. Nosotros construimos el puente.
+            Las alcancías no enseñan a invertir, y las apps reales de inversión son demasiado peligrosas. Nosotros construimos el puente entre el juego de la infancia y la confianza financiera.
           </p>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF STRIP */}
+      <section className="py-10 sm:py-12 px-6 bg-white border-b border-sky-100/60">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-3 gap-6 text-center">
+            {[
+              { value: "5 min", label: "Al día es todo lo que necesitan" },
+              { value: "K–12", label: "Todos los grados cubiertos" },
+              { value: "$0", label: "De dinero real en riesgo" },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="text-2xl sm:text-3xl font-black text-[#145374] tracking-tight">{stat.value}</div>
+                <div className="text-xs sm:text-sm font-semibold text-[#0c2d48]/45 mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* APP PREVIEW */}
+      <section className="py-16 sm:py-20 px-6 bg-white">
+        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+          <div className="flex-1 text-left">
+            <p className="text-xs font-bold text-[#145374] uppercase tracking-[0.15em] mb-3">Dentro de la app</p>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#0c2d48] mb-4 leading-tight">
+              El centro de mando financiero<br />de tu hijo.
+            </h2>
+            <p className="text-sm sm:text-base text-[#0c2d48]/55 font-medium leading-relaxed mb-6">
+              Lecciones con IA, un simulador de bolsa en vivo y una economía de recompensas — todo en un solo lugar diseñado para cómo aprenden los niños de verdad.
+            </p>
+            <div className="flex flex-col gap-3">
+              {[
+                { icon: "🧠", text: "Lecciones cortas que se aprenden en 5 minutos" },
+                { icon: "📈", text: "Datos reales del mercado, cero riesgo real" },
+                { icon: "🏆", text: "Recompensas que hacen adictivo el aprendizaje" },
+              ].map((item) => (
+                <div key={item.text} className="flex items-center gap-3">
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-sm font-semibold text-[#0c2d48]/70">{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex justify-center">
+            <div style={{
+              width: 260,
+              background: "#0a1629",
+              borderRadius: 36,
+              padding: "14px 10px",
+              boxShadow: "0 40px 80px rgba(12,45,72,0.25), 0 0 0 8px #0c2d48",
+            }}>
+              <div style={{ borderRadius: 28, overflow: "hidden", background: "#0a1629" }}>
+                <div style={{ padding: "10px 18px 6px", display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "rgba(177,212,224,0.4)", fontSize: 10, fontWeight: 700 }}>9:41</span>
+                  <div style={{ width: 20, height: 6, background: "rgba(255,255,255,0.1)", borderRadius: 3, marginTop: 3 }} />
+                </div>
+                <div style={{ padding: "6px 18px 12px" }}>
+                  <div style={{ color: "rgba(177,212,224,0.45)", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 3 }}>TIBURÓN NIVEL 4</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ color: "#fff", fontSize: 16, fontWeight: 900 }}>El Laboratorio 🧪</div>
+                    <div style={{ color: "#2e8bc0", fontSize: 11, fontWeight: 800 }}>1,240 XP</div>
+                  </div>
+                  <div style={{ marginTop: 7, height: 4, background: "rgba(255,255,255,0.07)", borderRadius: 2, overflow: "hidden" }}>
+                    <div style={{ width: "65%", height: "100%", background: "linear-gradient(90deg, #2e8bc0, #b1d4e0)", borderRadius: 2 }} />
+                  </div>
+                </div>
+                <div style={{ margin: "0 10px 10px", background: "#0d1f35", borderRadius: 16, padding: "16px 14px" }}>
+                  <div style={{ color: "rgba(177,212,224,0.4)", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", marginBottom: 7, textTransform: "uppercase" }}>LECCIÓN DE HOY</div>
+                  <div style={{ color: "#fff", fontSize: 12, fontWeight: 900, marginBottom: 5, lineHeight: 1.4 }}>¿Qué es el interés compuesto?</div>
+                  <div style={{ color: "rgba(177,212,224,0.5)", fontSize: 10, fontWeight: 600, lineHeight: 1.5, marginBottom: 12 }}>Dinero que genera dinero. El arma secreta de todo gran inversionista.</div>
+                  <div style={{ background: "linear-gradient(135deg, #145374, #2e8bc0)", borderRadius: 10, padding: "9px 0", textAlign: "center", color: "#fff", fontWeight: 900, fontSize: 11 }}>Empezar Lección →</div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-around", padding: "6px 10px 14px" }}>
+                  {[{ v: "12🔥", l: "Racha" }, { v: "850", l: "Moolies" }, { v: "5", l: "Jefes" }].map((s) => (
+                    <div key={s.l} style={{ textAlign: "center" }}>
+                      <div style={{ color: "#fff", fontWeight: 900, fontSize: 13 }}>{s.v}</div>
+                      <div style={{ color: "rgba(177,212,224,0.35)", fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 2 }}>{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -327,8 +417,11 @@ export default function LandingPageES({ onParentLogin, onTestApp, onSignUp }: La
             <br />
             <span style={{ color: "#b1d4e0" }}>que tú hubieras querido tener.</span>
           </h2>
-          <p className="text-sm sm:text-base font-semibold mb-10" style={{ color: "rgba(177,212,224,0.55)" }}>
+          <p className="text-sm sm:text-base font-semibold mb-3" style={{ color: "rgba(177,212,224,0.55)" }}>
             5 minutos al día. Una vida entera de fluidez financiera.
+          </p>
+          <p className="text-xs font-medium mb-10" style={{ color: "rgba(177,212,224,0.3)" }}>
+            Únete a las familias que están criando a la próxima generación de niños con confianza financiera.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <button
