@@ -802,7 +802,7 @@ function PodcastClipSlide({
 
           <div style={{
             display: "flex", flexDirection: "column", gap: 10,
-            width: "100%", maxWidth: 380,
+            width: "100%", maxWidth: "min(100%, 460px)",
           }}>
             {(hasPlayed ? dialogue.slice(0, visibleLines) : dialogue.slice(0, 2)).map((line, idx) => {
               const isHost = line.speaker.toLowerCase() === "host" || line.speaker.toLowerCase() === "presentador" || line.speaker.toLowerCase() === "presentadora";
@@ -1534,7 +1534,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               {t.auth.signUpSubtitle[lang]}
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 340, marginBottom: 24 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: "min(100%, 460px)", marginBottom: 24 }}>
               <button
                 className="ws-btn"
                 onClick={() => {
@@ -1656,7 +1656,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               {t.auth.enterPinPrompt[lang]}
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: "min(100%, 460px)", marginBottom: 20 }}>
               <div>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
                   {t.auth.nickname[lang]}
@@ -1703,7 +1703,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
             {kidLoginError && (
               <div style={{
-                width: "100%", maxWidth: 340, marginBottom: 14, padding: "10px 14px",
+                width: "100%", maxWidth: "min(100%, 460px)", marginBottom: 14, padding: "10px 14px",
                 borderRadius: 10, background: "rgba(220,53,69,0.08)",
                 border: "1px solid rgba(220,53,69,0.25)", color: "#b32a3a",
                 fontSize: "0.72rem", fontWeight: 700, textAlign: "center",
@@ -1717,7 +1717,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               onClick={attemptPinLogin}
               disabled={!canLogin}
               style={{
-                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                width: "100%", maxWidth: "min(100%, 460px)", padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
                 background: canLogin
                   ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
@@ -1749,7 +1749,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               {t.auth.parentSignUpDesc[lang]}
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: "min(100%, 460px)", marginBottom: 20 }}>
               <div>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>{t.onboard.yourName[lang]}</label>
                 <input
@@ -1781,7 +1781,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               }}
               disabled={!canContinue}
               style={{
-                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                width: "100%", maxWidth: "min(100%, 460px)", padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
                 background: canContinue
                   ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
@@ -1857,7 +1857,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               {t.auth.loginSubtitle[lang]}
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: "min(100%, 460px)", marginBottom: 20 }}>
               <div>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>{t.onboard.yourName[lang]}</label>
                 <input
@@ -1882,7 +1882,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               onClick={handleLogin}
               disabled={!canLogin}
               style={{
-                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                width: "100%", maxWidth: "min(100%, 460px)", padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
                 background: canLogin
                   ? "linear-gradient(135deg, #0c2d48, #145374)"
@@ -1931,7 +1931,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             </p>
 
             {students.length > 0 && (
-              <div style={{ width: "100%", maxWidth: 340, marginBottom: 16 }}>
+              <div style={{ width: "100%", maxWidth: "min(100%, 460px)", marginBottom: 16 }}>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 8, paddingLeft: 4 }}>
                   {t.auth.studentProfiles[lang]}
                 </label>
@@ -1973,7 +1973,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                 setOnboardView("add-child");
               }}
               style={{
-                width: "100%", maxWidth: 340, padding: "14px 20px", borderRadius: 16,
+                width: "100%", maxWidth: "min(100%, 460px)", padding: "14px 20px", borderRadius: 16,
                 background: "rgba(46,139,192,0.08)", border: "1px dashed rgba(46,139,192,0.25)",
                 color: "#145374", fontFamily: FONT, fontWeight: 800, fontSize: "0.85rem",
                 cursor: "pointer", marginBottom: 12,
@@ -2002,7 +2002,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                   startSession({ birthYear: firstStudent.birthYear, accountType: "parent" });
                 }}
                 style={{
-                  width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                  width: "100%", maxWidth: "min(100%, 460px)", padding: "18px 40px", borderRadius: 18,
                   border: "none", fontFamily: FONT,
                   background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
                   color: "#fff", fontWeight: 900, fontSize: "1.05rem", letterSpacing: "0.06em",
@@ -2037,7 +2037,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               {t.auth.personalizedProfile[lang]}
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 340, marginBottom: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: "min(100%, 460px)", marginBottom: 20 }}>
               <div>
                 <label style={{ display: "block", color: "rgba(12,45,72,0.45)", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6, paddingLeft: 4 }}>
                   {t.auth.nickname[lang]}
@@ -2125,7 +2125,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
             )}
 
             <div style={{
-              width: "100%", maxWidth: 340, marginBottom: 20, padding: "16px 20px", borderRadius: 16,
+              width: "100%", maxWidth: "min(100%, 460px)", marginBottom: 20, padding: "16px 20px", borderRadius: 16,
               background: "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(177,212,224,0.08))",
               border: "1px solid rgba(46,139,192,0.15)", textAlign: "center",
             }}>
@@ -2162,7 +2162,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               }}
               disabled={!canCreate}
               style={{
-                width: "100%", maxWidth: 340, padding: "18px 40px", borderRadius: 18,
+                width: "100%", maxWidth: "min(100%, 460px)", padding: "18px 40px", borderRadius: 18,
                 border: "none", fontFamily: FONT,
                 background: canCreate
                   ? "linear-gradient(135deg, #2e8bc0, #b1d4e0)"
@@ -3329,7 +3329,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     textShadow: "0 1px 8px rgba(0,0,0,0.9)",
                     textAlign: "left",
                     letterSpacing: "0.01em",
-                    maxWidth: 340,
+                    maxWidth: "min(100%, 460px)",
                   }}
                 >
                   {card.desc}
@@ -4368,7 +4368,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
                     borderRadius: 28,
                     border: "1px solid rgba(46,139,192,0.2)",
                     width: "100%",
-                    maxWidth: 380,
+                    maxWidth: "min(100%, 460px)",
                     backdropFilter: "blur(20px)",
                     WebkitBackdropFilter: "blur(20px)",
                     boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 60px rgba(46,139,192,0.08)",
