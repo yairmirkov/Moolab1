@@ -2356,7 +2356,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
         </div>
 
         {/* Header */}
-        <div style={{ textAlign: "center", maxWidth: 440, width: "100%", marginBottom: 24, animation: "subjectFadeIn 0.55s ease-out 0.05s both" }}>
+        <div style={{ textAlign: "center", maxWidth: "min(100%, 720px)", width: "100%", marginBottom: 24, animation: "subjectFadeIn 0.55s ease-out 0.05s both" }}>
           <div style={{
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             width: 56, height: 56, borderRadius: 18, marginBottom: 14,
@@ -2380,8 +2380,10 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
 
         {/* Subjects list — one wide button per row */}
         <div style={{
-          display: "flex", flexDirection: "column", gap: 10,
-          width: "100%", maxWidth: 440,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))",
+          gap: 10,
+          width: "100%", maxWidth: "min(100%, 720px)",
         }}>
           {(() => {
             const NEONS = [
@@ -2694,7 +2696,7 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
       style={{
         position: "relative",
         width: "100%",
-        maxWidth: isPhoneShapedView ? 480 : "100%",
+        maxWidth: isPhoneShapedView ? "min(100%, 640px)" : "100%",
         margin: "0 auto",
         background: "#000",
         height: "100%",
