@@ -523,7 +523,7 @@ export default function CommandCenter({
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
         background: "#fff", borderBottom: `1px solid ${NAVY_BORDER}`,
-        padding: "16px 24px",
+        padding: "16px clamp(24px, 4vw, 60px)",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <div>
@@ -582,7 +582,7 @@ export default function CommandCenter({
         </div>
       </div>
 
-      <div className="cc-animate" key={activeTab} style={{ padding: "24px", maxWidth: 640, margin: "0 auto" }}>
+      <div className="cc-animate" key={activeTab} style={{ padding: "24px clamp(24px, 4vw, 60px)", maxWidth: 960, margin: "0 auto" }}>
         {tabContent[activeTab]()}
       </div>
 
