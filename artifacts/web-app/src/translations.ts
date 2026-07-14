@@ -63,7 +63,7 @@ const translations = {
     bossWins: { en: "BOSS WINS", es: "VICTORIAS JEFE" },
     streak: { en: "STREAK", es: "RACHA" },
     module: { en: "MODULE", es: "M\u00d3DULO" },
-    switchModule: { en: "SWITCH MODULE (DEV)", es: "CAMBIAR M\u00d3DULO (DEV)" },
+    switchModule: { en: "📚 Your Modules", es: "📚 Tus Módulos" },
     moolies: { en: "MOOLIES", es: "MOOLIES" },
     openVault: { en: "THE VAULT", es: "LA BÓVEDA" },
   },

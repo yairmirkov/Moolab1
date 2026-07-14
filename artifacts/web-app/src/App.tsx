@@ -3830,24 +3830,23 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
           })()}
 
           <h2 style={{
-            color: "#fff", fontSize: "1.6rem", fontWeight: 900,
-            background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            fontSize: "clamp(1.3rem, 5vw, 1.8rem)", fontWeight: 900, color: "#fff",
+            letterSpacing: "-0.02em",
             margin: "0 0 6px 0",
           }}>
             {userName ? userName.toUpperCase() : t.profile.yourProfile[lang]}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontWeight: 600, margin: "0 0 30px 0" }}>
-            {xp} / {level * 50} {t.profile.xpToNext[lang]}
+            {xp % (level * 50)} XP · {lang === "es" ? "Nivel" : "Level"} {level}
           </p>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: 10,
+              marginBottom: 20,
               width: "100%",
-              maxWidth: 300,
             }}
           >
             {[
@@ -3857,65 +3856,16 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               { label: t.profile.streak[lang], val: `${streak}🔥`, color: "#FF6B6B" },
             ].map((s) => (
               <div key={s.label} style={{
-                background: "rgba(255,255,255,0.03)",
-                padding: "20px 14px",
-                borderRadius: 20,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(120,180,255,0.1)",
+                borderRadius: 14,
+                padding: "14px 12px",
                 textAlign: "center",
-                border: "1px solid rgba(255,255,255,0.06)",
               }}>
                 <div style={{ color: s.color, fontSize: "1.6rem", fontWeight: 900, textShadow: `0 0 15px ${s.color}30` }}>{s.val}</div>
                 <div style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.1em", marginTop: 4 }}>{s.label}</div>
               </div>
             ))}
-          </div>
-
-          <div style={{
-            display: "flex", gap: 8, width: "100%", maxWidth: 300, marginTop: 20,
-          }}>
-            <button
-              className="ws-btn"
-              onClick={() => { setShowProfile(false); navigateTo("vault"); }}
-              style={{
-                flex: 1, padding: "14px 12px",
-                borderRadius: 18, border: "1px solid rgba(255,215,0,0.25)",
-                background: activeTab === "vault"
-                  ? "linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1))"
-                  : "linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.05))",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                cursor: "pointer", fontFamily: FONT, transition: "all 0.3s ease",
-              }}
-            >
-              <span style={{ fontSize: "1.3rem" }}>🏦</span>
-              <span style={{
-                fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.08em",
-                background: "linear-gradient(135deg, #FFD700, #FFA500)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-              }}>
-                VAULT
-              </span>
-            </button>
-            <button
-              className="ws-btn"
-              onClick={() => { setShowProfile(false); navigateTo("tank"); }}
-              style={{
-                flex: 1, padding: "14px 12px",
-                borderRadius: 18, border: "1px solid rgba(46,139,192,0.25)",
-                background: activeTab === "tank"
-                  ? "linear-gradient(135deg, rgba(46,139,192,0.15), rgba(20,83,116,0.1))"
-                  : "linear-gradient(135deg, rgba(46,139,192,0.08), rgba(20,83,116,0.05))",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                cursor: "pointer", fontFamily: FONT, transition: "all 0.3s ease",
-              }}
-            >
-              <span style={{ fontSize: "1.3rem" }}>🦈</span>
-              <span style={{
-                fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.08em",
-                background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-              }}>
-                TANK
-              </span>
-            </button>
           </div>
 
           {/* Module Switcher (Testing) — moved up so it isn't cut off the screen */}
