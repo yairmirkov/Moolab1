@@ -147,7 +147,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
 
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "flex-start",
-        gap: 16, marginTop: 40, width: "100%", maxWidth: "min(94vw, 760px)",
+        gap: 16, marginTop: 40, width: "100%", maxWidth: "min(96vw, 1100px)",
       }}>
         <button
           onClick={onOpenProfile}
@@ -227,7 +227,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       <div style={{
         display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
         gap: 12, marginTop: 20,
-        width: "100%", maxWidth: "min(94vw, 760px)",
+        width: "100%", maxWidth: "min(96vw, 1100px)",
       }}>
         {[
           { label: lang === "es" ? "NVL" : "LVL", val: level, color: "#60a5fa", sub: `${xpInLevel}/${xpNeeded} XP`, showBar: true },
@@ -268,8 +268,9 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       </div>
 
       <div style={{
-        display: "flex", flexDirection: "column",
-        gap: 14, width: "100%", maxWidth: "min(94vw, 760px)",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))",
+        gap: 14, width: "100%", maxWidth: "min(96vw, 1100px)",
         marginTop: 18, paddingBottom: "calc(env(safe-area-inset-bottom, 0) + 40px)",
       }}>
         {cards.map((card, idx) => (
@@ -340,7 +341,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
         <button
           onClick={() => setContactOpen(true)}
           style={{
-            marginTop: 4, alignSelf: "center",
+            marginTop: 4, alignSelf: "center", gridColumn: "1 / -1", justifySelf: "center",
             background: "rgba(255,255,255,0.04)",
             border: "1px solid rgba(120,180,255,0.18)",
             color: "rgba(207,225,245,0.75)",
