@@ -73,35 +73,42 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
     {
       id: "lab" as const,
       icon: "🧪",
-      title: lang === "es" ? "El Lab" : "The Lab",
-      subtitle: lang === "es" ? "Lecciones con IA" : "AI-powered lessons",
-      cta: lang === "es" ? "Entrar →" : "Enter →",
-      accent: "#60a5fa",
-      gradient: "linear-gradient(135deg, rgba(46,139,192,0.22) 0%, rgba(20,83,116,0.18) 60%, rgba(10,31,58,0.45) 100%)",
-      border: "rgba(96,165,250,0.35)",
-      glow: "rgba(46,139,192,0.2)",
+      title: lang === "es" ? "Entrar al Lab" : "The Lab",
+      subtitle: lang === "es" ? "Lecciones financieras con IA" : "AI-powered lessons",
+      accent: "#2e8bc0",
+      gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
+      border: "rgba(46,139,192,0.2)",
+      glow: "rgba(46,139,192,0.1)",
     },
     {
       id: "tank" as const,
       icon: "🦈",
       title: lang === "es" ? "El Tanque" : "The Tank",
-      subtitle: lang === "es" ? "Simula tu portafolio" : "Simulate your portfolio",
-      cta: lang === "es" ? "Entrar →" : "Dive in →",
-      accent: "#22d3ee",
-      gradient: "linear-gradient(135deg, rgba(34,211,238,0.18) 0%, rgba(20,83,116,0.18) 60%, rgba(10,31,58,0.45) 100%)",
-      border: "rgba(34,211,238,0.3)",
-      glow: "rgba(34,211,238,0.16)",
+      subtitle: lang === "es" ? "Simulador de portafolio" : "Simulate your portfolio",
+      accent: "#2e8bc0",
+      gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
+      border: "rgba(46,139,192,0.2)",
+      glow: "rgba(46,139,192,0.1)",
     },
     {
       id: "vault" as const,
       icon: "🏦",
       title: lang === "es" ? "La Bóveda" : "The Vault",
-      subtitle: lang === "es" ? "Tus recompensas" : "Your rewards",
-      cta: lang === "es" ? "Explorar →" : "Explore →",
-      accent: "#fbbf24",
-      gradient: "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(120,80,20,0.16) 60%, rgba(10,15,30,0.5) 100%)",
-      border: "rgba(251,191,36,0.3)",
-      glow: "rgba(251,191,36,0.16)",
+      subtitle: lang === "es" ? "Centro de recompensas" : "Your rewards",
+      accent: "#2e8bc0",
+      gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
+      border: "rgba(46,139,192,0.2)",
+      glow: "rgba(46,139,192,0.1)",
+    },
+    {
+      id: "prefs" as const,
+      icon: "👤",
+      title: lang === "es" ? "Preferencias" : "Preferences",
+      subtitle: lang === "es" ? "Cuéntanos sobre ti" : "Tell us about yourself",
+      accent: "#2e8bc0",
+      gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
+      border: "rgba(46,139,192,0.2)",
+      glow: "rgba(46,139,192,0.1)",
     },
   ];
 
@@ -313,7 +320,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
           <button
             key={card.id}
             className="hub-nav-card"
-            onClick={() => onNavigate(card.id)}
+            onClick={() => card.id === "prefs" ? setPrefsOpen(true) : onNavigate(card.id)}
             style={{
               width: "100%",
               padding: "24px 22px",
@@ -370,7 +377,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
                 background: `${card.accent}18`,
                 border: `1px solid ${card.accent}33`,
               }}>
-                {card.cta}
+                {lang === "es" ? "Entrar →" : "Enter →"}
               </div>
             </div>
             {/* Title + subtitle */}

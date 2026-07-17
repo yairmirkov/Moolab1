@@ -1,0 +1,52 @@
+Dark-theme both auth pages to match the new homepage. Apply the exact same changes to both artifacts/web-app/src/pages/Register.tsx and artifacts/web-app/src/pages/Login.tsx:
+
+In each file, find the outer wrapper div that has:
+  background: "linear-gradient(160deg, #f0f7fb 0%, #e1eef6 50%, #d4e8f2 100%)"
+Replace that entire style with:
+  background: "#020a14"
+  and add:
+  backgroundImage: "radial-gradient(circle, rgba(46,139,192,0.15) 1px, transparent 1px)"
+  backgroundSize: "32px 32px"
+  position: "relative"
+
+Find the inner card div that has:
+  background: "#fff"
+  boxShadow: "0 20px 60px rgba(12,45,72,0.08)"
+Replace those two properties with:
+  background: "rgba(12,45,72,0.45)"
+  backdropFilter: "blur(20px)"
+  border: "1px solid rgba(46,139,192,0.2)"
+  boxShadow: "0 24px 60px rgba(0,0,0,0.5), 0 0 40px rgba(46,139,192,0.1)"
+
+Find the logo <img> tag and add to its style:
+  filter: "brightness(0) invert(1)"
+
+Find the <h1> with color: "#0c2d48" and change to color: "#ffffff"
+
+Find the <p> subtitle with color: "rgba(12,45,72,0.45)" and change to color: "rgba(177,212,224,0.45)"
+
+Find every <label> with color: "rgba(12,45,72,0.5)" and change to color: "rgba(177,212,224,0.4)"
+
+Find every <input> element and update these style properties:
+  background: "rgba(255,255,255,0.05)"
+  border: "1.5px solid rgba(46,139,192,0.2)"
+  color: "#ffffff"
+
+Find the disabled state of the submit button where it has:
+  background: "rgba(12,45,72,0.08)"
+  color: "rgba(12,45,72,0.25)"
+Change to:
+  background: "rgba(255,255,255,0.06)"
+  color: "rgba(177,212,224,0.2)"
+
+Find the footer <p> with color: "rgba(12,45,72,0.4)" and change to color: "rgba(177,212,224,0.35)"
+
+Also add this <style> block right before the outer wrapper div's closing tag in each file:
+  <style>{`
+    input::placeholder { color: rgba(177,212,224,0.25) !important; }
+    input:-webkit-autofill { -webkit-box-shadow: 0 0 0 100px rgba(12,45,72,0.8) inset !important; -webkit-text-fill-color: #fff !important; }
+  `}</style>
+
+In Login.tsx only, find the "student pin access" Link at the bottom that has color: "rgba(12,45,72,0.35)" and change to color: "rgba(177,212,224,0.3)"
+
+After these changes, the Login and Register pages should have a deep dark background with a subtle dot grid, a frosted-glass dark card, white text, and styled inputs — matching the homepage aesthetic exactly.
