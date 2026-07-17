@@ -790,3 +790,48 @@ SENTENCE 2: One actionable insight or memorable principle to take with them — 
 
 MAX 45 words TOTAL. Punchy, joyful, sincere — no saccharine fluff. Only the text, no quotes, no formatting, no labels.`;
 }
+
+
+export function buildMentorLessonPrompt(mentor: {
+  name: string;
+  lessonTitle: string;
+  lessonPrinciples: string[];
+  quotes: { text: string; source: string }[];
+  keyIdeas: string[];
+}, gradeLevel: number): string {
+  const ageRange = gradeLevel <= 5 ? "8\u201310 years old" : gradeLevel <= 8 ? "11\u201313 years old" : "14\u201317 years old";
+  const complexity = gradeLevel <= 5 ? "very simple language, short sentences, concrete everyday examples" : gradeLevel <= 8 ? "clear language, real-world examples, some financial terms explained simply" : "mature language, nuanced concepts, real investment examples";
+
+  const verifiedQuotes = mentor.quotes.map(q => `"${q.text}" \u2014 ${q.source}`).join("\n");
+  const principles = mentor.lessonPrinciples.join("; ");
+
+  return `You are generating a Moolab bonus lesson inspired by ${mentor.name}'s publicly documented philosophy.
+
+LESSON TITLE: ${mentor.lessonTitle}
+STUDENT AGE: ${ageRange} (grade ${gradeLevel})
+WRITING STYLE: ${complexity}
+
+MENTOR'S KEY PRINCIPLES (teach these ideas, sourced from public works):
+${principles}
+
+VERIFIED QUOTES ONLY \u2014 only use these exact quotes, do not invent others:
+${verifiedQuotes}
+
+Generate exactly 8 lesson cards as a JSON array. Card types and order:
+1. type "intro" \u2014 Welcome card: introduce ${mentor.name} and what this lesson is about. Include this disclaimer in the body: "Educational content inspired by publicly available works. Not affiliated with or endorsed by ${mentor.name}."
+2\u20136. type "concept" \u2014 One card per key principle. Explain each in age-appropriate terms with a real-world analogy.
+7. type "quote" \u2014 Feature one of the verified quotes above. Explain what it means in simple terms.
+8. type "challenge" \u2014 A practical challenge the student can do this week to apply one principle.
+
+STRICT RULES:
+- Never fabricate quotes. Only use the verified quotes provided above.
+- Frame all content as "inspired by ${mentor.name}'s ideas" not "according to ${mentor.name}" or "as ${mentor.name} says"
+- No financial advice. Use language like "some investors believe..." or "this idea suggests..."
+- Keep every card focused on financial literacy and wealth mindset, not just biography
+
+Response format \u2014 return ONLY a valid JSON array, no markdown, no explanation:
+[
+  { "type": "intro"|"concept"|"quote"|"challenge", "emoji": "single emoji", "title": "card title", "body": "card body text" },
+  ...
+]`;
+}
