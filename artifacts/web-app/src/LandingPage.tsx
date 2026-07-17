@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
+import { useLang, t, translations } from "./useLang";
 
 const FONT = "'Bricolage Grotesque', 'Lato', system-ui, sans-serif";
 const BG = "#020a14";
@@ -65,6 +66,8 @@ function FadeSection({ children, style }: { children: React.ReactNode; style?: R
 }
 
 function ContactSection() {
+  const lang = useLang();
+  const tx = translations.pages.landing;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -78,7 +81,7 @@ function ContactSection() {
     if (!name.trim() || !email.trim() || !message.trim() || sending) return;
     setSending(true); setError("");
     try {
-      await api.sendContact(name.trim(), email.trim(), message.trim(), "en");
+      await api.sendContact(name.trim(), email.trim(), message.trim(), lang);
       setSent(true); setName(""); setEmail(""); setMessage("");
     } catch (err: any) {
       setError(err?.message || "Could not send. Please try again.");
@@ -105,12 +108,12 @@ function ContactSection() {
         transition: "opacity 0.7s ease, transform 0.7s ease",
       }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <Badge>Contact</Badge>
+          <Badge>{t(tx.contactBadge, lang)}</Badge>
           <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "#fff", letterSpacing: "-0.03em", margin: "0 0 10px" }}>
-            Questions? <span style={{ color: ACCENT }}>We're here.</span>
+            {t(tx.contactHeadline, lang)} <span style={{ color: ACCENT }}>{t(tx.contactAccent, lang)}</span>
           </h2>
           <p style={{ color: "rgba(177,212,224,0.45)", fontSize: "0.9rem", fontWeight: 500 }}>
-            Or email us at{" "}
+            {t(tx.contactEmailNote, lang)}{" "}
             <a href="mailto:contact@moolab.app" style={{ color: ACCENT2, fontWeight: 700 }}>contact@moolab.app</a>
           </p>
         </div>
@@ -120,29 +123,29 @@ function ContactSection() {
             borderRadius: 20, padding: "48px 32px", textAlign: "center",
           }}>
             <div style={{ fontSize: "3rem", marginBottom: 16 }}>🎉</div>
-            <h3 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#fff", marginBottom: 8 }}>Message Sent!</h3>
-            <p style={{ color: "rgba(177,212,224,0.5)", fontSize: "0.9rem" }}>We'll reply within 24 hours.</p>
+            <h3 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#fff", marginBottom: 8 }}>{t(tx.contactSentTitle, lang)}</h3>
+            <p style={{ color: "rgba(177,212,224,0.5)", fontSize: "0.9rem" }}>{t(tx.contactSentBody, lang)}</p>
             <button onClick={() => setSent(false)} style={{
               marginTop: 20, padding: "10px 24px", borderRadius: 99,
               background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.3)",
               color: ACCENT2, fontFamily: FONT, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer",
-            }}>Send another</button>
+            }}>{t(tx.contactSentAnother, lang)}</button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
               <div>
-                <label style={labelStyle}>Name</label>
-                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" style={inputStyle} required />
+                <label style={labelStyle}>{t(tx.contactNameLabel, lang)}</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={t(tx.contactNamePlaceholder, lang)} style={inputStyle} required />
               </div>
               <div>
-                <label style={labelStyle}>Email</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" style={inputStyle} required />
+                <label style={labelStyle}>{t(tx.contactEmailLabel, lang)}</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t(tx.contactEmailPlaceholder, lang)} style={inputStyle} required />
               </div>
             </div>
             <div>
-              <label style={labelStyle}>Message</label>
-              <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="How can we help?" rows={5} style={{ ...inputStyle, resize: "none" }} required />
+              <label style={labelStyle}>{t(tx.contactMessageLabel, lang)}</label>
+              <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder={t(tx.contactMessagePlaceholder, lang)} rows={5} style={{ ...inputStyle, resize: "none" }} required />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: "0.75rem", color: "#f87171", fontWeight: 700 }}>{error}</span>
@@ -152,7 +155,7 @@ function ContactSection() {
                 color: "#fff", fontFamily: FONT, fontWeight: 800, fontSize: "0.85rem",
                 cursor: sending ? "not-allowed" : "pointer", opacity: sending ? 0.6 : 1,
               }}>
-                {sending ? "Sending…" : "Send Message →"}
+                {sending ? t(tx.contactSending, lang) : t(tx.contactSendBtn, lang)}
               </button>
             </div>
           </form>
@@ -163,6 +166,8 @@ function ContactSection() {
 }
 
 export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: LandingPageProps) {
+  const lang = useLang();
+  const tx = translations.pages.landing;
   const goSignUp = onSignUp ?? onTestApp ?? (() => {});
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -178,25 +183,25 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
 
   const features = [
     {
-      badge: "🧪 The Lab",
-      headline: "Lessons that feel like a game.",
-      body: "AI-powered bite-sized cards on credit, savings, investing, and more. Swipe to learn — just like social media, but your brain actually profits.",
+      badge: t(tx.labBadge, lang),
+      headline: t(tx.labHeadline, lang),
+      body: t(tx.labBody, lang),
       accent: "#60a5fa",
       icon: "🧪",
       preview: ["💡 What is compound interest?", "📈 How do stocks work?", "💳 Credit vs. debit", "📊 Risk & reward"],
     },
     {
-      badge: "🦈 The Tank",
-      headline: "Real market. Zero risk.",
-      body: "A portfolio simulator powered by live stock prices. Buy, sell, and watch your virtual holdings move — all with Moolies, not real money.",
+      badge: t(tx.tankBadge, lang),
+      headline: t(tx.tankHeadline, lang),
+      body: t(tx.tankBody, lang),
       accent: "#22d3ee",
       icon: "🦈",
       preview: ["AAPL +2.4% ↑", "TSLA -1.8% ↓", "NVDA +5.1% ↑", "Portfolio: 1,250 Moolies"],
     },
     {
-      badge: "🏦 The Vault",
-      headline: "Earn. Spend. Flex.",
-      body: "Kids earn Moolies for completing lessons and use them to unlock themes, avatars, and cosmetics. A closed economy that makes learning rewarding.",
+      badge: t(tx.vaultBadge, lang),
+      headline: t(tx.vaultHeadline, lang),
+      body: t(tx.vaultBody, lang),
       accent: "#fbbf24",
       icon: "🏦",
       preview: ["🎃 Halloween Pack", "💻 Neon Hacker", "👑 Gold Crown", "🦈 Shark Border"],
@@ -233,25 +238,25 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
         }}>
           <MoolabLogo height={34} />
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <a href="?lang=es" onClick={() => localStorage.setItem("ws_lang", "es")} style={{
+            <a href={lang === "es" ? "?lang=en" : "?lang=es"} onClick={() => localStorage.setItem("ws_lang", lang === "es" ? "en" : "es")} style={{
               padding: "8px 14px", borderRadius: 99, color: "rgba(177,212,224,0.45)",
               fontWeight: 800, fontSize: "0.75rem", letterSpacing: "0.06em",
               textDecoration: "none", transition: "color 0.2s",
-            }}>ES</a>
+            }}>{lang === "es" ? "EN" : "ES"}</a>
             <button onClick={onParentLogin} className="lp-btn-ghost" style={{
               padding: "9px 20px", borderRadius: 99,
               border: "1px solid rgba(177,212,224,0.2)",
               background: "transparent", color: ACCENT2,
               fontFamily: FONT, fontWeight: 700, fontSize: "0.8rem",
               letterSpacing: "0.04em", cursor: "pointer", transition: "all 0.2s",
-            }}>Log In</button>
+            }}>{t(tx.ctaLogin, lang)}</button>
             <button onClick={goSignUp} className="lp-btn-primary" style={{
               padding: "9px 22px", borderRadius: 99, border: "none",
               background: "linear-gradient(135deg, #145374, #2e8bc0)",
               color: "#fff", fontFamily: FONT, fontWeight: 800,
               fontSize: "0.8rem", letterSpacing: "0.04em", cursor: "pointer",
               boxShadow: "0 4px 20px rgba(46,139,192,0.3)", transition: "all 0.22s",
-            }}>Sign Up</button>
+            }}>{t(tx.ctaSignUp, lang)}</button>
           </div>
         </div>
       </nav>
@@ -272,25 +277,25 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
         }} />
 
         <div style={{ position: "relative", maxWidth: 860, zIndex: 1 }}>
-          <Badge>🎓 Financial Literacy for Kids &amp; Teens</Badge>
+          <Badge>{t(tx.badge, lang)}</Badge>
 
           <h1 style={{
             fontSize: "clamp(2.4rem, 7vw, 5.2rem)", fontWeight: 900,
             letterSpacing: "-0.04em", lineHeight: 1.05, margin: "0 0 24px",
             color: "#fff",
           }}>
-            Money skills that{" "}
+            {t(tx.heroHeadline, lang)}{" "}
             <span style={{
               background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            }}>actually stick.</span>
+            }}>{t(tx.heroAccent, lang)}</span>
           </h1>
 
           <p style={{
             fontSize: "clamp(1rem, 2.5vw, 1.2rem)", fontWeight: 500, lineHeight: 1.7,
             color: "rgba(177,212,224,0.55)", maxWidth: 580, margin: "0 auto 40px",
           }}>
-            The gamified financial simulator for kids and teens. They learn to save, invest, and trade in 5 minutes a day — with zero real money at risk.
+            {t(tx.heroSubtitle, lang)}
           </p>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
@@ -300,17 +305,17 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
               color: "#fff", fontFamily: FONT, fontWeight: 900,
               fontSize: "1rem", letterSpacing: "0.04em", cursor: "pointer",
               boxShadow: "0 8px 40px rgba(46,139,192,0.4)", transition: "all 0.22s",
-            }}>Start Now ⚡</button>
+            }}>{t(tx.ctaStart, lang)}</button>
             <button onClick={onParentLogin} className="lp-btn-ghost" style={{
               padding: "16px 36px", borderRadius: 99,
               border: "1px solid rgba(177,212,224,0.22)",
               background: "transparent", color: ACCENT2,
               fontFamily: FONT, fontWeight: 800, fontSize: "1rem",
               letterSpacing: "0.04em", cursor: "pointer", transition: "all 0.22s",
-            }}>Log In</button>
+            }}>{t(tx.ctaLogin, lang)}</button>
           </div>
           <p style={{ fontSize: "0.72rem", color: "rgba(177,212,224,0.3)", fontWeight: 600, letterSpacing: "0.08em" }}>
-            FREE TO START · NO ADS · SAFE FOR KIDS
+            {t(tx.freeTag, lang)}
           </p>
         </div>
 
@@ -329,9 +334,9 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
             {[
-              { icon: "🧪", label: "The Lab", sub: "AI Lessons", accent: "#60a5fa" },
-              { icon: "🦈", label: "The Tank", sub: "Portfolio Sim", accent: "#22d3ee" },
-              { icon: "🏦", label: "The Vault", sub: "Earn Rewards", accent: "#fbbf24" },
+              { icon: "🧪", label: t(tx.labTitle, lang), sub: t(tx.labSub, lang), accent: "#60a5fa" },
+              { icon: "🦈", label: t(tx.tankTitle, lang), sub: t(tx.tankSub, lang), accent: "#22d3ee" },
+              { icon: "🏦", label: t(tx.vaultTitle, lang), sub: t(tx.vaultSub, lang), accent: "#fbbf24" },
             ].map(c => (
               <div key={c.label} style={{
                 background: `linear-gradient(135deg, rgba(46,139,192,0.1), rgba(2,10,20,0.6))`,
@@ -344,7 +349,7 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
                   <div style={{ fontSize: "0.85rem", fontWeight: 900, color: "#fff" }}>{c.label}</div>
                   <div style={{ fontSize: "0.65rem", color: "rgba(177,212,224,0.45)", fontWeight: 600 }}>{c.sub}</div>
                 </div>
-                <div style={{ fontSize: "0.65rem", fontWeight: 800, color: c.accent, marginTop: 4 }}>Enter →</div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 800, color: c.accent, marginTop: 4 }}>{t(tx.enterArrow, lang)}</div>
               </div>
             ))}
           </div>
@@ -371,13 +376,13 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
       {/* THE PROBLEM */}
       <section style={{ padding: "100px 24px", ...dotGrid, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         <FadeSection style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
-          <Badge>The Problem</Badge>
+          <Badge>{t(tx.problemBadge, lang)}</Badge>
           <h2 style={{ fontSize: "clamp(1.8rem, 5vw, 3.4rem)", fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "0 0 20px" }}>
-            Schools aren't teaching them{" "}
-            <span style={{ color: ACCENT }}>how money works.</span>
+            {t(tx.problemHeadline, lang)}{" "}
+            <span style={{ color: ACCENT }}>{t(tx.problemAccent, lang)}</span>
           </h2>
           <p style={{ fontSize: "1.05rem", color: "rgba(177,212,224,0.5)", fontWeight: 500, lineHeight: 1.7 }}>
-            Piggy banks don't teach investing. Real trading apps are too dangerous. Moolab is the bridge — a safe, gamified simulator that makes financial literacy feel like a game.
+            {t(tx.problemBody, lang)}
           </p>
         </FadeSection>
       </section>
@@ -446,9 +451,9 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
             background: "rgba(46,139,192,0.06)", border: "1px solid rgba(46,139,192,0.2)",
             borderRadius: 20, padding: "40px 48px", textAlign: "center",
           }}>
-            <Badge>Built for Families</Badge>
+            <Badge>{t(tx.safetyBadge, lang)}</Badge>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 20, justifyContent: "center", marginTop: 8 }}>
-              {["✓ Zero real money", "✓ No crypto, no risk", "✓ Safe, closed economy", "✓ No ads, ever", "✓ Parent dashboard"].map(s => (
+              {t(tx.safetyItems, lang).split("|").map(s => (
                 <span key={s} style={{ fontSize: "0.85rem", fontWeight: 800, color: ACCENT2 }}>{s}</span>
               ))}
             </div>
@@ -467,11 +472,11 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
             fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 900,
             letterSpacing: "-0.04em", lineHeight: 1.1, margin: "0 0 20px", color: "#fff",
           }}>
-            Give them the foundation{" "}
-            <span style={{ color: ACCENT }}>you wish you had.</span>
+            {t(tx.ctaHeadline, lang)}{" "}
+            <span style={{ color: ACCENT }}>{t(tx.ctaAccent, lang)}</span>
           </h2>
           <p style={{ color: "rgba(177,212,224,0.45)", fontSize: "1rem", fontWeight: 500, marginBottom: 40 }}>
-            5 minutes a day. A lifetime of financial fluency.
+            {t(tx.ctaSubtitle, lang)}
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
             <button onClick={goSignUp} className="lp-btn-primary" style={{
@@ -479,14 +484,14 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
               background: "linear-gradient(135deg, #145374, #2e8bc0)",
               color: "#fff", fontFamily: FONT, fontWeight: 900, fontSize: "1rem",
               cursor: "pointer", boxShadow: "0 8px 40px rgba(46,139,192,0.45)", transition: "all 0.22s",
-            }}>Get Started →</button>
+            }}>{t(tx.ctaGetStarted, lang)}</button>
             <button onClick={() => scrollToId("contact")} className="lp-btn-ghost" style={{
               padding: "18px 44px", borderRadius: 99,
               border: "1px solid rgba(177,212,224,0.22)",
               background: "transparent", color: ACCENT2,
               fontFamily: FONT, fontWeight: 800, fontSize: "1rem",
               cursor: "pointer", transition: "all 0.22s",
-            }}>Talk to Us</button>
+            }}>{t(tx.ctaTalkToUs, lang)}</button>
           </div>
         </FadeSection>
       </section>
@@ -506,13 +511,13 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
           <div>
             <MoolabLogo height={28} />
             <p style={{ fontSize: "0.65rem", color: "rgba(177,212,224,0.25)", fontWeight: 500, marginTop: 6 }}>
-              Building the next generation of financially literate leaders.
+              {t(tx.footerTagline, lang)}
             </p>
           </div>
           <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
             {[
-              { label: "Contact", action: () => scrollToId("contact") },
-              { label: "Privacy", href: "/privacy" },
+              { label: t(tx.footerContact, lang), action: () => scrollToId("contact") },
+              { label: t(tx.footerPrivacy, lang), href: "/privacy" },
               { label: "contact@moolab.app", href: "mailto:contact@moolab.app" },
             ].map(l => (
               l.href ? (
