@@ -1,0 +1,52 @@
+Make these changes to wire the Mentors section into the app's navigation:
+
+1. In src/App.tsx:
+   - Add "mentors" to the TabId type: type TabId = "hub" | "lab" | "tank" | "vault" | "mentors"
+   - Import MentorHub: import MentorHub from "./MentorHub"
+   - In the view-switcher (where it renders Lab/Tank/Vault based on activeTab), add:
+     {activeTab === "mentors" && <MentorHub />}
+
+2. In src/Hub.tsx, below the three main cards (Lab, Tank, Vault), add a "Meet Your Mentors" banner section:
+
+   Add this import at the top:
+   import type { TabId } from "../App"; // adjust import path if needed
+
+   Add onNavigate prop to Hub's Props interface: onNavigate?: (tab: string) => void
+
+   Add this JSX after the card grid:
+
+   <div style={{ margin: "24px 20px 0" }}>
+     <div style={{ fontSize: 11, color: "rgba(177,212,224,0.4)", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 12 }}>
+       Featured
+     </div>
+     <div
+       onClick={() => onNavigate?.("mentors")}
+       style={{
+         background: "rgba(12,45,72,0.45)",
+         backdropFilter: "blur(20px)",
+         border: "1px solid rgba(46,139,192,0.2)",
+         borderRadius: 16,
+         padding: "18px 20px",
+         display: "flex",
+         alignItems: "center",
+         justifyContent: "space-between",
+         cursor: "pointer",
+         position: "relative",
+         overflow: "hidden",
+       }}
+     >
+       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #2e8bc0, rgba(46,139,192,0))" }} />
+       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+         <div style={{ fontSize: 36 }}>🏆</div>
+         <div>
+           <div style={{ color: "#e8f4f8", fontSize: 15, fontWeight: 600, marginBottom: 3 }}>Meet Your Mentors</div>
+           <div style={{ color: "rgba(177,212,224,0.5)", fontSize: 12 }}>Lessons from legendary investors & builders</div>
+         </div>
+       </div>
+       <div style={{ color: "#2e8bc0", fontSize: 20 }}>›</div>
+     </div>
+   </div>
+
+3. In the bottom navigation bar (wherever the tab icons for Lab, Tank, Vault, Hub are rendered), add a Mentors tab icon. Use a 🏆 emoji or a star/trophy icon. Label it "Mentors". It should set activeTab to "mentors" when tapped.
+
+Make sure clicking the Mentors banner in Hub or the Mentors tab in the nav both navigate to the Mentors section.

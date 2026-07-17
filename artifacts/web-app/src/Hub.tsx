@@ -17,7 +17,7 @@ interface HubProps {
   bossWins: number;
   equippedItems: string[];
   themeBg?: string;
-  onNavigate: (view: "lab" | "tank" | "vault") => void;
+  onNavigate: (view: "lab" | "tank" | "vault" | "mentors") => void;
   onOpenProfile: () => void;
 }
 
@@ -406,6 +406,39 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
           <span style={{ fontSize: "0.9rem" }}>✉️</span>
           {lang === "es" ? "¿Necesitas ayuda? Contáctanos" : "Need help? Contact us"}
         </button>
+      </div>
+
+      {/* Meet Your Mentors banner */}
+      <div style={{ margin: "24px 20px 0", width: "100%", maxWidth: "min(96vw, 1100px)" }}>
+        <div style={{ fontSize: 11, color: "rgba(177,212,224,0.4)", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 12 }}>
+          {lang === "es" ? "Destacado" : "Featured"}
+        </div>
+        <div
+          onClick={() => onNavigate("mentors")}
+          style={{
+            background: "rgba(12,45,72,0.45)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(46,139,192,0.2)",
+            borderRadius: 16,
+            padding: "18px 20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            cursor: "pointer",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #2e8bc0, rgba(46,139,192,0))" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ fontSize: 36 }}>🏆</div>
+            <div>
+              <div style={{ color: "#e8f4f8", fontSize: 15, fontWeight: 600, marginBottom: 3 }}>{lang === "es" ? "Conoce a Tus Mentores" : "Meet Your Mentors"}</div>
+              <div style={{ color: "rgba(177,212,224,0.5)", fontSize: 12 }}>{lang === "es" ? "Lecciones de inversionistas y creadores legendarios" : "Lessons from legendary investors & builders"}</div>
+            </div>
+          </div>
+          <div style={{ color: "#2e8bc0", fontSize: 20 }}>›</div>
+        </div>
       </div>
 
       <ContactModal

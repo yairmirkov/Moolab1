@@ -12,6 +12,7 @@ import { findEquippedTitle } from "./titles";
 import Sandbox from "./Sandbox";
 import AppLayout from "./AppLayout";
 import Hub from "./Hub";
+import MentorHub from "./MentorHub";
 import { useFeed } from "./FeedContext";
 import { api } from "./api";
 import { useAuth } from "./AuthContext";
@@ -33,7 +34,7 @@ function getRecentTitles(subjectKey: string): string[] {
   return recentTitlesBySubject.get(subjectKey) || [];
 }
 
-type TabId = "hub" | "lab" | "tank" | "vault";
+type TabId = "hub" | "lab" | "tank" | "vault" | "mentors";
 
 const MODULE_ICONS = ["🐷", "📊", "💰", "📈", "💳", "🏛️", "🏠", "🪙"];
 const MODULE_WINS_NEEDED = 10;
@@ -4189,6 +4190,30 @@ function App({ demoMode = false, demoAgeGroup = "", childAuthMode = false }: App
               navigateTo(view);
             }}
           />
+        </div>
+      )}
+
+      {activeTab === "mentors" && (
+        <div style={{
+          position: "absolute",
+          top: 0, left: 0, width: "100%", height: "100%",
+          zIndex: 50,
+          overflowY: "auto",
+          background: "#020a14",
+        }}>
+          <button
+            onClick={() => navigateTo("hub")}
+            style={{
+              position: "sticky", top: 12, marginLeft: 16, zIndex: 10,
+              background: "rgba(12,45,72,0.65)", backdropFilter: "blur(12px)",
+              border: "1px solid rgba(46,139,192,0.3)", borderRadius: 999,
+              color: "#b1d4e0", fontSize: 13, fontWeight: 700,
+              padding: "8px 16px", cursor: "pointer",
+            }}
+          >
+            ← {lang === "es" ? "Volver al Hub" : "Back to Hub"}
+          </button>
+          <MentorHub />
         </div>
       )}
 
