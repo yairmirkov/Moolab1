@@ -100,16 +100,6 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       border: "rgba(46,139,192,0.2)",
       glow: "rgba(46,139,192,0.1)",
     },
-    {
-      id: "prefs" as const,
-      icon: "👤",
-      title: lang === "es" ? "Preferencias" : "Preferences",
-      subtitle: lang === "es" ? "Cuéntanos sobre ti" : "Tell us about yourself",
-      accent: "#2e8bc0",
-      gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
-      border: "rgba(46,139,192,0.2)",
-      glow: "rgba(46,139,192,0.1)",
-    },
   ];
 
   return (
@@ -320,7 +310,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
           <button
             key={card.id}
             className="hub-nav-card"
-            onClick={() => card.id === "prefs" ? setPrefsOpen(true) : onNavigate(card.id)}
+            onClick={() => onNavigate(card.id)}
             style={{
               width: "100%",
               padding: "24px 22px",
