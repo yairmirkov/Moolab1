@@ -74,11 +74,11 @@ export default function Register() {
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
             <label style={{ display: "block", color: "rgba(177,212,224,0.4)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 6, paddingLeft: 4 }}>
-              YOUR NAME
+              {lang === "es" ? "TU NOMBRE" : "YOUR NAME"}
             </label>
             <input
               type="text"
-              placeholder="e.g. Sarah"
+              placeholder={lang === "es" ? "ej. Sarah" : "e.g. Sarah"}
               value={name}
               onChange={(e) => setName(e.target.value)}
               style={{

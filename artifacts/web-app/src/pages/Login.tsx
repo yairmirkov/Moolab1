@@ -154,10 +154,10 @@ export default function Login() {
         <span style={{ fontSize: "1.8rem" }}>🦈</span>
         <span style={{ flex: 1 }}>
           <span style={{ display: "block", color: "#fff", fontWeight: 900, fontSize: "1rem", letterSpacing: "-0.01em" }}>
-            Student Login
+            {lang === "es" ? "Acceso de Estudiantes" : "Student Login"}
           </span>
           <span style={{ display: "block", color: "rgba(177,212,224,0.55)", fontWeight: 600, fontSize: "0.78rem", marginTop: 2 }}>
-            Enter username &amp; PIN to play
+            {lang === "es" ? "Ingresa tu usuario y PIN para jugar" : "Enter username & PIN to play"}
           </span>
         </span>
         <span style={{ color: "rgba(177,212,224,0.7)", fontSize: "1.3rem", fontWeight: 900 }}>→</span>
