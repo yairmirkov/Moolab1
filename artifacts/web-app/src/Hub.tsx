@@ -106,7 +106,7 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
     <div style={{
       width: "100%",
       height: "100%",
-      background: themeBg || "radial-gradient(ellipse at top, #0a1f3a 0%, #050d1c 60%, #02060f 100%)",
+      background: themeBg || "#020a14",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -115,13 +115,6 @@ export default function Hub({ lang, userName, moolies, xp, level, streak, bossWi
       fontFamily: FONT,
       position: "relative",
     }}>
-      {/* Ambient top glow */}
-      <div aria-hidden style={{
-        position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
-        width: "140%", height: 360, pointerEvents: "none",
-        background: "radial-gradient(ellipse at center top, rgba(46,139,192,0.16), transparent 65%)",
-      }} />
-
       <style>{`
         @keyframes hubShine {
           0% { background-position: -200% center; }

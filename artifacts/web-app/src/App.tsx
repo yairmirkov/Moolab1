@@ -458,7 +458,7 @@ const THEMES: Record<ThemeId, {
 }> = {
   navy: {
     label: "Navy", emoji: "🌊",
-    hubBg: "radial-gradient(ellipse at top, #0a1f3a 0%, #050d1c 60%, #02060f 100%)",
+    hubBg: "#020a14",
     slideBg: "linear-gradient(160deg, #051528 0%, #020a14 100%)",
     panelBg: "linear-gradient(135deg, #0c2d48 0%, #061522 100%)",
     accent: "#2e8bc0", accent2: "#b1d4e0",
