@@ -1,3 +1,5 @@
+In artifacts/web-app/src/LandingPage.tsx, completely replace the file contents with the following. Keep the ContactSection component logic (form submit, api.sendContact, success state) but restyle it to match the dark theme:
+
 import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
 
@@ -532,3 +534,13 @@ export default function LandingPage({ onParentLogin, onTestApp, onSignUp }: Land
     </div>
   );
 }
+
+After this change, the homepage should be:
+- Pure dark (#020a14) background throughout
+- Dot grid texture on hero and key sections
+- Scroll-triggered fade-in animations on all sections
+- Scrolling ticker marquee with financial terms
+- Three full feature sections with app preview cards (The Lab, The Tank, The Vault)
+- Dark contact form
+- Dark footer
+- Nav that goes from transparent to blurred-dark on scroll
