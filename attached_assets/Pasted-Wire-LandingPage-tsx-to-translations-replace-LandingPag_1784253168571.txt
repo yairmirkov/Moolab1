@@ -1,0 +1,33 @@
+Wire LandingPage.tsx to translations + replace LandingPageES.tsx:**
+In artifacts/web-app/src/LandingPage.tsx, add these two imports at the top of the file, after the existing import statements:
+import { useLang, useLangSuffix, t, translations } from "./useLang";
+Then inside the LandingPage default export component, add this line at the very top (before any other logic):
+const lang = useLang();
+const tx = translations.pages.landing;
+Then replace every hardcoded English string in the file with a t(tx.KEY, lang) call using the corresponding key from translations.pages.landing. For example:
+
+"🎓 Financial Literacy for Kids & Teens" → {t(tx.badge, lang)}
+"Money skills that" → {t(tx.heroHeadline, lang)}
+"actually stick." → {t(tx.heroAccent, lang)}
+"Start Now ⚡" → {t(tx.ctaStart, lang)}
+"Log In" (nav and hero) → {t(tx.ctaLogin, lang)}
+"Sign Up" → {t(tx.ctaSignUp, lang)}
+"FREE TO START · NO ADS · SAFE FOR KIDS" → {t(tx.freeTag, lang)}
+"The Lab" / "The Tank" / "The Vault" labels → tx.labTitle, tx.tankTitle, tx.vaultTitle
+"AI Lessons" / "Portfolio Sim" / "Earn Rewards" → tx.labSub, tx.tankSub, tx.vaultSub
+"Enter →" → {t(tx.enterArrow, lang)}
+All problem section strings → problemBadge, problemHeadline, problemAccent, problemBody
+All feature section strings → labBadge/labHeadline/labBody, tankBadge/tankHeadline/tankBody, vaultBadge/vaultHeadline/vaultBody
+Safety items: split t(tx.safetyItems, lang) by "|" to get the array
+All CTA section strings → ctaHeadline, ctaAccent, ctaSubtitle, ctaGetStarted, ctaTalkToUs
+All contact form strings → contactBadge, contactHeadline, contactAccent, contactEmailNote, contactNameLabel, contactNamePlaceholder, contactEmailLabel, contactEmailPlaceholder, contactMessageLabel, contactMessagePlaceholder, contactSentTitle, contactSentBody, contactSentAnother, contactSendBtn, contactSending
+Footer strings → footerTagline, footerContact, footerPrivacy
+
+Also in the nav's language toggle button, change the onClick so that when lang === "es" it switches to EN (href="?lang=en", sets ws_lang to "en"), and when lang === "en" it switches to ES (href="?lang=es", sets ws_lang to "es"). Display {lang === "es" ? "EN" : "ES"} as the label.
+Finally, replace the contents of artifacts/web-app/src/LandingPageES.tsx with just this:
+import LandingPage from "./LandingPage";
+export default function LandingPageES(props: any) {
+// Language is handled inside LandingPage via useLang() — no separate ES version needed
+return <LandingPage {...props} />;
+}
+After these changes, LandingPage.tsx renders in EN or ES based on the URL/localStorage lang, LandingPageES.tsx is just a passthrough (no more duplicate content), and all strings are sourced from a single translations.ts file.
