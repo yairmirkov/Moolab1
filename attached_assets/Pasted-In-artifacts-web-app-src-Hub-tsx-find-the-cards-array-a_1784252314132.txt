@@ -1,0 +1,48 @@
+In artifacts/web-app/src/Hub.tsx, find the `cards` array (around line 75) that defines the four cards with different accent colors (Lab = #60a5fa blue, Tank = #22d3ee teal, Vault = #fbbf24 yellow, Prefs = #b27ffd purple).
+
+Replace the entire `cards` array with this unified version where every card shares the same accent, gradient, border, and glow — no more per-card color differences:
+
+const cards = [
+  {
+    id: "lab" as const,
+    icon: "🧪",
+    title: lang === "es" ? "Entrar al Lab" : "The Lab",
+    subtitle: lang === "es" ? "Lecciones financieras con IA" : "AI-powered lessons",
+    accent: "#2e8bc0",
+    gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
+    border: "rgba(46,139,192,0.2)",
+    glow: "rgba(46,139,192,0.1)",
+  },
+  {
+    id: "tank" as const,
+    icon: "🦈",
+    title: lang === "es" ? "El Tanque" : "The Tank",
+    subtitle: lang === "es" ? "Simulador de portafolio" : "Simulate your portfolio",
+    accent: "#2e8bc0",
+    gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
+    border: "rgba(46,139,192,0.2)",
+    glow: "rgba(46,139,192,0.1)",
+  },
+  {
+    id: "vault" as const,
+    icon: "🏦",
+    title: lang === "es" ? "La Bóveda" : "The Vault",
+    subtitle: lang === "es" ? "Centro de recompensas" : "Your rewards",
+    accent: "#2e8bc0",
+    gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
+    border: "rgba(46,139,192,0.2)",
+    glow: "rgba(46,139,192,0.1)",
+  },
+  {
+    id: "prefs" as const,
+    icon: "👤",
+    title: lang === "es" ? "Preferencias" : "Preferences",
+    subtitle: lang === "es" ? "Cuéntanos sobre ti" : "Tell us about yourself",
+    accent: "#2e8bc0",
+    gradient: "linear-gradient(135deg, rgba(46,139,192,0.1) 0%, rgba(12,45,72,0.14) 60%, rgba(5,13,28,0.55) 100%)",
+    border: "rgba(46,139,192,0.2)",
+    glow: "rgba(46,139,192,0.1)",
+  },
+];
+
+After this change, all four hub cards should look identical in color — same deep dark navy background, same subtle blue border, same uniform aesthetic. The only differences between cards will be the icon and text.

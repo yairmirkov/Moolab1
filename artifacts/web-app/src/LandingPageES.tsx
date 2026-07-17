@@ -1,20 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
 
-const MoolabLogo = ({ height = 32, glow = false }: { height?: number; glow?: boolean }) => (
-  <img
-    src="/moolab-logo-trimmed.png"
-    alt="Moolab"
-    style={{
-      height,
-      width: "auto",
-      objectFit: "contain",
-      ...(glow ? {
-        filter: "drop-shadow(0 0 6px #2e8bc0) drop-shadow(0 0 14px rgba(46,139,192,0.4))",
-        animation: "logoGlow 2s ease-in-out infinite",
-      } : {}),
-    }}
-  />
+const FONT = "'Bricolage Grotesque', 'Lato', system-ui, sans-serif";
+const BG = "#020a14";
+const ACCENT = "#2e8bc0";
+const ACCENT2 = "#b1d4e0";
+
+const MoolabLogo = ({ height = 32 }: { height?: number }) => (
+  <img src="/moolab-logo-trimmed.png" alt="Moolab" style={{ height, width: "auto", objectFit: "contain", filter: "brightness(0) invert(1)" }} />
 );
 
 interface LandingPageProps {
@@ -28,6 +21,49 @@ const scrollToId = (id: string) => {
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
+function useFadeIn() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { el.style.opacity = "1"; el.style.transform = "translateY(0)"; } },
+      { threshold: 0.12 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return ref;
+}
+
+function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      padding: "4px 14px", borderRadius: 99,
+      border: "1px solid rgba(46,139,192,0.3)",
+      background: "rgba(46,139,192,0.08)",
+      fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.14em",
+      color: ACCENT2, textTransform: "uppercase", marginBottom: 20,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function FadeSection({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  const ref = useFadeIn();
+  return (
+    <div ref={ref} style={{
+      opacity: 0, transform: "translateY(28px)",
+      transition: "opacity 0.7s ease, transform 0.7s ease",
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
+
 function ContactSection() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,135 +71,91 @@ function ContactSection() {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const ref = useFadeIn();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !message.trim() || sending) return;
-    setSending(true);
-    setError("");
+    setSending(true); setError("");
     try {
       await api.sendContact(name.trim(), email.trim(), message.trim(), "es");
-      setSent(true);
-      setName(""); setEmail(""); setMessage("");
+      setSent(true); setName(""); setEmail(""); setMessage("");
     } catch (err: any) {
       setError(err?.message || "No se pudo enviar. Inténtalo de nuevo.");
-    } finally {
-      setSending(false);
-    }
+    } finally { setSending(false); }
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%", padding: "13px 16px", borderRadius: 12,
+    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(46,139,192,0.2)",
+    color: "#fff", fontFamily: FONT, fontWeight: 600, fontSize: "0.9rem",
+    outline: "none", boxSizing: "border-box",
+  };
+  const labelStyle: React.CSSProperties = {
+    display: "block", fontSize: "0.55rem", fontWeight: 800,
+    letterSpacing: "0.14em", textTransform: "uppercase",
+    color: "rgba(177,212,224,0.4)", marginBottom: 6,
   };
 
   return (
-    <section id="contact" className="py-16 sm:py-24 px-6 bg-gradient-to-b from-sky-50/40 to-white">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-10 sm:mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100/60 border border-sky-200/50 mb-4">
-            <span className="text-[10px] sm:text-xs font-bold text-[#145374] uppercase tracking-wider">Contacto</span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
-            ¿Preguntas?{" "}
-            <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">Estamos para ayudarte.</span>
+    <section id="contact" style={{ padding: "80px 24px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+      <div ref={ref} style={{
+        maxWidth: 680, margin: "0 auto",
+        opacity: 0, transform: "translateY(28px)",
+        transition: "opacity 0.7s ease, transform 0.7s ease",
+      }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <Badge>Contacto</Badge>
+          <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "#fff", letterSpacing: "-0.03em", margin: "0 0 10px" }}>
+            ¿Preguntas? <span style={{ color: ACCENT }}>Aquí estamos.</span>
           </h2>
-          <p className="text-sm sm:text-base text-[#0c2d48]/45 font-medium">
-            Escríbenos directamente a{" "}
-            <a href="mailto:contact@moolab.app" className="text-[#145374] font-bold underline decoration-sky-300 underline-offset-4 hover:text-[#2e8bc0] transition-colors">
-              contact@moolab.app
-            </a>
+          <p style={{ color: "rgba(177,212,224,0.45)", fontSize: "0.9rem", fontWeight: 500 }}>
+            O escríbenos a{" "}
+            <a href="mailto:contact@moolab.app" style={{ color: ACCENT2, fontWeight: 700 }}>contact@moolab.app</a>
           </p>
         </div>
-
         {sent ? (
-          <div className="bg-white rounded-2xl border border-sky-200/60 p-8 sm:p-12 shadow-xl shadow-sky-100/40 text-center animate-[fadeInUp_0.4s_ease-out]">
-            <style>{`
-              @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-              @keyframes checkPop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-              @keyframes ringPulse { 0% { transform: scale(0.8); opacity: 0.6; } 100% { transform: scale(1.7); opacity: 0; } }
-            `}</style>
-            <div className="relative w-24 h-24 mx-auto mb-6">
-              <div aria-hidden className="absolute inset-0 rounded-full bg-sky-300/40" style={{ animation: "ringPulse 1.6s ease-out infinite" }} />
-              <div
-                className="relative w-24 h-24 rounded-full flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, #2e8bc0, #145374)",
-                  boxShadow: "0 8px 32px rgba(46,139,192,0.5), inset 0 2px 8px rgba(255,255,255,0.3)",
-                  animation: "checkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                }}
-              >
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-            </div>
-            <h3 className="text-2xl sm:text-3xl font-black tracking-tight mb-3 bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">
-              ¡Mensaje enviado! 🎉
-            </h3>
-            <p className="text-sm sm:text-base text-[#0c2d48]/65 font-medium max-w-md mx-auto mb-6 leading-relaxed">
-              Gracias por escribirnos. Nuestro equipo te responderá a tu correo en menos de 24 horas.
-            </p>
-            <button
-              type="button"
-              onClick={() => setSent(false)}
-              className="px-6 py-2.5 rounded-full bg-sky-50 border border-sky-200 text-[#145374] font-bold text-xs tracking-wide hover:bg-sky-100 transition-all cursor-pointer"
-            >
-              Enviar otro mensaje
-            </button>
+          <div style={{
+            background: "rgba(46,139,192,0.08)", border: "1px solid rgba(46,139,192,0.2)",
+            borderRadius: 20, padding: "48px 32px", textAlign: "center",
+          }}>
+            <div style={{ fontSize: "3rem", marginBottom: 16 }}>🎉</div>
+            <h3 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#fff", marginBottom: 8 }}>¡Mensaje enviado!</h3>
+            <p style={{ color: "rgba(177,212,224,0.5)", fontSize: "0.9rem" }}>Te responderemos en menos de 24 horas.</p>
+            <button onClick={() => setSent(false)} style={{
+              marginTop: 20, padding: "10px 24px", borderRadius: 99,
+              background: "rgba(46,139,192,0.12)", border: "1px solid rgba(46,139,192,0.3)",
+              color: ACCENT2, fontFamily: FONT, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer",
+            }}>Enviar otro</button>
           </div>
         ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-sky-200/60 p-6 sm:p-8 shadow-xl shadow-sky-100/40 space-y-4"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold tracking-[0.15em] uppercase text-[#0c2d48]/50 mb-1.5">Nombre</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Tu nombre"
-                className="w-full px-4 py-2.5 rounded-lg border border-sky-200 bg-sky-50/40 text-sm font-semibold text-[#0c2d48] placeholder:text-[#0c2d48]/25 focus:outline-none focus:border-[#2e8bc0] focus:bg-white transition-all"
-                required
-              />
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+              <div>
+                <label style={labelStyle}>Nombre</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre" style={inputStyle} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Correo</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.com" style={inputStyle} required />
+              </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold tracking-[0.15em] uppercase text-[#0c2d48]/50 mb-1.5">Correo</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@correo.com"
-                className="w-full px-4 py-2.5 rounded-lg border border-sky-200 bg-sky-50/40 text-sm font-semibold text-[#0c2d48] placeholder:text-[#0c2d48]/25 focus:outline-none focus:border-[#2e8bc0] focus:bg-white transition-all"
-                required
-              />
+              <label style={labelStyle}>Mensaje</label>
+              <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="¿Cómo podemos ayudarte?" rows={5} style={{ ...inputStyle, resize: "none" }} required />
             </div>
-          </div>
-          <div>
-            <label className="block text-[11px] font-bold tracking-[0.15em] uppercase text-[#0c2d48]/50 mb-1.5">Mensaje</label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="¿En qué podemos ayudarte?"
-              rows={5}
-              className="w-full px-4 py-2.5 rounded-lg border border-sky-200 bg-sky-50/40 text-sm font-semibold text-[#0c2d48] placeholder:text-[#0c2d48]/25 focus:outline-none focus:border-[#2e8bc0] focus:bg-white transition-all resize-none"
-              required
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div
-              className={`text-xs font-bold transition-all ${error ? "text-rose-600 opacity-100" : "opacity-0"}`}
-              role="status"
-              aria-live="polite"
-            >
-              {error ? `✕ ${error}` : "placeholder"}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.75rem", color: "#f87171", fontWeight: 700 }}>{error}</span>
+              <button type="submit" disabled={sending} style={{
+                padding: "13px 32px", borderRadius: 99, border: "none",
+                background: "linear-gradient(135deg, #145374, #2e8bc0)",
+                color: "#fff", fontFamily: FONT, fontWeight: 800, fontSize: "0.85rem",
+                cursor: sending ? "not-allowed" : "pointer", opacity: sending ? 0.6 : 1,
+              }}>
+                {sending ? "Enviando…" : "Enviar mensaje →"}
+              </button>
             </div>
-            <button
-              type="submit"
-              disabled={sending}
-              className="px-7 py-3 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm tracking-wide shadow-lg shadow-sky-200/50 hover:shadow-sky-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              {sending ? "Enviando..." : "Enviar mensaje"}
-            </button>
-          </div>
-        </form>
+          </form>
         )}
       </div>
     </section>
@@ -172,325 +164,371 @@ function ContactSection() {
 
 export default function LandingPageES({ onParentLogin, onTestApp, onSignUp }: LandingPageProps) {
   const goSignUp = onSignUp ?? onTestApp ?? (() => {});
-  const [visible, setVisible] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    requestAnimationFrame(() => setVisible(true));
+    const handler = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  const dotGrid = {
+    backgroundImage: "radial-gradient(circle, rgba(46,139,192,0.18) 1px, transparent 1px)",
+    backgroundSize: "32px 32px",
+  };
+
+  const features = [
+    {
+      badge: "🧪 El Lab",
+      headline: "Lecciones que se sienten como un juego.",
+      body: "Tarjetas breves con IA sobre crédito, ahorro, inversión y más. Desliza para aprender — como las redes sociales, pero tu cerebro sí gana.",
+      accent: "#60a5fa",
+      icon: "🧪",
+      preview: ["💡 ¿Qué es el interés compuesto?", "📈 ¿Cómo funcionan las acciones?", "💳 Crédito vs. débito", "📊 Riesgo y recompensa"],
+    },
+    {
+      badge: "🦈 El Tanque",
+      headline: "Mercado real. Cero riesgo.",
+      body: "Un simulador de portafolio con precios de acciones en vivo. Compra, vende y mira cómo se mueven tus inversiones virtuales — todo con Moolies, no con dinero real.",
+      accent: "#22d3ee",
+      icon: "🦈",
+      preview: ["AAPL +2.4% ↑", "TSLA -1.8% ↓", "NVDA +5.1% ↑", "Portafolio: 1,250 Moolies"],
+    },
+    {
+      badge: "🏦 La Bóveda",
+      headline: "Gana. Gasta. Presume.",
+      body: "Los niños ganan Moolies por completar lecciones y las usan para desbloquear temas, avatares y cosméticos. Una economía cerrada que hace que aprender valga la pena.",
+      accent: "#fbbf24",
+      icon: "🏦",
+      preview: ["🎃 Pack de Halloween", "💻 Hacker Neón", "👑 Corona de Oro", "🦈 Borde de Tiburón"],
+    },
+  ];
+
+  const ticker = ["AHORRA", "INVIERTE", "INTERÉS COMPUESTO", "PRESUPUESTO", "ACCIONES", "ETFs", "GANA", "OPERA", "DIVERSIFICA", "MOOLIES", "CRECE", "CRÉDITO"];
+
   return (
-    <div
-      className={`min-h-screen bg-white font-['Bricolage_Grotesque','Lato',system-ui,sans-serif] text-[#0c2d48] transition-opacity duration-700 ${visible ? "opacity-100" : "opacity-0"}`}
-      style={{ overflowX: "hidden" }}
-    >
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-sky-100">
-        <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MoolabLogo height={37} />
-          </div>
-          <div className="flex items-center gap-2.5">
-            <a
-              href="?lang=en"
-              onClick={() => { localStorage.setItem("ws_lang", "en"); }}
-              className="px-3 py-2 rounded-full text-[#0c2d48]/40 font-bold text-xs tracking-wide hover:text-[#145374] hover:bg-sky-50 transition-all duration-200"
-            >
-              EN
-            </a>
-            <button
-              onClick={onParentLogin}
-              className="px-4 py-2 rounded-full border border-sky-200 text-[#145374] font-bold text-xs sm:text-sm tracking-wide hover:bg-sky-50 active:scale-95 transition-all duration-200 cursor-pointer"
-            >
-              Iniciar Sesión
-            </button>
-            <button
-              onClick={goSignUp}
-              className="px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-200/50 hover:shadow-sky-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-            >
-              Registrarse
-            </button>
+    <div style={{ fontFamily: FONT, background: BG, color: "#fff", overflowX: "hidden", minHeight: "100vh" }}>
+
+      {/* GLOBAL STYLES */}
+      <style>{`
+        * { box-sizing: border-box; }
+        ::placeholder { color: rgba(177,212,224,0.25) !important; }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes heroGlow { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+        .lp-btn-primary:hover { transform: scale(1.04); box-shadow: 0 0 40px rgba(46,139,192,0.4) !important; }
+        .lp-btn-ghost:hover { background: rgba(46,139,192,0.12) !important; border-color: rgba(46,139,192,0.5) !important; }
+        .lp-feature-card:hover { transform: translateY(-4px); border-color: rgba(46,139,192,0.35) !important; }
+      `}</style>
+
+      {/* NAV */}
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        background: scrolled ? "rgba(2,10,20,0.85)" : "transparent",
+        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+        transition: "all 0.3s ease",
+      }}>
+        <div style={{
+          maxWidth: 1120, margin: "0 auto", padding: "16px 24px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <MoolabLogo height={34} />
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <a href="/" onClick={() => localStorage.setItem("ws_lang", "en")} style={{
+              padding: "8px 14px", borderRadius: 99, color: "rgba(177,212,224,0.45)",
+              fontWeight: 800, fontSize: "0.75rem", letterSpacing: "0.06em",
+              textDecoration: "none", transition: "color 0.2s",
+            }}>EN</a>
+            <button onClick={onParentLogin} className="lp-btn-ghost" style={{
+              padding: "9px 20px", borderRadius: 99,
+              border: "1px solid rgba(177,212,224,0.2)",
+              background: "transparent", color: ACCENT2,
+              fontFamily: FONT, fontWeight: 700, fontSize: "0.8rem",
+              letterSpacing: "0.04em", cursor: "pointer", transition: "all 0.2s",
+            }}>Iniciar sesión</button>
+            <button onClick={goSignUp} className="lp-btn-primary" style={{
+              padding: "9px 22px", borderRadius: 99, border: "none",
+              background: "linear-gradient(135deg, #145374, #2e8bc0)",
+              color: "#fff", fontFamily: FONT, fontWeight: 800,
+              fontSize: "0.8rem", letterSpacing: "0.04em", cursor: "pointer",
+              boxShadow: "0 4px 20px rgba(46,139,192,0.3)", transition: "all 0.22s",
+            }}>Regístrate</button>
           </div>
         </div>
       </nav>
 
       {/* HERO */}
-      <section className="relative pt-24 sm:pt-28 pb-8 sm:pb-12 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-sky-50/60 via-white to-white" />
-        <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-sky-200/20 blur-3xl" />
-        <div className="absolute top-40 right-[5%] w-48 h-48 rounded-full bg-sky-300/15 blur-3xl" />
-        <div className="relative max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0c2d48]/5 border border-[#0c2d48]/10 mb-7">
-            <span style={{ fontSize: "1rem" }}>🦈</span>
-            <span className="text-xs font-bold text-[#145374] tracking-wide">Piensa en Shark Tank más Duolingo — para niños</span>
-          </div>
-          <h1
-            className="font-black tracking-tight leading-[1.1] mb-6 sm:mb-8"
-            style={{ fontSize: "clamp(1.875rem, 6vw, 3.5rem)" }}
-          >
-            Deja de pelear con las pantallas.
-            <br />
-            <span className="bg-gradient-to-r from-[#0c2d48] via-[#145374] to-[#2e8bc0] bg-clip-text text-transparent">
-              Conviértelas en educación financiera.
-            </span>
+      <section style={{
+        minHeight: "100vh", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", textAlign: "center",
+        padding: "120px 24px 80px", position: "relative",
+        ...dotGrid,
+      }}>
+        {/* Ambient glow */}
+        <div aria-hidden style={{
+          position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)",
+          width: 600, height: 400, borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(46,139,192,0.18) 0%, transparent 70%)",
+          pointerEvents: "none", animation: "heroGlow 4s ease-in-out infinite",
+        }} />
+
+        <div style={{ position: "relative", maxWidth: 860, zIndex: 1 }}>
+          <Badge>🎓 Educación Financiera para Niños y Adolescentes</Badge>
+
+          <h1 style={{
+            fontSize: "clamp(2.4rem, 7vw, 5.2rem)", fontWeight: 900,
+            letterSpacing: "-0.04em", lineHeight: 1.05, margin: "0 0 24px",
+            color: "#fff",
+          }}>
+            Habilidades de dinero que{" "}
+            <span style={{
+              background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>sí se quedan.</span>
           </h1>
-          <p className="text-base sm:text-lg text-[#0c2d48]/55 font-medium max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
-            El simulador financiero gamificado para niños y adolescentes. Aprenden las reglas del dinero en 5 minutos al día, invierten en un simulador sin riesgo y forman hábitos que duran toda la vida.
-          </p>
-          <button
-            onClick={goSignUp}
-            className="px-9 py-4 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm sm:text-base tracking-wide shadow-xl shadow-sky-300/30 hover:shadow-sky-400/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-          >
-            Empieza Gratis &#x26A1;
-          </button>
-          <p className="text-xs text-[#0c2d48]/30 font-medium mt-5">Gratis para empezar · Sin anuncios · Seguro para niños</p>
-          <p className="text-[10px] text-[#0c2d48]/40 font-medium mt-2">Moolab = moola (dinero) + lab (laboratorio). El lugar donde se crea la fluidez financiera.</p>
-        </div>
-      </section>
 
-      {/* THE PROBLEM */}
-      <section className="py-16 sm:py-24 px-6 border-y border-sky-100/60 bg-sky-50/30">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-sky-200/60 mb-5">
-            <span className="text-[10px] sm:text-xs font-bold text-[#145374] uppercase tracking-wider">El Problema</span>
+          <p style={{
+            fontSize: "clamp(1rem, 2.5vw, 1.2rem)", fontWeight: 500, lineHeight: 1.7,
+            color: "rgba(177,212,224,0.55)", maxWidth: 580, margin: "0 auto 40px",
+          }}>
+            El simulador financiero gamificado para niños y adolescentes. Aprenden a ahorrar, invertir y operar en 5 minutos al día — sin arriesgar dinero real.
+          </p>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
+            <button onClick={goSignUp} className="lp-btn-primary" style={{
+              padding: "16px 36px", borderRadius: 99, border: "none",
+              background: "linear-gradient(135deg, #145374, #2e8bc0)",
+              color: "#fff", fontFamily: FONT, fontWeight: 900,
+              fontSize: "1rem", letterSpacing: "0.04em", cursor: "pointer",
+              boxShadow: "0 8px 40px rgba(46,139,192,0.4)", transition: "all 0.22s",
+            }}>Empieza Ahora ⚡</button>
+            <button onClick={onParentLogin} className="lp-btn-ghost" style={{
+              padding: "16px 36px", borderRadius: 99,
+              border: "1px solid rgba(177,212,224,0.22)",
+              background: "transparent", color: ACCENT2,
+              fontFamily: FONT, fontWeight: 800, fontSize: "1rem",
+              letterSpacing: "0.04em", cursor: "pointer", transition: "all 0.22s",
+            }}>Iniciar sesión</button>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-5 leading-tight">
-            Las escuelas no enseñan{" "}
-            <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">cómo funciona el dinero.</span>
-          </h2>
-          <p className="text-base sm:text-lg text-[#0c2d48]/55 font-medium leading-relaxed max-w-2xl mx-auto">
-            Las alcancías no enseñan a invertir, y las apps reales de inversión son demasiado peligrosas. Nosotros construimos el puente entre el juego de la infancia y la confianza financiera.
+          <p style={{ fontSize: "0.72rem", color: "rgba(177,212,224,0.3)", fontWeight: 600, letterSpacing: "0.08em" }}>
+            GRATIS PARA EMPEZAR · SIN ANUNCIOS · SEGURO PARA NIÑOS
           </p>
         </div>
-      </section>
 
-      {/* SOCIAL PROOF STRIP */}
-      <section className="py-10 sm:py-12 px-6 bg-white border-b border-sky-100/60">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-3 gap-6 text-center">
+        {/* Hero app preview card */}
+        <div style={{
+          marginTop: 60, width: "100%", maxWidth: 760, position: "relative", zIndex: 1,
+          background: "linear-gradient(160deg, rgba(12,45,72,0.9), rgba(2,10,20,0.95))",
+          border: "1px solid rgba(46,139,192,0.2)", borderRadius: 24,
+          padding: "28px 28px 20px",
+          boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(46,139,192,0.1), 0 0 60px rgba(46,139,192,0.12)",
+        }}>
+          <div style={{ display: "flex", gap: 6, marginBottom: 20 }}>
+            {["#ff5f57","#febc2e","#28c840"].map(c => (
+              <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />
+            ))}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
             {[
-              { value: "5 min", label: "Al día es todo lo que necesitan" },
-              { value: "K–12", label: "Todos los grados cubiertos" },
-              { value: "$0", label: "De dinero real en riesgo" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <div className="text-2xl sm:text-3xl font-black text-[#145374] tracking-tight">{stat.value}</div>
-                <div className="text-xs sm:text-sm font-semibold text-[#0c2d48]/45 mt-1">{stat.label}</div>
+              { icon: "🧪", label: "El Lab", sub: "Lecciones con IA", accent: "#60a5fa" },
+              { icon: "🦈", label: "El Tanque", sub: "Simulador de portafolio", accent: "#22d3ee" },
+              { icon: "🏦", label: "La Bóveda", sub: "Gana recompensas", accent: "#fbbf24" },
+            ].map(c => (
+              <div key={c.label} style={{
+                background: `linear-gradient(135deg, rgba(46,139,192,0.1), rgba(2,10,20,0.6))`,
+                border: `1px solid ${c.accent}33`,
+                borderRadius: 16, padding: "18px 14px",
+                display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8,
+              }}>
+                <div style={{ fontSize: "1.8rem" }}>{c.icon}</div>
+                <div>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 900, color: "#fff" }}>{c.label}</div>
+                  <div style={{ fontSize: "0.65rem", color: "rgba(177,212,224,0.45)", fontWeight: 600 }}>{c.sub}</div>
+                </div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 800, color: c.accent, marginTop: 4 }}>Entrar →</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* APP PREVIEW */}
-      <section className="py-16 sm:py-20 px-6 bg-white">
-        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-          <div className="flex-1 text-left">
-            <p className="text-xs font-bold text-[#145374] uppercase tracking-[0.15em] mb-3">Dentro de la app</p>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#0c2d48] mb-4 leading-tight">
-              El centro de mando financiero<br />de tu hijo.
-            </h2>
-            <p className="text-sm sm:text-base text-[#0c2d48]/55 font-medium leading-relaxed mb-6">
-              Lecciones con IA, un simulador de bolsa en vivo y una economía de recompensas — todo en un solo lugar diseñado para cómo aprenden los niños de verdad.
-            </p>
-            <div className="flex flex-col gap-3">
-              {[
-                { icon: "🧠", text: "Lecciones cortas que se aprenden en 5 minutos" },
-                { icon: "📈", text: "Datos reales del mercado, cero riesgo real" },
-                { icon: "🏆", text: "Recompensas que hacen adictivo el aprendizaje" },
-              ].map((item) => (
-                <div key={item.text} className="flex items-center gap-3">
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="text-sm font-semibold text-[#0c2d48]/70">{item.text}</span>
-                </div>
+      {/* TICKER */}
+      <div style={{
+        borderTop: "1px solid rgba(255,255,255,0.05)",
+        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        background: "rgba(46,139,192,0.04)",
+        padding: "14px 0", overflow: "hidden",
+      }}>
+        <div style={{ display: "flex", animation: "marquee 28s linear infinite", whiteSpace: "nowrap", width: "max-content" }}>
+          {[...ticker, ...ticker, ...ticker, ...ticker].map((w, i) => (
+            <span key={i} style={{
+              padding: "0 24px", fontSize: "0.7rem", fontWeight: 800,
+              letterSpacing: "0.14em", color: i % 2 === 0 ? "rgba(177,212,224,0.35)" : "rgba(46,139,192,0.5)",
+            }}>{w} ·</span>
+          ))}
+        </div>
+      </div>
+
+      {/* THE PROBLEM */}
+      <section style={{ padding: "100px 24px", ...dotGrid, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <FadeSection style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
+          <Badge>El Problema</Badge>
+          <h2 style={{ fontSize: "clamp(1.8rem, 5vw, 3.4rem)", fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "0 0 20px" }}>
+            En la escuela no les enseñan{" "}
+            <span style={{ color: ACCENT }}>cómo funciona el dinero.</span>
+          </h2>
+          <p style={{ fontSize: "1.05rem", color: "rgba(177,212,224,0.5)", fontWeight: 500, lineHeight: 1.7 }}>
+            Las alcancías no enseñan a invertir. Las apps de trading reales son demasiado peligrosas. Moolab es el puente — un simulador seguro y gamificado que hace que la educación financiera se sienta como un juego.
+          </p>
+        </FadeSection>
+      </section>
+
+      {/* FEATURE SECTIONS */}
+      {features.map((f, i) => (
+        <section key={f.badge} style={{
+          padding: "100px 24px",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          background: i % 2 === 1 ? "rgba(46,139,192,0.025)" : "transparent",
+        }}>
+          <FadeSection style={{
+            maxWidth: 1100, margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))",
+            gap: 60, alignItems: "center",
+          }}>
+            {/* Text side */}
+            <div style={{ order: i % 2 === 1 ? 2 : 0 }}>
+              <Badge>{f.badge}</Badge>
+              <h2 style={{
+                fontSize: "clamp(1.8rem, 4vw, 3rem)", fontWeight: 900,
+                letterSpacing: "-0.03em", lineHeight: 1.1, color: "#fff",
+                margin: "0 0 20px",
+              }}>{f.headline}</h2>
+              <p style={{
+                fontSize: "1.05rem", color: "rgba(177,212,224,0.5)",
+                fontWeight: 500, lineHeight: 1.75, maxWidth: 440,
+              }}>{f.body}</p>
+            </div>
+            {/* Visual preview */}
+            <div className="lp-feature-card" style={{
+              background: "linear-gradient(160deg, rgba(12,45,72,0.7), rgba(2,10,20,0.9))",
+              border: `1px solid ${f.accent}22`,
+              borderRadius: 20, padding: "28px",
+              boxShadow: `0 24px 60px rgba(0,0,0,0.4), 0 0 40px ${f.accent}18`,
+              transition: "all 0.3s ease",
+            }}>
+              <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: "1.5rem" }}>{f.icon}</span>
+                <span style={{ fontSize: "0.75rem", fontWeight: 800, color: f.accent, letterSpacing: "0.1em" }}>{f.badge.toUpperCase()}</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {f.preview.map((item) => (
+                  <div key={item} style={{
+                    padding: "14px 18px", borderRadius: 12,
+                    background: `rgba(255,255,255,0.04)`,
+                    border: `1px solid ${f.accent}18`,
+                    fontSize: "0.85rem", fontWeight: 700, color: "rgba(207,225,245,0.75)",
+                    display: "flex", alignItems: "center", gap: 10,
+                  }}>
+                    <span style={{ color: f.accent, fontSize: "0.65rem" }}>▶</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </FadeSection>
+        </section>
+      ))}
+
+      {/* SAFETY */}
+      <section style={{ padding: "80px 24px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <FadeSection style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div style={{
+            background: "rgba(46,139,192,0.06)", border: "1px solid rgba(46,139,192,0.2)",
+            borderRadius: 20, padding: "40px 48px", textAlign: "center",
+          }}>
+            <Badge>Hecho para Familias</Badge>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 20, justifyContent: "center", marginTop: 8 }}>
+              {["✓ Cero dinero real", "✓ Sin cripto, sin riesgo", "✓ Economía cerrada y segura", "✓ Sin anuncios, nunca", "✓ Panel para padres"].map(s => (
+                <span key={s} style={{ fontSize: "0.85rem", fontWeight: 800, color: ACCENT2 }}>{s}</span>
               ))}
             </div>
           </div>
-          <div className="flex-shrink-0 flex justify-center">
-            <div style={{
-              width: 260,
-              background: "#0a1629",
-              borderRadius: 36,
-              padding: "14px 10px",
-              boxShadow: "0 40px 80px rgba(12,45,72,0.25), 0 0 0 8px #0c2d48",
-            }}>
-              <div style={{ borderRadius: 28, overflow: "hidden", background: "#0a1629" }}>
-                <div style={{ padding: "10px 18px 6px", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "rgba(177,212,224,0.4)", fontSize: 10, fontWeight: 700 }}>9:41</span>
-                  <div style={{ width: 20, height: 6, background: "rgba(255,255,255,0.1)", borderRadius: 3, marginTop: 3 }} />
-                </div>
-                <div style={{ padding: "6px 18px 12px" }}>
-                  <div style={{ color: "rgba(177,212,224,0.45)", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 3 }}>TIBURÓN NIVEL 4</div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ color: "#fff", fontSize: 16, fontWeight: 900 }}>El Laboratorio 🧪</div>
-                    <div style={{ color: "#2e8bc0", fontSize: 11, fontWeight: 800 }}>1,240 XP</div>
-                  </div>
-                  <div style={{ marginTop: 7, height: 4, background: "rgba(255,255,255,0.07)", borderRadius: 2, overflow: "hidden" }}>
-                    <div style={{ width: "65%", height: "100%", background: "linear-gradient(90deg, #2e8bc0, #b1d4e0)", borderRadius: 2 }} />
-                  </div>
-                </div>
-                <div style={{ margin: "0 10px 10px", background: "#0d1f35", borderRadius: 16, padding: "16px 14px" }}>
-                  <div style={{ color: "rgba(177,212,224,0.4)", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", marginBottom: 7, textTransform: "uppercase" }}>LECCIÓN DE HOY</div>
-                  <div style={{ color: "#fff", fontSize: 12, fontWeight: 900, marginBottom: 5, lineHeight: 1.4 }}>¿Qué es el interés compuesto?</div>
-                  <div style={{ color: "rgba(177,212,224,0.5)", fontSize: 10, fontWeight: 600, lineHeight: 1.5, marginBottom: 12 }}>Dinero que genera dinero. El arma secreta de todo gran inversionista.</div>
-                  <div style={{ background: "linear-gradient(135deg, #145374, #2e8bc0)", borderRadius: 10, padding: "9px 0", textAlign: "center", color: "#fff", fontWeight: 900, fontSize: 11 }}>Empezar Lección →</div>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-around", padding: "6px 10px 14px" }}>
-                  {[{ v: "12🔥", l: "Racha" }, { v: "850", l: "Moolies" }, { v: "5", l: "Jefes" }].map((s) => (
-                    <div key={s.l} style={{ textAlign: "center" }}>
-                      <div style={{ color: "#fff", fontWeight: 900, fontSize: 13 }}>{s.v}</div>
-                      <div style={{ color: "rgba(177,212,224,0.35)", fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 2 }}>{s.l}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES — THREE COLUMN */}
-      <section id="features" className="py-16 sm:py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-3">
-              Tres pilares.{" "}
-              <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">Una sola fluidez financiera.</span>
-            </h2>
-            <p className="text-sm sm:text-base text-[#0c2d48]/45 font-medium max-w-lg mx-auto">
-              Aprendizaje, práctica y recompensa — todo en un entorno cerrado y seguro, hecho para familias.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {[
-              {
-                emoji: "🧪",
-                name: "El Laboratorio",
-                desc: "Lecciones cortas guiadas por IA sobre crédito, ahorro e inversión, con la interfaz de deslizar que ya conocen.",
-              },
-              {
-                emoji: "🦈",
-                name: "El Tanque",
-                desc: "Un simulador sin riesgo con datos reales del mercado bursátil.",
-              },
-              {
-                emoji: "🏦",
-                name: "La Bóveda",
-                desc: "Una economía cerrada donde ganan Moolies por aprender y los gastan personalizando la app.",
-              },
-            ].map((card) => (
-              <div
-                key={card.name}
-                className="relative rounded-2xl bg-white border border-sky-200/60 p-6 sm:p-7 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                style={{ boxShadow: "0 4px 30px rgba(46,139,192,0.06)" }}
-              >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#145374] to-[#2e8bc0]" />
-                <div className="text-4xl mb-4 mt-1">{card.emoji}</div>
-                <div className="text-lg sm:text-xl font-black text-[#145374] mb-2">{card.name}</div>
-                <p className="text-sm text-[#0c2d48]/55 font-medium leading-relaxed">{card.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SAFETY GUARANTEE BANNER */}
-      <section className="px-6 pb-4 sm:pb-8">
-        <div className="max-w-5xl mx-auto">
-          <div
-            className="rounded-2xl border border-sky-200/60 px-6 py-5 sm:py-6 text-center"
-            style={{ background: "linear-gradient(135deg, rgba(177,212,224,0.25) 0%, rgba(46,139,192,0.08) 100%)" }}
-          >
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm font-bold text-[#145374]">
-              <span>✓ Cero dinero real en juego.</span>
-              <span className="text-[#0c2d48]/20">•</span>
-              <span>✓ Estrictamente SIN cripto.</span>
-              <span className="text-[#0c2d48]/20">•</span>
-              <span>✓ Entorno seguro y cerrado.</span>
-            </div>
-          </div>
-        </div>
+        </FadeSection>
       </section>
 
       {/* FINAL CTA */}
-      <section className="py-20 sm:py-28 px-6" style={{ background: "linear-gradient(135deg, #0c2d48 0%, #145374 50%, #0c2d48 100%)" }}>
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-4 text-white leading-tight">
-            Dales la base financiera
-            <br />
-            <span style={{ color: "#b1d4e0" }}>que tú hubieras querido tener.</span>
+      <section style={{
+        padding: "120px 24px", textAlign: "center",
+        background: "radial-gradient(ellipse at center, rgba(12,45,72,0.8) 0%, rgba(2,10,20,1) 70%)",
+        ...dotGrid,
+      }}>
+        <FadeSection style={{ maxWidth: 700, margin: "0 auto" }}>
+          <h2 style={{
+            fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 900,
+            letterSpacing: "-0.04em", lineHeight: 1.1, margin: "0 0 20px", color: "#fff",
+          }}>
+            Dales la base{" "}
+            <span style={{ color: ACCENT }}>que tú hubieras querido tener.</span>
           </h2>
-          <p className="text-sm sm:text-base font-semibold mb-3" style={{ color: "rgba(177,212,224,0.55)" }}>
-            5 minutos al día. Una vida entera de fluidez financiera.
+          <p style={{ color: "rgba(177,212,224,0.45)", fontSize: "1rem", fontWeight: 500, marginBottom: 40 }}>
+            5 minutos al día. Toda una vida de fluidez financiera.
           </p>
-          <p className="text-xs font-medium mb-10" style={{ color: "rgba(177,212,224,0.3)" }}>
-            Únete a las familias que están criando a la próxima generación de niños con confianza financiera.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-            <button
-              onClick={goSignUp}
-              className="px-8 py-3.5 rounded-full font-bold text-sm sm:text-base tracking-wide shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-              style={{
-                background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)",
-                color: "#0c2d48",
-                boxShadow: "0 4px 30px rgba(46,139,192,0.35), 0 0 60px rgba(46,139,192,0.15)",
-              }}
-            >
-              Registrarse
-            </button>
-            <button
-              onClick={onParentLogin}
-              className="px-8 py-3.5 rounded-full font-bold text-sm sm:text-base tracking-wide border-2 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
-              style={{
-                borderColor: "rgba(177,212,224,0.4)",
-                color: "#b1d4e0",
-                background: "transparent",
-              }}
-            >
-              Iniciar Sesión
-            </button>
+          <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
+            <button onClick={goSignUp} className="lp-btn-primary" style={{
+              padding: "18px 44px", borderRadius: 99, border: "none",
+              background: "linear-gradient(135deg, #145374, #2e8bc0)",
+              color: "#fff", fontFamily: FONT, fontWeight: 900, fontSize: "1rem",
+              cursor: "pointer", boxShadow: "0 8px 40px rgba(46,139,192,0.45)", transition: "all 0.22s",
+            }}>Comenzar →</button>
+            <button onClick={() => scrollToId("contact")} className="lp-btn-ghost" style={{
+              padding: "18px 44px", borderRadius: 99,
+              border: "1px solid rgba(177,212,224,0.22)",
+              background: "transparent", color: ACCENT2,
+              fontFamily: FONT, fontWeight: 800, fontSize: "1rem",
+              cursor: "pointer", transition: "all 0.22s",
+            }}>Habla con nosotros</button>
           </div>
-        </div>
+        </FadeSection>
       </section>
 
       {/* CONTACT */}
       <ContactSection />
 
       {/* FOOTER */}
-      <footer className="py-10 px-6 border-t border-sky-100 bg-white">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-5">
-          <div className="flex flex-col items-center sm:items-start gap-2">
-            <MoolabLogo height={32} />
-            <p className="text-[10px] text-[#0c2d48]/30 font-medium">
-              Construyendo la próxima generación de líderes financieramente inteligentes.
+      <footer style={{
+        padding: "40px 24px", borderTop: "1px solid rgba(255,255,255,0.05)",
+        background: "#010608",
+      }}>
+        <div style={{
+          maxWidth: 1100, margin: "0 auto",
+          display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20,
+        }}>
+          <div>
+            <MoolabLogo height={28} />
+            <p style={{ fontSize: "0.65rem", color: "rgba(177,212,224,0.25)", fontWeight: 500, marginTop: 6 }}>
+              Formando a la próxima generación de líderes con educación financiera.
             </p>
           </div>
-          <div className="flex items-center gap-6 text-xs font-bold text-[#145374]">
-            <button
-              onClick={() => scrollToId("contact")}
-              className="hover:text-[#2e8bc0] transition-colors cursor-pointer"
-            >
-              Contacto
-            </button>
-            <a
-              href="/privacy"
-              className="hover:text-[#2e8bc0] transition-colors"
-            >
-              Política de Privacidad
-            </a>
-            <a
-              href="mailto:contact@moolab.app"
-              className="hover:text-[#2e8bc0] transition-colors hidden sm:inline"
-            >
-              contact@moolab.app
-            </a>
+          <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+            {[
+              { label: "Contacto", action: () => scrollToId("contact") },
+              { label: "Privacidad", href: "/privacy" },
+              { label: "contact@moolab.app", href: "mailto:contact@moolab.app" },
+            ].map(l => (
+              l.href ? (
+                <a key={l.label} href={l.href} style={{ fontSize: "0.75rem", fontWeight: 700, color: "rgba(177,212,224,0.4)", textDecoration: "none" }}
+                  onMouseOver={e => (e.currentTarget.style.color = ACCENT2)}
+                  onMouseOut={e => (e.currentTarget.style.color = "rgba(177,212,224,0.4)")}>{l.label}</a>
+              ) : (
+                <button key={l.label} onClick={l.action} style={{
+                  background: "none", border: "none", fontSize: "0.75rem",
+                  fontWeight: 700, color: "rgba(177,212,224,0.4)", cursor: "pointer", fontFamily: FONT,
+                }}>{l.label}</button>
+              )
+            ))}
           </div>
         </div>
       </footer>
-
-      <style>{`
-        @keyframes logoGlow {
-          0%, 100% { filter: drop-shadow(0 0 6px #2e8bc0) drop-shadow(0 0 14px rgba(46,139,192,0.4)); }
-          50% { filter: drop-shadow(0 0 10px #2e8bc0) drop-shadow(0 0 20px rgba(46,139,192,0.6)); }
-        }
-      `}</style>
     </div>
   );
 }
