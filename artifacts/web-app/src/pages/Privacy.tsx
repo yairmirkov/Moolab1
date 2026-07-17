@@ -1,22 +1,15 @@
 import { useNavigate } from "react-router-dom";
 
+const FONT = "'Bricolage Grotesque', 'Lato', system-ui, -apple-system, sans-serif";
 const COMPANY = "Mirkov Holding LLC";
 const ADDRESS = "2055 Limestone Rd STE 200-C, Wilmington, DE 19808, New Castle, US";
 const EFFECTIVE_DATE = "April 17, 2026";
 
-const MoolabLogo = ({ height = 32 }: { height?: number }) => (
-  <img
-    src="/moolab-logo-trimmed.png"
-    alt="Moolab"
-    style={{ height, width: "auto", objectFit: "contain" }}
-  />
-);
-
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-8">
-      <h2 className="text-lg sm:text-xl font-black text-[#145374] mb-3 tracking-tight">{title}</h2>
-      <div className="text-sm sm:text-[15px] text-[#0c2d48]/75 font-medium leading-relaxed space-y-3">
+    <section style={{ marginBottom: 40 }}>
+      <h2 style={{ fontSize: "1.05rem", fontWeight: 900, color: "#b1d4e0", marginBottom: 12, letterSpacing: "-0.01em" }}>{title}</h2>
+      <div style={{ fontSize: "0.9rem", color: "rgba(177,212,224,0.55)", fontWeight: 500, lineHeight: 1.8 }}>
         {children}
       </div>
     </section>
@@ -27,157 +20,137 @@ export default function Privacy() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white font-['Bricolage_Grotesque','Lato',system-ui,sans-serif] text-[#0c2d48]">
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b border-sky-100">
-        <div className="max-w-4xl mx-auto px-5 py-3.5 flex items-center justify-between">
-          <button
-            onClick={() => navigate("/")}
-            aria-label="Back to home"
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <MoolabLogo height={34} />
+    <div style={{
+      minHeight: "100vh", background: "#020a14",
+      backgroundImage: "radial-gradient(circle, rgba(46,139,192,0.12) 1px, transparent 1px)",
+      backgroundSize: "32px 32px",
+      fontFamily: FONT, color: "#fff",
+    }}>
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+        backdropFilter: "blur(16px)", background: "rgba(2,10,20,0.85)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+      }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button onClick={() => navigate("/")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+            <img src="/moolab-logo-trimmed.png" alt="Moolab" style={{ height: 34, filter: "brightness(0) invert(1)" }} />
           </button>
-          <button
-            onClick={() => navigate("/")}
-            className="px-4 py-2 rounded-full border border-sky-200 text-[#145374] font-bold text-xs sm:text-sm tracking-wide hover:bg-sky-50 active:scale-95 transition-all duration-200 cursor-pointer"
-          >
-            ← Back to Home
-          </button>
+          <button onClick={() => navigate("/")} style={{
+            padding: "8px 18px", borderRadius: 99,
+            border: "1px solid rgba(177,212,224,0.2)",
+            background: "transparent", color: "#b1d4e0",
+            fontFamily: FONT, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer",
+          }}>← Back to Home</button>
         </div>
       </nav>
 
-      <main className="pt-28 sm:pt-32 pb-20 px-6">
-        <div className="max-w-3xl mx-auto">
-          <button
-            onClick={() => navigate("/")}
-            className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-sky-200 text-[#145374] font-bold text-xs tracking-wide hover:bg-sky-50 active:scale-95 transition-all duration-200 cursor-pointer"
-          >
-            ← Back to Home
-          </button>
+      <main style={{ paddingTop: 120, paddingBottom: 80, paddingLeft: 24, paddingRight: 24 }}>
+        <div style={{ maxWidth: 740, margin: "0 auto" }}>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100/60 border border-sky-200/50 mb-4">
-            <span className="text-[10px] sm:text-xs font-bold text-[#145374] uppercase tracking-wider">Legal</span>
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-3">
+          <div style={{
+            display: "inline-flex", alignItems: "center", padding: "4px 14px", borderRadius: 99,
+            border: "1px solid rgba(46,139,192,0.3)", background: "rgba(46,139,192,0.08)",
+            fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.14em", color: "#b1d4e0",
+            textTransform: "uppercase", marginBottom: 16,
+          }}>Legal</div>
+
+          <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1.05, margin: "0 0 12px" }}>
             Privacy{" "}
-            <span className="bg-gradient-to-r from-[#0c2d48] to-[#2e8bc0] bg-clip-text text-transparent">Policy</span>
+            <span style={{ background: "linear-gradient(135deg, #2e8bc0, #b1d4e0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Policy</span>
           </h1>
-          <p className="text-sm text-[#0c2d48]/45 font-medium mb-2">Effective date: {EFFECTIVE_DATE}</p>
+          <p style={{ fontSize: "0.8rem", color: "rgba(177,212,224,0.35)", fontWeight: 500, marginBottom: 32 }}>Effective date: {EFFECTIVE_DATE}</p>
 
-          <div className="rounded-2xl border border-sky-200/60 bg-sky-50/40 p-5 sm:p-6 mb-10">
-            <div className="text-[10px] font-black tracking-[0.2em] uppercase text-[#145374] mb-2">Operated by</div>
-            <div className="text-base font-extrabold text-[#0c2d48]">{COMPANY}</div>
-            <div className="text-sm text-[#0c2d48]/65 font-semibold mt-1">{ADDRESS}</div>
+          <div style={{
+            background: "rgba(46,139,192,0.07)", border: "1px solid rgba(46,139,192,0.2)",
+            borderRadius: 16, padding: "20px 24px", marginBottom: 48,
+          }}>
+            <div style={{ fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.18em", color: "rgba(177,212,224,0.4)", textTransform: "uppercase", marginBottom: 6 }}>Operated by</div>
+            <div style={{ fontSize: "1rem", fontWeight: 900, color: "#fff" }}>{COMPANY}</div>
+            <div style={{ fontSize: "0.82rem", color: "rgba(177,212,224,0.45)", fontWeight: 500, marginTop: 4 }}>{ADDRESS}</div>
           </div>
 
           <Section title="1. Introduction">
-            <p>
-              {COMPANY} ("we," "us," or "our") operates Moolab, an educational mobile and web application designed to teach financial literacy to children and young adults aged 8–21. This Privacy Policy explains how we collect, use, and protect personal information when you or your child use Moolab.
-            </p>
-            <p>
-              We are committed to protecting children's privacy and complying with applicable laws, including the Children's Online Privacy Protection Act (COPPA) in the United States and the General Data Protection Regulation (GDPR) where applicable.
-            </p>
+            <p style={{ margin: "0 0 12px" }}>{COMPANY} ("we," "us," or "our") operates Moolab, an educational mobile and web application designed to teach financial literacy to children and young adults aged 8–21. This Privacy Policy explains how we collect, use, and protect personal information when you or your child use Moolab.</p>
+            <p style={{ margin: 0 }}>We are committed to protecting children's privacy and complying with applicable laws, including the Children's Online Privacy Protection Act (COPPA) in the United States and the General Data Protection Regulation (GDPR) where applicable.</p>
           </Section>
 
           <Section title="2. Information We Collect">
-            <p>We collect only the minimum information necessary to provide the service:</p>
-            <ul className="list-disc pl-6 space-y-1.5">
-              <li><strong>Parent account information:</strong> name, email address, and password (stored hashed).</li>
-              <li><strong>Child profile information:</strong> first name or display name, age range, and a parent-managed PIN. We do not collect last names, real-world addresses, or contact information for children.</li>
-              <li><strong>Learning progress:</strong> XP, streak, completed lessons, and in-app currency ("Moolies") used solely to personalize the learning experience.</li>
-              <li><strong>Device and usage information:</strong> basic technical logs (device type, app version, error reports) to keep the service stable and secure.</li>
+            <p style={{ margin: "0 0 10px" }}>We collect only the minimum information necessary to provide the service:</p>
+            <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+              <li><strong style={{ color: "#fff" }}>Parent account information:</strong> name, email address, and password (stored hashed).</li>
+              <li><strong style={{ color: "#fff" }}>Child profile information:</strong> first name or display name, age range, and a parent-managed PIN. We do not collect last names, real-world addresses, or contact information for children.</li>
+              <li><strong style={{ color: "#fff" }}>Learning progress:</strong> XP, streak, completed lessons, and in-app currency ("Moolies") used solely to personalize the learning experience.</li>
+              <li><strong style={{ color: "#fff" }}>Device and usage information:</strong> basic technical logs (device type, app version, error reports) to keep the service stable and secure.</li>
             </ul>
           </Section>
 
           <Section title="3. How We Use Information">
-            <p>We use the information we collect to:</p>
-            <ul className="list-disc pl-6 space-y-1.5">
+            <p style={{ margin: "0 0 10px" }}>We use the information we collect to:</p>
+            <ul style={{ margin: "0 0 12px", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
               <li>Deliver age-appropriate educational content and personalize lessons.</li>
               <li>Track learning progress so parents can monitor their child's growth.</li>
               <li>Provide customer support and respond to inquiries.</li>
               <li>Maintain the security, integrity, and reliability of the service.</li>
               <li>Comply with legal obligations.</li>
             </ul>
-            <p>
-              We do not use children's personal information for behavioral advertising, profiling, or any commercial purpose unrelated to providing the educational service.
-            </p>
+            <p style={{ margin: 0 }}>We do not use children's personal information for behavioral advertising, profiling, or any commercial purpose unrelated to providing the educational service.</p>
           </Section>
 
           <Section title="4. Parental Consent and Control">
-            <p>
-              Child accounts on Moolab can only be created by a verified parent or legal guardian. The parent controls the child's PIN, can view all learning activity from the Parent Dashboard, and may request deletion of the child's profile at any time by contacting us.
-            </p>
+            <p style={{ margin: 0 }}>Child accounts on Moolab can only be created by a verified parent or legal guardian. The parent controls the child's PIN, can view all learning activity from the Parent Dashboard, and may request deletion of the child's profile at any time by contacting us.</p>
           </Section>
 
           <Section title="5. No Real Money. No Crypto.">
-            <p>
-              Moolab is a closed, simulated environment. No real money is traded, transferred, or stored on behalf of children. Cryptocurrency is strictly excluded from the platform. Any in-app currency ("Moolies") is fictional and has no real-world value.
-            </p>
+            <p style={{ margin: 0 }}>Moolab is a closed, simulated environment. No real money is traded, transferred, or stored on behalf of children. Cryptocurrency is strictly excluded from the platform. Any in-app currency ("Moolies") is fictional and has no real-world value.</p>
           </Section>
 
           <Section title="6. Sharing of Information">
-            <p>
-              We do not sell, rent, or trade personal information. We share information only with:
-            </p>
-            <ul className="list-disc pl-6 space-y-1.5">
+            <p style={{ margin: "0 0 10px" }}>We do not sell, rent, or trade personal information. We share information only with:</p>
+            <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
               <li>Service providers (e.g., cloud hosting, analytics for service performance) that are contractually bound to protect the information.</li>
               <li>Authorities, when required by law or to protect the rights, safety, and property of users or the public.</li>
             </ul>
           </Section>
 
           <Section title="7. Data Security">
-            <p>
-              We use industry-standard safeguards including encrypted connections (HTTPS), hashed password storage, and access controls. No system can be guaranteed 100% secure, but we work continuously to protect the information entrusted to us.
-            </p>
+            <p style={{ margin: 0 }}>We use industry-standard safeguards including encrypted connections (HTTPS), hashed password storage, and access controls. No system can be guaranteed 100% secure, but we work continuously to protect the information entrusted to us.</p>
           </Section>
 
           <Section title="8. Data Retention">
-            <p>
-              We retain account and progress data for as long as the account is active. Parents may request deletion of any child profile or the entire account at any time. Upon verified request, we will delete personal information within a reasonable timeframe, except where retention is required by law.
-            </p>
+            <p style={{ margin: 0 }}>We retain account and progress data for as long as the account is active. Parents may request deletion of any child profile or the entire account at any time. Upon verified request, we will delete personal information within a reasonable timeframe, except where retention is required by law.</p>
           </Section>
 
           <Section title="9. Your Rights">
-            <p>
-              Depending on your jurisdiction, you may have the right to access, correct, delete, or restrict the use of your personal information, to object to processing, and to data portability. To exercise these rights, contact us using the details below.
-            </p>
+            <p style={{ margin: 0 }}>Depending on your jurisdiction, you may have the right to access, correct, delete, or restrict the use of your personal information, to object to processing, and to data portability. To exercise these rights, contact us using the details below.</p>
           </Section>
 
           <Section title="10. International Users">
-            <p>
-              Moolab is operated from the United States. If you access the service from outside the U.S., your information may be transferred to, stored, and processed in the U.S. or other countries where our service providers operate.
-            </p>
+            <p style={{ margin: 0 }}>Moolab is operated from the United States. If you access the service from outside the U.S., your information may be transferred to, stored, and processed in the U.S. or other countries where our service providers operate.</p>
           </Section>
 
           <Section title="11. Changes to This Policy">
-            <p>
-              We may update this Privacy Policy from time to time. Material changes will be communicated through the app or by email to the parent account. Continued use of Moolab after a policy update constitutes acceptance of the revised terms.
-            </p>
+            <p style={{ margin: 0 }}>We may update this Privacy Policy from time to time. Material changes will be communicated through the app or by email to the parent account. Continued use of Moolab after a policy update constitutes acceptance of the revised terms.</p>
           </Section>
 
           <Section title="12. Contact Us">
-            <p>
-              For questions, requests, or concerns about this Privacy Policy or our practices, please contact:
-            </p>
-            <div className="rounded-xl border border-sky-200/60 bg-sky-50/40 p-5 mt-3">
-              <div className="text-base font-extrabold text-[#0c2d48]">{COMPANY}</div>
-              <div className="text-sm text-[#0c2d48]/70 font-semibold mt-1">{ADDRESS}</div>
-              <div className="text-sm font-semibold mt-2">
+            <p style={{ margin: "0 0 12px" }}>For questions, requests, or concerns about this Privacy Policy or our practices, please contact:</p>
+            <div style={{ background: "rgba(46,139,192,0.07)", border: "1px solid rgba(46,139,192,0.2)", borderRadius: 14, padding: "18px 22px" }}>
+              <div style={{ fontSize: "0.95rem", fontWeight: 900, color: "#fff", marginBottom: 4 }}>{COMPANY}</div>
+              <div style={{ fontSize: "0.82rem", color: "rgba(177,212,224,0.45)", fontWeight: 500, marginBottom: 8 }}>{ADDRESS}</div>
+              <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "rgba(177,212,224,0.55)" }}>
                 Email:{" "}
-                <a href="mailto:contact@moolab.app" className="text-[#145374] underline decoration-sky-300 underline-offset-4 hover:text-[#2e8bc0] transition-colors">
-                  contact@moolab.app
-                </a>
+                <a href="mailto:contact@moolab.app" style={{ color: "#2e8bc0", fontWeight: 800, textDecoration: "underline" }}>contact@moolab.app</a>
               </div>
             </div>
           </Section>
 
-          <div className="mt-12 pt-6 border-t border-sky-100 text-center">
-            <button
-              onClick={() => navigate("/")}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#145374] to-[#2e8bc0] text-white font-bold text-sm tracking-wide shadow-lg shadow-sky-200/50 hover:shadow-sky-300/60 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-            >
-              ← Back to Home
-            </button>
+          <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
+            <button onClick={() => navigate("/")} style={{
+              padding: "14px 32px", borderRadius: 99, border: "none",
+              background: "linear-gradient(135deg, #145374, #2e8bc0)",
+              color: "#fff", fontFamily: FONT, fontWeight: 800, fontSize: "0.9rem",
+              cursor: "pointer", boxShadow: "0 8px 30px rgba(46,139,192,0.3)",
+            }}>← Back to Home</button>
           </div>
         </div>
       </main>
